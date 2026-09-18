@@ -13,7 +13,7 @@ bash vendor/install.sh --check    # 检查是否已安装且与锁文件一致
 
 | 来源 | 上游 | 许可证 | 本插件怎么用 |
 |---|---|---|---|
-| `anthropic-skills` | anthropics/skills：frontend-design、skill-creator、claude-api/agent-design | Apache-2.0 | frontend-design 被 design-contract 引用；其余为维护者参考 |
+| `anthropic-skills` | anthropics/skills：frontend-design、skill-creator、claude-api/agent-design | Apache-2.0 | frontend-design 是设计（explore / specify）与前端 UI 车道的必读资料（registry `reads`）；其余为维护者参考 |
 | `agentskills` | agentskills/agentskills：规范与写作指南 | Apache-2.0 | 维护者参考 |
 | `svg-diagram` | bybit-exchange/svg-diagram 运行时子集 | MIT | 已收纳，待绘图检查接入 |
 | `anthropic-docx` | anthropics/skills 的 docx | All rights reserved | 维护者参考；默认不下载，`--accept-restricted` 表示你接受其上游条款 |

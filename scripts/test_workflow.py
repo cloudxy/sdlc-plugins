@@ -32,7 +32,11 @@ class WorkflowTests(unittest.TestCase):
             check = f"python3 {ROOT}/scripts/workflow.py check-task --role {role} --stage {stage} --task {task} --root {self.root}"
         if evidence is None:
             evidence = ["web", "screenshots"] if (role, task) == ("designer", "explore") else []
-        return (f"## SPAWN PACKET v2\nhat: {role}\nstage: {stage}\ntask: {task}\n"
+        reads = [f"{ROOT}/{rd}" for t in self.registry["tasks"]
+                 if (t["role"], t["stage"]) == (role, stage) and (t["task"] == task or t.get("task_pattern"))
+                 for rd in t.get("reads", [])]
+        extra_inputs = "inputs:\n" + "".join(f"  - {{path: {r}, required: true}}\n" for r in reads) if reads else ""
+        return (f"## SPAWN PACKET v2\nhat: {role}\nstage: {stage}\ntask: {task}\n" + extra_inputs + ""
                 f"subagent_type: sdlc-workflow:{role}\nPLUGIN_ROOT: {ROOT}\n"
                 f"feature_dir: {self.root}\nlane: L2\nprimary_skill: sdlc-workflow:{skill}\n"
                 "deliverable_paths:\n" + "".join(f"  - {p}\n" for p in outputs)
@@ -179,6 +183,21 @@ class WorkflowTests(unittest.TestCase):
         self.put("state.yaml", "feature: f\nq_security: yes\n")
         pk = self.packet(role="architect", stage="shape", task="contract", skill="architecture", outputs=["02-shape/contract.md"])
         self.assertIn("VISUALS", {e["code"] for e in lint(pk)["errors"]})
+
+    # ---- frontend handoff: required reading is enforced, not suggested
+    def test_frontend_packet_must_list_frontend_design(self):
+        pk = self.packet(role="frontend", stage="implement", task="T-1", skill="impl-evidence",
+                         outputs=["03-impl/T-1-frontend-evidence.md"], evidence=["running_app", "screenshots"])
+        pk += "lane_file: ui\nslice_integrator: frontend\n"
+        self.assertEqual({e["code"] for e in lint(pk)["errors"]}, set())
+        stripped = "\n".join(l for l in pk.splitlines() if "frontend-design" not in l) + "\n"
+        self.assertIn("READS", {e["code"] for e in lint(stripped)["errors"]})
+
+    def test_reads_resolve_through_vendor_locks(self):
+        self.assertEqual(validate_registry(self.registry), [])
+        broken = copy.deepcopy(self.registry)
+        next(t for t in broken["tasks"] if t["role"] == "frontend")["reads"] = ["vendor/anthropic-skills/nope.md"]
+        self.assertTrue(any("reads" in e for e in validate_registry(broken)))
 
     def test_symlink_outside_root_cannot_satisfy_task(self):
         self.put("02-shape/design-brief.md"); self.put("02-shape/design-directions.md")

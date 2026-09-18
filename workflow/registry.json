@@ -727,6 +727,9 @@
       "evidence": [
         "web",
         "screenshots"
+      ],
+      "reads": [
+        "vendor/anthropic-skills/skills/frontend-design/SKILL.md"
       ]
     },
     {
@@ -742,6 +745,9 @@
       ],
       "evidence": [
         "screenshots"
+      ],
+      "reads": [
+        "vendor/anthropic-skills/skills/frontend-design/SKILL.md"
       ]
     },
     {
@@ -852,6 +858,9 @@
       "evidence": [
         "running_app",
         "screenshots"
+      ],
+      "reads": [
+        "vendor/anthropic-skills/skills/frontend-design/SKILL.md"
       ]
     },
     {

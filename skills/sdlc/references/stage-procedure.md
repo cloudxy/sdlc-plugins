@@ -21,7 +21,7 @@ Task contracts and ranks: [stage-map.md](stage-map.md), generated from `workflow
 | shape (architect) | spec; on ui: yes also `design-directions.md` + `flows.md` |
 | dba | spec, `02-shape/contract.md` |
 | collect | `01-define/tracking.md`, contract |
-| implement | ticket, contract, spec (journeys J-n), briefing (the why); on ui: yes `flows.md`, `edge-states.md`, prototype screenshots; on tracking: yes `tracking.md` |
+| implement | ticket, contract, spec (journeys J-n), briefing (the why); on ui: yes the final prototype `02-shape/prototypes/final/` (code, not screenshots), `flows.md`, `edge-states.md`; on tracking: yes `tracking.md` |
 | verify | spec, `tracking.md`, all `03-impl/*` evidence and integration files, `edge-states.md` |
 | accept (walkthrough) | briefing, spec, `coverage.md`, integration and E2E screenshots |
 | accept (design-qa) | `design-directions.md`, `flows.md`, `edge-states.md`, screenshots |

@@ -297,6 +297,10 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
         check_success_checks(p, contract, hat, stage, err)
         check_evidence(p, contract, stage, err)
         check_visuals(p, contract, stage, err)
+        inputs = [str(i.get("path", "")) if isinstance(i, dict) else str(i) for i in p.get("inputs") or []]
+        for rd in contract.get("reads", []):
+            if not any(i.endswith(rd) for i in inputs):
+                err("READS", f"inputs must include PLUGIN_ROOT/{rd} (required reading for {hat}/{stage}/{p.get('task')})")
     except ValueError as error:
         err("TASK", str(error))
 

@@ -66,6 +66,10 @@ def validate_registry(registry, root=ROOT):
                 errors.append(f"{key}: unknown visual {v}")
         if t.get("visuals") and not (root / t.get("diagram_reference", "")).is_file():
             errors.append(f"{key}: diagram_reference {t.get('diagram_reference')} missing")
+        for rd in t.get("reads", []):
+            # vendor files may not be installed yet (bash vendor/install.sh); a lock that lists them is enough
+            if not (root / rd).is_file() and not _vendor_lists(root, rd):
+                errors.append(f"{key}: reads {rd} is neither in the plugin nor listed in a vendor lock")
         for ev in t.get("evidence", []):
             kind = ev.get("kind") if isinstance(ev, dict) else ev
             if kind not in EVIDENCE_KINDS:
@@ -90,6 +94,17 @@ def validate_registry(registry, root=ROOT):
             if Path(p).is_absolute() or ".." in Path(p).parts:
                 errors.append(f"{key}: path must stay inside artifact root")
     return errors
+
+
+def _vendor_lists(root, rel):
+    parts = Path(rel).parts
+    if len(parts) < 3 or parts[0] != "vendor":
+        return False
+    try:
+        lock = json.loads((Path(root) / "vendor" / f"{parts[1]}.lock.json").read_text())
+    except (OSError, ValueError):
+        return False
+    return any(f.get("path") == "/".join(parts[2:]) for f in lock.get("files", []))
 
 
 def artifact_paths(registry, ids, legacy=False):
@@ -290,6 +305,8 @@ def main():
             task = dict(resolve_task(r, args.role, args.stage, args.task))
             task["artifacts"] = {key: r["artifacts"][key] for key in task["required"]}
             task["success_check"] = success_check(task)
+            if task.get("reads"):
+                task["reads"] = [f"<PLUGIN_ROOT>/{rd}" for rd in task["reads"]]  # add each to packet inputs
             if task.get("visuals"):
                 d = r["diagram"]
                 base = "<product_root>" if task["stage"] == "product" else "<feature_dir>"

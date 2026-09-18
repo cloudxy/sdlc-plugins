@@ -24,6 +24,7 @@ The handoff that frontend builds against. It turns the picked direction into the
 - **Every state** in `edge-states.md` (empty, loading, error, partial, permission, overflow) is reachable, e.g. with a `?state=empty` switch, and has its real copy.
 - **Tokens only:** colours, type, spacing and radii come from the design tokens / `design-system.md` (CSS variables). A literal value that is not a token is a defect.
 - **Component IDs:** mark reusable parts with `data-component="<id>"` so implementation, review and design QA refer to the same things.
+- **Close to the real stack:** when the project has a component library or design tokens in code, build the final prototype with the same class names, token names and component boundaries, so frontend ports it instead of redrawing it.
 - **Screenshots** of every screen × state at 375 and 1440 in `02-shape/prototypes/final/shots/`, looked at before returning.
 
 Frontend implements against the final prototype, `flows.md`, `edge-states.md` and the tokens. Design QA (`design-qa`) compares the running build with these screenshots at the same breakpoints and states.
