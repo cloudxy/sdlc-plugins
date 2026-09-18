@@ -1,0 +1,1 @@
+Primary procedure: the packet's `primary_skill`, else `sdlc-workflow:{{PROC}}`. Extra procedures load only when the packet names them (`companion_skills`, `debug_protocol`) — do not self-select. Inside a skill, follow its "when to read" table for references and templates. The skill's **excellence bar** is part of the deliverable, not optional reading.

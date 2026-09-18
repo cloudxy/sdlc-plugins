@@ -1,0 +1,48 @@
+// sdlc:unfilled — dba 写入本产品的真实全局 ER 后删除本行
+// 全局 ER（产品层 erd.dbml；负责人 dba）。按限界上下文分组；每个功能的 schema.dbml 是对这里的增量。
+// 每张表 Note 写「一行 = ___」与所属上下文；关系写明基数。
+
+Project product {
+  database_type: 'MySQL'
+  Note: '<产品名> 全局数据模型'
+}
+
+TableGroup data_ingestion {
+  datasets
+}
+
+TableGroup reporting {
+  reports
+}
+
+Table datasets {
+  id bigint [pk, increment]
+  tenant_id bigint [not null]
+  name varchar(128) [not null]
+  source_type varchar(32) [not null, note: '扩展点：见 domain-model.md §4']
+  created_at datetime(3) [not null]
+  updated_at datetime(3) [not null]
+
+  indexes {
+    (tenant_id, name) [unique]
+  }
+  Note: '一行 = 用户一次导入的数据集（上下文：数据接入）'
+}
+
+Table reports {
+  id bigint [pk, increment]
+  tenant_id bigint [not null]
+  dataset_id bigint [not null]
+  name varchar(128) [not null]
+  status varchar(20) [not null, note: 'draft|published|archived']
+  created_at datetime(3) [not null]
+  updated_at datetime(3) [not null]
+
+  indexes {
+    (tenant_id, name) [unique]
+    (tenant_id, status, updated_at)
+  }
+  Note: '一行 = 一份报表定义（上下文：报表）'
+}
+
+Ref: reports.dataset_id > datasets.id

@@ -1,0 +1,52 @@
+{
+  "skill_name": "deliver",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We need to deploy the new LLM cooldown feature. It has a migration (adds a new Redis key but no schema change), passes all tests, and the QC approved it. Write the release plan.",
+      "expected_output": "Pre-deploy checklist references actual gate output fingerprints (not 'it passed'). Deploy steps are replayable commands. Rollback plan is VERIFIED (actually run in staging) not just written. Monitoring includes the new Redis key's TTL and cooldown rate. Does NOT just say 'deploy and hope'.",
+      "files": [],
+      "expectations": [
+        "Pre-deploy checklist references actual gate outputs (command + exit code)",
+        "Rollback plan includes actual verification evidence, not just steps",
+        "Monitoring covers the new feature's specific metrics (cooldown activation rate)",
+        "No hardcoded ports or secrets in the deploy steps"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Production is down. The API returns 502 for all requests. The last deployment was 2 hours ago. What do you do?",
+      "expected_output": "Phase 1 - Timeline: when did it start, what changed 2 hours ago. Phase 2 - Immediate recovery: ROLLBACK FIRST (not debug in production), verify rollback works. Phase 3 - Root cause: check deploy diff, logs, monitoring. Phase 4 - Postmortem: blameless, every escape becomes a mechanism improvement. Does NOT debug in production before rolling back.",
+      "files": [],
+      "expectations": [
+        "Rolls back FIRST before debugging (recovery > root cause)",
+        "Checks deploy diff as a likely cause (something changed 2 hours ago)",
+        "Follows four-phase response: timeline → root cause → recovery → postmortem",
+        "Postmortem is blameless — every escape becomes a mechanism check"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Our Docker build works locally on macOS ARM but fails in CI on Linux x86_64 with 'unsupported platform' errors. All tests pass locally. What's happening?",
+      "expected_output": "Identifies platform difference (macOS ARM vs Linux x86_64) as the root cause. Explains that local success does NOT guarantee CI success — different architectures resolve dependencies differently. Recommends: 1) validate Docker build in CI (not just locally), 2) pin platform-specific dependencies, 3) use buildx for multi-platform builds. Does NOT say 'it works on my machine'.",
+      "files": [],
+      "expectations": [
+        "Identifies platform difference (ARM vs x86_64) as root cause",
+        "Explains that local success ≠ CI success (different dependency resolution)",
+        "Recommends CI-level Docker build validation",
+        "Does NOT dismiss as 'works on my machine'"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "QC approved. Write a 亲爱的用户 announcement and the CS talk track for seat management. You are sre.",
+      "expected_output": "Refuses user-facing copy and support scripts. Those are ops / 产品运营 / enablement. Writes or offers the deploy checklist instead, or points to sdlc-workflow:ops.",
+      "files": [],
+      "expectations": [
+        "Refuses user-facing announcement / CS talk tracks",
+        "Names 'ops' or 'enablement' as the correct hat",
+        "Does not treat '亲爱的用户' copy as a deliverable of sre"
+      ]
+    }
+  ]
+}

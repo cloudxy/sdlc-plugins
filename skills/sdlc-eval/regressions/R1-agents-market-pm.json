@@ -1,0 +1,74 @@
+{
+  "id": "R1-agents-market-pm",
+  "title": "能力市场：PM 能否找到双边核心价值与核心功能（v3 spec 为基线）",
+  "project": "auto_agents",
+  "skill": "prd-gwt",
+  "hat": "pm",
+  "stage": "define",
+  "baseline_before": "2026-09-15T00:00:00+08:00",
+  "artifacts_ref": "2f256dfaa6d5214e5e2c63408329a71336d5f3f2",
+  "exclude_paths": [
+    ".sdlc/feat-agents-market"
+  ],
+  "hindsight_paths": [
+    "docs/product",
+    ".sdlc/_product"
+  ],
+  "inputs": [
+    ".sdlc/feat-agents-market/00-discover/briefing.md",
+    ".sdlc/feat-agents-market/00-discover/market.md",
+    ".sdlc/feat-agents-market/00-discover/compete.md"
+  ],
+  "baseline": [
+    {
+      "from": ".sdlc/feat-agents-market/01-define/spec.md",
+      "as": "01-define/spec.md"
+    }
+  ],
+  "product_root": "product",
+  "deliverables": [
+    "01-define/spec.md",
+    "01-define/tracking.md",
+    "product/strategy.md",
+    "product/feature-map.md"
+  ],
+  "task": "stage: define, task: spec. The discovery briefing for this change is frozen (see inputs). Write the spec (01-define/spec.md, plus 01-define/tracking.md if new events are needed) for this change.",
+  "v3_gaps_observed": [
+    "grep on baseline spec.md (2026-09-17): 核心价值 0 · Aha 0 · 旅程 0 · J-1 0 · 方案对比 0 matches",
+    "Tenant value is kept out of this round's acceptance exactly as the briefing decided (A3/K3; 未量化 ×7) — correct; but 假设 appears once and no hypothesis carries a validation time or fallback",
+    "The recorded solution forks S1–S4 are technical choices (scan channel, directory upload, drawer, markdown renderer), not product concepts"
+  ],
+  "what_good_looks_like": "Names who gets value on each side and where their Aha moment is; separates core-path features from support/governance work with a stated test; compares at least three genuinely different product concepts; writes walkable journeys that requirements hang off; turns low-evidence value into testable hypotheses with metrics instead of excluding it; keeps requirements testable and measurable.",
+  "rubric": [
+    {
+      "id": "core_value",
+      "criterion": "Identifies the core value path and Aha moment for each role that gets value. Where the briefing keeps a side out of this round's acceptance (A3/K3), the spec respects that decision and still names that side's value and Aha as a hypothesis — neither dropped nor written into acceptance",
+      "weight": 3
+    },
+    {
+      "id": "core_vs_support",
+      "criterion": "Separates core features from support/governance features with an explicit test and prioritizes accordingly",
+      "weight": 2
+    },
+    {
+      "id": "concepts",
+      "criterion": "Compares at least three genuinely different product solution concepts with trade-offs",
+      "weight": 2
+    },
+    {
+      "id": "journeys",
+      "criterion": "Key journeys are concrete and walkable; requirements anchor to journey steps",
+      "weight": 2
+    },
+    {
+      "id": "uncertainty",
+      "criterion": "Low-evidence value becomes a testable hypothesis with a metric, a validation time and a fallback, while respecting the briefing's decisions (K3: no consumer metric in acceptance without count data) — not silently excluded, not faked, not smuggled into acceptance",
+      "weight": 2
+    },
+    {
+      "id": "testability",
+      "criterion": "Requirements are testable (GWT) and measurable (north star, drivers, guardrails, events)",
+      "weight": 1
+    }
+  ]
+}

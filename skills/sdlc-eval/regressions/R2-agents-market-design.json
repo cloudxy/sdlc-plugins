@@ -1,0 +1,76 @@
+{
+  "id": "R2-agents-market-design",
+  "title": "能力市场：设计师能否给出有记忆点、可选择的设计方向（v3 六态矩阵为基线）",
+  "project": "auto_agents",
+  "skill": "design-contract",
+  "hat": "designer",
+  "stage": "designer",
+  "baseline_before": "2026-09-15T00:00:00+08:00",
+  "artifacts_ref": "2f256dfaa6d5214e5e2c63408329a71336d5f3f2",
+  "exclude_paths": [
+    ".sdlc/feat-agents-market"
+  ],
+  "hindsight_paths": [
+    "docs/product",
+    ".sdlc/_product"
+  ],
+  "inputs": [
+    ".sdlc/feat-agents-market/00-discover/briefing.md",
+    ".sdlc/feat-agents-market/00-discover/compete.md",
+    ".sdlc/feat-agents-market/01-define/spec.md"
+  ],
+  "baseline": [
+    {
+      "from": ".sdlc/feat-agents-market/02-shape/edge-states.md",
+      "as": "02-shape/edge-states.md"
+    }
+  ],
+  "product_root": "product",
+  "deliverables": [
+    "02-shape/design-brief.md",
+    "02-shape/design-directions.md",
+    "02-shape/prototypes/",
+    "02-shape/flows.md",
+    "02-shape/edge-states.md",
+    "02-shape/design-tokens.json",
+    "product/design-system.md"
+  ],
+  "task": "stage: designer. Design the capability-market shelf and the asset detail drawer for this change (inputs: briefing with the operator's reference images described, compete notes, spec). Run task explore; the human delegates the pick, so continue with your recommended direction and run task specify.",
+  "v3_gaps_observed": [
+    "grep on baseline edge-states.md (2026-09-17): prototype/原型 0 · .png 0 · 签名 0 matches",
+    "The baseline is a 41 KB state matrix plus IA; the operator's reference images are transcribed (参考图 ×5) but no alternative directions are explored or rendered"
+  ],
+  "what_good_looks_like": "Three or more structurally different directions that were actually rendered and looked at, each with a concrete signature moment tied to what makes the market valuable; a recommendation argued from users and the core path (not from resemblance to the reference images or a generic AI look) whose own screenshots are free of rendering defects; then a precise contract (flows, states with real copy, tokens) for it.",
+  "rubric": [
+    {
+      "id": "directions",
+      "criterion": "Explores at least three structurally different directions (layout and interaction model, not palette swaps), informed by references beyond the operator's images, each rendered and looked at, with trade-offs",
+      "weight": 3
+    },
+    {
+      "id": "signature",
+      "criterion": "Names a concrete, precisely specified signature moment tied to the core value",
+      "weight": 2
+    },
+    {
+      "id": "picked_quality",
+      "criterion": "The recommended direction's own screenshots are free of rendering defects (overlap, clipping, broken layout, unreadable text, placeholder junk) at the stated viewports",
+      "weight": 3
+    },
+    {
+      "id": "ai_default",
+      "criterion": "Avoids generic AI-default styling (purple/blue gradients, glassmorphism, emoji icons, interchangeable SaaS card grids) or justifies it; the recommendation argues from users and the core path, not from resemblance to the reference images",
+      "weight": 2
+    },
+    {
+      "id": "value_path",
+      "criterion": "The design makes the core path (browse → understand → subscribe/enable) fast and obvious",
+      "weight": 2
+    },
+    {
+      "id": "contract",
+      "criterion": "The chosen direction is specified precisely: flows, all states with real copy, tokens",
+      "weight": 2
+    }
+  ]
+}

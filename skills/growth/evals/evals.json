@@ -1,0 +1,59 @@
+{
+  "skill_name": "growth",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "stage: growth. We are adding one-click shareable report links to our data-report SaaS. compete.md says users mostly use Excel pivot tables and screenshots in WeChat; reviews of a rival BI tool complain that sharing needs every viewer to have a paid seat. Write the positioning and highlight hypotheses.",
+      "expected_output": "Derives positioning from the real alternatives (Excel + screenshots, rival BI seat-gated sharing) → unique attribute (viewer needs no account/seat) → value (weekly report reaches the boss in seconds) → best-fit segment (ops leads who report upward weekly) → frame. Compares at least two positioning options and recommends one with evidence. Highlights are ≤3 demonstrable moments tied to a journey step, each with proof and the objection it answers. Segments are behaviour-defined, with missing events listed as tracking requests. No adjective-only slogan, no launch copy.",
+      "files": [],
+      "expectations": [
+        "Lists competitive alternatives including the status quo (Excel / screenshots)",
+        "Compares at least two positioning options and recommends one",
+        "Each highlight names a journey step or moment the user can see",
+        "Segments are defined by behaviour or lifecycle, not demographics only",
+        "Does NOT write final launch copy or claim the feature is already verified"
+      ],
+      "rubric": [
+        {"id": "alternatives", "criterion": "Positioning is derived from the alternatives users actually use, citing the compete evidence", "weight": 2},
+        {"id": "options", "criterion": "At least two genuinely different positioning options with a reasoned recommendation", "weight": 2},
+        {"id": "moments", "criterion": "Highlights are concrete, demonstrable moments with proof and the objection they answer", "weight": 3},
+        {"id": "segments", "criterion": "Target segments are computable from product data; data gaps become tracking requests", "weight": 2}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "stage: accept. The briefing claims 'export to Excel in one click' and 'report ready in 10 seconds'. On the build, export produces a UTF-8 BOM CSV, and a 5,000-row import takes 22–31 seconds to render the report. Write the claims check.",
+      "expected_output": "Checks each claim on the build with evidence. 'Export to Excel' is not true as stated: rewrite to 'export CSV (opens in Excel)' or remove; 'ready in 10 seconds' fails on realistic data: rewrite with measured conditions or flag as a product gap if it is the core highlight. Provides a ≤5-step demo script. Ends with an explicit verdict line (有条件通过 if only wording changes, 不通过 if a core highlight is undelivered).",
+      "files": [],
+      "expectations": [
+        "Does NOT accept 'export to Excel' as verified",
+        "Uses the measured 22–31 second numbers instead of the 10-second claim",
+        "Includes a demo script",
+        "Ends with a verdict line '结论：' followed by 通过 / 有条件通过 / 不通过"
+      ],
+      "rubric": [
+        {"id": "evidence", "criterion": "Each claim is judged from build evidence, not from the spec", "weight": 3},
+        {"id": "honesty", "criterion": "Overstated claims are rewritten to accurate wording or removed; core gaps escalated to pm", "weight": 3},
+        {"id": "verdict", "criterion": "Verdict follows the rules (core highlight broken → 不通过; wording only → 有条件通过)", "weight": 2}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "stage: launch. Plan the launch campaign for shareable report links. The boss wants to push a notification to all 80,000 registered users tomorrow.",
+      "expected_output": "Does not do a blanket push. Splits by lifecycle and behaviour (e.g. activated users who create weekly reports; users who exported to CSV in the last 14 days) using tag ids, with exclusions. Builds a message × channel × timing × offer matrix using only verified claims. Adds an experiment: goal metric id, guardrails (unsubscribe/complaint/uninstall), holdout, sample size, stop rule. Adds cross-channel frequency caps and consent basis, and aligns timing with the sre canary.",
+      "files": [],
+      "expectations": [
+        "Does NOT recommend pushing to all 80,000 users at once",
+        "Defines segments with exclusions",
+        "Includes a holdout or A/B control",
+        "Names guardrail metrics",
+        "Mentions frequency caps or consent"
+      ],
+      "rubric": [
+        {"id": "segmentation", "criterion": "Segments are behaviour/lifecycle based, sized, with exclusions", "weight": 2},
+        {"id": "experiment", "criterion": "Goal metric, guardrails, holdout, sample size and stop rule are all present and coherent", "weight": 3},
+        {"id": "respect", "criterion": "Frequency caps, consent and release timing are handled", "weight": 2}
+      ]
+    }
+  ]
+}

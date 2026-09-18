@@ -1,0 +1,87 @@
+{
+  "skill_name": "coverage-matrix",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Here's the PRD for a member management feature. FR-01: create member (username, email, password, role). FR-02: list members with pagination. FR-03: update member role. FR-04: delete member (soft delete). Design test cases and build the coverage matrix.",
+      "expected_output": "Derives cases from GWT for each FR. Includes boundary cases (empty username, duplicate email, unauthorized access), soft delete verification (deleted member disappears from list but data persists), pagination edge cases (page 0, negative page, page beyond total). Builds a matrix mapping FR-01..04 to specific test IDs.",
+      "files": [],
+      "expectations": [
+        "Test cases derived from FR acceptance criteria, not from implementation code",
+        "Boundary cases included (empty input, duplicate, unauthorized)",
+        "Soft delete verified by checking list exclusion AND data persistence",
+        "Pagination edge cases tested (page 0, beyond total, negative)",
+        "Coverage matrix maps every FR to at least one test case ID"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "All our tests pass on SQLite but we found a production bug where ORDER BY with NULLS LAST crashes MySQL. How did this escape testing?",
+      "expected_output": "Identifies the dialect mismatch: SQLite silently accepts PG-specific syntax that MySQL rejects. Explains this is a test environment fidelity issue. Recommends either running tests against real MySQL (MYSQL_FIDELITY=1) or explicitly marking dialect-sensitive queries for real-DB verification.",
+      "files": [],
+      "expectations": [
+        "Identifies SQLite-MySQL dialect mismatch as the root cause",
+        "Explains WHY SQLite accepts it (it's lenient) but MySQL doesn't",
+        "Recommends real-DB testing or dialect-sensitive query marking"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "The developer says 'all tests pass, ready for review.' I look at the tests and see: test_create_member checks that the API returns 200. test_delete_member checks that the API returns 200. test_update_role checks that the API returns 200. Are these tests good?",
+      "expected_output": "Identifies ALL tests as hollow assertions — they only check HTTP 200 status, not: 1) whether the member was actually created in the database, 2) whether soft delete actually excludes from list, 3) whether role change persists. These are 'assert True' equivalents. The developer has NOT proven the requirements are met.",
+      "files": [],
+      "expectations": [
+        "Identifies ALL three tests as hollow (assert 200 without verifying data state)",
+        "Explains WHY they're hollow (checking status code ≠ checking business outcome)",
+        "Recommends specific assertions (query DB to verify member exists, verify soft-deleted member excluded from list, verify role persisted)",
+        "Does NOT accept 'all tests pass' as sufficient evidence"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "We have a feature where users can be assigned to departments. The design has 6 edge states: empty (no departments), loading, error, boundary (max departments reached), permission (viewer tries to assign), offline. How do I make sure the frontend covers all of these?",
+      "expected_output": "Creates a test case for each edge state, cross-references with the design's edge-states.md. For each state, defines: trigger condition, expected UI behavior, and assertion method. Recommends checking the state matrix screen by screen, not just the happy path.",
+      "files": [],
+      "expectations": [
+        "Creates 6 test cases matching the 6 edge states",
+        "Each test case has a trigger condition and expected UI behavior",
+        "Cross-references with design edge-states.md",
+        "Does NOT only test the happy path"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Spec has journeys J-1 (sign up → import data → see first report) and J-2 (share report → viewer opens link on mobile), events EV-1 report_viewed and EV-2 report_shared, FR-01..FR-06. The team has 140 unit tests and 30 integration tests, all green, and gates.e2e is null. Write the verification plan and coverage matrix.",
+      "expected_output": "Refuses e2e: null for a UI change; adds E2E runs for J-1 and J-2 from realistic starting states with screenshots on failure; maps EV-1/EV-2 to validation rows (fires once, properties, identity); keeps boundary/permission cases at unit/integration layers; adds an exploratory charter (e.g. shared link on mobile, weak network, no permission); records the e2e gate in state.",
+      "files": [],
+      "expectations": [
+        "Does NOT accept e2e: null for this change",
+        "Maps J-1 and J-2 to E2E cases",
+        "Includes validation rows for EV-1 and EV-2",
+        "Includes an exploratory testing charter"
+      ],
+      "rubric": [
+        {
+          "id": "journeys",
+          "criterion": "Every journey has a realistic end-to-end run on the running app",
+          "weight": 3
+        },
+        {
+          "id": "tracking",
+          "criterion": "Event validation is concrete (fires once, properties, identity)",
+          "weight": 2
+        },
+        {
+          "id": "risk",
+          "criterion": "Risk-based layering and an exploratory charter aimed at the riskiest area",
+          "weight": 2
+        },
+        {
+          "id": "matrix",
+          "criterion": "Matrix has no silent holes and reasoned exemptions",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

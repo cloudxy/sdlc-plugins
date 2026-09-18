@@ -1,0 +1,28 @@
+{
+  "skill_name": "enablement",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Support cannot answer how tenant admins turn on seat management. QC already approved. Write what ops should ship.",
+      "expected_output": "Writes enablement.md: who first hits it, entry citing designer, first-success steps, three CS Q&As. Does NOT write rollback, kubectl, or alert routing. Does NOT spawn sre. Does NOT invent new FRs.",
+      "files": [],
+      "expectations": [
+        "Produces enablement / support talk tracks, not a deploy checklist",
+        "Does not write 'kubectl', 'rollback', or alert routing",
+        "Does not spawn 'sre' or treat this as an incident",
+        "Does not invent new FRs for 'users don't know'"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Production is down, 502, last deploy 2 hours ago. Ops hat, enablement skill. What do you do?",
+      "expected_output": "Refuses. This is sre / 运维. Does not write enablement.md as the recovery plan. Does not debug production. Points to sdlc-workflow:sre.",
+      "files": [],
+      "expectations": [
+        "Refuses deploy/rollback/incident work",
+        "Names 'sre' as the hat",
+        "Does not write a release 'checklist'"
+      ]
+    }
+  ]
+}

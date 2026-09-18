@@ -1,0 +1,94 @@
+{
+  "skill_name": "findings",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review this code: the developer says 'I implemented the FR-01 requirement for user tag creation. All tests pass.' The code shows a POST endpoint that creates tags, but the tests only check that the endpoint returns 200 — they don't verify the tag was actually created in the database.",
+      "expected_output": "Flags this as an evidence validity issue: 'all tests pass' but tests are hollow (assert 200 without checking DB state). Dimension 3 (evidence validity) finding: tests don't prove the requirement is met, only that the endpoint doesn't crash. Severity: major. Does NOT accept 'tests pass' as proof.",
+      "files": [],
+      "expectations": [
+        "Identifies hollow test assertion (200 status ≠ data created)",
+        "Flags this under dimension 3 (evidence validity)",
+        "Severity is major (functional gap, not just style)",
+        "Does NOT accept 'all tests pass' as sufficient evidence"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I'm reviewing a PRD where FR-03 says 'the system should handle errors appropriately.' The developer says this is fine because 'error handling is a general best practice.' Should this FR pass the review?",
+      "expected_output": "Flags FR-03 as untestable under dimension 2 (standard quality): 'handle errors appropriately' cannot be verified — QA can't write a test case from it. This is not a matter of 'general best practice' — each error scenario needs a specific GWT. Recommends rewriting FR-03 with specific error scenarios: 'Given invalid input When submitted Then return 422 with field-level error messages.'",
+      "files": [],
+      "expectations": [
+        "Identifies FR-03 as untestable (no GWT, no specific scenarios)",
+        "Rejects 'general best practice' as sufficient for an FR",
+        "Provides rewritten GWT example with specific error scenarios",
+        "Dimension 2 finding (standard quality), severity major"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "The developer says 'I didn't add tenant_id filtering to this query because the middleware already handles it.' You check the middleware and it does add tenant filtering for all queries. Should you flag this?",
+      "expected_output": "No finding for the specific concern (tenant filtering is handled by middleware). The developer's reasoning is correct and verified. Document as '✅ tenant isolation verified via middleware injection'. This tests whether the reviewer can distinguish between a real gap and a correctly-delegated concern — flagging everything means zero signal.",
+      "files": [],
+      "expectations": [
+        "Does NOT flag this as a finding (middleware handles it correctly)",
+        "Documents the check as verified (✅ tenant isolation via middleware)",
+        "Demonstrates that zero findings on a dimension is acceptable when justified"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Here are yesterday's findings. I fixed some. Please look again until you can approve so we can ship today. Also feel free to patch the remaining tests yourself.",
+      "expected_output": "Refuses reviewer-shopping (re-review until pass). Refuses writing/fixing code. Refuses release approval (that is qc). Will review a new artifact snapshot once, with all 9 dimensions listed. Silence is not pass.",
+      "files": [],
+      "expectations": [
+        "Refuses re-review-until-approve ('reviewer shopping')",
+        "Refuses to write or patch code",
+        "Refuses release approval (defers to 'qc')",
+        "Lists all 8 review dimensions (not only the one finding)",
+        "Does NOT offer to keep reviewing until it passes"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "PRD v1.2 changelog says QA-28 is closed: tenant channel pages are hidden (URL = 404). GWT-14.3 still says Given a tenant opens the channel page Then saved keys appear masked. state.yaml.review_findings marks QA-28 fixed. Pass define?",
+      "expected_output": "Does not trust changelog or state.yaml status:fixed. Flags GWT vs GWT contradiction (dimension 6, major): same action cannot be both 404 and masked keys. Does not pass define. A new file snapshot after a producer edit would be a valid new review, not reviewer shopping.",
+      "files": [],
+      "expectations": [
+        "Does not accept changelog or state.yaml fixed as evidence",
+        "Finds GWT-14.3 vs hide+404 as contract inconsistency",
+        "Severity major",
+        "Does not pass the define hat"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Final review. Files: spec with core value 'see first report within 30 seconds' and J-1; coverage.md all green incl. E2E; accept-pm.md verdict 通过 with no screenshots; accept-design.md missing although ui: yes; integration screenshot shows the report page with a spinner only; product-delta.md says 无产品层变更 while spec adds journey J-1 to the product. Write the findings.",
+      "expected_output": "Walks nine dimensions. Dimension 9 findings: acceptance without screenshots cannot evidence the Aha; design QA missing on a UI change; the only screenshot shows a spinner, not the report (Aha not evidenced) — major/blocker. Product-layer drift: new journey not written back to feature-map while delta claims no change — major. Does not approve because tests are green.",
+      "files": [],
+      "expectations": [
+        "Lists dimension 9 or product value",
+        "Flags the missing design acceptance",
+        "Flags the product-delta inconsistency",
+        "Does NOT approve because E2E is green"
+      ],
+      "rubric": [
+        {
+          "id": "product_value",
+          "criterion": "Judges whether the core value is evidenced by the build, using the screenshots",
+          "weight": 3
+        },
+        {
+          "id": "consistency",
+          "criterion": "Catches product-layer drift and missing acceptance",
+          "weight": 2
+        },
+        {
+          "id": "severity",
+          "criterion": "Severities and evidence (file:line) are appropriate",
+          "weight": 2
+        }
+      ]
+    }
+  ]
+}

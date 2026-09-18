@@ -1,0 +1,96 @@
+{
+  "skill_name": "collect",
+  "evals": [
+    {
+      "id": "tracking-1",
+      "prompt": "companion_skills: [collect]. Spec metric: 'first report view rate within 24h of import'. The frontend lead proposes events click_import_btn, ImportSuccess, view_report_page and report_page_view_v2. Write 01-define/tracking.md.",
+      "expected_output": "Derives events from the metric: dataset_imported (server-side, result truth) and report_viewed (client, triggered when the first chart renders, with is_first_view). Uses object_action past-tense snake_case, one behaviour one event, properties typed with allowed values, each event tied to a journey step and the metric id, validation steps for qa. Rejects the proposed inconsistent names and the page-view-as-value proxy. No PII in properties.",
+      "files": [],
+      "expectations": [
+        "Uses object_action snake_case names such as report_viewed / dataset_imported",
+        "Does NOT keep both view_report_page and report_page_view_v2",
+        "Ties events to the metric id",
+        "Includes validation steps per event",
+        "Places the import result event server-side or explains the source of truth"
+      ],
+      "rubric": [
+        {
+          "id": "metric_first",
+          "criterion": "Events are derived from the metric, not from buttons",
+          "weight": 3
+        },
+        {
+          "id": "naming",
+          "criterion": "Consistent convention; one behaviour one event; properties typed",
+          "weight": 2
+        },
+        {
+          "id": "validation",
+          "criterion": "Each event has runnable validation steps and a trigger defined from the user's point of view",
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "id": "tracking-2",
+      "prompt": "Our funnel from landing page visit to signup to first project created shows 40% of signups have no prior visits and many users appear twice. We track visits with a cookie id and signups with the database user id. What is wrong and what should the tracking plan say?",
+      "expected_output": "Identifies missing identity stitching: anonymous_id is never linked to user_id at signup/login, so pre-signup behaviour is orphaned and users are double counted. Plan: persistent anonymous_id, server-side user_signed_up / user_logged_in events carrying both ids, new anonymous_id on logout, user_id as the cross-device key, and validation steps before/after login.",
+      "files": [],
+      "expectations": [
+        "Identifies the missing anonymous_id to user_id mapping as the cause",
+        "Emits the mapping at signup or login from the server side",
+        "Addresses logout or cross-device behaviour",
+        "Adds validation steps for identity"
+      ],
+      "rubric": [
+        {
+          "id": "diagnosis",
+          "criterion": "Correct root cause: identity stitching, not 'the funnel tool is broken'",
+          "weight": 3
+        },
+        {
+          "id": "plan",
+          "criterion": "Concrete identity rules (signup/login mapping, logout, cross-device) written into the plan",
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "I need to build a spider that scrapes product prices from an e-commerce site. The site has 100 pages of products, uses JavaScript rendering for prices, and has a rate limit of about 1 request per second based on my testing. Design the crawl strategy.",
+      "expected_output": "Identifies: JS rendering needed (Splash/Playwright), DOWNLOAD_DELAY ≥ 1s (respect rate limit), UA rotation (basic anti-scraping), pagination via page parameter or 'next' link. Defines item fields (product_name, price, URL, timestamp). Uses content_hash for dedup. Does NOT start coding without the strategy.",
+      "files": [],
+      "expectations": [
+        "Identifies JS rendering requirement (Splash or Playwright)",
+        "Sets DOWNLOAD_DELAY ≥ 1s (respects observed rate limit)",
+        "Defines item schema with type validation",
+        "Includes content_hash for dedup",
+        "Does NOT start coding before the strategy is clear"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Our spider was working fine for 3 months but suddenly returns 0 items. The HTTP responses are 200 OK but the content is different — it looks like a captcha page. What do you do?",
+      "expected_output": "Identifies: the site has added captcha-based anti-scraping (soft block — 200 OK but captcha content). Escalation: 1) verify it's actually a captcha (screenshot/content check), 2) try IP rotation (proxy pool), 3) try UA change, 4) consider captcha solving service (last resort, costs money), 5) if none work, contact the site for API access. Also: the monitoring system should have alerted after 3 consecutive zero-item runs.",
+      "files": [],
+      "expectations": [
+        "Identifies soft block (200 OK but captcha content, not a hard 403 ban)",
+        "Proposes escalation order: verify → IP rotation → UA change → captcha service → API access",
+        "Mentions monitoring (3 consecutive zero-item runs should have alerted)",
+        "Does NOT suggest increasing request rate (that makes it worse)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "The spider collects product names and prices, but sometimes the price field is 'N/A' or an empty string instead of a number. The pipeline writes it to Redis and the backend consumer crashes when it tries to parse the price as a float. Whose problem is this?",
+      "expected_output": "This is the data collector's problem. Bad data at the source poisons every downstream layer. Fix at the Item level: validate price is numeric before yielding the item, or set price to None and let the consumer handle the absence (not crash). The item pipeline should reject items with invalid required fields — garbage in, garbage out everywhere downstream.",
+      "files": [],
+      "expectations": [
+        "Takes responsibility (data quality at source is the collector's job)",
+        "Recommends Item-level validation (price must be numeric or explicitly None)",
+        "Explains the downstream impact (backend crash, warehouse pollution)",
+        "Does NOT say 'the backend should handle it' (garbage in = garbage out)"
+      ]
+    }
+  ]
+}

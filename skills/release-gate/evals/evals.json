@@ -1,0 +1,71 @@
+{
+  "skill_name": "release-gate",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "The team says all tests pass and the reviewer found no blockers. Can we ship? Here's the context: 3 FRs, coverage matrix has FR-01 and FR-02 but no FR-03. The design was done verbally (no edge-states.md). Test report shows 5 passed tests. Gate outputs: test=0, lint=0, build=0, migration=not run.",
+      "expected_output": "Identifies THREE coverage gaps: 1) FR-03 missing from matrix (hole), 2) no edge-states.md (design stage skipped), 3) migration gate not run. Does NOT approve release. Explains each gap and what's needed to close them.",
+      "files": [],
+      "expectations": [
+        "Identifies FR-03 as a coverage matrix hole",
+        "Identifies missing edge-states.md as a design stage gap",
+        "Identifies migration gate as not run",
+        "Decision is BLOCK, not conditional ship",
+        "Does NOT just trust 'tests pass' — verifies coverage completeness"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "The reviewer found 2 findings: QA-1 (blocker, SQL injection in search endpoint) and QA-2 (minor, button color slightly off). The developer fixed QA-1 but says QA-2 is 'cosmetic, skip it'. Can we ship?",
+      "expected_output": "QA-1 blocker is fixed (verify with evidence — re-run security scan or read the fix). QA-2 minor can be waived BUT requires: documented reason, owner, and re-evaluation condition. If developer just says 'skip it' without documentation, that's not a valid waiver. Decision: conditional ship if QA-2 waiver is properly documented, otherwise fix QA-2 first.",
+      "files": [],
+      "expectations": [
+        "Verifies QA-1 fix with evidence (not just 'developer says fixed')",
+        "QA-2 minor CAN be waived but requires documentation (reason + owner + condition)",
+        "Does NOT accept verbal 'skip it' as a valid waiver",
+        "Decision is conditional ship (blocker fixed, minor waived with documentation) or block (waiver not documented)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "The PRD has 8 FRs. The coverage matrix shows FR-01 through FR-06 mapped to test cases. FR-07 and FR-08 are not in the matrix. The developer says FR-07 and FR-08 are 'infrastructure work, not user-facing, so no tests needed.' Is this valid?",
+      "expected_output": "Challenges the 'infrastructure = no tests' assumption. FR-07 and FR-08 still need coverage — infrastructure bugs (caching, rate limiting, logging) are production incidents. If they truly can't be user-tested, they need at least integration tests. Matrix hole = BLOCK until resolved or properly exempted with reasoning.",
+      "files": [],
+      "expectations": [
+        "Does NOT accept 'infrastructure = no tests needed'",
+        "Explains that infrastructure bugs are production incidents",
+        "Requires at least integration tests even if unit tests are impractical",
+        "Matrix hole without proper exemption = BLOCK"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "L3 release decision. findings: 0 blocker, 0 major. Gates: test/lint/build/migration pass; e2e pass. Acceptance: accept-pm 通过, accept-design 有条件通过 (empty-state copy fix, owner frontend, due in 2 days, not yet accepted by the product owner), accept-growth 不通过 (core highlight '30 秒出报表' measured at 45 s). Give the release opinion.",
+      "expected_output": "Blocks: any acceptance 不通过 blocks release regardless of green gates and zero findings; the core highlight is undelivered (product gap to pm/backend) or the claim must be rewritten and re-verified by growth. The conditional design verdict also needs human acceptance of its condition. Gives a minimal fix set and does not waive.",
+      "files": [],
+      "expectations": [
+        "Decision is block / 不放行",
+        "Cites the accept-growth 不通过 verdict",
+        "Notes the design condition needs acceptance",
+        "Does NOT ship because gates are green"
+      ],
+      "rubric": [
+        {
+          "id": "acceptance",
+          "criterion": "Treats acceptance verdicts as release evidence and blocks on 不通过",
+          "weight": 3
+        },
+        {
+          "id": "fix_set",
+          "criterion": "Minimal, owned fix set without waiving",
+          "weight": 2
+        },
+        {
+          "id": "conditions",
+          "criterion": "Handles the conditional verdict correctly",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

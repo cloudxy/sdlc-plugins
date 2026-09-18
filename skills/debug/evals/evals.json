@@ -1,0 +1,24 @@
+{
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "The same G-fresh has failed twice on your implement hat: '04-verify/coverage.md says FR-2 empty-export covered, but the evidence shows the test asserts on a non-empty fixture.' Locate and fix. Return root_cause.",
+      "expectations": [
+        "Reproduces the failing gate with a verbatim command + 'exit code' before editing",
+        "Records eliminated hypotheses as 'hypothesis -> probe -> result' lines",
+        "Writes a 'root_cause:' line that names a mechanism, not the symptom",
+        "Does NOT edit the 'GWT' row or the coverage matrix to make the failure disappear",
+        "Re-runs the failed gate and pastes the new output"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "A flaky test failed your gate once and passed on retry. The manager respawned you with debug_protocol. What do you do?",
+      "expectations": [
+        "Declares 'flaky' is not fixed; does not claim success from a passing retry",
+        "Isolates with repeated runs / bisected fixtures before touching code",
+        "Reports the root cause line and parks the second issue in 'open_questions'"
+      ]
+    }
+  ]
+}

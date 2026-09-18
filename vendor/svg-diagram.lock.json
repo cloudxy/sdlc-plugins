@@ -1,0 +1,182 @@
+{
+  "source": "svg-diagram",
+  "url": "https://github.com/bybit-exchange/svg-diagram.git",
+  "branch": "main",
+  "kind": "tool",
+  "commit": "c30c9e3bc9a70f2b77b60c7ea27157de3a88d81a",
+  "commit_time": "2026-09-03T19:09:40+08:00",
+  "included_paths": [
+    "SKILL.md",
+    "LICENSE",
+    "README.md",
+    "package.json",
+    "assets",
+    "tools/svg-lint/bin",
+    "tools/svg-lint/lib",
+    "tools/svg-lint/README.md"
+  ],
+  "tree_digest": "e625a0c90c541919967025529b793472926da80afc90c411752eac1308e1ae27",
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "aaaed664f33c52eb0b5bfa94b77a6fa2f1856204bbb7a85ffe691fc725fd3263",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "README.md",
+      "sha256": "185b624dfe9e4fdef9432dc6d44327ff00cd81dc63c507da26820e554043a548",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "9be93a5e8b79881bd9a9e993f19ff28f1e67f5bf63422f99b8e99bd2996cd0a9",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "assets/house-style.svg",
+      "sha256": "fa9a8f27d2276f8cefc965eaf6d7f3babc8e1f3c37dc6fff0c7371df43b14ebd",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "package.json",
+      "sha256": "c62b444228e120cec29ba5f510514042f93ce1ddbcd8cb51d69d303bd5bbd20e",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/README.md",
+      "sha256": "898d3341ac59926c101684bf784c5634ef47d6429fffe2dee6e9bd804acc7290",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/bin/svg-lint.mjs",
+      "sha256": "79a1f24608047f2b73296e42e7704623aa5505ff3f9ba91cdeb6f8d8408168d7",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/checks/arrow-marker.mjs",
+      "sha256": "0152a603aa105915dcf361ef5a1814c6f08475caaa8bbb6573a4f0b1ebd51413",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/checks/baseline-offset.mjs",
+      "sha256": "27427f2d0e040cf79a19f5d8f9ef59578c6b4adf6a66339afb89daf65d1e0a75",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/checks/block-spacing.mjs",
+      "sha256": "0fac17df4f18ec3f79c3d5259ae967861e427ea29546b653e2b4b91ae1918aa6",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/checks/box-height.mjs",
+      "sha256": "74252d330ffd6accfc16b5469166541bee79a97b8bf58881912cc3a9efbdb3fa",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/checks/connector-geometry.mjs",
+      "sha256": "e47424025e8bf12052fd8db8a1a7e852cbaa5933832ab39737db7e01d70eaa4b",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/checks/font-stack.mjs",
+      "sha256": "cc76e3b93e5ad0b91fd2781ad99f527166cea932718188fa247dd2908e3bb54a",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/checks/light-bg-fallback.mjs",
+      "sha256": "ff03245bce9d4d3e2b6310b1b416f35a563c3629f3aaef65315eda1b62c9b0a8",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/checks/overlap.mjs",
+      "sha256": "fea9cbc135a900a49da5e43875be9ce8be3759f719759f00c9eb9164acaa4216",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/checks/palette-conformance.mjs",
+      "sha256": "3238c5a61ace8c54d15b1719de21c98e7a3c9993979a2d1bbeac6e9ef886d8e0",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/checks/text-overflow.mjs",
+      "sha256": "ecf8d2d8a58ee885e48244de6bacce39585374778df7d12cc2fdde3a83b22461",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/checks/viewbox-clipping.mjs",
+      "sha256": "99d87afa7ed8a9cd89320cdabb480e5c95da3b414cf7468ea1196a4bda390331",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/checks/xml-escaping.mjs",
+      "sha256": "3bb9eb52003fea882dc1c88b6ada1941fb477f14ff861afd1d16125ce882c0fa",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/color.mjs",
+      "sha256": "bea561fb115acbb46af99f5f5c5ed7675d40538732d1fd0400f5b4c141000f2c",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/document.mjs",
+      "sha256": "7aa310606c9c55c12c422251b75b932b16c7983f1644ff2dd762e535b48622c5",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/format-json.mjs",
+      "sha256": "ded28e6228e5ea77398474ecfdf1a7d6feecc6e8c5ad8422c2d2f409115e95cc",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/format-text.mjs",
+      "sha256": "7d78d3724054cd28e2e7e55292207b6bb5f7a787d4125049842962686100d614",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/geometry.mjs",
+      "sha256": "731312c603683530562e86cb4d74f75bd5348b579ad717b5fbe5abc4e7bd04cb",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/lint.mjs",
+      "sha256": "0c0a16e44a687ac89fd67669d68e25beb76b3db467b9a8ad2ac43f120342e0e2",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/palette.mjs",
+      "sha256": "9580719d57cec880e5675a654d6073e3ae736e729cb14bd7eb31aca9c9c8dc2c",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/panels.mjs",
+      "sha256": "403fbb0d302826ec90ce18a685a32d1819e359a75b7d7008d9ea505f0990ba64",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/parse-svg.mjs",
+      "sha256": "3078b9049acc54d256ea1878ccd1c5454a2e6ecd31dc4ee69db5072a6a1ab57f",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/registry.mjs",
+      "sha256": "93077d2cfcc54f112432a46d677ad20f1a5640296a5f5decc158290265d5b316",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/report.mjs",
+      "sha256": "71892de22493310d514d515620924fb3bccebc471cef964788f80077ae1911df",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "tools/svg-lint/lib/text-metrics.mjs",
+      "sha256": "ee4d94c554b491033cc7dd6b4ed814a33372059fefc8523836059dff1107e6dd",
+      "purpose": "maintainer"
+    }
+  ],
+  "license": "MIT",
+  "adopted_at": "2026-09-18T16:06:37+0800",
+  "previous_commit": null,
+  "reviewed_by": "plugin-updater inspect/gate.sh (content)",
+  "note": "由 plugin-updater 写入，不要手改。vendor/ 内容不进 git；使用者运行 vendor/install.sh 按本锁文件的 commit 下载并校验 tree_digest。",
+  "node": "v25.9.0"
+}

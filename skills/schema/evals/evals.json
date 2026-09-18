@@ -1,0 +1,100 @@
+{
+  "skill_name": "schema",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm building a new feature where users can tag their spider tasks. Each task can have multiple tags and each tag can be on multiple tasks. We also need to track who created each tag and when. How should I store this?",
+      "expected_output": "Identifies M:N relationship (tags ↔ tasks), creates a junction table (taggings) with proper business name (not task_tags), includes created_by and created_at as junction attributes, defines tenant_id, uses surrogate PK + UNIQUE for business constraints.",
+      "files": [],
+      "expectations": [
+        "Output includes a junction/association table for the M:N relationship",
+        "Junction table has a meaningful business name (e.g., taggings, not just task_tags)",
+        "Junction table includes created_by field for tracking who applied the tag",
+        "Composite unique key on (tenant_id, tag_id, resource_type, resource_id) or similar",
+        "Uses surrogate PK, not business fields as primary key"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "This query is slow: SELECT * FROM spider_results WHERE spider_name = 'hotsearch' ORDER BY created_at DESC LIMIT 20. The table has 10 million rows. There's already an index on spider_name. Should I add another index on created_at?",
+      "expected_output": "Identifies pattern as equality + sort, recommends composite index (spider_name, created_at) NOT separate created_at index. Explains ESR rule and why separate index on created_at alone won't help. Asks about access pattern source.",
+      "files": [],
+      "expectations": [
+        "Recommends composite index (spider_name, created_at), not a separate created_at index",
+        "Explains that sort column must be in the same index to avoid filesort",
+        "Mentions tenant_id should be considered for multi-tenant tables",
+        "Asks about or checks actual access patterns before recommending"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need to change the column user_name to username in the users table which has 500K rows and is actively being written to. Can I just do ALTER TABLE users RENAME COLUMN in a single migration?",
+      "expected_output": "Identifies this as a destructive change (rename). Explains the deployment window where old/new code runs simultaneously. Recommends expand-contract: 1) add new column, 2) dual-write/backfill, 3) drop old column. Provides 3 separate migrations.",
+      "files": [],
+      "expectations": [
+        "Identifies rename as destructive/destructive change requiring expand-contract",
+        "Explains WHY one-step is dangerous (old code still reading old column)",
+        "Proposes 3-step approach in 3 separate migrations",
+        "Mentions backfill strategy for existing 500K rows"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I want to cache some LLM response data in Redis. I'll just SET the key when I get a response and read it back when needed. The key will be something like response_12345.",
+      "expected_output": "Points out missing TTL (immortal key risk), suggests proper naming convention (domain:entity:id, e.g., llm:response:12345), asks about invalidation path (when does this cache become stale?).",
+      "files": [],
+      "expectations": [
+        "Points out that no TTL means the key lives forever",
+        "Recommends a proper key naming pattern (domain:entity:id format)",
+        "Asks about or defines the invalidation path",
+        "Does NOT just approve the approach without addressing these gaps"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Should every table in our system have a deleted_at column for soft delete? That way we never lose data.",
+      "expected_output": "Explains the exemption matrix: audit/history tables, child tables (cascade with parent), aggregate tables, and system tables should NOT have soft delete. Also explains that tables WITH soft delete need unique keys that include the deletion marker.",
+      "files": [],
+      "expectations": [
+        "Does NOT approve universal soft delete",
+        "Mentions specific exemption categories (audit, child, aggregate, system)",
+        "Explains the unique key + deletion marker issue",
+        "Suggests checking the project's specific exemption matrix"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Feature: an online course platform adds video courses. feature-map Next: live classes, quizzes; Later: course bundles, multiple instructors per course, per-country pricing. Current tables: courses(id, title, instructor_id, price), lessons(id, course_id, video_url). Design the data model change and prove it will extend.",
+      "expected_output": "Places the change in the domain model (catalog vs learning vs commerce contexts; Course and Lesson aggregates; invariants). Chooses extension points for known variation: lesson content types (video/live/quiz) via a type column + extension tables or typed JSON config; course-instructor as a junction entity; prices separated from courses (price lists by currency/country) rather than a price column. Writes a roadmap stress test table walking live classes, quizzes, bundles, multiple instructors and per-country pricing, marking each additive or accepting cost with a trigger.",
+      "files": [],
+      "expectations": [
+        "Includes a roadmap stress test covering live classes and quizzes",
+        "Models multiple instructors with a junction table",
+        "Moves price out of a single courses.price column or explains the cost",
+        "Does NOT use a generic EAV attribute table"
+      ],
+      "rubric": [
+        {
+          "id": "domain",
+          "criterion": "Bounded contexts, aggregates and invariants stated before tables",
+          "weight": 2
+        },
+        {
+          "id": "stress_test",
+          "criterion": "Every Next/Later item walked through the model with additive vs destructive judgement",
+          "weight": 3
+        },
+        {
+          "id": "extension_points",
+          "criterion": "Extension points fit the known variation and state the cost of adding a variant",
+          "weight": 2
+        },
+        {
+          "id": "correctness",
+          "criterion": "Constraints, keys and snapshot-vs-reference decisions are correct",
+          "weight": 2
+        }
+      ]
+    }
+  ]
+}

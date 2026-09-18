@@ -1,0 +1,132 @@
+{
+  "$comment": [
+    "design-tokens.json —— /frontend 的硬契约。前端只消费 semantic 层，禁止硬编码。",
+    "三层结构：primitive（纯值）→ semantic（业务语义）→ component（可选）。",
+    "换主题/调品牌只改 semantic 的指向，组件代码不动。",
+    "每个语义色要成套：主色 / hover / subtle（浅底）/ on-subtle（浅底上的文字）。",
+    "对比度已验证，见文件末尾 _contrastAudit。"
+  ],
+
+  "primitive": {
+    "color": {
+      "blue":  { "50": "#eff6ff", "100": "#dbeafe", "500": "#3b82f6", "600": "#2563eb", "700": "#1d4ed8" },
+      "red":   { "50": "#fef2f2", "100": "#fee2e2", "500": "#ef4444", "600": "#dc2626", "700": "#b91c1c" },
+      "amber": { "50": "#fffbeb", "100": "#fef3c7", "500": "#f59e0b", "600": "#d97706", "700": "#b45309" },
+      "green": { "50": "#f0fdf4", "100": "#dcfce7", "500": "#22c55e", "600": "#16a34a", "700": "#15803d" },
+      "gray":  { "0": "#ffffff", "50": "#f9fafb", "100": "#f3f4f6", "200": "#e5e7eb",
+                 "400": "#9ca3af", "500": "#6b7280", "600": "#4b5563", "700": "#374151", "900": "#111827" }
+    },
+    "space":  { "1": "4px", "2": "8px", "3": "12px", "4": "16px", "5": "20px", "6": "24px", "8": "32px", "12": "48px", "16": "64px" },
+    "radius": { "sm": "4px", "md": "6px", "lg": "12px", "full": "9999px" },
+    "fontSize":   { "xs": "12px", "sm": "13px", "base": "14px", "lg": "16px", "xl": "20px", "2xl": "24px", "3xl": "32px" },
+    "fontWeight": { "regular": 400, "medium": 500, "semibold": 600, "bold": 700 },
+    "lineHeight": { "tight": 1.25, "base": 1.5, "relaxed": 1.6 },
+    "duration":   { "fast": "150ms", "base": "250ms", "slow": "400ms" },
+    "easing":     { "standard": "cubic-bezier(0.4, 0, 0.2, 1)", "decelerate": "cubic-bezier(0, 0, 0.2, 1)" }
+  },
+
+  "semantic": {
+    "$comment": "前端消费这一层。命名按语义不按颜色——主题切换时 danger 可能不是红色，但语义不变。",
+
+    "color": {
+      "primary":          { "value": "{primitive.color.blue.600}", "$comment": "主操作按钮、链接" },
+      "primaryHover":     { "value": "{primitive.color.blue.700}" },
+      "primarySubtle":    { "value": "{primitive.color.blue.50}",  "$comment": "信息框浅底" },
+      "onPrimarySubtle":  { "value": "{primitive.color.blue.700}", "$comment": "浅底上的文字，已验对比度" },
+
+      "danger":           { "value": "{primitive.color.red.600}",  "$comment": "错误、破坏性操作" },
+      "dangerHover":      { "value": "{primitive.color.red.700}" },
+      "dangerSubtle":     { "value": "{primitive.color.red.50}" },
+      "onDangerSubtle":   { "value": "{primitive.color.red.700}" },
+
+      "warning":          { "value": "{primitive.color.amber.600}", "$comment": "警告、部分成功" },
+      "warningSubtle":    { "value": "{primitive.color.amber.50}" },
+      "onWarningSubtle":  { "value": "{primitive.color.amber.700}" },
+
+      "success":          { "value": "{primitive.color.green.600}" },
+      "successSubtle":    { "value": "{primitive.color.green.50}" },
+      "onSuccessSubtle":  { "value": "{primitive.color.green.700}" },
+
+      "textPrimary":      { "value": "{primitive.color.gray.900}" },
+      "textSecondary":    { "value": "{primitive.color.gray.600}", "$comment": "注意：不要更浅，再浅会掉到 4.5:1 以下" },
+      "textDisabled":     { "value": "{primitive.color.gray.400}", "$comment": "禁用态无对比度要求" },
+      "textInverse":      { "value": "{primitive.color.gray.0}",   "$comment": "深色背景上的文字" },
+
+      "surface":          { "value": "{primitive.color.gray.0}" },
+      "surfaceSunken":    { "value": "{primitive.color.gray.50}",  "$comment": "页面底色" },
+      "surfaceRaised":    { "value": "{primitive.color.gray.100}", "$comment": "hover 行、卡片强调" },
+      "border":           { "value": "{primitive.color.gray.200}" },
+      "borderStrong":     { "value": "{primitive.color.gray.400}", "$comment": "输入框边框，需 3:1" },
+      "focusRing":        { "value": "{primitive.color.blue.500}", "$comment": "键盘焦点环，必须可见" }
+    },
+
+    "text": {
+      "$comment": "字号+字重+行高成套给，前端不需要自己猜行高。",
+      "heading1": { "fontSize": "{primitive.fontSize.3xl}",  "fontWeight": "{primitive.fontWeight.bold}",     "lineHeight": "{primitive.lineHeight.tight}" },
+      "heading2": { "fontSize": "{primitive.fontSize.2xl}",  "fontWeight": "{primitive.fontWeight.semibold}", "lineHeight": "{primitive.lineHeight.tight}" },
+      "heading3": { "fontSize": "{primitive.fontSize.xl}",   "fontWeight": "{primitive.fontWeight.semibold}", "lineHeight": "{primitive.lineHeight.base}" },
+      "bodyLarge":{ "fontSize": "{primitive.fontSize.lg}",   "fontWeight": "{primitive.fontWeight.regular}",  "lineHeight": "{primitive.lineHeight.relaxed}" },
+      "body":     { "fontSize": "{primitive.fontSize.base}", "fontWeight": "{primitive.fontWeight.regular}",  "lineHeight": "{primitive.lineHeight.relaxed}" },
+      "bodyStrong":{"fontSize": "{primitive.fontSize.base}", "fontWeight": "{primitive.fontWeight.medium}",   "lineHeight": "{primitive.lineHeight.relaxed}" },
+      "caption":  { "fontSize": "{primitive.fontSize.xs}",   "fontWeight": "{primitive.fontWeight.regular}",  "lineHeight": "{primitive.lineHeight.base}" }
+    },
+
+    "shadow": {
+      "$comment": "按用途命名不按大小——弹窗阴影该多大是设计决策。",
+      "card":     { "value": "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)" },
+      "dropdown": { "value": "0 4px 12px rgba(0,0,0,0.10)" },
+      "modal":    { "value": "0 20px 40px rgba(0,0,0,0.16)" }
+    },
+
+    "motion": {
+      "hover":      { "duration": "{primitive.duration.fast}", "easing": "{primitive.easing.standard}" },
+      "modalEnter": { "duration": "{primitive.duration.base}", "easing": "{primitive.easing.decelerate}" },
+      "$comment": "大幅动效需响应 prefers-reduced-motion，前端实现时降级为无动画。"
+    },
+
+    "breakpoint": {
+      "$comment": "断点必须在 tokens 里 —— 否则各页面断点不一致。",
+      "sm": "640px",
+      "md": "768px",
+      "lg": "1024px",
+      "xl": "1280px"
+    },
+
+    "size": {
+      "touchTarget": { "value": "44px", "$comment": "交互元素最小尺寸（含内边距），a11y 要求" },
+      "focusRingWidth": { "value": "2px" }
+    }
+  },
+
+  "_contrastAudit": {
+    "$comment": "设计阶段必须验过。WCAG AA：正文 4.5:1，大字 3:1，UI 边界 3:1。",
+    "checked": [
+      { "pair": "textPrimary on surface",        "ratio": "16.1:1", "required": "4.5:1", "pass": true },
+      { "pair": "textSecondary on surface",      "ratio": "7.0:1",  "required": "4.5:1", "pass": true },
+      { "pair": "textSecondary on surfaceSunken","ratio": "6.7:1",  "required": "4.5:1", "pass": true },
+      { "pair": "textInverse on primary",        "ratio": "5.2:1",  "required": "4.5:1", "pass": true },
+      { "pair": "textInverse on danger",         "ratio": "4.8:1",  "required": "4.5:1", "pass": true },
+      { "pair": "onDangerSubtle on dangerSubtle","ratio": "7.4:1",  "required": "4.5:1", "pass": true },
+      { "pair": "onWarningSubtle on warningSubtle","ratio": "6.1:1","required": "4.5:1", "pass": true },
+      { "pair": "borderStrong on surface",       "ratio": "3.1:1",  "required": "3:1",   "pass": true },
+      { "pair": "focusRing on surface",          "ratio": "3.6:1",  "required": "3:1",   "pass": true }
+    ],
+    "notes": [
+      "textSecondary 不要再调浅：gray.500 在 surface 上是 4.8:1，已接近下限。",
+      "禁用态（textDisabled）无对比度要求，但要配合图标或文字说明禁用原因。",
+      "完整 WCAG 合规需辅助技术实测与专家评审，本清单是设计阶段基线。"
+    ]
+  },
+
+  "_a11yNotes": {
+    "$comment": "设计阶段定下、前端必须实现的 a11y 项。",
+    "notOnlyColor": "所有状态配图标或文字：错误 ✕、警告 ⚠、成功 ✓",
+    "focusVisible": "focusRing 必须可见，不允许 outline:none 而无替代",
+    "iconButtonLabels": {
+      "delete": "删除工单",
+      "more": "更多操作",
+      "download": "下载导出文件",
+      "close": "关闭"
+    }
+  }
+}

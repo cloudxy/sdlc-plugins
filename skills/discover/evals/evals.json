@@ -1,0 +1,75 @@
+{
+  "skill_name": "discover",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "User says /sdlc-discover: 给报表页加个导出按钮，能下载 Excel.",
+      "expected_output": "Does not write spec.md. Does not spawn pm. Frames who/surface first, then surveys market and compete (spawn researcher + competitor, or asks for survey inputs). Discuss-P uses the three-question probe and does not pick the export button as the solution in the first round. Stops for human answers. Live HITL — do not invent a product grilling session.",
+      "files": [],
+      "expectations": [
+        "Does not spawn 'sdlc-workflow:pm' as the first action",
+        "Does not write '01-define/spec.md'",
+        "Asks how the user does this today / where it breaks / what they do next, or frames then surveys first",
+        "Does not treat 'export button' as the chosen solution before survey"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Competitor X has seat management. We should add it too. Start discovery.",
+      "expected_output": "Compete track: 'they have it' is not a problem statement. Asks whether our users have the same problem and writes 现状 into the competitor set. Does not write FR. Does not spawn pm to spec seats.",
+      "files": [],
+      "expectations": [
+        "Does not write 'spec.md' or FR rows",
+        "Treats competitor-has-it as E0 until survey",
+        "Asks whether our users have the same problem",
+        "Includes status quo as a competitor"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "00-discover/briefing.md already exists and is frozen. User says continue to spec.",
+      "expected_output": "Does not re-grill. Tells the user to run /sdlc so pm writes spec.md from the briefing. Does not author spec.md in this window.",
+      "files": [],
+      "expectations": [
+        "Does not write 'spec.md'",
+        "Points to /sdlc / pm / define",
+        "Does not restart Discuss-P from scratch"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "00-discover/market.md and compete.md are 200 lines each. Operator in chat said 80% of users export weekly. Freeze briefing.md.",
+      "expected_output": "Briefing Market/Compete are summaries (≤5 lines) plus links to 00-discover/market.md and compete.md. Does not paste the survey files. Does not grade the operator 80% as E3 (that is E1). Asks for a counted snapshot or writes 未量化.",
+      "files": [],
+      "expectations": [
+        "Briefing compresses survey (links to 00-discover/market.md / compete.md, does not paste 200 lines)",
+        "Does not grade the operator claim as 'E3'",
+        "Writes 未量化 or asks for a counted snapshot",
+        "Does not write 'spec.md'"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "/sdlc-discover: 我们想做一个面向独立开发者的 API 监控产品。researcher 与 competitor 的调研文件都已写好。下一步做什么？",
+      "expected_output": "Spawns growth (stage growth) after compete.md exists to produce positioning options, highlight hypotheses as demonstrable moments and behaviour-defined segments, before Discuss-S; the briefing later gets a compressed ## Growth section. Does not jump to spec or solution picking.",
+      "files": [],
+      "expectations": [
+        "Spawns or plans 'sdlc-workflow:growth' before Discuss-S",
+        "Does not write 'spec.md'",
+        "Mentions positioning or highlight hypotheses"
+      ],
+      "rubric": [
+        {
+          "id": "order",
+          "criterion": "Growth runs after compete and before solution discussion",
+          "weight": 2
+        },
+        {
+          "id": "insight",
+          "criterion": "Discovery aims at what would win (positioning, highlights), not only at killing ideas",
+          "weight": 2
+        }
+      ]
+    }
+  ]
+}

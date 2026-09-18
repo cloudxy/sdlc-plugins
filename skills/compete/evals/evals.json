@@ -1,0 +1,27 @@
+{
+  "skill_name": "compete",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Competitor X launched AI insights. We don't have it. Should we build it?",
+      "expected_output": "Does not say yes. Classifies X as direct/indirect/benchmark. Borrow/avoid/differentiate with scene gap. Status quo is in the set. Does not RICE or write FRs.",
+      "files": [],
+      "expectations": [
+        "Gives borrow/avoid/differentiate, not 'they have it so we should'",
+        "Includes status quo in the competitor set",
+        "Does not decide to build (no FR / no RICE)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "No named competitor. Users paste rows into Excel every week. Snapshot this change.",
+      "expected_output": "Status quo Excel is the competitor. Snapshot can complete without an external product name. Does not report an empty set.",
+      "files": [],
+      "expectations": [
+        "Writes Excel/manual as '现状' in the set",
+        "Does not fail for lack of a branded rival",
+        "Still gives borrow/avoid/differentiate against the workaround"
+      ]
+    }
+  ]
+}

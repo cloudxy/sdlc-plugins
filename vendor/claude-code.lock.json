@@ -1,0 +1,48 @@
+{
+  "source": "claude-code",
+  "url": "https://github.com/anthropics/claude-code.git",
+  "branch": "main",
+  "kind": "docs",
+  "commit": "f96c3b49c4c8721685206aaab23609b2d399df4e",
+  "commit_time": "2026-09-15T00:42:19Z",
+  "included_paths": [
+    "LICENSE.md",
+    "plugins/plugin-dev/skills/agent-development/references/system-prompt-design.md",
+    "plugins/plugin-dev/skills/skill-development/SKILL.md",
+    "plugins/feature-dev/commands/feature-dev.md",
+    "plugins/code-review/commands/code-review.md"
+  ],
+  "tree_digest": "4d44fe03214426af28b0abdbf5b1f1bab910c9dd4c9c055bed43158374520e2a",
+  "files": [
+    {
+      "path": "LICENSE.md",
+      "sha256": "728158fd1037143fad6907e8fa34804177e598b7326519503fe83cafdef849e6",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "plugins/code-review/commands/code-review.md",
+      "sha256": "2b0837c5ec0b2e75f8ba4565bdafd76fa916b0dc146608c5733af7ba5802012c",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "plugins/feature-dev/commands/feature-dev.md",
+      "sha256": "652e5d6264fd253fcb70c2f84de986a88d77109a02410aacd90230a6ab4bf557",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "plugins/plugin-dev/skills/agent-development/references/system-prompt-design.md",
+      "sha256": "eaac53eaaf8326ac04428987280fb5041920b7571477ad41742517c5aac683fc",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "plugins/plugin-dev/skills/skill-development/SKILL.md",
+      "sha256": "d40080c45d652dd3cc481d1e381cd7e6258091a87351fa1de67c6c8ecec3446e",
+      "purpose": "maintainer"
+    }
+  ],
+  "license": "All rights reserved",
+  "adopted_at": "2026-09-18T16:24:49+0800",
+  "previous_commit": null,
+  "reviewed_by": "plugin-updater inspect/gate.sh (content)",
+  "note": "由 plugin-updater 写入，不要手改。vendor/ 内容不进 git；使用者运行 vendor/install.sh 按本锁文件的 commit 下载并校验 tree_digest。"
+}

@@ -1,0 +1,214 @@
+{
+  "skill_name": "impl-evidence",
+  "evals": [
+    {
+      "id": "ui-1",
+      "prompt": "Implement a data table page with search, pagination, and a status badge column. The design has 5 columns, a search input, and a 'New Item' button. Data comes from GET /api/v1/items with pagination.",
+      "expected_output": "Uses react-query for data fetching (no manual setInterval/useState loading). Uses antd Table with proper columns. Search uses debounce or form submit. Status column uses Tag with color mapping. Pagination is server-side. Does NOT hardcode colors — uses tokens or antd theme.",
+      "files": [],
+      "expectations": [
+        "Uses react-query (useQuery) not manual useState + useEffect + fetch",
+        "Does NOT use 'setInterval' for polling",
+        "Table uses antd Table component with columns definition",
+        "Status column renders colored Tags",
+        "No hardcoded hex color values in inline styles"
+      ]
+    },
+    {
+      "id": "ui-2",
+      "prompt": "The sidebar disappears when I refresh the page. It shows after login but not after F5. What's wrong?",
+      "expected_output": "Identifies that permission cache is module-level and lost on refresh (while auth persists via localStorage). Checks if refreshPermissions is called on mount when user is authenticated but cache is empty. Does NOT suggest 'clear localStorage and re-login'.",
+      "files": [],
+      "expectations": [
+        "Identifies permission cache lifecycle as the root cause",
+        "Suggests auto-refresh on mount when authenticated but cache empty",
+        "Does NOT suggest clearing localStorage (that's a workaround, not a fix)"
+      ]
+    },
+    {
+      "id": "ui-3",
+      "prompt": "The designer gave me a design-tokens.json with primary color #1677ff, spacing scale (4/8/16/24/32), and border radius (4/8/12). But the existing code has inline styles with hardcoded colors like #1890ff and #40a9ff. How do I handle this?",
+      "expected_output": "Identifies that #1890ff is the OLD primary color and #1677ff is the NEW one from tokens. Recommends: 1) replacing all hardcoded colors with token references, 2) running check-frontend.sh to catch remaining violations, 3) NOT doing a big-bang refactor — fix as you touch each file. Does NOT say 'keep the old colors since they work'.",
+      "files": [],
+      "expectations": [
+        "Identifies the color mismatch between tokens and existing code",
+        "Recommends consuming tokens over hardcoding",
+        "Suggests incremental fix (fix as you touch), not big-bang refactor",
+        "Mentions check-frontend.sh as a mechanical verification tool"
+      ]
+    },
+    {
+      "id": "ui-4",
+      "prompt": "I need to implement a page that fetches data from two APIs in sequence: first get the user profile, then use the user's tenant_id to fetch their usage data. How do I handle this?",
+      "expected_output": "Recognizes this as a sequential dependency, not parallel. Recommends: 1) react-query with enabled flag (second query waits for first), or 2) a single queryFn that chains both calls. Does NOT use two independent useEffects with manual ordering (execution order unreliable). Does NOT use async/await in useEffect without cleanup.",
+      "files": [],
+      "expectations": [
+        "Recognizes sequential dependency (second call depends on first result)",
+        "Recommends react-query enabled flag or chained queryFn",
+        "Does NOT recommend two independent useEffects (execution order unreliable)",
+        "Handles cleanup (abort previous request if tenant_id changes)"
+      ]
+    },
+    {
+      "id": "ui-5",
+      "prompt": "A list page has a search box and a Create button. The design matrix requires empty, loading, error, boundary, permission, and offline. Describe the UI for each state. Do not assume a component library.",
+      "expected_output": "Walks all six states with trigger + UI. Empty has a call to action (Create), not a dead 'no data'. Permission hides or disables Create for viewer. Offline is at least a network error with retry. Does NOT only describe the happy-path table. Stack (antd/react-query) is optional, not required.",
+      "files": [],
+      "expectations": [
+        "Documents all 6 states (empty/loading/error/boundary/permission/offline)",
+        "Empty state includes a call to action, not just 'no data'",
+        "Permission state addressed (what does an unauthorized user see?)",
+        "Offline state addressed (at least as a network error message)",
+        "Does NOT only describe the 'happy-path' loaded table"
+      ]
+    },
+    {
+      "id": "api-1",
+      "prompt": "Implement the POST /api/v1/members endpoint. It should create a new member with username, email, password, and tenant_role. The tenant_id comes from the current user's JWT. Make sure duplicate emails are rejected.",
+      "expected_output": "Router handles HTTP protocol, Schema validates fields declaratively, Service handles business logic (duplicate check + creation), Repository handles data access. Uses existing project patterns. Adds self-test evidence.",
+      "files": [],
+      "expectations": [
+        "Follows existing project layering (Router → Service → Repository)",
+        "Duplicate email check is in Service layer (business logic), not Router",
+        "Schema validates email format declaratively",
+        "Does NOT import ORM models in Router",
+        "Self-test evidence includes command and exit code"
+      ]
+    },
+    {
+      "id": "api-2",
+      "prompt": "This endpoint processes payment callbacks. Multiple webhooks might arrive for the same transaction. How should I make it idempotent?",
+      "expected_output": "Identifies the read-modify-write race. Recommends unique constraint on business key (transaction_id) + upsert pattern, or idempotency key table. Does NOT just say 'add a lock' without analyzing the contention pattern.",
+      "files": [],
+      "expectations": [
+        "Identifies the race condition (multiple concurrent webhooks)",
+        "Recommends unique constraint or idempotency key (not just mutex/lock)",
+        "Considers what happens on partial failure (partial write = dirty state)"
+      ]
+    },
+    {
+      "id": "api-3",
+      "prompt": "Create order, deduct inventory, and write a ledger row. Then send the customer an email. Should this be one database transaction?",
+      "expected_output": "Order + inventory + ledger are one business unit → one transaction. Email is an external call — MUST be outside the transaction (or via outbox). Does NOT put HTTP/email inside the DB transaction. Mentions dirty state if any of the three writes commits alone.",
+      "files": [],
+      "expectations": [
+        "Puts order + inventory + ledger in one transaction (multi-table write)",
+        "Keeps the email/HTTP call OUTSIDE the transaction (or uses an outbox table)",
+        "Does NOT recommend wrapping the external call inside the DB transaction",
+        "Explains partial-write dirty state if the three writes are not atomic"
+      ]
+    },
+    {
+      "id": "api-4",
+      "prompt": "The members list handler loads members, then in a Python for-loop calls repo.get_roles(member.id) for each row. It feels a bit slow with 200 members. Someone suggested adding Redis. What do you do?",
+      "expected_output": "Identifies N+1 (1 list query + N role queries). First fix is JOIN/IN/eager load at the Repository, not a cache. Cache on an N+1 path hides the bug and multiplies load on miss. Does NOT start with Redis.",
+      "files": [],
+      "expectations": [
+        "Identifies this as N+1 (loop of per-row queries)",
+        "Recommends JOIN, WHERE id IN (...), or eager load at Repository first",
+        "Does NOT recommend Redis/cache as the first fix",
+        "Notes that caching N+1 hides the query shape and can stampede on miss"
+      ]
+    },
+    {
+      "id": "ai-1",
+      "prompt": "Our AI tag suggestion feature has an accuracy of 85%. The product manager wants to improve it to 95%. What do you do?",
+      "expected_output": "First asks: 85% by what measure? On what eval set version? What's the baseline (rules-based)? Then: 95% may not be achievable — check MDE. If proceeding: verify eval set quality (50+ samples, labeled, stratified), change one variable at a time, document all rounds. Does NOT just say 'try a better model'.",
+      "files": [],
+      "expectations": [
+        "Asks about eval set version and labeling criteria",
+        "Checks if a rules-based baseline exists and what it scores",
+        "Does NOT promise 95% without checking MDE feasibility",
+        "Plan changes one variable at a time with documented results"
+      ]
+    },
+    {
+      "id": "ai-2",
+      "prompt": "I want to use GPT-4o for our AI planning feature instead of the current model. The current model works fine. What's your process?",
+      "expected_output": "First asks WHY — what problem are you solving? If no specific problem, the current model is fine. If there IS a problem (quality, latency, cost): 1) define what 'better' means with measurable criteria, 2) build eval set if none exists, 3) run both models on same eval set, 4) compare with statistical significance, 5) plan degradation chain. Does NOT just swap models.",
+      "files": [],
+      "expectations": [
+        "Asks WHY before recommending a change (what problem are you solving?)",
+        "Requires measurable criteria for better (latency, quality, or cost — not model recency)",
+        "Recommends running both models on same eval set for comparison",
+        "Plans degradation chain (new primary → old model as backup → rules fallback)"
+      ]
+    },
+    {
+      "id": "ai-3",
+      "prompt": "The AI feature works great in testing but users are complaining about quality in production. The eval set shows 92% accuracy. What's going on?",
+      "expected_output": "Identifies the offline-online gap: eval set may not represent production distribution. Checks: 1) is the eval set stratified the same way as production data? 2) has production data distribution shifted since eval set was created? 3) are there edge cases in production not covered by eval set? Recommends refreshing eval set with production samples.",
+      "files": [],
+      "expectations": [
+        "Identifies offline-online gap as the likely cause",
+        "Checks eval set stratification vs production distribution",
+        "Recommends refreshing eval set with production samples",
+        "Does NOT just say 'the model is bad' — diagnoses the specific gap"
+      ]
+    },
+    {
+      "id": "model-1",
+      "prompt": "Build a churn prediction model. We have 6 months of user activity data. The model should predict which users will stop using the product in the next 30 days.",
+      "expected_output": "First asks: what action will be taken on predicted churners? (Send coupon → optimize precision; human outreach → optimize recall). Then: checks data quality (6 months may be insufficient for seasonal patterns), defines as-of for features (use data up to day T to predict T+30), proposes time-based split (train on months 1-4, test on month 5). Does NOT jump to model selection.",
+      "files": [],
+      "expectations": [
+        "Asks what action will be taken on predicted churners before modeling",
+        "Defines as-of timestamp for features (no future data leakage)",
+        "Proposes time-based split, not random split",
+        "Does NOT start with model selection before defining the decision"
+      ]
+    },
+    {
+      "id": "model-2",
+      "prompt": "My churn prediction model has 95% accuracy on the test set. Can we deploy it?",
+      "expected_output": "Challenges the 95% accuracy: what's the class distribution? If 95% of users DON'T churn, then always predicting 'no churn' gives 95% accuracy — the model is useless. Checks: PR AUC, lift, precision-recall tradeoff. Also checks: was the time-based split done correctly? Are features computed with as-of discipline? Is there a baseline comparison (rule-based vs model)?",
+      "files": [],
+      "expectations": [
+        "Challenges accuracy on imbalanced data (always-predict-no gives 95%)",
+        "Recommends PR AUC or lift instead of accuracy",
+        "Checks time-based split correctness (not random)",
+        "Requires baseline comparison (rules-based vs model)"
+      ]
+    },
+    {
+      "id": "model-3",
+      "prompt": "I computed the mean and standard deviation of all features across the entire dataset, then split into train/test and applied the scaling. Is this correct?",
+      "expected_output": "Identifies this as DATA LEAKAGE: computing statistics on the full dataset before splitting means test set information has leaked into the training set. The correct approach: split FIRST, then compute statistics on train set only, apply those same statistics to test set. This is one of the most common and most dangerous ML mistakes.",
+      "files": [],
+      "expectations": [
+        "Identifies full-dataset statistics before split as DATA LEAKAGE",
+        "Explains the correct approach: split first, then normalize on train only",
+        "Explains WHY it matters (test information inflates model performance)"
+      ]
+    },
+    {
+      "id": "ui-6",
+      "prompt": "lane_file: ui. Ticket T-02 (J-1 steps 2–3: generate report and show it, signature moment: metrics fade in one by one). Unit tests and build pass. The backend endpoint is ready on staging. What remains before you can mark the slice done, and what do you write?",
+      "expected_output": "Runs the slice against the real backend (not the mock), walks J-1 steps 2–3 from a realistic state, captures screenshots at the designed breakpoints with scripts/ui-evidence.sh and looks at them, compares with the picked prototype (signature moment present?), triggers empty/error/permission states, checks EV events fire, and writes 03-impl/T-02-integration.md. Does not mark done on green tests alone.",
+      "files": [],
+      "expectations": [
+        "Does NOT mark the slice done on passing unit tests alone",
+        "Runs against the real backend",
+        "Captures screenshots",
+        "Writes an integration record"
+      ],
+      "rubric": [
+        {
+          "id": "integration",
+          "criterion": "Real-backend walkthrough of the journey slice with screenshots that were looked at",
+          "weight": 3
+        },
+        {
+          "id": "design_fidelity",
+          "criterion": "Compares with the prototype and checks the signature moment",
+          "weight": 2
+        },
+        {
+          "id": "states_events",
+          "criterion": "Checks key states and tracking events",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

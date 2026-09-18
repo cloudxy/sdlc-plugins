@@ -1,0 +1,131 @@
+{
+  "skill_name": "sdlc",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "User says /sdlc for a one-line typo fix in README.",
+      "expected_output": "Judges L0. Does not spawn role subagents. Mentions commit trailer lane=L0. Does not write a PRD.",
+      "files": [],
+      "expectations": [
+        "Chooses lane 'L0'",
+        "Does not spawn 'pm'/'architect'/'reviewer'",
+        "Does not produce 'spec.md'"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "User says /sdlc to add a billed export API. No 00-discover/briefing.md exists.",
+      "expected_output": "Does NOT spawn pm first. Enters Step 1b discover (frame / survey researcher+competitor). Does not write spec.md in the orchestrator window.",
+      "files": [],
+      "expectations": [
+        "Does not spawn 'sdlc-workflow:pm' as the first action",
+        "Enters discovery (Step 1b / discover skill) or spawns researcher/competitor",
+        "Orchestrator does not author 'spec.md'"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "User says /sdlc to add a billed export API. 00-discover/briefing.md is frozen and discovery.status is done.",
+      "expected_output": "First producer spawn is sdlc-workflow:pm with briefing as required input. Does not start with general-purpose. Does not write the PRD in the orchestrator context.",
+      "files": [],
+      "expectations": [
+        "Uses subagent_type sdlc-workflow:pm as the first producer spawn after discovery",
+        "Briefing is a required input",
+        "Orchestrator does not author 'spec.md' itself"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "User says /sdlc to continue feat-four-pillars. Host spawn_subagent rejects sdlc-workflow:pm as unknown type. Available: general-purpose, explore, plan.",
+      "expected_output": "Attempts sdlc-workflow:pm first. On unknown type, one general-purpose spawn whose first action is Read PLUGIN_ROOT/agents/pm.md and skills/prd-gwt/SKILL.md. Records host_spawn.fallback. Does not spawn native and general-purpose together. Does not write the PRD in the orchestrator window.",
+      "files": [],
+      "expectations": [
+        "First attempted type is sdlc-workflow:pm",
+        "Fallback is a single general-purpose with Read of agents/pm.md and skills/prd-gwt/SKILL.md",
+        "Records host_spawn in state.yaml",
+        "Does not dual-dispatch native + general-purpose",
+        "Orchestrator does not author 'spec.md'"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "state.yaml current_hat is 塑形, hats_done includes 定义, last fresh-context result is fail with major>0. User says continue /sdlc.",
+      "expected_output": "Does not spawn architect. Resumes at define (producer pm) to close findings. Writes or already has 05-review/findings.md. Does not mark 定义 done.",
+      "files": [],
+      "expectations": [
+        "Does not spawn architect / start shape",
+        "Resumes the producing hat (define / pm)",
+        "Treats G-fresh fail as blocking hat advance"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "state.yaml: sdlc_version 4, lane L2, ui: yes, current_hat shape, hats_done [define]. The designer's explore spawn returned 02-shape/design-directions.md with D1–D3 and screenshots. User says continue /sdlc.",
+      "expected_output": "Does not spawn the architect yet. Presents the three directions (signature moment, trade-off, screenshot paths) and the designer's recommendation, waits for the human pick, records design.picked / picked_by, then spawns designer task specify, and only after that the architect.",
+      "files": [],
+      "expectations": [
+        "Does not spawn 'sdlc-workflow:architect' before the pick",
+        "Presents the directions for a human decision",
+        "Spawns designer specify after the pick"
+      ],
+      "rubric": [
+        {
+          "id": "order",
+          "criterion": "Experience before architecture: pick → specify → architect",
+          "weight": 3
+        },
+        {
+          "id": "decision_point",
+          "criterion": "Presents directions clearly and waits instead of deciding",
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "state.yaml: sdlc_version 4, lane L2, current_hat accept. accept-pm.md 通过, accept-design.md 通过, accept-growth.md 不通过 (claim '一键导出 Excel' but the build exports CSV; core highlight). User says continue.",
+      "expected_output": "Does not spawn the final reviewer. Routes the gap: the core highlight is undelivered, so it is a product gap (pm decides: implement xlsx export via rework on implement, or change the claim and re-run growth claims check). Increments rework_rounds, re-runs verify and acceptance after the fix. Does not write role artifacts itself.",
+      "files": [],
+      "expectations": [
+        "Does not spawn 'sdlc-workflow:reviewer' as the next step",
+        "Routes the gap back to implement or pm",
+        "Re-runs acceptance after the fix"
+      ],
+      "rubric": [
+        {
+          "id": "gate",
+          "criterion": "Acceptance 不通过 blocks the final review",
+          "weight": 3
+        },
+        {
+          "id": "routing",
+          "criterion": "Correct routing of a product gap vs a copy fix, with rework bookkeeping",
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "User says /sdlc to add team workspaces to an existing SaaS product. sdlc.config.yaml has product_root: docs/product, but every product file still contains the sdlc:unfilled marker. No briefing exists.",
+      "expected_output": "Recognises the product layer is unfilled for an existing product and recommends /sdlc-product before (or as part of) the first feature, explaining that pm, designer, architect and dba need strategy, feature map, design system, architecture and domain model. Does not write product files itself. Then proceeds with discovery once the user agrees.",
+      "files": [],
+      "expectations": [
+        "Recommends '/sdlc-product'",
+        "Does not write 'strategy.md' in the manager window",
+        "Mentions the unfilled product layer"
+      ],
+      "rubric": [
+        {
+          "id": "product_layer",
+          "criterion": "Treats the product layer as a prerequisite for quality and routes to /sdlc-product",
+          "weight": 3
+        },
+        {
+          "id": "manager_discipline",
+          "criterion": "Does not do role work in the manager window",
+          "weight": 2
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "skill_name": "retro",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "After we launched the export feature, our weekly active users increased from 1200 to 1500. The export feature clearly drove this growth!",
+      "expected_output": "Challenges the causal claim: was there an A/B test? No control group means you can only say 'changed', not 'increased because of the export feature'. Lists alternative explanations: seasonal trend, marketing campaign, other feature releases in the same period. Asks for sample size and time window. Does NOT accept the causal conclusion.",
+      "files": [],
+      "expectations": [
+        "Challenges the causal claim (no control group = correlation only)",
+        "Lists ≥2 alternative explanations",
+        "Asks for sample size and time window",
+        "Does NOT accept 'because of the export feature' without an experiment"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Our dashboard shows that the average response time went from 200ms to 350ms after the last deployment. The developer says it's fine because the p99 is still under 1 second. What do you say?",
+      "expected_output": "Identifies the discrepancy between average and tail latency. Average 350ms is 75% worse than before — that IS significant even if p99 is fine. Checks: 1) what's the p95? 2) is this a bimodal distribution (some fast, some very slow)? 3) does the SLA define average or P95? Refers to metrics.yaml for the agreed metric definition. Does NOT accept 'p99 is fine' as dismissing the average regression.",
+      "files": [],
+      "expectations": [
+        "Identifies that 200ms→350ms is a 75% regression (significant)",
+        "Checks p95 and distribution shape (may be bimodal)",
+        "Refers to metrics.yaml for agreed metric definition",
+        "Does NOT accept 'p99 is fine' as dismissing the average regression"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need to analyze why our user retention dropped last month. I have access to the production MySQL database. Can I just run some queries directly on it?",
+      "expected_output": "Advises against running heavy analytical queries directly on the production OLTP database — it will compete with live traffic for resources. Recommends: 1) use the read-only analysis replica if available, 2) if no replica, extract data to a separate analysis environment, 3) schedule heavy queries during off-peak hours. Does NOT approve direct production queries for analysis.",
+      "files": [],
+      "expectations": [
+        "Advises against heavy queries on production OLTP database",
+        "Recommends read-only replica or separate analysis environment",
+        "Mentions off-peak scheduling as fallback",
+        "Does NOT approve direct production queries"
+      ]
+    }
+  ]
+}

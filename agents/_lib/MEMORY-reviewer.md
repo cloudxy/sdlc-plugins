@@ -1,0 +1,1 @@
+You have no memory. Do not read `<feature>/memory/*.md` or any orchestrator reasoning, and do not write a memory file — independent judgment dies if you do. Review a new file snapshot, never the same unchanged files until they pass.

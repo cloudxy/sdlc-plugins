@@ -1,0 +1,1068 @@
+{
+  "schema_version": 1,
+  "commands": {
+    "sdlc-discover": {
+      "skill": "discover",
+      "mode": "full",
+      "description": "HITL product discovery — frame, market∥compete survey, growth positioning, discuss, falsify, freeze briefing. Does not write spec.md. This window stays the manager.",
+      "argument_hint": "[idea or 'continue']"
+    },
+    "sdlc-eval": {
+      "skill": "sdlc-eval",
+      "mode": "eval",
+      "description": "Run the SDLC eval harness (v2 — 22 skills; mechanical grade + blind rubric judging + real-failure regressions). Human-triggered only — not a weekly gate.",
+      "argument_hint": "[skill: prd-gwt|design-contract|architecture|schema|growth|collect|warehouse|coverage-matrix|findings|release-gate|impl-evidence|debug|tdd|refactor|cicd|discover|market|compete|falsify|enablement|signals|sdlc] [mechanical|rubric|regression <case-id|all>]"
+    },
+    "sdlc-product": {
+      "skill": "sdlc",
+      "mode": "product",
+      "description": "Build or refresh the product layer (strategy, feature map, growth, design system, architecture, domain model, data) before or between features. Spawns the owning hats; this window stays the manager.",
+      "argument_hint": "[product name / what to refresh, e.g. '全部' | 'strategy feature-map' | 'domain-model']"
+    },
+    "sdlc-research": {
+      "skill": "discover",
+      "mode": "research",
+      "description": "AFK survey only — spawn researcher (market) ∥ competitor (compete), then growth (positioning). No HITL grilling, no spec.md. This window stays the manager.",
+      "argument_hint": "[change to survey]"
+    },
+    "sdlc-review": {
+      "skill": "sdlc",
+      "mode": "review-only",
+      "description": "Independent G-fresh review of artifacts already on disk. Spawns sdlc-workflow:reviewer only — not a full swimlane. This window stays the manager.",
+      "argument_hint": "[feature dir or artifact paths]"
+    },
+    "sdlc": {
+      "skill": "sdlc",
+      "mode": "auto",
+      "description": "Run the SDLC swimlane (v4) — product layer, discovery with growth, design before architecture, journey slices, E2E, three-party acceptance, gates. ops=用户运营, growth=增长运营, sre=运维. Not a one-line fix.",
+      "argument_hint": "[requirement, '先调研', '短路径', or 'continue']"
+    }
+  },
+  "roles": {
+    "pm": {
+      "skill": "prd-gwt",
+      "description": "Use this agent when defining product value, core features, key journeys, spec.md (FR/GWT), tracking needs, or walking acceptance on the build. Use proactively when the user states a problem before technical design. Do NOT use while /sdlc is running in the parent window. Do NOT use for architecture, schema, or implementation.",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [
+        "feature-map.md",
+        "strategy.md"
+      ]
+    },
+    "growth": {
+      "skill": "growth",
+      "description": "Use this agent ONLY when the spawn packet or the user names growth. 增长运营: positioning, highlights, claims check, segments, precision-marketing launch plans. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Do NOT use for feature specs (pm), support scripts or signals (ops), or deploy/rollback (sre).",
+      "color": "orange",
+      "fresh": false,
+      "product_writes": [
+        "growth.md"
+      ]
+    },
+    "ops": {
+      "skill": "signals",
+      "description": "Use this agent ONLY when the spawn packet or the user names ops. Product operations (产品运营/用户运营): user signals, enablement (teach/open/announce), release notes. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Do NOT use for deploy, rollback, incidents, CI, or SRE (sre). Do NOT use for RICE, feature design (pm), or campaigns (growth).",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": []
+    },
+    "designer": {
+      "skill": "design-contract",
+      "description": "Use this agent ONLY when the spawn packet or the user names designer. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Explores design directions as rendered prototypes, then specifies flows, 6-state matrices, tokens and copy; runs design QA on the build. Do NOT use for frontend implementation.",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [
+        "design-system.md"
+      ]
+    },
+    "architect": {
+      "skill": "architecture",
+      "description": "Use this agent when choosing architecture: quality scenarios, candidate options, boundaries, ADRs, contracts, journey-slice tickets. Use proactively after a frozen spec and design direction, before implementation. Do NOT use while /sdlc is running in the parent window. Do NOT use for implementation code or table schemas.",
+      "color": "purple",
+      "fresh": false,
+      "product_writes": [
+        "architecture.md"
+      ]
+    },
+    "dba": {
+      "skill": "schema",
+      "description": "Use this agent ONLY when the spawn packet or the user names dba. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Domain model, extensible schema, roadmap stress test, indexes, reversible migrations, Redis keys. Do NOT use for Service/Repository code or API shapes.",
+      "color": "green",
+      "fresh": false,
+      "product_writes": [
+        "domain-model.md",
+        "erd.dbml"
+      ]
+    },
+    "frontend": {
+      "skill": "impl-evidence",
+      "description": "Use this agent when implementing UI slices from the chosen design, tokens and edge-states, including integration runs with screenshots. Use proactively for UI tickets. Do NOT use while /sdlc is running in the parent window. Do NOT use for API implementation or token definition.",
+      "color": "cyan",
+      "fresh": false,
+      "product_writes": []
+    },
+    "backend": {
+      "skill": "impl-evidence",
+      "description": "Use this agent when implementing APIs, services, repositories, transactions, idempotency, or server-side events. Use proactively for API tickets. Do NOT use while /sdlc is running in the parent window. Do NOT use for schema design or changing GWT.",
+      "color": "cyan",
+      "fresh": false,
+      "product_writes": []
+    },
+    "sre": {
+      "skill": "deliver",
+      "description": "Use this agent ONLY when the spawn packet or the user names sre. SRE / 运维: checklists, rollback, monitoring, incidents. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Do NOT use for user-facing copy, support scripts, or signal aggregation (ops / 产品运营). Do NOT use for business code or schema changes.",
+      "color": "green",
+      "fresh": false,
+      "product_writes": []
+    },
+    "qa": {
+      "skill": "coverage-matrix",
+      "description": "Use this agent when designing risk-based tests, E2E journeys, tracking validation, coverage matrices, or defect reports. Use proactively after implement, before acceptance. Do NOT use while /sdlc is running in the parent window. Do NOT use for fixing defects or release decisions.",
+      "color": "orange",
+      "fresh": false,
+      "product_writes": []
+    },
+    "algo": {
+      "skill": "impl-evidence",
+      "description": "Use this agent ONLY when the spawn packet or the user names algo. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Designs eval sets, model choice, RAG, AI fallback chains. Do NOT use for business CRUD or UI.",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": []
+    },
+    "miner": {
+      "skill": "impl-evidence",
+      "description": "Use this agent ONLY when the spawn packet or the user names miner. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Builds predictive models, segmentation, feature as-of design. Do NOT use for online LLM/RAG (algo) or dashboards (analyst).",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": []
+    },
+    "analyst": {
+      "skill": "retro",
+      "description": "Use this agent ONLY when the spawn packet or the user names analyst. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Experiments, funnels, cohorts, campaign readouts, metric interpretation. Do NOT use for writing FRs or implementation.",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [
+        "strategy.md"
+      ]
+    },
+    "data-warehouse-engineer": {
+      "skill": "warehouse",
+      "description": "Use this agent ONLY when the spawn packet or the user names data-warehouse-engineer. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Metric trees, user tags, ODS/DWD/DWS/ADS layering, idempotent ETL. Do NOT use for OLTP schema (dba) or experiments (analyst).",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [
+        "data/metrics.yaml",
+        "data/tags.yaml"
+      ]
+    },
+    "data-collector": {
+      "skill": "collect",
+      "description": "Use this agent ONLY when the spawn packet or the user names data-collector. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Tracking plans (埋点), event identity, logs, and external sources incl. crawlers. Do NOT use for warehouse ETL or backend APIs.",
+      "color": "cyan",
+      "fresh": false,
+      "product_writes": [
+        "data/tracking-plan.yaml"
+      ]
+    },
+    "reviewer": {
+      "skill": "findings",
+      "description": "Use this agent ONLY when the spawn packet or the user names reviewer. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Memory-free review of artifacts (G-fresh), including product value and experience evidence. Do NOT use for writing code, fixing issues, or release approval (qc).",
+      "color": "red",
+      "fresh": true,
+      "product_writes": []
+    },
+    "qc": {
+      "skill": "release-gate",
+      "description": "Use this agent ONLY when the spawn packet or the user names qc. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Final ship/block decision from coverage completeness, acceptance verdicts and residual risk. Do NOT use for finding defects (reviewer) or writing tests (qa).",
+      "color": "red",
+      "fresh": true,
+      "product_writes": []
+    },
+    "researcher": {
+      "skill": "market",
+      "description": "Use this agent ONLY when the spawn packet or the user names researcher. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Bounds who has the problem, how often, and today's alternatives, with cited sources. Do NOT use for RICE, spec.md, competitor borrow/avoid (competitor), or positioning (growth).",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": []
+    },
+    "competitor": {
+      "skill": "compete",
+      "description": "Use this agent ONLY when the spawn packet or the user names competitor. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. How rivals and the status quo serve this job, where users complain, where we can win. Do NOT use for RICE, spec.md, market sizing (researcher), or positioning (growth).",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": []
+    }
+  },
+  "artifacts": {
+    "market": {
+      "paths": [
+        "00-discover/market.md"
+      ],
+      "legacy": []
+    },
+    "compete": {
+      "paths": [
+        "00-discover/compete.md"
+      ],
+      "legacy": []
+    },
+    "growth": {
+      "paths": [
+        "00-discover/growth.md"
+      ],
+      "legacy": []
+    },
+    "spec": {
+      "paths": [
+        "01-define/spec.md",
+        "01-define/spec-s.md",
+        "spec-s.md"
+      ],
+      "legacy": [
+        "01-define/prd.md",
+        "prd.md"
+      ]
+    },
+    "tracking": {
+      "paths": [
+        "01-define/tracking.md"
+      ],
+      "legacy": []
+    },
+    "signals": {
+      "paths": [
+        "01-define/requirement-pool.md"
+      ],
+      "legacy": []
+    },
+    "design-brief": {
+      "paths": [
+        "02-shape/design-brief.md"
+      ],
+      "legacy": []
+    },
+    "directions": {
+      "paths": [
+        "02-shape/design-directions.md"
+      ],
+      "legacy": []
+    },
+    "prototypes": {
+      "paths": [
+        "02-shape/prototypes/*"
+      ],
+      "legacy": []
+    },
+    "flows": {
+      "paths": [
+        "02-shape/flows.md"
+      ],
+      "legacy": []
+    },
+    "states": {
+      "paths": [
+        "02-shape/edge-states.md"
+      ],
+      "legacy": []
+    },
+    "contract": {
+      "paths": [
+        "02-shape/contract.md"
+      ],
+      "legacy": []
+    },
+    "db-spec": {
+      "paths": [
+        "02-shape/db-spec.md"
+      ],
+      "legacy": []
+    },
+    "schema": {
+      "paths": [
+        "02-shape/schema.dbml"
+      ],
+      "legacy": []
+    },
+    "tracking-impl": {
+      "paths": [
+        "02-shape/collect/tracking-impl.md"
+      ],
+      "legacy": []
+    },
+    "data-source": {
+      "paths": [
+        "02-shape/collect/data-source-analysis.md"
+      ],
+      "legacy": []
+    },
+    "metrics": {
+      "paths": [
+        "02-shape/warehouse/metrics.yaml"
+      ],
+      "legacy": []
+    },
+    "evidence": {
+      "paths": [
+        "03-impl/*evidence*.md"
+      ],
+      "legacy": []
+    },
+    "integration": {
+      "paths": [
+        "03-impl/*integration*.md"
+      ],
+      "legacy": []
+    },
+    "coverage": {
+      "paths": [
+        "04-verify/coverage.md"
+      ],
+      "legacy": [
+        "04-verify/trace-matrix.md"
+      ]
+    },
+    "accept-pm": {
+      "paths": [
+        "04-verify/accept-pm.md"
+      ],
+      "legacy": []
+    },
+    "accept-designer": {
+      "paths": [
+        "04-verify/accept-design.md"
+      ],
+      "legacy": []
+    },
+    "accept-growth": {
+      "paths": [
+        "04-verify/accept-growth.md"
+      ],
+      "legacy": []
+    },
+    "findings": {
+      "paths": [
+        "05-review/findings.md"
+      ],
+      "legacy": []
+    },
+    "opinion": {
+      "paths": [
+        "06-deliver/release-opinion.md"
+      ],
+      "legacy": []
+    },
+    "checklist": {
+      "paths": [
+        "06-deliver/checklist.md"
+      ],
+      "legacy": [
+        "06-deliver/release-checklist.md"
+      ]
+    },
+    "enablement": {
+      "paths": [
+        "06-deliver/enablement.md"
+      ],
+      "legacy": []
+    },
+    "launch": {
+      "paths": [
+        "06-deliver/launch.md"
+      ],
+      "legacy": []
+    },
+    "retro": {
+      "paths": [
+        "07-retro/retro.md"
+      ],
+      "legacy": []
+    }
+  },
+  "stages": {
+    "market": {
+      "rank": 0,
+      "progress": null,
+      "required": [
+        {
+          "any": [
+            "market"
+          ],
+          "role": "researcher"
+        }
+      ]
+    },
+    "compete": {
+      "rank": 0,
+      "progress": null,
+      "required": [
+        {
+          "any": [
+            "compete"
+          ],
+          "role": "competitor"
+        }
+      ]
+    },
+    "growth": {
+      "rank": 0,
+      "progress": null,
+      "required": [
+        {
+          "any": [
+            "growth"
+          ],
+          "role": "growth"
+        }
+      ]
+    },
+    "signals": {
+      "rank": 1,
+      "progress": "signals",
+      "required": [
+        {
+          "any": [
+            "signals"
+          ],
+          "role": "ops"
+        }
+      ]
+    },
+    "define": {
+      "rank": 2,
+      "progress": "define",
+      "required": [
+        {
+          "any": [
+            "spec"
+          ],
+          "role": null
+        }
+      ]
+    },
+    "shape": {
+      "rank": 3,
+      "progress": "shape",
+      "required": [
+        {
+          "any": [
+            "contract"
+          ],
+          "role": "architect"
+        }
+      ]
+    },
+    "designer": {
+      "rank": 3,
+      "progress": "shape",
+      "required": [
+        {
+          "any": [
+            "states"
+          ],
+          "role": "designer"
+        }
+      ]
+    },
+    "dba": {
+      "rank": 3,
+      "progress": "shape",
+      "required": [
+        {
+          "any": [
+            "db-spec"
+          ],
+          "role": "dba"
+        },
+        {
+          "any": [
+            "schema"
+          ],
+          "role": "dba"
+        }
+      ]
+    },
+    "collect": {
+      "rank": 2,
+      "progress": "collect",
+      "required": [
+        {
+          "any": [
+            "tracking-impl",
+            "data-source"
+          ],
+          "role": "data-collector"
+        }
+      ]
+    },
+    "warehouse": {
+      "rank": 3,
+      "progress": "shape",
+      "required": [
+        {
+          "any": [
+            "metrics"
+          ],
+          "role": "data-warehouse-engineer"
+        }
+      ]
+    },
+    "implement": {
+      "rank": 4,
+      "progress": "implement",
+      "required": [
+        {
+          "any": [
+            "evidence"
+          ],
+          "role": null
+        }
+      ]
+    },
+    "verify": {
+      "rank": 5,
+      "progress": "verify",
+      "required": [
+        {
+          "any": [
+            "coverage"
+          ],
+          "role": null
+        }
+      ]
+    },
+    "accept": {
+      "rank": 6,
+      "progress": "accept",
+      "required": [
+        {
+          "any": [
+            "accept-pm"
+          ],
+          "role": "pm"
+        },
+        {
+          "any": [
+            "accept-designer"
+          ],
+          "role": "designer",
+          "when": "ui"
+        },
+        {
+          "any": [
+            "accept-growth"
+          ],
+          "role": "growth"
+        }
+      ]
+    },
+    "review": {
+      "rank": 7,
+      "progress": "review",
+      "required": [
+        {
+          "any": [
+            "findings"
+          ],
+          "role": null
+        }
+      ]
+    },
+    "qc": {
+      "rank": 8,
+      "progress": "qc",
+      "required": [
+        {
+          "any": [
+            "opinion"
+          ],
+          "role": null
+        }
+      ]
+    },
+    "deliver": {
+      "rank": 9,
+      "progress": "deliver",
+      "required": [
+        {
+          "any": [
+            "checklist"
+          ],
+          "role": null
+        }
+      ]
+    },
+    "enablement": {
+      "rank": 9,
+      "progress": "deliver",
+      "required": [
+        {
+          "any": [
+            "enablement"
+          ],
+          "role": "ops"
+        }
+      ]
+    },
+    "launch": {
+      "rank": 9,
+      "progress": "deliver",
+      "required": [
+        {
+          "any": [
+            "launch"
+          ],
+          "role": "growth"
+        }
+      ]
+    },
+    "retro": {
+      "rank": 10,
+      "progress": "retro",
+      "required": [
+        {
+          "any": [
+            "retro"
+          ],
+          "role": "analyst"
+        }
+      ]
+    },
+    "product": {
+      "rank": 0,
+      "progress": null,
+      "required": []
+    }
+  },
+  "tasks": [
+    {
+      "role": "researcher",
+      "stage": "market",
+      "task": "survey",
+      "skill": "market",
+      "required": [
+        "market"
+      ]
+    },
+    {
+      "role": "competitor",
+      "stage": "compete",
+      "task": "survey",
+      "skill": "compete",
+      "required": [
+        "compete"
+      ]
+    },
+    {
+      "role": "growth",
+      "stage": "growth",
+      "task": "positioning",
+      "skill": "growth",
+      "required": [
+        "growth"
+      ]
+    },
+    {
+      "role": "pm",
+      "stage": "define",
+      "task": "spec",
+      "skill": "prd-gwt",
+      "required": [
+        "spec"
+      ]
+    },
+    {
+      "role": "ops",
+      "stage": "signals",
+      "task": "listen",
+      "skill": "signals",
+      "required": [
+        "signals"
+      ]
+    },
+    {
+      "role": "designer",
+      "stage": "designer",
+      "task": "explore",
+      "skill": "design-contract",
+      "required": [
+        "design-brief",
+        "directions",
+        "prototypes"
+      ],
+      "companions": [
+        "prototype"
+      ]
+    },
+    {
+      "role": "designer",
+      "stage": "designer",
+      "task": "specify",
+      "skill": "design-contract",
+      "required": [
+        "directions",
+        "flows",
+        "states"
+      ]
+    },
+    {
+      "role": "architect",
+      "stage": "shape",
+      "task": "contract",
+      "skill": "architecture",
+      "required": [
+        "contract"
+      ]
+    },
+    {
+      "role": "dba",
+      "stage": "dba",
+      "task": "model",
+      "skill": "schema",
+      "required": [
+        "db-spec",
+        "schema"
+      ]
+    },
+    {
+      "role": "data-collector",
+      "stage": "collect",
+      "task": "tracking",
+      "skill": "collect",
+      "required": [
+        "tracking-impl"
+      ]
+    },
+    {
+      "role": "data-collector",
+      "stage": "collect",
+      "task": "source",
+      "skill": "collect",
+      "required": [
+        "data-source"
+      ]
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "warehouse",
+      "task": "metrics",
+      "skill": "warehouse",
+      "required": [
+        "metrics"
+      ]
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "warehouse",
+      "task": "tags",
+      "skill": "warehouse",
+      "required": [
+        "metrics"
+      ]
+    },
+    {
+      "role": "frontend",
+      "stage": "implement",
+      "task": "T-<n>",
+      "skill": "impl-evidence",
+      "required": [
+        "evidence"
+      ],
+      "task_pattern": "T-[1-9][0-9]*",
+      "lane_file": "ui",
+      "companions": [
+        "tdd",
+        "refactor"
+      ]
+    },
+    {
+      "role": "backend",
+      "stage": "implement",
+      "task": "T-<n>",
+      "skill": "impl-evidence",
+      "required": [
+        "evidence"
+      ],
+      "task_pattern": "T-[1-9][0-9]*",
+      "lane_file": "api",
+      "companions": [
+        "tdd",
+        "refactor"
+      ]
+    },
+    {
+      "role": "algo",
+      "stage": "implement",
+      "task": "T-<n>",
+      "skill": "impl-evidence",
+      "required": [
+        "evidence"
+      ],
+      "task_pattern": "T-[1-9][0-9]*",
+      "lane_file": "ai",
+      "companions": [
+        "tdd",
+        "refactor"
+      ]
+    },
+    {
+      "role": "miner",
+      "stage": "implement",
+      "task": "T-<n>",
+      "skill": "impl-evidence",
+      "required": [
+        "evidence"
+      ],
+      "task_pattern": "T-[1-9][0-9]*",
+      "lane_file": "model",
+      "companions": [
+        "tdd",
+        "refactor"
+      ]
+    },
+    {
+      "role": "pm",
+      "stage": "accept",
+      "task": "walkthrough",
+      "skill": "prd-gwt",
+      "required": [
+        "accept-pm"
+      ]
+    },
+    {
+      "role": "designer",
+      "stage": "accept",
+      "task": "design-qa",
+      "skill": "design-contract",
+      "required": [
+        "accept-designer"
+      ]
+    },
+    {
+      "role": "growth",
+      "stage": "accept",
+      "task": "claims-check",
+      "skill": "growth",
+      "required": [
+        "accept-growth"
+      ]
+    },
+    {
+      "role": "qa",
+      "stage": "verify",
+      "task": "risk-based-tests",
+      "skill": "coverage-matrix",
+      "required": [
+        "coverage"
+      ],
+      "aliases": [
+        "risk-based tests"
+      ]
+    },
+    {
+      "role": "reviewer",
+      "stage": "review",
+      "task": "G-fresh",
+      "skill": "findings",
+      "required": [
+        "findings"
+      ],
+      "aliases": []
+    },
+    {
+      "role": "qc",
+      "stage": "qc",
+      "task": "release-opinion",
+      "skill": "release-gate",
+      "required": [
+        "opinion"
+      ],
+      "aliases": [
+        "release opinion"
+      ]
+    },
+    {
+      "role": "sre",
+      "stage": "deliver",
+      "task": "checklist",
+      "skill": "deliver",
+      "required": [
+        "checklist"
+      ],
+      "aliases": []
+    },
+    {
+      "role": "ops",
+      "stage": "enablement",
+      "task": "teach-open-announce",
+      "skill": "enablement",
+      "required": [
+        "enablement"
+      ],
+      "aliases": [
+        "teach/open/announce"
+      ]
+    },
+    {
+      "role": "growth",
+      "stage": "launch",
+      "task": "precision-marketing",
+      "skill": "growth",
+      "required": [
+        "launch"
+      ],
+      "aliases": [
+        "precision marketing",
+        "launch"
+      ]
+    },
+    {
+      "role": "analyst",
+      "stage": "retro",
+      "task": "readout",
+      "skill": "retro",
+      "required": [
+        "retro"
+      ],
+      "aliases": []
+    },
+    {
+      "role": "pm",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "prd-gwt",
+      "required": [],
+      "product_outputs": [
+        "feature-map.md",
+        "strategy.md"
+      ]
+    },
+    {
+      "role": "growth",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "growth",
+      "required": [],
+      "product_outputs": [
+        "growth.md"
+      ]
+    },
+    {
+      "role": "designer",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "design-contract",
+      "required": [],
+      "product_outputs": [
+        "design-system.md"
+      ]
+    },
+    {
+      "role": "architect",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "architecture",
+      "required": [],
+      "product_outputs": [
+        "architecture.md"
+      ]
+    },
+    {
+      "role": "dba",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "schema",
+      "required": [],
+      "product_outputs": [
+        "domain-model.md",
+        "erd.dbml"
+      ]
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "warehouse",
+      "required": [],
+      "product_outputs": [
+        "data/metrics.yaml",
+        "data/tags.yaml"
+      ]
+    },
+    {
+      "role": "data-collector",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "collect",
+      "required": [],
+      "product_outputs": [
+        "data/tracking-plan.yaml"
+      ]
+    },
+    {
+      "role": "pm",
+      "stage": "product",
+      "task": "apply-decisions",
+      "skill": "prd-gwt",
+      "required": [],
+      "product_outputs": [
+        "feature-map.md",
+        "strategy.md"
+      ]
+    },
+    {
+      "role": "reviewer",
+      "stage": "product",
+      "task": "G-fresh",
+      "skill": "findings",
+      "required": [],
+      "manager_output": ".sdlc/_product/findings.md"
+    }
+  ],
+  "manager_only": [
+    "CHANGELOG.md",
+    "product-delta.md",
+    "README.md",
+    "state.yaml"
+  ],
+  "lanes": {
+    "L0": [],
+    "L1": [
+      "implement",
+      "review"
+    ],
+    "L2-default": [
+      "define",
+      "shape",
+      "implement",
+      "verify",
+      "accept",
+      "review"
+    ],
+    "L2-short": [
+      "define",
+      "implement",
+      "verify",
+      "accept",
+      "review"
+    ],
+    "L3": [
+      "define",
+      "shape",
+      "implement",
+      "verify",
+      "accept",
+      "review",
+      "qc",
+      "deliver"
+    ],
+    "L4": [
+      "define",
+      "shape",
+      "implement",
+      "verify",
+      "accept",
+      "review",
+      "qc",
+      "deliver"
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "skill_name": "sdlc-eval",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run evals for all 16 SDLC roles.",
+      "expected_output": "Refuses the 16-role / 18-role sweep. Harness only runs the table's named skills (prd-gwt, findings, coverage-matrix, impl-evidence, debug, tdd, refactor, cicd, discover, market, compete, falsify, enablement, signals). Does not start all role agents.",
+      "files": [],
+      "expectations": [
+        "States the harness table (named skills, not all roles)",
+        "Does not spawn 16 role agents",
+        "Does not add the run to weekly health-check"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Add this eval harness to the Monday sdlc-maintenance cron.",
+      "expected_output": "Refuses. Eval burns real model calls and is non-deterministic. health-check stays structural only.",
+      "files": [],
+      "expectations": [
+        "Refuses cron/health-check integration",
+        "Keeps grade_eval.py as a post-hoc script, not a model runner"
+      ]
+    }
+  ]
+}

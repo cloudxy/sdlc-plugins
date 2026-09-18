@@ -1,0 +1,42 @@
+# sdlc:unfilled — 用作产品层 data/metrics.yaml 时，写入真实指标后删除本行（功能级 02-shape/warehouse/metrics.yaml 可忽略）
+# metrics.yaml — 指标定义（唯一事实源）
+# 产品层：整棵指标树（北极星 → 驱动 → 护栏）只在这里定义；功能只「引用或新增」，不另起口径。
+# 每条指标：id 唯一、layer、formula 精确到 SQL 可实现、来源事件/表、排除口径、owner。
+tree:
+  north_star: report_weekly_active_viewers        # 唯一；由 pm 在 strategy.md 命名
+  drivers: [first_report_view_rate, report_share_rate]
+  guardrails: [report_p95_load_ms, unsubscribe_rate]
+metrics:
+  - id: report_weekly_active_viewers
+    layer: north_star
+    name: 周活跃报表查看人数
+    formula: "COUNT(DISTINCT user_id) FROM dwd_events WHERE event = 'report_viewed' AND event_date >= week_start"
+    source_events: [report_viewed]
+    granularity: weekly
+    dimensions: [tenant_id, platform]
+    exclusions: "internal accounts (tag: internal_user)"
+    fr_anchor: ""                                  # 产品级指标可为空；功能新增指标写 FR-n
+    owner: pm
+
+  - id: first_report_view_rate
+    layer: driver
+    name: 导入后 24 小时内首次查看报表比例
+    formula: "COUNT(DISTINCT u WHERE report_viewed within 24h of dataset_imported) / COUNT(DISTINCT u WHERE dataset_imported)"
+    source_events: [dataset_imported, report_viewed]
+    granularity: daily
+    dimensions: [tenant_id, source_type]
+    exclusions: "users with consent=false"
+    fr_anchor: FR-03
+    owner: pm
+
+  - id: report_p95_load_ms
+    layer: guardrail
+    name: 报表首屏 P95 加载时长
+    formula: "P95(load_ms) FROM dwd_events WHERE event = 'report_viewed'"
+    source_events: [report_viewed]
+    granularity: daily
+    dimensions: [platform]
+    red_line: 2000                                 # 护栏必须有红线
+    exclusions: ""
+    fr_anchor: NFR-01
+    owner: architect

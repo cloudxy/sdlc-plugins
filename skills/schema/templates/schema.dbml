@@ -1,0 +1,78 @@
+// schema.dbml · <feature 名>
+// 上游：db-spec.md ｜ 下游：迁移文件 → /backend ORM 模型
+// 规范：每个索引后必须用注释标注它服务的访问模式 ID（无模式 ID 的索引不许进本文件）
+// 语法参考：https://dbml.dbdiagram.io/docs
+
+Project <project_name> {
+  database_type: 'MySQL'
+  note: '<一句话说明这组表的业务范围>'
+}
+
+// ─────────────────────────────────────────────
+// 枚举：用 VARCHAR + 应用层校验时，在此登记合法值供下游对齐
+// （不用 MySQL ENUM：改值需要 DDL）
+// ─────────────────────────────────────────────
+
+enum order_status {
+  pending  [note: '待支付']
+  paid     [note: '已支付']
+  shipped  [note: '已发货']
+  canceled [note: '已取消']
+}
+
+// ─────────────────────────────────────────────
+// 表
+// ─────────────────────────────────────────────
+
+Table orders {
+  id           bigint       [pk, increment, note: '代理主键']
+  tenant_id    bigint       [not null, note: '租户隔离，所有查询必带']
+  user_id      bigint       [not null, ref: > users.id]
+  order_no     varchar(32)  [not null, note: '业务单号，租户内唯一']
+  status       varchar(20)  [not null, default: 'pending', note: '见 enum order_status']
+  amount       decimal(12,2)[not null, note: '金额用 DECIMAL 不用 FLOAT']
+  channel      varchar(20)  [null, note: 'NULL = 历史数据来源未知']
+  created_at   datetime(3)  [not null, default: `CURRENT_TIMESTAMP(3)`]
+  updated_at   datetime(3)  [not null, default: `CURRENT_TIMESTAMP(3)`, note: 'ON UPDATE 在迁移里补']
+
+  indexes {
+    (tenant_id, order_no) [unique, name: 'uk_orders_tenant_no']
+    // 业务唯一：单号租户内唯一。兼作 P-02（按单号精确查）的索引
+
+    (tenant_id, status, created_at) [name: 'idx_orders_tenant_status_created']
+    // 服务 P-01：租户内按状态筛 + 创建时间倒序翻页
+    // ESR：等值(tenant_id, status) → 排序(created_at)，排序列在索引内免 filesort
+
+    (user_id, created_at) [name: 'idx_orders_user_created']
+    // 服务 P-03：用户订单列表，时间倒序
+
+    // 已评估不建：
+    //   (status) —— 基数 4，选择性差；已作为 idx_orders_tenant_status_created 的非最左列
+    //   (created_at) —— 无单独按时间查的模式；已在复合索引尾部
+    //   (channel) —— 仅离线报表使用，频次低于 Top-N 阈值
+  }
+
+  note: '订单主表。一行 = 一笔订单。'
+}
+
+Table users {
+  id         bigint      [pk, increment]
+  tenant_id  bigint      [not null]
+  email      varchar(255)[not null]
+  username   varchar(64) [not null]
+  created_at datetime(3) [not null, default: `CURRENT_TIMESTAMP(3)`]
+
+  indexes {
+    (tenant_id, email) [unique, name: 'uk_users_tenant_email']
+    // 业务唯一：邮箱租户内唯一（不是全局唯一——多租户下同一人可属多租户）
+  }
+
+  note: '用户表。一行 = 一个租户内的一个用户。'
+}
+
+// ─────────────────────────────────────────────
+// 关系（级联行为默认 RESTRICT，删除逻辑放应用层显式处理）
+// ─────────────────────────────────────────────
+
+Ref: orders.user_id > users.id [delete: restrict, update: cascade]
+// N:1。RESTRICT：有订单的用户不允许直接删（业务上应软删或先归档订单）

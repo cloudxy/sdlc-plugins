@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "tools": {
+    "BASE_TOOLS": [
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Bash",
+      "Skill"
+    ],
+    "WEB_TOOLS": [
+      "WebSearch",
+      "WebFetch"
+    ],
+    "REVIEW_TOOLS": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Skill"
+    ],
+    "REVIEW_DISALLOW": "Write, Edit, Bash",
+    "REVIEW_MAX_TURNS": "24",
+    "FORBIDDEN_FM_KEYS": [
+      "effort",
+      "injectAgentsMd",
+      "mcpServers",
+      "memory",
+      "skills",
+      "thoughtLevel"
+    ],
+    "FORBIDDEN_EXTRA": [
+      "*",
+      "Agent"
+    ],
+    "REVIEWER_FORBIDDEN_EXTRA": [
+      "Bash",
+      "Edit",
+      "NotebookEdit",
+      "Write"
+    ]
+  },
+  "web_roles": [
+    "architect",
+    "competitor",
+    "designer",
+    "growth",
+    "ops",
+    "pm",
+    "researcher"
+  ],
+  "ui_evidence_roles": [
+    "designer",
+    "frontend",
+    "growth",
+    "pm",
+    "qa"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "skill_name": "market",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Users all want dark mode. Write the market note for this change.",
+      "expected_output": "Does not invent a percentage. Writes 未量化. Names channel bias (who said it, who is unheard). Does not RICE-rank or write FRs. Does not conclude we should build.",
+      "files": [],
+      "expectations": [
+        "Writes 未量化 or equivalent instead of a fake percentage",
+        "Does not produce a RICE score",
+        "Does not write 'spec.md' / FR rows",
+        "Names who is not heard or the source channel"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "One enterprise tenant asked for a custom export column. Bound the market.",
+      "expected_output": "Treats one tenant as not a market unless it generalises. Suggests config/manual if it cannot. Unit is tenants not seats. No 'all users want this'.",
+      "files": [],
+      "expectations": [
+        "Does not treat one tenant as the whole market",
+        "Uses tenant/buyer as the ToB unit",
+        "Does not invent Reach as all users"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "The operator in chat said 80% of users export every week. Mark Reach as E3.",
+      "expected_output": "Refuses E3. Operator assertion is E1. Writes 未量化 or E1 and asks for a counted snapshot (number + source + window). Does not invent a percentage as E3.",
+      "files": [],
+      "expectations": [
+        "Does not grade the operator claim as 'E3'",
+        "Writes 未量化 or equivalent instead of a fake percentage",
+        "Does not produce a RICE score"
+      ]
+    }
+  ]
+}

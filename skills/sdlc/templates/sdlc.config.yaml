@@ -1,0 +1,35 @@
+# sdlc.config.yaml 模板——落项目根；换项目只填这个文件（适配层，不进插件）
+gates:
+  test:      "<测试命令>"        # 如 uv run pytest -q backend/tests
+  lint:      "<静态/架构检查>"    # 如 bash scripts/check-arch.sh
+  build:     "<构建命令>"        # 如 npm run build -w admin
+  migration: "<迁移校验>"        # 如 bash scripts/check-db-migrations.sh；无则 null
+  e2e:       "<E2E 命令>"        # 如 npx playwright test e2e/；有 UI 的项目必须配置（v4：ui: yes 的功能 e2e 不得为 null）
+  e2e_reason: ""                 # 仅当项目完全没有用户界面时填写 e2e: null 的理由；scripts/check_config.py 发现 UI 目录会判定矛盾
+app:                             # 联调、截图、验收走查用（scripts/ui-evidence.sh 读 base_url）
+  start: "<启动命令>"             # 如 docker compose up -d && npm run dev -w web
+  base_url: "http://localhost:5173"   # 主界面
+  urls:                          # 可选：产品有多个界面，或要探测 API 健康时逐个列出；check_config.py --probe 逐个探测，帽子截图 / 走查 / E2E 按名字取
+    # admin: "http://localhost:9112"
+    # api: "http://127.0.0.1:9111/api/v1/health"
+  widths: [375, 768, 1440]       # 截图断点，与 design-system.md 一致
+product_root: docs/product       # 产品层目录（策略/功能地图/增长/设计系统/架构/领域模型/数据）；v4 每个功能都读它并回写
+research:
+  offline: false                 # 只有用户能改成 true（内网 / 断网环境）：调研类产物不再要求网络来源；帽子与经理不得自行设置
+constitution: "<项目红线宪法路径>"   # 每帽产出前自检对象
+artifact_root: .                   # state.yaml 与 .sdlc/ 的根
+mcp_adapters: []                   # 经理警告清单 ONLY——不改任何帽子 YAML 的 tools。
+  # 要给帽子真正加 MCP 工具：编辑插件 adapters/extra-tools.json（编译期白名单）后重渲染 agents。
+  # schema = name + hats + skill，例如：
+  # - name: playwright        # 与已连接 MCP server 名精确匹配
+  #   hats: [designer, frontend, qa]
+  #   skill: design-contract
+lane_rules:
+  file_count_threshold: 20
+  subproject_dirs: []
+  schema_paths: []                 # 命中触发 Q1
+  auth_paths: []                   # 命中触发 Q2
+  ui_paths: []                     # 命中触发 Q-ui（如 frontend/, web/, app/）；check_config.py 会列出检测到的 UI 目录
+  tracking_paths: []               # 命中触发 Q-tracking（如 src/analytics/）
+# extra_gates: []                  # 可选 layering / explain。默认不跑（无后端票会假红）
+# layering_root: backend           # 相对本文件所在项目根；仅当 extra_gates 含 layering

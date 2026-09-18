@@ -1,0 +1,71 @@
+{
+  "skill_name": "warehouse",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We need to track spider task completion rates. Build the data pipeline from our spider_tasks table to a dashboard that shows daily completion rates by tenant.",
+      "expected_output": "Designs a pipeline: ODS (mirror spider_tasks) → DWD (dedup, timezone, filter out test data) → DWS (daily aggregation by tenant, completion rate calculation) → ADS (dashboard-ready). Defines metric in metrics.yaml with FR anchor. Uses partition overwrite for idempotency. Registers lineage.",
+      "files": [],
+      "expectations": [
+        "Follows 4-layer architecture (ODS→DWD→DWS→ADS)",
+        "Defines metric in metrics.yaml with unique ID and FR anchor",
+        "Uses partition overwrite for idempotent re-runs",
+        "Includes quality assertions (PK uniqueness, non-null, value range, row count delta)",
+        "Does NOT write back to the online spider_tasks table"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "The /analyst says the retention rate from the warehouse doesn't match what they calculate directly from the production database. The numbers are different. What's going on?",
+      "expected_output": "Investigates the gap systematically: 1) check if metrics.yaml formula matches the analyst's SQL (metric drift), 2) check if DWD dedup removed rows the analyst includes, 3) check timezone handling (DWD may have normalized to UTC), 4) check exclusion criteria (status filter). The root cause is likely metric drift — two SQL definitions of 'retention rate'. Resolution: align on metrics.yaml as the single source.",
+      "files": [],
+      "expectations": [
+        "Systematically investigates the gap (metric drift vs dedup vs timezone vs exclusions)",
+        "Identifies metric drift (two SQL definitions of the same metric) as the most likely cause",
+        "Recommends aligning on metrics.yaml as the single source of truth",
+        "Does NOT just say 'recalculate' without identifying the root cause"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Can I run my ETL queries directly on the production MySQL database that serves the web application?",
+      "expected_output": "Advises against it: heavy analytical queries compete with live traffic. If no separate warehouse instance exists, use: 1) read-only account with resource limits, 2) schedule during off-peak hours (e.g., 2 AM), 3) table-prefix layering (ods_) to isolate analytical tables from OLTP tables. When data volume or query latency crosses threshold, propose OLAP ADR (ClickHouse/Doris).",
+      "files": [],
+      "expectations": [
+        "Advises against running heavy ETL on production OLTP database",
+        "Recommends read-only account and off-peak scheduling as interim measures",
+        "Mentions table-prefix layering to isolate analytical from OLTP",
+        "Suggests OLAP evaluation when threshold is crossed"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Growth wants to send a reminder to 'users who imported data in the last 7 days but never viewed a report', and a win-back campaign to 'high-value users who went quiet'. Events exist: user_signed_up, dataset_imported, report_viewed, order_paid. There is no tag system; analysts write ad-hoc SQL for each request. Design the tags and segments.",
+      "expected_output": "Defines lifecycle_stage (rule tag referencing the Aha event report_viewed), RFM value tag from order_paid, event-window fact tags (e.g. imported_7d, viewed_7d), exclusions (internal users, opted out, recently contacted), refresh cadence, owner, privacy class and consumers in tags.yaml; expresses both campaigns as segment definitions using tag ids; lays out DWD events → DWS user-day → ADS tag table with daily snapshots.",
+      "files": [],
+      "expectations": [
+        "Defines a lifecycle stage tag",
+        "Defines an RFM or value tag",
+        "Expresses the campaigns as segments with exclusions",
+        "States refresh cadence and privacy class"
+      ],
+      "rubric": [
+        {
+          "id": "tags",
+          "criterion": "Tags are computable from the named events, versioned logic, owner, refresh, privacy",
+          "weight": 3
+        },
+        {
+          "id": "segments",
+          "criterion": "Both campaigns expressed as reusable segment definitions with exclusions",
+          "weight": 2
+        },
+        {
+          "id": "pipeline",
+          "criterion": "Sensible layering and snapshots for campaign readouts",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

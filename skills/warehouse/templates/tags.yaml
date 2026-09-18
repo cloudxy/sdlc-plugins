@@ -1,0 +1,55 @@
+# sdlc:unfilled — data-warehouse-engineer 写入本产品真实标签体系后删除本行
+# tags.yaml — 用户标签体系（产品层 data/tags.yaml；负责人 data-warehouse-engineer；主要消费者 growth / miner / analyst）
+# 规则：每个标签都能由 tracking-plan 事件或业务表计算；写清逻辑、刷新频率、owner、隐私级别、消费者。
+# 类型：fact（事实，直接统计）· rule（规则组合）· model（模型预测，需 model card）
+version: 1
+entity: user                     # 标签挂在谁身上：user / tenant / device
+privacy_classes:
+  public: 可用于任何触达
+  internal: 仅内部分析，不用于触达
+  sensitive: 需单独授权，不用于营销
+tags:
+  - id: lifecycle_stage
+    type: rule
+    values: [new_unactivated, activated, active, dormant_14d, churned_60d, reactivated]
+    logic: |
+      new_unactivated: signed_up 且未发生 report_viewed
+      activated: 首次 report_viewed 发生在注册后 7 天内
+      active: 近 7 天有 report_viewed
+      dormant_14d: 已激活且 14 天无任何事件
+      churned_60d: 60 天无任何事件
+      reactivated: churned_60d 之后再次出现 report_viewed
+    source_events: [user_signed_up, report_viewed]
+    refresh: daily
+    owner: data-warehouse-engineer
+    privacy: public
+    consumers: [growth, analyst]
+
+  - id: rfm_value_segment
+    type: rule
+    values: [high, mid, low]
+    logic: 最近一次付费（R）× 近 90 天付费次数（F）× 近 90 天金额（M）分位组合
+    source_tables: [orders]
+    refresh: daily
+    owner: data-warehouse-engineer
+    privacy: internal
+    consumers: [growth]
+
+  - id: churn_risk_30d
+    type: model
+    values: "0.0-1.0"
+    logic: 见 03-impl/mining/model-card.md（miner）；阈值 0.7 以上为高风险
+    refresh: weekly
+    owner: miner
+    privacy: internal
+    consumers: [growth]
+
+  - id: internal_user
+    type: fact
+    values: [true, false]
+    logic: 邮箱域名属于公司域或在内部账号表中
+    source_tables: [users]
+    refresh: hourly
+    owner: data-warehouse-engineer
+    privacy: internal
+    consumers: [analyst, growth]   # 用于排除

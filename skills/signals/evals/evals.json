@@ -1,0 +1,64 @@
+{
+  "skill_name": "signals",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Users are asking for a dark mode. 3 tickets, 2 comments, 1 survey mention. Is this a real requirement?",
+      "expected_output": "Counts total signals (6), identifies affected user segment, checks if these are power users or casual users, formats as a signal with evidence chain, passes to /pm for RICE scoring. Does NOT decide priority.",
+      "files": [],
+      "expectations": [
+        "Counts specific evidence (3 tickets + 2 comments + 1 survey = 6 signals)",
+        "Identifies affected user segment",
+        "Formats as signal with source + frequency + recommendation",
+        "Does NOT decide priority (that's /pm's RICE call)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Competitor X just launched an AI-powered data insights feature. Our product doesn't have this. Should we build it?",
+      "expected_output": "Does NOT say 'yes we should match them'. Uses three-layer identification: is X a direct/indirect/benchmark competitor? Is the feature core to their value prop or a checkbox? Gives a borrow/avoid/differentiate conclusion with reasoning. Passes the signal to /pm with evidence, not with a recommendation to build.",
+      "files": [],
+      "expectations": [
+        "Uses three-layer competitor identification (direct/indirect/benchmark)",
+        "Gives borrow/avoid/differentiate conclusion, NOT just 'they have it'",
+        "Does NOT decide whether to build (that's /pm's call)",
+        "Includes evidence about the competitor feature (user adoption, reviews)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We launched the export feature 3 months ago. Initial adoption was high (200 exports in week 1) but it's dropped to 20 per week. The PM predicted sustained usage. Write the P9 review.",
+      "expected_output": "Compares predicted vs actual (PM predicted sustained usage, actual is declining). Investigates possible causes: was the initial usage just novelty? Did users find the export format inadequate? Is there a seasonal factor? Formats as a signal with evidence, feeds back to /pm as a P0 input for the next iteration.",
+      "files": [],
+      "expectations": [
+        "Compares predicted vs actual (not just reports current numbers)",
+        "Investigates decline causes (novelty effect, format issues, seasonal)",
+        "Does NOT only report good data — the decline IS the signal",
+        "Formats as feedback-digest for P0 re-entry"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "The CEO says dark mode ships this Friday and must sit at the top of the backlog. We have 2 tickets. Rank it P0.",
+      "expected_output": "Records CEO urgency as a calendar constraint, not as a RICE score. 2 tickets is a weak signal (call it weak, do not inflate). Does NOT reorder the backlog or assign P0. Passes a sourced signal + the constraint to pm.",
+      "files": [],
+      "expectations": [
+        "Treats CEO Friday as a constraint for pm, not a RICE/P0 ranking by ops",
+        "Labels the signal weak (2 tickets) instead of inflating it",
+        "Does NOT assign P0 or reorder the backlog",
+        "Does NOT commit to shipping Friday"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Production is down. API 502. Last deploy 2 hours ago. You are ops. Restart it and write the rollback.",
+      "expected_output": "Refuses. Deploy/rollback/incidents are sre / 运维. Does not write kubectl or a release checklist. Points to sdlc-workflow:sre.",
+      "files": [],
+      "expectations": [
+        "Refuses deploy/rollback/incident work",
+        "Names 'sre' as the correct hat",
+        "Does not write a 'rollback' plan"
+      ]
+    }
+  ]
+}

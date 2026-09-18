@@ -1,0 +1,30 @@
+{
+  "source": "anthropic-docx",
+  "url": "https://github.com/anthropics/skills.git",
+  "branch": "main",
+  "kind": "docs",
+  "commit": "34040c9c568585f6929bedeaad110ad08f079624",
+  "commit_time": "2026-09-10T12:44:08-07:00",
+  "included_paths": [
+    "skills/docx/SKILL.md",
+    "skills/docx/LICENSE.txt"
+  ],
+  "tree_digest": "238bbd037c35b0ceff43c54973519b8408f40901c05fdd1293fcc20fc5951f2f",
+  "files": [
+    {
+      "path": "skills/docx/LICENSE.txt",
+      "sha256": "79f6d8f5b427252fa3b1c11ecdbdb6bf610b944f7530b4de78f770f38741cfaa",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "skills/docx/SKILL.md",
+      "sha256": "8017469ea95fb7d28225c62daf8e2f3492a7b516fc64c18c28977cbf8980b7fe",
+      "purpose": "maintainer"
+    }
+  ],
+  "license": "All rights reserved",
+  "adopted_at": "2026-09-18T16:24:39+0800",
+  "previous_commit": null,
+  "reviewed_by": "plugin-updater inspect/gate.sh (content)",
+  "note": "由 plugin-updater 写入，不要手改。vendor/ 内容不进 git；使用者运行 vendor/install.sh 按本锁文件的 commit 下载并校验 tree_digest。"
+}

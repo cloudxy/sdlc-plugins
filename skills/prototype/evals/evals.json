@@ -1,0 +1,27 @@
+{
+  "skill_name": "prototype",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We are unsure if a ticket can be both cancelled and paid. Prototype the state model.",
+      "expected_output": "Picks LOGIC. Builds a throwaway HTML (or describes that artifact) with explicit illegal transitions visible. Does not write production services or tests. Does not treat the HTML as implement evidence.",
+      "files": [],
+      "expectations": [
+        "Chooses 'LOGIC' not UI",
+        "Throwaway path under '00-discover/prototypes'",
+        "Does not present the prototype as '03-impl' evidence"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Will people pay for seat management? Build it.",
+      "expected_output": "Picks FAKE (waitlist or pricing door), not a real billing integration. No charges. Verdict goes to falsify, not to spec as a decided FR.",
+      "files": [],
+      "expectations": [
+        "Chooses 'FAKE' not production billing",
+        "Does not take 'payment'",
+        "Does not write 'spec.md' FRs as if the demand were proven"
+      ]
+    }
+  ]
+}

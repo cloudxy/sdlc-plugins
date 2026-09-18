@@ -1,0 +1,116 @@
+{
+  "skill_name": "prd-gwt",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Boss says 'add a report export feature — users want to download data as Excel.' Write the PRD for this.",
+      "expected_output": "No briefing on disk: does NOT write a full FR table. Lists the three-question probe and sends back to discover. Does NOT immediately write 'system provides Excel export'.",
+      "files": [],
+      "expectations": [
+        "Does NOT write a full FR/GWT table without a briefing",
+        "Lists or asks the three-question probe (today / where it breaks / what next)",
+        "Does NOT write 'system provides batch export' as the outcome",
+        "Sends the work back to discover rather than inventing evidence"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We have three features to build: A) AI-powered data insights (no user data yet, purely speculative), B) Fix a bug where users can't reset their password (tracked in ticket #4523, 200+ users affected), C) Add a notification bell (competitor has it). Prioritize these.",
+      "expected_output": "Uses RICE scoring with honest confidence levels. A gets low confidence (no data, speculative). B gets high impact and confidence (200+ users, tracked). C gets assessed as feature parity — may be 'keep up with competition' rather than genuine user need. Does NOT just rank by 'AI is cool'.",
+      "files": [],
+      "expectations": [
+        "Uses RICE or similar framework, not gut feeling",
+        "Confidence for A is honest (low — no data backing the speculation)",
+        "B is prioritized appropriately (200+ affected users, real evidence)",
+        "C is analyzed as competitive parity, not automatic priority",
+        "Does NOT commit to delivery dates"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Here's my draft PRD. The acceptance criteria say 'the system should handle errors gracefully and provide a good user experience.' Is this ready?",
+      "expected_output": "Identifies that 'handle errors gracefully' and 'good user experience' are untestable. Rewrites them as testable GWT with specific scenarios. Explains WHY they're untestable (QA can't write a test case from these). Does NOT approve the PRD as-is.",
+      "files": [],
+      "expectations": [
+        "Identifies 'handle errors gracefully' as untestable",
+        "Provides rewritten GWT examples with specific error scenarios",
+        "Explains WHY the original wording fails (QA can't derive test cases)",
+        "Does NOT approve the PRD without fixing acceptance criteria"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Briefing (frozen): a 0→1 habit app for people learning English on their commute. Market notes: competitors are Duolingo-style streak apps and podcast players; app-store reviews complain streak apps feel childish and podcasts are too hard to follow. No usage data exists yet. The founder's wish list: streaks, leaderboards, AI chat tutor, vocabulary notebook, offline audio lessons, social sharing, subscription paywall, dark mode. Identify the core features and write the value section and key journeys of the spec.",
+      "expected_output": "Starts from the job (learn on a commute without feeling childish or lost) and names the core value path with a concrete Aha moment (e.g. understanding a real short audio clip within the first session). Applies a removal test: offline audio lessons + comprehension support are core; paywall/accounts are support; leaderboards/social are growth; dark mode is experience or cut. Compares at least three concepts (founder's feature bundle, audio-first graded clips, AI tutor-first). Writes walkable journeys J-n anchored to FRs. Writes no-data assumptions as hypotheses with metrics and cheapest validation instead of blocking or inventing numbers.",
+      "files": [],
+      "expectations": [
+        "Names an Aha moment",
+        "Separates core features from support, growth or experience features",
+        "Compares at least three solution concepts",
+        "Writes journeys labelled J-1 or similar",
+        "Does NOT invent usage percentages or DAU numbers"
+      ],
+      "rubric": [
+        {
+          "id": "job_and_aha",
+          "criterion": "Job-to-be-done and a concrete, recognisable Aha moment grounded in the market evidence",
+          "weight": 3
+        },
+        {
+          "id": "core_features",
+          "criterion": "Core vs support/growth/experience classification with a stated test; the wish list is actually prioritised, not accepted wholesale",
+          "weight": 3
+        },
+        {
+          "id": "concepts",
+          "criterion": "At least three genuinely different product concepts compared with trade-offs",
+          "weight": 2
+        },
+        {
+          "id": "journeys",
+          "criterion": "Walkable journeys that reach the Aha quickly; requirements anchor to steps",
+          "weight": 2
+        },
+        {
+          "id": "hypotheses",
+          "criterion": "No-data uncertainty handled as hypotheses with metrics and cheap validation",
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "stage: accept, task: walkthrough. Spec J-1: a new user imports a 5,000-row spreadsheet and sees the first report within 30 seconds (Aha). On the build: the upload works, but the screen stays blank for 20 seconds with no progress indicator, then the report appears at 45 seconds; on a 375px screen the first chart is below the fold. E2E is green. Write accept-pm.md.",
+      "expected_output": "Walks J-1 from a new account with screenshots, records actual 45s vs 30s target and the 20s blank wait, judges that users will think it is stuck and the Aha is not noticeable on mobile. Classifies these as blocking/value-damaging gaps and routes them (progress feedback and mobile layout to frontend/designer; performance to backend/architect). Verdict 不通过 (or 有条件通过 only with explicit owner and deadline acceptable to the user) — green E2E is not acceptance.",
+      "files": [],
+      "expectations": [
+        "Does NOT accept green E2E as sufficient acceptance",
+        "Records the 45 second actual time against the 30 second target",
+        "Mentions the missing progress feedback",
+        "Ends with a verdict line '结论：'"
+      ],
+      "rubric": [
+        {
+          "id": "walkthrough",
+          "criterion": "Walks the journey as the target user with concrete observations and screenshot references",
+          "weight": 2
+        },
+        {
+          "id": "aha_judgement",
+          "criterion": "Judges whether users can perceive the value, not only whether steps technically complete",
+          "weight": 3
+        },
+        {
+          "id": "routing",
+          "criterion": "Gaps are ranked by severity and routed to the right owners",
+          "weight": 2
+        },
+        {
+          "id": "verdict",
+          "criterion": "Verdict follows the rules and is defensible",
+          "weight": 2
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "skill_name": "design-contract",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Design the edge states for a data table page that shows spider task results. The table has columns for name, status, and created date. There's a search bar and pagination.",
+      "expected_output": "Documents all 6 states: empty (no results — invitation to create), loading (skeleton for table shape), error (API failure with retry), boundary (max page, zero results for search term), permission (viewer can see but not create), offline (cached last results or network error). Does NOT only document the happy path.",
+      "files": [],
+      "expectations": [
+        "Documents all 6 states (empty/loading/error/boundary/permission/offline)",
+        "Empty state includes a call to action, not just 'no data'",
+        "Permission state addressed (what does an unauthorized user see?)",
+        "Offline state addressed (at least as a network error message)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create the design tokens for a new admin dashboard. Brand color is teal (#0D9488).",
+      "expected_output": "Produces a three-layer token file (primitive → semantic → component) covering ALL token categories — color, spacing scale, typography (size+weight+line-height sets), radius, shadows named by purpose, motion duration+easing, breakpoints. Semantic color names (color-primary), with a full set per semantic color (hover/subtle/text-on-subtle). Does NOT deliver a palette of hex values and call it tokens.",
+      "files": [],
+      "expectations": [
+        "Defines tokens beyond color: spacing, typography, radius, shadow, motion, breakpoints all present",
+        "Uses semantic naming (color-primary) not color names (color-teal) for the consumption layer",
+        "Each semantic color comes as a set (base/hover/subtle/text-on-subtle)",
+        "Typography tokens bundle size+weight+line-height together",
+        "Breakpoints are defined as tokens"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Design the visual direction for the marketing landing page of our skills marketplace.",
+      "expected_output": "First grounds in subject matter (what a skills marketplace is, who visits, what the page's primary job is), then produces a plan: 4-6 named hex colors, typeface roles, a one-line layout concept, and principles. Critiques the plan against the recognizable AI defaults (cream+serif+terracotta, dark+acid-green, SaaS card kit, ALL-CAPS eyebrows, arrow-suffixed links) and revises anything that matches. Spends boldness in one memorable element.",
+      "files": [],
+      "expectations": [
+        "States the subject matter/audience/page-job before any visual choices",
+        "Produces a plan (palette, type, layout, principles) before implementation details",
+        "Explicitly checks the plan against AI-default clusters and revises matches",
+        "Does NOT deliver cream #F4F1EA + serif + terracotta #D97757, or near-black + acid green, without brief-driven justification",
+        "Concentrates visual boldness in one element rather than decorating everywhere"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Write the UI copy for the LLM provider connection test feature: the button, and the copy for empty (no provider configured yet), testing, success, and failure states.",
+      "expected_output": "Button says what happens ('测试连接'). Failure copy states what happened + what to do now ('API Key 无效，检查后重新测试'), no apology, no vagueness. Empty state is an invitation to act, not '暂无数据'. Success toast keeps the action's name ('连接成功' after '测试连接'). All copy is active voice, user-perspective.",
+      "files": [],
+      "expectations": [
+        "Button label states the consequence ('测试连接'), not a vague verb ('提交'/'执行'/'确定')",
+        "Error copy contains both what happened and what to do next; no '抱歉' and no '出了点问题' style vagueness",
+        "Empty state invites action instead of a dead-end '暂无数据'",
+        "Success message keeps the trigger action's vocabulary (test → 连接成功, not '操作完成')"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "We're adding four FRs to the admin console: user CRUD, role assignment, department tree management, audit log viewer. Design the information architecture for them.",
+      "expected_output": "Maps each FR to a screen and a menu location, reuses existing pages where they exist (users list already has CRUD — role assignment extends it rather than duplicating), introduces new screens only for genuinely new capabilities (audit viewer), states the navigation group each screen belongs to, and flags which FRs need a flow document (role assignment with permission matrix) versus simple CRUD.",
+      "files": [],
+      "expectations": [
+        "Every FR maps to exactly one primary screen location — no FR orphaned, no invented screens for non-FRs",
+        "Reuses the existing user management page instead of creating a duplicate CRUD screen",
+        "Assigns each screen to a navigation group",
+        "Identifies which FR needs a flow document (role assignment / permission matrix) versus plain CRUD",
+        "Does NOT place audit log viewer inside user management (cross-cutting data belongs in its own section)"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "task: explore. Feature: first-run experience of a personal finance app — after linking a bank account, the user should understand where their money went last month. Brand character: calm, trustworthy, a little warm. Produce the design directions deliverable.",
+      "expected_output": "Studies references and states what to take/avoid. Produces at least three structurally different directions (e.g. story-style month recap, category treemap dashboard, conversational Q&A) as rendered HTML prototypes with screenshots at mobile and desktop widths. Each direction names a signature moment tied to the Aha (e.g. the month's biggest surprise revealed with a gentle count-up), its trade-offs, risks, build cost and an AI-default self-check. Ends with a reasoned recommendation and leaves the pick to the human.",
+      "files": [],
+      "expectations": [
+        "Presents at least three directions labelled D1, D2 and D3",
+        "Each direction names a signature moment",
+        "References screenshots or rendered prototypes",
+        "Gives a recommendation"
+      ],
+      "rubric": [
+        {
+          "id": "distinct",
+          "criterion": "Directions differ in structure or interaction model, not just colour",
+          "weight": 3
+        },
+        {
+          "id": "rendered",
+          "criterion": "Directions are rendered artifacts that were looked at (screenshots/prototypes), not only prose",
+          "weight": 3
+        },
+        {
+          "id": "signature",
+          "criterion": "Each direction has a concrete signature moment tied to the Aha",
+          "weight": 2
+        },
+        {
+          "id": "brand_fit",
+          "criterion": "Directions express the stated brand character and avoid unjustified AI-default looks",
+          "weight": 1
+        },
+        {
+          "id": "recommendation",
+          "criterion": "Recommendation is reasoned with trade-offs and leaves the choice to the human",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "task: design-qa. The picked direction D2 shows the monthly recap with a count-up animation on the total and a highlighted 'biggest surprise' card. Build screenshots: the total appears instantly without animation, the surprise card uses the default grey card style, the empty state (no transactions) shows '暂无数据', and focus outlines were removed. Write accept-design.md.",
+      "expected_output": "Compares build vs prototype side by side, identifies the missing signature moment (no count-up, surprise card not highlighted) as blocking, the '暂无数据' empty state and removed focus outlines as major (accessibility floor), ranks gaps, routes them to frontend, and gives verdict 不通过.",
+      "files": [],
+      "expectations": [
+        "Identifies the missing signature moment",
+        "Flags the removed focus outline as an accessibility problem",
+        "Rejects '暂无数据' as the empty state copy",
+        "Ends with a verdict line '结论：'"
+      ],
+      "rubric": [
+        {
+          "id": "comparison",
+          "criterion": "Side-by-side comparison anchored in screenshots",
+          "weight": 2
+        },
+        {
+          "id": "signature",
+          "criterion": "Recognises the loss of the signature moment as the most important gap",
+          "weight": 3
+        },
+        {
+          "id": "severity",
+          "criterion": "Correct severity ranking incl. accessibility floor",
+          "weight": 2
+        },
+        {
+          "id": "verdict",
+          "criterion": "Verdict follows the rules",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

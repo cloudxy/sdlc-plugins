@@ -1,0 +1,54 @@
+{
+  "source": "anthropic-skills",
+  "url": "https://github.com/anthropics/skills.git",
+  "branch": "main",
+  "kind": "docs",
+  "commit": "34040c9c568585f6929bedeaad110ad08f079624",
+  "commit_time": "2026-09-10T12:44:08-07:00",
+  "included_paths": [
+    "skills/frontend-design/SKILL.md",
+    "skills/frontend-design/LICENSE.txt",
+    "skills/skill-creator/SKILL.md",
+    "skills/skill-creator/LICENSE.txt",
+    "skills/claude-api/shared/agent-design.md",
+    "skills/claude-api/LICENSE.txt"
+  ],
+  "tree_digest": "d9a1b4c4608c9dac1eb29a35f13d212ca944b3bedf6568c02e14114e9e27d7ca",
+  "files": [
+    {
+      "path": "skills/claude-api/LICENSE.txt",
+      "sha256": "bc6b3af2f331cbc7fb0da1344efb2cbe5877a31498b4d70dbc7000f3405a1362",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "skills/claude-api/shared/agent-design.md",
+      "sha256": "9960728faf6976a2ddfceed02ed72af122d3b2558af573a9a0ea207b3adec2bc",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "skills/frontend-design/LICENSE.txt",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "skills/frontend-design/SKILL.md",
+      "sha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3",
+      "purpose": "runtime"
+    },
+    {
+      "path": "skills/skill-creator/LICENSE.txt",
+      "sha256": "bc6b3af2f331cbc7fb0da1344efb2cbe5877a31498b4d70dbc7000f3405a1362",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "skills/skill-creator/SKILL.md",
+      "sha256": "dcd4803e61e913e6fc27294184cd3a71f09f5e924ff20c8a9a20173e7b3c2bcf",
+      "purpose": "maintainer"
+    }
+  ],
+  "license": "Apache-2.0",
+  "adopted_at": "2026-09-18T16:08:16+0800",
+  "previous_commit": null,
+  "reviewed_by": "plugin-updater inspect/gate.sh (content)",
+  "note": "由 plugin-updater 写入，不要手改。vendor/ 内容不进 git；使用者运行 vendor/install.sh 按本锁文件的 commit 下载并校验 tree_digest。"
+}

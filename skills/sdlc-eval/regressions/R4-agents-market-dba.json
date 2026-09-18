@@ -1,0 +1,72 @@
+{
+  "id": "R4-agents-market-dba",
+  "title": "能力市场：DBA 能否设计出可扩展的数据模型（v3 db-spec 为基线）",
+  "project": "auto_agents",
+  "skill": "schema",
+  "hat": "dba",
+  "stage": "dba",
+  "baseline_before": "2026-09-15T00:00:00+08:00",
+  "artifacts_ref": "2f256dfaa6d5214e5e2c63408329a71336d5f3f2",
+  "exclude_paths": [
+    ".sdlc/feat-agents-market"
+  ],
+  "hindsight_paths": [
+    "docs/product",
+    ".sdlc/_product"
+  ],
+  "inputs": [
+    ".sdlc/feat-agents-market/00-discover/briefing.md",
+    ".sdlc/feat-agents-market/01-define/spec.md",
+    ".sdlc/feat-agents-market/02-shape/contract.md"
+  ],
+  "baseline": [
+    {
+      "from": ".sdlc/feat-agents-market/02-shape/db-spec.md",
+      "as": "02-shape/db-spec.md"
+    },
+    {
+      "from": ".sdlc/feat-agents-market/02-shape/schema.dbml",
+      "as": "02-shape/schema.dbml"
+    }
+  ],
+  "product_root": "product",
+  "deliverables": [
+    "02-shape/db-spec.md",
+    "02-shape/schema.dbml",
+    "product/domain-model.md",
+    "product/erd.dbml"
+  ],
+  "task": "stage: dba. Design the data model for this change: 02-shape/db-spec.md and 02-shape/schema.dbml (inputs: briefing, spec, contract). The briefing's Fog / out-of-scope list and the spec's out-of-scope section are the known roadmap.",
+  "v3_gaps_observed": [
+    "grep on baseline db-spec.md (2026-09-17): 压力测试 0 · 上下文 0 · 扩展 0 · Next/下一轮/未来 0 matches",
+    "The model is an increment of columns on capability_assets (migration 050 spec); deferred roadmap items (remote sources, public install counts, official detail page) are not walked through the model"
+  ],
+  "what_good_looks_like": "The change placed in a domain model (contexts, aggregates, invariants, one vocabulary), a roadmap stress test over the deferred items showing additive changes or accepted costs with triggers, extension points justified by known variation (asset kinds, versions, tenant-private assets) with the cost of adding a variant, and correctness backed by constraints and evidence.",
+  "rubric": [
+    {
+      "id": "domain",
+      "criterion": "Places the change in a domain model: contexts, aggregates, invariants, ubiquitous language",
+      "weight": 2
+    },
+    {
+      "id": "stress_test",
+      "criterion": "Walks known roadmap items through the model; additive or cost accepted with a trigger",
+      "weight": 3
+    },
+    {
+      "id": "extension_points",
+      "criterion": "Extension points justified by known variation, with the cost of adding a variant",
+      "weight": 2
+    },
+    {
+      "id": "correctness",
+      "criterion": "Grain sentences, constraints for uniqueness and invariants, snapshot vs reference, state transitions",
+      "weight": 2
+    },
+    {
+      "id": "evidence",
+      "criterion": "Indexes derived from access patterns with evidence or clearly labelled presumptions",
+      "weight": 1
+    }
+  ]
+}

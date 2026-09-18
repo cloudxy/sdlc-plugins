@@ -1,0 +1,67 @@
+{
+  "id": "R3-agents-market-architecture",
+  "title": "能力市场：架构师能否用质量属性与候选方案驱动设计（v3 contract 为基线）",
+  "project": "auto_agents",
+  "skill": "architecture",
+  "hat": "architect",
+  "stage": "shape",
+  "baseline_before": "2026-09-15T00:00:00+08:00",
+  "artifacts_ref": "2f256dfaa6d5214e5e2c63408329a71336d5f3f2",
+  "exclude_paths": [
+    ".sdlc/feat-agents-market"
+  ],
+  "hindsight_paths": [
+    "docs/product",
+    ".sdlc/_product"
+  ],
+  "inputs": [
+    ".sdlc/feat-agents-market/00-discover/briefing.md",
+    ".sdlc/feat-agents-market/01-define/spec.md"
+  ],
+  "baseline": [
+    {
+      "from": ".sdlc/feat-agents-market/02-shape/contract.md",
+      "as": "02-shape/contract.md"
+    }
+  ],
+  "product_root": "product",
+  "deliverables": [
+    "02-shape/contract.md",
+    "02-shape/adr-*.md",
+    "02-shape/contracts/",
+    "product/architecture.md"
+  ],
+  "task": "stage: shape, task: contract. Write 02-shape/contract.md for this change (inputs: briefing, spec). There is no design direction file for this regression; use the spec's UI requirements.",
+  "v3_gaps_observed": [
+    "grep on baseline contract.md (2026-09-17): 质量属性/QAS 0 · P95/QPS 0 · 演进 0 matches; 候选/备选 3 matches",
+    "Decisions AD-1…AD-11 are recorded individually; no measurable scenarios or capacity estimate drive them"
+  ],
+  "what_good_looks_like": "Measurable quality scenarios (including what happens when the market opens to all tenants), at least two feasible options compared on those scenarios with evidence, explicit rejected alternatives and revisit triggers, an evolution path with checks CI can run, contracts with failure semantics, and tickets that are demonstrable journey slices.",
+  "rubric": [
+    {
+      "id": "scenarios",
+      "criterion": "Quality attribute scenarios with measures drive the decisions (incl. capacity when the market opens)",
+      "weight": 3
+    },
+    {
+      "id": "options",
+      "criterion": "At least two feasible options compared on the scenarios with evidence; rejected reasons and revisit triggers",
+      "weight": 3
+    },
+    {
+      "id": "evolution",
+      "criterion": "Evolution path and fitness functions that CI can run",
+      "weight": 2
+    },
+    {
+      "id": "slices",
+      "criterion": "Tickets are journey slices, each demonstrable end-to-end",
+      "weight": 2
+    },
+    {
+      "id": "contracts",
+      "criterion": "Contracts define errors, idempotency, pagination and versioning",
+      "weight": 1
+    }
+  ]
+}

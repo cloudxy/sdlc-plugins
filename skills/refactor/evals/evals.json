@@ -1,0 +1,23 @@
+{
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Ticket: extract the 300-line pricing function's discount block into its own module. No behavior change. Do it.",
+      "expectations": [
+        "Writes or runs 'characterization' tests on the seam before the first structural edit",
+        "One seam per step with gates run per step",
+        "Zero edits to characterization 'assertions'",
+        "Parks unrelated cleanup in 'open_questions' instead of doing it"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Mid-refactor you realize the extracted function must also fix an off-by-one in weekend pricing. Handle it.",
+      "expectations": [
+        "Refuses to mix the 'bug fix' into the refactor ticket",
+        "Opens a separate ticket / 'open_question' for the defect",
+        "Keeps the refactor 'behavior-preserving'"
+      ]
+    }
+  ]
+}

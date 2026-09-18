@@ -1,0 +1,90 @@
+{
+  "skill_name": "architecture",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We need to add user tag functionality to spider tasks. Each task can have multiple tags, tags are shared across the tenant. The PRD has 5 FRs: FR-01 create tags, FR-02 apply tags to tasks, FR-03 filter tasks by tag, FR-04 tag CRUD API, FR-05 bulk tagging. Break this into modules and tickets.",
+      "expected_output": "Derives 2-3 modules (tag management, task-tag relationship, query/filter). Each ticket references FR anchors. Does NOT create one giant ticket. Identifies M:N relationship as a data contract for /dba. Declares which roles participate (backend + dba, no frontend if API-only).",
+      "files": [],
+      "expectations": [
+        "Modules are derived from 'FR' clustering, not arbitrary splits",
+        "Each ticket references at least one 'FR-' number",
+        "Ticket granularity allows single-session completion",
+        "Team tailoring is declared (which roles are in and out)",
+        "At least one 'ADR' or decision point is identified (e.g., tag storage model)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "The team is debating whether to use Redis or MySQL for storing spider task scheduling state. Make the decision.",
+      "expected_output": "Writes an ADR that splits scheduling state: coordination (queue/claim/lease) vs record (definitions/history). Does NOT pick one store for both. Rejects the Redis-vs-MySQL false binary. If no codebase, tags whether Redis is already in the topology as [ASSUMED]. Uses rejected/否决 on alternatives. Notes the store pick is expensive to reverse.",
+      "files": [],
+      "expectations": [
+        "Output is structured as an 'ADR' (decision, alternatives, reasoning)",
+        "Splits coordination vs record (queue/claim vs history) or 协调 vs 记录",
+        "Both options are seriously considered with tradeoffs",
+        "Identifies reversibility of the decision",
+        "Explains why the alternative was 'rejected'",
+        "Treats existing Redis in topology as a constraint or tags [ASSUMED]"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I have a feature with 12 FRs. The architect said to split into modules, but I'm not sure where the boundaries are. The FRs are: FR-01 user login, FR-02 data table view, FR-03 export to CSV, FR-04 role management, FR-05 audit logging, FR-06 real-time notifications, FR-07 API rate limiting, FR-08 data chart visualization, FR-09 bulk import, FR-10 user profile, FR-11 LLM-powered insights, FR-12 cache warming. Where do I draw module boundaries?",
+      "expected_output": "Groups FRs by shared data model / lifecycle / ownership: auth module (FR-01, FR-04, FR-10), data module (FR-02, FR-03, FR-08, FR-09), real-time module (FR-06, FR-12), AI module (FR-11), platform module (FR-05, FR-07). Explains WHY each grouping makes sense (shared data, shared change reasons). Does NOT create 12 modules (one per FR) or 1 module (all in one).",
+      "files": [],
+      "expectations": [
+        "Groups FRs by shared data model or lifecycle, not by FR number sequence",
+        "Produces 3-5 module boundaries, not 1 or 12",
+        "Explains the clustering rationale (shared data / shared change reasons)",
+        "Flags cross-cutting concerns (FR-05 audit, FR-07 rate limiting) as platform-level, not module-level"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "The /backend developer says the contract for FR-03 is wrong — the export endpoint can't return CSV synchronously for 50K rows. The PRD says it should. What do I do as the architect?",
+      "expected_output": "Recognizes this as a backflow (implementation → architecture). Evaluates: is the requirement technically infeasible or just hard? If infeasible, updates the contract (async export or limit rows). Updates affected downstream artifacts (frontend contract, test cases). Does NOT silently absorb the change or blame the developer.",
+      "files": [],
+      "expectations": [
+        "Recognizes this as a valid backflow (implementation → architecture)",
+        "Evaluates whether the requirement is truly infeasible or just difficult",
+        "Updates the contract if needed, then marks downstream artifacts as stale",
+        "Does NOT blame the developer or silently change the implementation"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Feature: a content app adds a personalised home feed. Product layer: 200k DAU today, growth plans a campaign expected to reach 1M DAU within 6 months; users open the feed ~12 times/day; peak factor 3. The team runs a modular monolith on PostgreSQL with Redis already deployed. Write the architecture decision section of contract.md.",
+      "expected_output": "Writes measurable quality scenarios (feed P95, peak read QPS computed: 1M×12/86400×3 ≈ 417 QPS, availability, cost, modifiability for ranking changes). Compares at least two feasible options (e.g. fan-out-on-read with Redis cache vs precomputed feed tables with async workers) on those scenarios with evidence or labelled estimates. Chooses, records rejected reasons and a revisit trigger, outlines the evolution path and at least one fitness function, and slices tickets along the feed journey.",
+      "files": [],
+      "expectations": [
+        "Computes a peak QPS figure",
+        "Compares at least two architecture options",
+        "States rejected alternatives",
+        "Names a revisit trigger or evolution stage"
+      ],
+      "rubric": [
+        {
+          "id": "scenarios",
+          "criterion": "Measurable scenarios with capacity derived from the product numbers",
+          "weight": 3
+        },
+        {
+          "id": "options",
+          "criterion": "Two or more feasible options compared on the scenarios; decision with rejected reasons",
+          "weight": 3
+        },
+        {
+          "id": "evolution",
+          "criterion": "Evolution path with triggers and at least one fitness function",
+          "weight": 2
+        },
+        {
+          "id": "pragmatism",
+          "criterion": "Reuses existing topology sensibly; avoids premature services",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

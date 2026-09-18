@@ -1,0 +1,22 @@
+{
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Wire this project's sdlc gates into CI. sdlc.config.yaml has test=pytest, lint=ruff, build=npm build. Features live in .sdlc/<feature>/ trees.",
+      "expectations": [
+        "One CI step per config command plus 'check-sdlc.sh', cheapest first",
+        "Does not translate a nonzero exit into a 'warning'",
+        "Runs 'check-sdlc' per feature dir; full --require on main",
+        "Uploads gate logs as artifacts admissible as 'gates[]' evidence"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Teammate suggests adding an LLM auto-review step in CI so review is free. Respond per the skill.",
+      "expectations": [
+        "Refuses: CI is 'G-script' only, G-fresh stays an independent reviewer",
+        "Does not add 'LLM' auto-review to CI"
+      ]
+    }
+  ]
+}

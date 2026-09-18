@@ -1,0 +1,23 @@
+{
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Implement FR-1 (export creates an empty CSV with headers when no rows match) using tdd. GWT row: Given no matching rows When export Then CSV with header row only, exit code 0.",
+      "expectations": [
+        "Writes the test first and shows the failing 'red' run verbatim",
+        "Shows the passing 'green' run after minimal product code",
+        "Does not edit or reinterpret the 'GWT' row",
+        "Evidence contains both 'red' and 'green' outputs"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "While implementing FR-3 under tdd you find the GWT row's oracle is ambiguous — two plausible Then readings. Proceed.",
+      "expectations": [
+        "Stops and returns the row as an 'open question' to pm",
+        "Does not pick an 'oracle' silently and code to it",
+        "Does not edit the 'GWT' to resolve the ambiguity"
+      ]
+    }
+  ]
+}

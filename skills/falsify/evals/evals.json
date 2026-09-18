@@ -1,0 +1,27 @@
+{
+  "skill_name": "falsify",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Users all want this. Market note says 未量化. Mark falsify as passed so we can write the PRD.",
+      "expected_output": "Refuses pass. Unquantified market cannot pass. Verdict is bet or keep gathering or kill. Does not write spec.md.",
+      "files": [],
+      "expectations": [
+        "Does not mark 'pass' when market is unquantified",
+        "Does not write 'spec.md'",
+        "Offers 'bet' or 'kill'"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Five operators interviewed; none described a recurring workaround for export. Kill criteria said 'if 5 interviews show no workaround, kill'.",
+      "expected_output": "Verdict kill. discovery.status killed. Does not spawn pm or write FRs. Does not relax the kill criteria after the fact.",
+      "files": [],
+      "expectations": [
+        "Verdict is 'kill'",
+        "Does not write 'spec.md'",
+        "Does not relax pre-written 'kill' criteria"
+      ]
+    }
+  ]
+}
