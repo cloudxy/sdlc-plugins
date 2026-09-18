@@ -115,7 +115,8 @@ check_defaulted() { # $1 = red|warn；其余 = 文件
   done <<EOF
 $(decision_rows "$@")
 EOF
-  hits=$(grep -HnE '默认已定|未(应答|回复|答复)[^|]{0,24}(默认|采用|推荐)' "$@" 2>/dev/null)
+  hits=$(grep -HnE '默认已定|未(应答|回复|答复)[^|]{0,24}(默认|采用|推荐)' "$@" 2>/dev/null \
+    | grep -vE '(不写|不要写|不得写|禁止写|别写|不能写|不要|不得|禁止)[[:space:]]*[「"“]?默认已定')  # 模板里禁止这样写的说明不是违规（C02）
   [ -n "$hits" ] || return 0
   local total
   total=$(printf '%s\n' "$hits" | grep -c .)
@@ -181,6 +182,35 @@ EOF
   return 1
 }
 
+missing_images() { # $1 = md 文件 → 打印引用了但不存在的图片；一张都没引用时打印 NONE
+  local f="$1" refs ref d nd j found miss=""
+  refs=$(grep -oE '[A-Za-z0-9_./~-]+\.(png|jpe?g|webp)' "$f" 2>/dev/null | sort -u)
+  [ -n "$refs" ] || { echo NONE; return; }
+  while IFS= read -r ref; do
+    found=0
+    case "$ref" in
+      /*) [ -f "$ref" ] && found=1 ;;
+      *) d=$(cd "$(dirname "$f")" && pwd); j=0
+         while [ $j -lt 6 ]; do
+           [ -f "$d/$ref" ] && { found=1; break; }
+           [ -f "$d/sdlc.config.yaml" ] && break
+           nd=$(dirname "$d"); [ "$nd" = "$d" ] && break; d="$nd"; j=$((j+1))
+         done ;;
+    esac
+    [ "$found" -eq 1 ] || miss="$miss $ref"
+  done <<EOF
+$refs
+EOF
+  echo "${miss# }"
+}
+need_images() { # $1 = md 文件；$2 = 标签；$3 = 语境。截图必须真实存在：一张不引用、或引用了不存在的文件都算违规
+  local m
+  m=$(missing_images "$1")
+  if [ "$m" = "NONE" ]; then red "$2" "$1: ${3}未引用截图"
+  elif [ -n "$m" ]; then red "$2" "$1: 引用的截图不存在: ${m}（截图要真实拍下来，不能只写路径）"
+  fi
+}
+
 # ---------- --hat product：产品层独立检查（/sdlc-product 用；不跑泳道检查） ----------
 if [ "$HAT_GIVEN" = "1" ] && [ "$HATID" = "product" ]; then
   PRD="$TARGET"
@@ -189,6 +219,7 @@ if [ "$HAT_GIVEN" = "1" ] && [ "$HATID" = "product" ]; then
   else
     for pf in strategy.md feature-map.md architecture.md domain-model.md erd.dbml; do
       if [ ! -f "$PRD/$pf" ]; then red PRODUCTCTX "--hat product: 缺 $PRD/$pf"
+      elif ! grep -q '[^[:space:]]' "$PRD/$pf" 2>/dev/null; then red PRODUCTCTX "--hat product: $PRD/$pf 是空文件（P08）"
       elif is_unfilled "$PRD/$pf"; then red PRODUCTCTX "--hat product: $PRD/$pf 仍是模板（含 sdlc:unfilled）"
       fi
     done
@@ -355,16 +386,23 @@ need_product() { # $1 = 产品层相对路径；$2 = 标签
   elif is_unfilled "$PRA/$1"; then red PRODUCTCTX "$2: 产品层 $PRA/$1 仍是模板（含 sdlc:unfilled）"
   fi
 }
-verdict_of() { # $1 = 验收文件 → 通过|有条件通过|不通过|空
-  grep -m1 -oE '结论[:：][[:space:]]*(有条件通过|不通过|通过)' "$1" 2>/dev/null | sed -E 's/^结论[:：][[:space:]]*//'
+verdict_of() { # $1 = 验收文件 → 通过|有条件通过|不通过|歧义|空。出现多个不同结论时不取第一个（P12），判为歧义
+  local all
+  all=$(grep -oE '结论[:：][[:space:]]*(有条件通过|不通过|通过)' "$1" 2>/dev/null | sed -E 's/^结论[:：][[:space:]]*//' | sort -u)
+  case "$(printf '%s\n' "$all" | grep -c .)" in
+    0) echo "" ;;
+    1) echo "$all" ;;
+    *) echo "歧义" ;;
+  esac
 }
 check_accept_file() { # $1 = 文件；$2 = 谁；$3 = 是否要求截图(1/0)
   [ -f "$1" ] || return 0 # presence is checked by the registry gate
   VD=$(verdict_of "$1")
   if [ -z "$VD" ]; then red ACCEPT "$1: 缺「结论：通过|有条件通过|不通过」"
+  elif [ "$VD" = "歧义" ]; then red ACCEPT "$1: 出现多个不同的「结论：」，只保留当前这一轮的结论（历史轮次移到「历史」小节并改写措辞）"
   elif [ "$VD" = "不通过" ]; then red ACCEPT "$1: $2 验收不通过（按差距清单返工 implement 后重验）"
   fi
-  if [ "$3" = "1" ]; then grep -qiE '\.png|\.jpe?g|\.webp' "$1" || red ACCEPT "$1: $2 验收未引用截图（有界面的变更须在运行中的产品上走查）"; fi
+  if [ "$3" = "1" ]; then need_images "$1" ACCEPT "$2 验收（有界面的变更须在运行中的产品上走查）"; fi
 }
 e2e_passed() {
   [ -f "$ST" ] || return 1
@@ -473,7 +511,7 @@ if [ "$HAT_GIVEN" = "1" ]; then
           ND=$(grep -oE '^#+[[:space:]]*D[0-9]+' "$DD" | grep -oE 'D[0-9]+' | sort -u | wc -l | tr -d ' ')
           [ "${ND:-0}" -ge 3 ] || red DIRECTIONS "$DD: 设计方向 ${ND:-0} 个（v4 须 ≥3 个真正不同的方向，标题 ## D1 / ## D2 / ## D3）"
           grep -qE '选定[:：][[:space:]]*D[0-9]+' "$DD" || red DIRECTIONS "$DD: 缺「选定：D<n>」（人工选择后由 designer specify 记录）"
-          grep -qiE '\.png|\.jpe?g|\.webp' "$DD" || red DIRECTIONS "$DD: 方向未附渲染截图（没有渲染产物的方向不算方向）"
+          need_images "$DD" DIRECTIONS "方向（没有渲染产物的方向不算方向）"
           grep -qE '缺陷检查' "$DD" || red DIRECTIONS "$DD: 缺「缺陷检查」（推荐前逐张看截图：重叠 / 截断 / 溢出 / 对齐 / 对比度 / 占位内容）"
           need_sources "$DD" 3 "--hat designer（参考表）"
         fi
@@ -483,7 +521,9 @@ if [ "$HAT_GIVEN" = "1" ]; then
     implement)
       if is_v4 && ui_yes; then
         if ls "$ROOT"/03-impl/*integration*.md >/dev/null 2>&1; then
-          grep -qiE '\.png|\.jpe?g|\.webp' "$ROOT"/03-impl/*integration*.md || red INTEGRATION "03-impl/*integration*.md: 未附运行截图（联调须在运行中的产品上走通切片）"
+          for IF in "$ROOT"/03-impl/*integration*.md; do
+            need_images "$IF" INTEGRATION "联调记录（须在运行中的产品上走通切片并截图）"
+          done
         else
           red INTEGRATION "--hat implement: ui: yes 但缺 03-impl/T-n-integration.md（前后端联调 + 截图）"
         fi
@@ -559,7 +599,8 @@ done
 
 # ---------- 2. GWT 验收标准（L2+ 工件含验收段时校验） ----------
 for f in $FILES; do
-  if grep -qE "^#+\s*(验收标准|Acceptance)" "$f" 2>/dev/null; then
+  case "$f" in */04-verify/*|*/05-review/*) continue ;; esac  # 验收/审查报告不是需求工件（P13）
+  if grep -qiE "^#+[[:space:]]*(验收标准|Acceptance([[:space:]]+criteria)?)[[:space:]]*$" "$f" 2>/dev/null; then
     if ! grep -qE "Given|当.*时|假设" "$f" 2>/dev/null; then
       red GWT "$f: 验收标准缺 Given/When/Then 结构"
     fi
@@ -743,7 +784,14 @@ if [ -f "$ST" ]; then
         case "$DSTAT" in
           pending|"")
             if [ "$NHAT" = "define" ] || [ "$(rank_of "$NHAT")" -ge 2 ]; then
-              red NODISCOVER "$ST: L2+ discovery.status=${DSTAT:-empty} 禁止 define/其后（须 done|skipped|killed）"
+              red NODISCOVER "$ST: L2+ discovery.status=${DSTAT:-empty} 禁止 define/其后（须 done|skipped）"
+            fi
+            ;;
+          killed)
+            # 发现阶段结论是「不做」：必须显式重开（discovery.reopened: {by, at, reason}）才能继续（P07）
+            REOPENED=$(awk '$0 ~ /^discovery:/ { d=1; next } d && /^[^[:space:]]/ { d=0 } d && /reopened:/ { print "y"; exit }' "$ST")
+            if [ -z "$REOPENED" ] && { [ "$NHAT" = "define" ] || [ "$(rank_of "$NHAT")" -ge 2 ]; }; then
+              red NODISCOVER "$ST: discovery.status=killed（发现阶段结论是不做），define 及之后不得继续；确需继续由用户决定并记录 discovery.reopened: {by, at, reason}"
             fi
             ;;
           done)
@@ -782,7 +830,10 @@ if [ -f "$ST" ]; then
   if is_v4; then
     for af in "$ROOT"/04-verify/accept-*.md; do
       [ -f "$af" ] || continue
-      [ "$(verdict_of "$af")" = "不通过" ] && red ACCEPT "$af: 验收不通过未关闭（返工 implement → 重跑 verify → 重新验收）"
+      case "$(verdict_of "$af")" in
+        不通过) red ACCEPT "$af: 验收不通过未关闭（返工 implement → 重跑 verify → 重新验收）" ;;
+        歧义) red ACCEPT "$af: 验收结论有歧义（多个不同的「结论：」）" ;;
+      esac
     done
     if grep -qE 'hats_done:.*accept' "$ST"; then
       [ -f "$ROOT/${ART_accept_pm}" ] || red ACCEPTMISS "$ST: hats_done 含 accept 但无 04-verify/accept-pm.md"
@@ -839,8 +890,8 @@ EOF
     EXPLAIN_PY="$SCRIPT_DIR/../skills/schema/scripts/check-explain.py"
     EXFILE=$(find "$ROOT" -name '*explain*' 2>/dev/null | head -1)
     if [ -n "$EXFILE" ] && [ -f "$EXPLAIN_PY" ] && command -v python3 >/dev/null 2>&1; then
-      XOUT=$(python3 "$EXPLAIN_PY" "$EXFILE" 2>&1) || true
-      XCODE=$?
+      XOUT=$(python3 "$EXPLAIN_PY" "$EXFILE" 2>&1)
+      XCODE=$?  # 不能写成 $(...) || true 再读 $?：那样永远是 0（P09b）
       [ "$XCODE" -ne 0 ] && red EXPLAIN "$EXFILE: check-explain.py exit $XCODE"
     fi
   fi

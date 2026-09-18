@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # 迁移自检 · <migration_id> <一句话变更内容>
 
 > 上游：`db-spec.md` / `schema.dbml`｜变更类型：☐ 纯加法 ☐ 破坏性（走 expand-contract 第 <n>/3 步）

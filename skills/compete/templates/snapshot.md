@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # Compete · <本变更>
 
 > 作者：competitor 帽｜日期：<YYYY-MM-DD>｜泳道：L2｜下游：discover briefing

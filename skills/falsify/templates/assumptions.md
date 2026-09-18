@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # Falsify · <本变更>
 
 > 下游：briefing § Falsify · 赌注指标进 define 度量蓝图

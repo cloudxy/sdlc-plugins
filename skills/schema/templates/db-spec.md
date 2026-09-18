@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # db-spec · <feature 名>
 
 > 上游：spec `<路径>`（FR-<n>…）· contract §7 数据语义诉求 · 产品 `domain-model.md` / `erd.dbml` / `feature-map.md`

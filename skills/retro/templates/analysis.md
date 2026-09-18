@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # 分析报告 · <标题>
 
 > 作者：/analyst｜日期：<YYYY-MM-DD>｜口径来源：`/pm` 的 `metrics-blueprint.md`

@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # G-fresh 审查报告
 
 > 审查对象：{feature 名} · 审查时间：{ISO 时间} · 审查者：sdlc-reviewer（无记忆子代理）

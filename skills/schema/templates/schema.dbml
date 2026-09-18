@@ -1,3 +1,4 @@
+// sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交
 // schema.dbml · <feature 名>
 // 上游：db-spec.md ｜ 下游：迁移文件 → /backend ORM 模型
 // 规范：每个索引后必须用注释标注它服务的访问模式 ID（无模式 ID 的索引不许进本文件）

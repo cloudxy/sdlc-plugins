@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # 联调记录 · T-<nn> <旅程切片>
 
 > 作者：frontend 帽（与 backend 同一切片）｜泳道：L<n>｜日期：<YYYY-MM-DD>｜构建：<commit>

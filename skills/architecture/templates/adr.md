@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # ADR-<nnn>：<决策一句话>
 
 > 状态：proposed / **accepted** / superseded by ADR-<nnn> / deprecated

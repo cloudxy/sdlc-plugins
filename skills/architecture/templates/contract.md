@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # 技术方案 · <功能名>
 
 > 上游：spec `<路径>`（FR-01…FR-0n，旅程 J-1…）· 选定设计方向 `02-shape/design-directions.md` · 产品 `architecture.md` / `domain-model.md`

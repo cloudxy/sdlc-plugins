@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # 模型选型与降级链 · <任务名>
 
 > 上游：`task-spec.md` · `eval-set-v<n>`｜作者：/algo｜日期：<YYYY-MM-DD>

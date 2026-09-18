@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # 特征字典 · <项目名>
 
 > 上游：`problem-framing.md`｜作者：/miner｜日期：<YYYY-MM-DD>

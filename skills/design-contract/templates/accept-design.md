@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # 设计走查 · <功能名>
 
 > 作者：designer 帽（task design-qa）｜泳道：L<n>｜日期：<YYYY-MM-DD>｜构建：<commit / 环境 URL>

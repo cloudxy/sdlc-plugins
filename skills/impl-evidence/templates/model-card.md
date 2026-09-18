@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # Model Card · <模型名> v<n>
 
 > 上游：`problem-framing.md` · `feature-dict.md`｜作者：/miner｜日期：<YYYY-MM-DD>

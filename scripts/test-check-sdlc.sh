@@ -536,11 +536,15 @@ mk_v4 g1
 F="$T/g1/.sdlc/f"
 sed -i.bak 's/^current_hat: define/current_hat: shape/' "$F/state.yaml" && rm -f "$F/state.yaml.bak"
 printf '泳道：L2\n| 屏 | 空 |\n' >"$F/02-shape/edge-states.md"
+for d in d1 d2 d3; do printf 'png' >"$F/02-shape/prototypes/$d-1440.png"; done
 printf '泳道：L2\n| 参考 | https://a.example/x 2026-09-01 |\n| 参考 | https://b.example/y 2026-09-01 |\n| 参考 | https://c.example/z 2026-09-01 |\n## D1 卡片流\n![](prototypes/d1-1440.png)\n## D2 时间线\n' >"$F/02-shape/design-directions.md"
 assert_exit 3 "v4 --hat designer with 2 directions, no pick, no defect check is DIRECTIONS x3" --hat designer "$F"
 assert_tag DIRECTIONS
 printf '泳道：L2\n| 参考 | https://a.example/x 2026-09-01 |\n| 参考 | https://b.example/y 2026-09-01 |\n| 参考 | https://c.example/z 2026-09-01 |\n## D1 卡片流\n![](prototypes/d1-1440.png)\n## D2 时间线\n![](prototypes/d2-1440.png)\n## D3 对话式\n![](prototypes/d3-1440.png)\n## 缺陷检查\n| prototypes/d2-1440.png | 无重叠截断 | 无 |\n选定：D2（picked_by: user）\n' >"$F/02-shape/design-directions.md"
 assert_exit 0 "v4 --hat designer with 3 directions + pick + screenshots" --hat designer "$F"
+rm "$F/02-shape/prototypes/d3-1440.png"
+assert_exit 1 "v4 --hat designer: a direction screenshot that does not exist is DIRECTIONS (P02)" --hat designer "$F"
+assert_tag DIRECTIONS
 
 # 26. shape: ui yes without pick → DESIGNFIRST; contract without QAS/options → ARCH
 mk_v4 s1
@@ -568,6 +572,9 @@ printf '泳道：L2\nnote\n' >"$F/03-impl/T-1-evidence.md"
 assert_exit 1 "v4 --hat implement ui without integration is INTEGRATION" --hat implement "$F"
 assert_tag INTEGRATION
 printf '泳道：L2\nJ-1 walked against real API\n![](screens/j1-1440.png)\n' >"$F/03-impl/T-1-integration.md"
+assert_exit 1 "v4 --hat implement: integration cites a screenshot that does not exist (P02)" --hat implement "$F"
+assert_tag INTEGRATION
+mkdir -p "$F/03-impl/screens" && printf 'png' >"$F/03-impl/screens/j1-1440.png"
 assert_exit 0 "v4 --hat implement with integration screenshot" --hat implement "$F"
 
 # 29. verify: J-1 without E2E row → MATRIX; no e2e gate → E2E; both fixed → pass
@@ -610,6 +617,8 @@ mk_v4 a1
 F="$T/a1/.sdlc/f"
 assert_exit 3 "v4 --hat accept with no acceptance files" --hat accept "$F"
 assert_tag HATMISS
+mkdir -p "$F/03-impl/screens" "$F/04-verify/shots"
+printf 'png' >"$F/03-impl/screens/j1.png"; printf 'png' >"$F/04-verify/shots/d2.png"
 printf '泳道：L2\nJ-1 走查 ![](../03-impl/screens/j1.png)\n结论：不通过\n' >"$F/04-verify/accept-pm.md"
 printf '泳道：L2\n对比原型 ![](shots/d2.png)\n结论：通过\n' >"$F/04-verify/accept-design.md"
 printf '泳道：L2\n卖点核验\n结论：通过\n' >"$F/04-verify/accept-growth.md"
@@ -620,6 +629,12 @@ assert_exit 0 "v4 --hat accept all 通过 with screenshots" --hat accept "$F"
 rm "$F/04-verify/accept-growth.md"
 printf 'roles_skipped: [growth]\n' >>"$F/state.yaml"
 assert_exit 0 "v4 --hat accept skips growth via roles_skipped" --hat accept "$F"
+printf '泳道：L2\n## 第 1 轮\n结论：不通过\n## 第 2 轮\nJ-1 走查 ![](../03-impl/screens/j1.png)\n结论：通过\n' >"$F/04-verify/accept-pm.md"
+assert_exit 2 "v4 accept file with two different verdicts is ambiguous, not first-wins (P12)" --hat accept "$F"
+assert_tag ACCEPT
+printf '泳道：L2\nJ-1 走查 ![](../03-impl/screens/gone.png)\n结论：通过\n' >"$F/04-verify/accept-pm.md"
+assert_exit 1 "v4 accept citing a screenshot that does not exist is ACCEPT (P04)" --hat accept "$F"
+assert_tag ACCEPT
 
 # 31. review (v4 L2): no product-delta → WRITEBACK; 无产品层变更 → pass; delta naming a missing file → WRITEBACK
 mk_v4 r1
@@ -782,6 +797,56 @@ printf '<!-- sdlc:unfilled — architect 写入真实内容后删除本行 -->\n
 printf 'Table t {\n  id int\n}\n  // sdlc:unfilled\n' >"$PR/erd.dbml"
 assert_exit 2 "leading comment markers (html and dbml) are templates" --hat product "$PR"
 assert_tag PRODUCTCTX
+
+# 40. P07 discovery killed：define 及之后不得继续；显式 reopened 后放行
+mk_v4 k1
+F="$T/k1/.sdlc/f"
+printf 'discovery:\n  status: killed\n' >>"$F/state.yaml"
+assert_exit 1 "discovery killed blocks define (P07)" --hat define "$F"
+assert_tag NODISCOVER
+printf '  reopened: {by: user, at: 2026-09-18, reason: 新证据}\n' >>"$F/state.yaml"
+assert_exit 0 "discovery killed + reopened by the user may continue" --hat define "$F"
+
+# 41. P08 空产品文件不是已填写的产品层
+mk_v4 e1
+: >"$T/e1/docs/product/strategy.md"
+printf '   \n\n' >"$T/e1/docs/product/domain-model.md"
+assert_exit 2 "empty / blank product files are PRODUCTCTX (P08)" --hat product "$T/e1/docs/product"
+assert_tag PRODUCTCTX
+
+# 42. P09b 子检查失败必须传到父闸门：check-explain 拒绝的执行计划不能被吞掉
+mk_v4 x1
+F="$T/x1/.sdlc/f"
+printf 'product_root: docs/product\nextra_gates: [explain]\n' >"$T/x1/sdlc.config.yaml"
+printf '| 1 | SIMPLE | orders | ALL | NULL | NULL | NULL | 10000 | 100 | Using temporary |\n' >"$F/explain.txt"
+printf '泳道：L2\nnote\n' >"$F/03-impl/T-1-evidence.md"
+mkdir -p "$F/03-impl/screens" && printf 'png' >"$F/03-impl/screens/j1.png"
+printf '泳道：L2\n![](screens/j1.png)\n' >"$F/03-impl/T-1-integration.md"
+assert_exit 1 "check-explain failure reaches the parent gate (P09b)" --hat implement "$F"
+assert_tag EXPLAIN
+
+# 43. P13 验收报告标题（Acceptance report）不触发需求 GWT 规则
+mk_v4 h13
+F="$T/h13/.sdlc/f"
+mkdir -p "$F/03-impl/screens" && printf 'png' >"$F/03-impl/screens/j1.png"
+for w in pm design growth; do printf '# Acceptance report\n泳道：L2\n![](../03-impl/screens/j1.png)\n结论：通过\n' >"$F/04-verify/accept-$w.md"; done
+assert_exit 0 "acceptance report heading is not a requirement GWT section (P13)" --hat accept "$F"
+
+# 44. C02 模板里「不写「默认已定」」的说明不是默认落地的决策
+mk_v4 c02
+F="$T/c02/.sdlc/f"
+printf '泳道：L2\n## 核心价值与 Aha 时刻\nx\n## 关键用户旅程\nJ-1 导入\n说明：没回答不等于同意——不写「默认已定」。\n' >"$F/01-define/spec.md"
+assert_exit 0 "instruction not to write 默认已定 is not DEFAULTED (C02)" --hat define "$F"
+printf '泳道：L2\n## 核心价值与 Aha 时刻\nx\n## 关键用户旅程\nJ-1 导入\n定价：默认已定为 99 元\n' >"$F/01-define/spec.md"
+assert_exit 1 "a decision written as 默认已定 is still DEFAULTED" --hat define "$F"
+assert_tag DEFAULTED
+
+# 45. C03 原样拷贝的模板（带 sdlc:unfilled）等于没交
+mk_v4 c03
+F="$T/c03/.sdlc/f"
+cp "$ROOT/skills/prd-gwt/templates/spec.md" "$F/01-define/spec.md"
+assert_exit 2 "a copied, unfilled spec template is HATMISS (C03)" --hat define "$F"
+assert_tag HATMISS
 
 if [ "$fail" -ne 0 ]; then
   echo "----------------------------------------"

@@ -1,3 +1,4 @@
+<!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # T-<nn> · <标题>
 
 > 泳道：L<n>｜角色：backend → frontend（同一切片）｜粗估：<n>–<n>d｜状态：**todo** / doing / done / blocked

@@ -85,13 +85,29 @@ def artifact_paths(registry, ids, legacy=False):
     return [p for key in ids for p in registry["artifacts"][key]["legacy" if legacy else "paths"]]
 
 
+UNFILLED = re.compile(r"^[ \t]*(<!--|#|//)[ \t]*sdlc:unfilled", re.M)
+
+
+def deliverable(p):
+    """A deliverable is a real file with content: not hidden (.gitkeep), not blank, not an unfilled template."""
+    if not p.is_file() or p.name.startswith("."):
+        return False
+    try:
+        head = p.read_bytes()[:65536]
+    except OSError:
+        return False
+    if not head.strip():
+        return False
+    return not UNFILLED.search(head.decode("utf-8", errors="replace"))
+
+
 def existing(root, patterns, task=None):
     for pattern in patterns:
         # One ticket's evidence cannot satisfy a different ticket's task check.
         if task and re.fullmatch(r"T-[1-9][0-9]*", task):
             pattern = pattern.replace("*evidence*", task + "-*evidence*")
         for p in Path(root).glob(pattern):
-            if p.is_file() and p.resolve().is_relative_to(Path(root).resolve()):
+            if deliverable(p) and p.resolve().is_relative_to(Path(root).resolve()):
                 return p
     return None
 
@@ -108,7 +124,10 @@ def check_groups(registry, root, groups, skipped=(), ui=False, task=None, legacy
         if old:
             results.append(("warning", "DEPRECATED", f"{old}: use {' or '.join(paths)}"))
         else:
-            results.append(("error", "HATMISS", f"missing {' or '.join(paths)}"))
+            present = [p for pat in paths for p in Path(root).glob(pat) if p.is_file() and not p.name.startswith(".")]
+            why = (f" ({present[0].relative_to(root)} exists but is empty or still a template with sdlc:unfilled — fill it and delete the marker line)"
+                   if present else "")
+            results.append(("error", "HATMISS", f"missing {' or '.join(paths)}{why}"))
     return results
 
 
