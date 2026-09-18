@@ -383,6 +383,13 @@
         "02-shape/prototypes/final/**/*"
       ],
       "legacy": []
+    },
+    "diagram": {
+      "paths": [
+        "*/assets/*.svg",
+        "assets/*.svg"
+      ],
+      "legacy": []
     }
   },
   "stages": {
@@ -684,7 +691,19 @@
       "skill": "prd-gwt",
       "required": [
         "spec"
-      ]
+      ],
+      "visuals": [
+        {
+          "type": "flow",
+          "when": "branches"
+        },
+        {
+          "type": "state",
+          "when": "state_machine"
+        }
+      ],
+      "diagram_reference": "skills/prd-gwt/references/flow-diagram.md",
+      "diagram_dir": "01-define/assets"
     },
     {
       "role": "ops",
@@ -732,7 +751,23 @@
       "skill": "architecture",
       "required": [
         "contract"
-      ]
+      ],
+      "visuals": [
+        {
+          "type": "architecture",
+          "when": "services"
+        },
+        {
+          "type": "sequence",
+          "when": "services"
+        },
+        {
+          "type": "trust-boundary",
+          "when": "security"
+        }
+      ],
+      "diagram_reference": "skills/architecture/references/diagrams.md",
+      "diagram_dir": "02-shape/assets"
     },
     {
       "role": "dba",
@@ -742,7 +777,19 @@
       "required": [
         "db-spec",
         "schema"
-      ]
+      ],
+      "visuals": [
+        {
+          "type": "er",
+          "when": "schema"
+        },
+        {
+          "type": "state",
+          "when": "state_machine"
+        }
+      ],
+      "diagram_reference": "skills/schema/references/er-diagram.md",
+      "diagram_dir": "02-shape/assets"
     },
     {
       "role": "data-collector",
@@ -769,7 +816,15 @@
       "skill": "warehouse",
       "required": [
         "metrics"
-      ]
+      ],
+      "visuals": [
+        {
+          "type": "lineage",
+          "when": "new_metrics"
+        }
+      ],
+      "diagram_reference": "skills/warehouse/references/lineage-diagram.md",
+      "diagram_dir": "02-shape/assets"
     },
     {
       "role": "data-warehouse-engineer",
@@ -1014,7 +1069,15 @@
       "required": [],
       "product_outputs": [
         "architecture.md"
-      ]
+      ],
+      "visuals": [
+        {
+          "type": "architecture",
+          "when": "services"
+        }
+      ],
+      "diagram_reference": "skills/architecture/references/diagrams.md",
+      "diagram_dir": "assets"
     },
     {
       "role": "dba",
@@ -1025,7 +1088,15 @@
       "product_outputs": [
         "domain-model.md",
         "erd.dbml"
-      ]
+      ],
+      "visuals": [
+        {
+          "type": "er",
+          "when": "schema"
+        }
+      ],
+      "diagram_reference": "skills/schema/references/er-diagram.md",
+      "diagram_dir": "assets"
     },
     {
       "role": "data-warehouse-engineer",
@@ -1114,6 +1185,33 @@
       "review",
       "qc",
       "deliver"
+    ]
+  },
+  "diagram": {
+    "guide": "vendor/svg-diagram/SKILL.md",
+    "tool": "vendor/svg-diagram/tools/svg-lint/bin/svg-lint.mjs",
+    "lint": "scripts/diagram/lint.py",
+    "render": "scripts/diagram/render.sh",
+    "types": [
+      "flow",
+      "state",
+      "architecture",
+      "sequence",
+      "trust-boundary",
+      "er",
+      "lineage",
+      "other"
+    ],
+    "when": {
+      "security": "state q_security: yes (enforced)",
+      "schema": "tables or relationships added or changed",
+      "state_machine": "a new or changed status field with legal transitions",
+      "services": "calls between services or modules change",
+      "branches": "a journey with three or more branches",
+      "new_metrics": "new metrics or datasets"
+    },
+    "enforced_when": [
+      "security"
     ]
   }
 }

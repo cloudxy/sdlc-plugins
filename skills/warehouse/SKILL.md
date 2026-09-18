@@ -120,6 +120,7 @@ Quality assertions (four types, run after every ETL):
 
 | Reference | Read when... |
 |---|---|
+| [lineage-diagram.md](references/lineage-diagram.md) | Packet visuals lineage: drawing metric lineage checked against metrics.yaml and the schema |
 | [tags-and-segments.md](references/tags-and-segments.md) | Designing the user tag system, lifecycle and RFM tags, segment definitions for growth, tag quality and privacy |
 | [layering-deep-dive.md](references/layering-deep-dive.md) | ODS/DWD/DWS/ADS decisions, prefix contracts |
 | [metrics-yaml-guide.md](references/metrics-yaml-guide.md) | Authoring or reviewing metrics.yaml |

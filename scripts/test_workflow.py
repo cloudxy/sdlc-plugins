@@ -157,6 +157,29 @@ class WorkflowTests(unittest.TestCase):
         self.put("02-shape/prototypes/final/index.html", "<h1>final</h1>\n")
         self.assertEqual(check_task(self.registry, self.root, "designer", "designer", "specify"), [])
 
+    # ---- package C: diagrams
+    def dba_packet(self, extra=""):
+        return (self.packet(role="dba", stage="dba", task="model", skill="schema",
+                            outputs=["02-shape/db-spec.md", "02-shape/schema.dbml"]) + extra)
+
+    def test_visuals_require_svg_guide_and_diagram_check(self):
+        codes = {e["code"] for e in lint(self.dba_packet("visuals: [er]\n"))["errors"]}
+        self.assertIn("DIAGRAM", codes)
+        good = self.dba_packet("visuals: [er]\n").replace(
+            "deliverable_paths:\n", "deliverable_paths:\n  - 02-shape/assets/f-er.svg\n").replace(
+            "success_checks:\n", f"success_checks:\n  - python3 {ROOT}/scripts/diagram/lint.py --root {self.root} {self.root}/02-shape/assets/f-er.svg\n")
+        good += (f"inputs:\n  - {{path: {ROOT}/vendor/svg-diagram/SKILL.md, required: true}}\n"
+                 f"  - {{path: {ROOT}/skills/schema/references/er-diagram.md, required: true}}\n")
+        self.assertEqual({e["code"] for e in lint(good)["errors"]}, set())
+
+    def test_visual_not_in_contract_is_rejected(self):
+        self.assertIn("VISUALS", {e["code"] for e in lint(self.dba_packet("visuals: [lineage]\n"))["errors"]})
+
+    def test_security_feature_requires_trust_boundary(self):
+        self.put("state.yaml", "feature: f\nq_security: yes\n")
+        pk = self.packet(role="architect", stage="shape", task="contract", skill="architecture", outputs=["02-shape/contract.md"])
+        self.assertIn("VISUALS", {e["code"] for e in lint(pk)["errors"]})
+
     def test_symlink_outside_root_cannot_satisfy_task(self):
         self.put("02-shape/design-brief.md"); self.put("02-shape/design-directions.md")
         directory = self.root / "02-shape/prototypes"; directory.mkdir()

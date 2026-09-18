@@ -826,6 +826,21 @@ if [ -f "$ST" ]; then
     [ -n "$FIND" ] || red FINDINGS "$ST: 已记 fresh-context 但无 findings.md（审查结论必须落盘）"
   fi
 
+  # DIAGRAM：功能目录里的每张图都要过绘图闸门（来源声明、安全、svg-lint 零警告、与来源的语义比对）
+  if is_v4; then
+    SVGS=$(find "$ROOT" -path '*/assets/*.svg' -not -path '*/shots/*' 2>/dev/null | sort)
+    if [ -n "$SVGS" ]; then
+      DOUT=$(printf '%s\n' "$SVGS" | tr '\n' '\0' | xargs -0 python3 "$SCRIPT_DIR/diagram/lint.py" --root "$ROOT" 2>&1)
+      DCODE=$?
+      while IFS= read -r line; do
+        case "$line" in *'✗ [DIAGRAM-'*) red DIAGRAM "${line#*] }" ;; esac
+      done <<EOF
+$DOUT
+EOF
+      [ "$DCODE" -eq 2 ] && ! printf '%s' "$DOUT" | grep -q '✗ \[DIAGRAM-' && red DIAGRAM "diagram check could not run: ${DOUT}"
+    fi
+  fi
+
   # v4 ACCEPT：任何验收结论「不通过」都挡住整棵树，直到重新验收
   if is_v4; then
     for af in "$ROOT"/04-verify/accept-*.md; do

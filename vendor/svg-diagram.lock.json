@@ -30,7 +30,7 @@
     {
       "path": "SKILL.md",
       "sha256": "9be93a5e8b79881bd9a9e993f19ff28f1e67f5bf63422f99b8e99bd2996cd0a9",
-      "purpose": "maintainer"
+      "purpose": "runtime"
     },
     {
       "path": "assets/house-style.svg",
@@ -50,7 +50,7 @@
     {
       "path": "tools/svg-lint/bin/svg-lint.mjs",
       "sha256": "79a1f24608047f2b73296e42e7704623aa5505ff3f9ba91cdeb6f8d8408168d7",
-      "purpose": "maintainer"
+      "purpose": "runtime"
     },
     {
       "path": "tools/svg-lint/lib/checks/arrow-marker.mjs",
@@ -174,8 +174,8 @@
     }
   ],
   "license": "MIT",
-  "adopted_at": "2026-09-18T16:06:37+0800",
-  "previous_commit": null,
+  "adopted_at": "2026-09-18T19:30:38+0800",
+  "previous_commit": "c30c9e3bc9a70f2b77b60c7ea27157de3a88d81a",
   "reviewed_by": "plugin-updater inspect/gate.sh (content)",
   "note": "由 plugin-updater 写入，不要手改。vendor/ 内容不进 git；使用者运行 vendor/install.sh 按本锁文件的 commit 下载并校验 tree_digest。",
   "node": "v25.9.0"

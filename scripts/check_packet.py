@@ -180,6 +180,49 @@ def check_evidence(p, contract, stage, err):
         err("EVIDENCE", f"evidence_required must list {', '.join(missing)} (registry contract for this task; a packet may add, never drop)")
 
 
+def _security_feature(p):
+    st = os.path.join(str(p.get("feature_dir") or ""), "state.yaml")
+    try:
+        return bool(re.search(r"^q_security:\s*yes\b", open(st, encoding="utf-8").read(), re.M))
+    except OSError:
+        return False
+
+
+def check_visuals(p, contract, stage, err):
+    """Diagrams the packet asks for must be drawn with the vendored conventions and checked by the diagram gate."""
+    kinds = {v["type"]: v["when"] for v in contract.get("visuals", [])}
+    asked = [str(x).strip() for x in p.get("visuals") or []]
+    for v in asked:
+        if v not in kinds:
+            err("VISUALS", f"visuals lists {v}; this task draws only {', '.join(kinds) or 'no diagrams'}")
+    for v, when in kinds.items():
+        if when in REGISTRY["diagram"]["enforced_when"] and when == "security" and _security_feature(p) and v not in asked:
+            err("VISUALS", f"q_security: yes — visuals must include {v}")
+    if not [v for v in asked if v in kinds]:
+        return
+    d = REGISTRY["diagram"]
+    base = os.path.normpath(str((p.get("product_root") if stage == "product" else p.get("feature_dir")) or ""))
+    outs = [str(o) for o in p.get("deliverable_paths") or []]
+    if not any(fnmatch.fnmatchcase(o.replace(base + "/", ""), f"{contract['diagram_dir']}/*.svg") for o in outs):
+        err("DIAGRAM", f"visuals need an SVG deliverable under {contract['diagram_dir']}/ (e.g. {contract['diagram_dir']}/<name>.svg)")
+    inputs = [str(i.get("path", "")) if isinstance(i, dict) else str(i) for i in p.get("inputs") or []]
+    for need in (d["guide"], contract["diagram_reference"]):
+        if not any(i.endswith(need) for i in inputs):
+            err("DIAGRAM", f"inputs must include PLUGIN_ROOT/{need}")
+    checks = []
+    for chk in p.get("success_checks") or []:
+        try:
+            tok = shlex.split(str(chk))
+        except ValueError:
+            continue
+        if any(x.endswith(d["lint"]) for x in tok):
+            checks.append(tok)
+    if not checks:
+        err("DIAGRAM", f"success_checks must run python3 PLUGIN_ROOT/{d['lint']} --root {base} <svg> (the contract prints it as diagram.check)")
+    elif not any(os.path.normpath(str(_flag(tok, "--root") or "")) == base for tok in checks):
+        err("DIAGRAM", f"the diagram check must use --root {base}")
+
+
 # ----------------------------------------------------------------------------- lint
 def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
     errors: list[dict[str, str]] = []
@@ -253,6 +296,7 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
                     + (" (prototype is throwaway discovery code; design prototypes follow design-contract direction-prototypes.md)" if name == "prototype" else ""))
         check_success_checks(p, contract, hat, stage, err)
         check_evidence(p, contract, stage, err)
+        check_visuals(p, contract, stage, err)
     except ValueError as error:
         err("TASK", str(error))
 

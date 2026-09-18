@@ -190,7 +190,7 @@ Run `EXPLAIN` (or `EXPLAIN ANALYZE` for real timing) for each Top-N pattern. Pas
 
 ### Stage 8 — Roadmap stress test: "Will the next features be additive?"
 
-Take the Next / Later items in `feature-map.md` (and variety the strategy already names: new source types, new roles, multi-currency, new regions) and walk each through the new model: what DDL would it need, is it additive or destructive, what does it cost? Destructive results either change the model now (preferred when the item is Next) or are accepted with a reason and a trigger. Choose extension patterns only for variation the product expects — type table + JSON config with generated-column indexes, extension (1:1 side) tables, polymorphic links with a type column, temporal/versioned rows — never "just in case" ([extensibility-patterns.md](references/extensibility-patterns.md)).
+Take the Next / Later items in `feature-map.md` (and variety the strategy names, e.g. new roles, currencies, regions) and walk each through the new model: what DDL would it need, is it additive or destructive, what does it cost? Destructive results either change the model now (preferred when the item is Next) or are accepted with a reason and a trigger. Choose extension patterns only for variation the product expects — type table + JSON config with generated-column indexes, extension (1:1 side) tables, polymorphic links with a type column, temporal/versioned rows — never "just in case" ([extensibility-patterns.md](references/extensibility-patterns.md)).
 
 ### Redis key governance
 
@@ -256,6 +256,7 @@ Read a reference when the task is complex, when you're about to produce a delive
 
 | Reference | Read when... |
 |---|---|
+| [er-diagram.md](references/er-diagram.md) | Packet visuals er/state (checked against the DBML) |
 | [domain-modeling.md](references/domain-modeling.md) | Stage 0: bounded contexts, aggregates and invariants, event storming lite, reverse-engineering an existing schema |
 | [extensibility-patterns.md](references/extensibility-patterns.md) | Stage 8: extension patterns with costs, EAV trap, writing the roadmap stress test |
 | [modeling-patterns.md](references/modeling-patterns.md) | Modeling hits hierarchy, audit, money, snapshot, multi-tenant, state machine, or idempotency |

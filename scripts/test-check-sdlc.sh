@@ -848,6 +848,26 @@ cp "$ROOT/skills/prd-gwt/templates/spec.md" "$F/01-define/spec.md"
 assert_exit 2 "a copied, unfilled spec template is HATMISS (C03)" --hat define "$F"
 assert_tag HATMISS
 
+# 46. DIAGRAM：功能目录里的图必须过绘图闸门（与 DBML 语义一致、svg-lint 零警告）
+if [ -f "$ROOT/vendor/svg-diagram/assets/house-style.svg" ] && command -v node >/dev/null 2>&1; then
+  mk_v4 dg
+  F="$T/dg/.sdlc/f"
+  mkdir -p "$F/02-shape/assets"
+  printf 'Table users {\n  id bigint [pk]\n}\nTable orders {\n  id bigint [pk]\n  user_id bigint [ref: > users.id]\n}\n' >"$F/02-shape/schema.dbml"
+  python3 - "$ROOT/vendor/svg-diagram/assets/house-style.svg" "$F/02-shape/assets/f-er.svg" <<'PY'
+import re, sys
+t = open(sys.argv[1]).read()
+meta = '<metadata id="sdlc">{"type": "er", "owner": "dba", "sources": ["02-shape/schema.dbml"]}</metadata>'
+t = re.sub(r"(<svg[^>]*>)", r"\1" + meta, t, count=1)
+t = t.replace("</svg>", '<g data-sdlc-id="users"/><g data-sdlc-id="orders"/><g data-sdlc-id="orders.user_id->users.id"/></svg>')
+open(sys.argv[2], "w").write(t)
+PY
+  assert_exit 0 "an ER diagram matching its DBML passes the stage gate" --hat define "$F"
+  sed -i.bak 's#<g data-sdlc-id="orders.user_id->users.id"/>##' "$F/02-shape/assets/f-er.svg" && rm -f "$F/02-shape/assets/f-er.svg.bak"
+  assert_exit 1 "an ER diagram missing a DBML relationship is DIAGRAM" --hat define "$F"
+  assert_tag DIAGRAM
+fi
+
 if [ "$fail" -ne 0 ]; then
   echo "----------------------------------------"
   echo "test-check-sdlc: $fail failed"

@@ -91,6 +91,7 @@ One ticket = one journey step range, backend + frontend + tests + integration ru
 | [quality-attributes.md](references/quality-attributes.md) | Writing scenarios, estimating capacity, comparing options, planning evolution stages, choosing fitness functions |
 | [adr-and-tradeoffs.md](references/adr-and-tradeoffs.md) | Writing ADRs, storage and consistency trade-offs, sync vs async |
 | [boundary-derivation.md](references/boundary-derivation.md) | Deriving module boundaries from FRs, fixing cycles, when to split services |
+| [diagrams.md](references/diagrams.md) | Packet visuals architecture/sequence/trust-boundary (trust-boundary required when q_security: yes) |
 | [contract-design.md](references/contract-design.md) | API and event contracts |
 | [threat-model.md](references/threat-model.md) | Q-security = yes: STRIDE per trust boundary → `[SEC-n]` in the contract |
 | [auto-agents-pitfalls.md](references/auto-agents-pitfalls.md) | Verified auto_agents boundary traps |

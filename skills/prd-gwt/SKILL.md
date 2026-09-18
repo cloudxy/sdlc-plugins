@@ -111,6 +111,7 @@ Budget first, scope follows. Cut **around** the path to Aha, not through it: by 
 | [product-shaping.md](references/product-shaping.md) | Before any FR: JTBD, core value path and Aha, removal test + Kano, opportunity–solution tree, MVP skeleton, 0→1 hypothesis mode |
 | [requirement-triage.md](references/requirement-triage.md) | Triaging requirements, digging for the real problem behind solution-speak, RICE |
 | [gwt-authoring.md](references/gwt-authoring.md) | Writing GWT, fixing untestable words, enumerating edge cases, one-oracle rule |
+| [flow-diagram.md](references/flow-diagram.md) | Packet visuals flow/state: drawing a checked business flow or state diagram from the spec |
 | [metrics-blueprint.md](references/metrics-blueprint.md) | Designing metrics and instrumentation gaps |
 | [acceptance-walkthrough.md](references/acceptance-walkthrough.md) | Stage accept: walking journeys on the build, severity, verdict |
 | [auto-agents-pitfalls.md](references/auto-agents-pitfalls.md) | Verified auto_agents product-contract traps (xlsx vs Excel, dual public gates) |

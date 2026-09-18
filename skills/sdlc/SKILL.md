@@ -121,6 +121,10 @@ deliverable_paths:
   - <relative to feature_dir>   # implement: 03-impl/T-<n>-<role>-evidence.md (one file per lane)
 evidence_required:          # copy the contract's `evidence` list (web | screenshots | running_app | e2e); add, never drop
   - <kind>
+visuals: []                 # diagrams this task draws (contract `visuals`; trust-boundary is required when q_security: yes).
+                            # Non-empty → add contract.diagram.inputs to inputs, contract.diagram.deliverable to
+                            # deliverable_paths and contract.diagram.check to success_checks. A diagram is a view of its
+                            # source: draw it only when it removes ambiguity for the next hat.
 forbidden:
   - Do not spawn further subagents (host depth 1).
   - Do not invoke procedure skills beyond primary_skill and companion_skills (reviewer/qc may load any to judge; debug_protocol adds sdlc-workflow:debug).

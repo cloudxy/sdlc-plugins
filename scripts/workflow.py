@@ -61,6 +61,11 @@ def validate_registry(registry, root=ROOT):
         for art in t["required"]:
             if art not in registry["artifacts"]:
                 errors.append(f"{key}: unknown artifact {art}")
+        for v in t.get("visuals", []):
+            if v.get("type") not in registry.get("diagram", {}).get("types", []) or v.get("when") not in registry.get("diagram", {}).get("when", {}):
+                errors.append(f"{key}: unknown visual {v}")
+        if t.get("visuals") and not (root / t.get("diagram_reference", "")).is_file():
+            errors.append(f"{key}: diagram_reference {t.get('diagram_reference')} missing")
         for ev in t.get("evidence", []):
             kind = ev.get("kind") if isinstance(ev, dict) else ev
             if kind not in EVIDENCE_KINDS:
@@ -279,6 +284,17 @@ def main():
             task = dict(resolve_task(r, args.role, args.stage, args.task))
             task["artifacts"] = {key: r["artifacts"][key] for key in task["required"]}
             task["success_check"] = success_check(task)
+            if task.get("visuals"):
+                d = r["diagram"]
+                base = "<product_root>" if task["stage"] == "product" else "<feature_dir>"
+                task["diagram"] = {
+                    "when": {v["type"]: d["when"][v["when"]] for v in task["visuals"]},
+                    "enforced": [v["type"] for v in task["visuals"] if v["when"] in d["enforced_when"]],
+                    "inputs": [f"<PLUGIN_ROOT>/{d['guide']}", f"<PLUGIN_ROOT>/{task['diagram_reference']}"],
+                    "deliverable": f"{task['diagram_dir']}/<name>.svg",
+                    "check": f"python3 <PLUGIN_ROOT>/{d['lint']} --root {base} {base}/{task['diagram_dir']}/<name>.svg",
+                    "render": f"bash <PLUGIN_ROOT>/{d['render']} {base}/{task['diagram_dir']}/shots {base}/{task['diagram_dir']}/<name>.svg",
+                }
             task.setdefault("evidence", [])
             print(json.dumps(task, ensure_ascii=False, indent=2)); return 0
         if not Path(args.root).is_dir():
