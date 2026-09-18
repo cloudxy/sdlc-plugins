@@ -21,6 +21,16 @@ INLINE_REF = re.compile(r"""^\s*("?\w+"?)\s+[^\n\[]*\[[^\]]*\bref\s*:\s*(?:<>|<|
 COMPOSITE = re.compile(r"\w+\.\(\s*\w+\s*,")
 
 
+def table_blocks(text: str):
+    """Yield (table name, body) with braces matched, so an `indexes { … }` block does not end the table early."""
+    for m in re.finditer(r"""^\s*Table\s+("?[\w.]+"?)[^{\n]*\{""", text, re.M | re.I):
+        depth, i = 1, m.end()
+        while i < len(text) and depth:
+            depth += {"{": 1, "}": -1}.get(text[i], 0)
+            i += 1
+        yield m.group(1), text[m.end():i - 1]
+
+
 def _clean(s: str) -> str:
     return s.strip().strip('"').split(".")[-1].lower()
 
@@ -36,9 +46,9 @@ def parse_dbml(text: str) -> tuple[set[str], set[str], list[str]]:
     for m in TABLE.finditer(text):
         tables.add(_clean(m.group(1)))
     # inline refs: need the owning table, so walk table blocks
-    for m in re.finditer(r"""^\s*Table\s+("?[\w.]+"?)[^{]*\{(.*?)^\s*\}""", text, re.M | re.S | re.I):
-        owner = _clean(m.group(1))
-        for im in INLINE_REF.finditer(m.group(2)):
+    for name, body in table_blocks(text):
+        owner = _clean(name)
+        for im in INLINE_REF.finditer(body):
             rels.add(rel_key(owner, im.group(1), im.group(2), im.group(3)))
     for m in re.finditer(r"""^\s*Ref\b[^:{\n]*[:{](.*?)(?:\}|$)""", text, re.M | re.S | re.I):
         body = m.group(1)

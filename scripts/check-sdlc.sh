@@ -229,6 +229,10 @@ if [ "$HAT_GIVEN" = "1" ] && [ "$HATID" = "product" ]; then
       fi
     done
     if [ -f "$PRD/growth.md" ] && ! is_unfilled "$PRD/growth.md"; then need_sources "$PRD/growth.md" 3 "--hat product growth.md"; fi
+    if [ -f "$PRD/data-dictionary.md" ]; then
+      python3 "$SCRIPT_DIR/data_dictionary.py" --product-root "$PRD" --check >/dev/null 2>&1 \
+        || red PRODUCTCTX "$PRD/data-dictionary.md: 与 erd.dbml / domain-model.md / data/metrics.yaml 不一致（来源已变或被手改）——重新生成：python3 PLUGIN_ROOT/scripts/data_dictionary.py --product-root $PRD"
+    fi
     DS="$PRD/design-system.md"
     if [ -f "$DS" ] && ! is_unfilled "$DS"; then
       has_existing_image "$DS" || red PRODUCTUI "$DS: 没有引用任何存在的截图——设计系统要从运行中的产品反推：按 app.start 启动，scripts/ui-evidence.sh 截图并引用 PNG（尚无界面的新产品引用原型截图；check_config.py --probe 查应用是否在跑）"

@@ -868,6 +868,15 @@ PY
   assert_tag DIAGRAM
 fi
 
+# 47. 数据字典是生成视图：来源变了或被手改都不算一致
+mk_v4 dd
+PR="$T/dd/docs/product"
+python3 "$ROOT/scripts/data_dictionary.py" --product-root "$PR" >/dev/null
+assert_exit 0 "a freshly generated data dictionary passes the product gate" --hat product "$PR"
+printf '\n手工补充一行\n' >>"$PR/data-dictionary.md"
+assert_exit 1 "a hand-edited data dictionary is PRODUCTCTX" --hat product "$PR"
+assert_tag PRODUCTCTX
+
 if [ "$fail" -ne 0 ]; then
   echo "----------------------------------------"
   echo "test-check-sdlc: $fail failed"

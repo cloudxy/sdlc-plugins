@@ -9,21 +9,13 @@ import re
 import subprocess
 import sys
 from workflow import load_registry, validate_registry, generated_files
+import vendorlib
 
 RED, YEL, GRN, NC = "\033[0;31m", "\033[0;33m", "\033[0;32m", "\033[0m"
 
 
 def _vendor_tree(root: str) -> tuple[str, dict[str, str]]:
-    """与 plugin-updater/scripts/update/vendor.py 的 tree_digest 同一算法。"""
-    files: dict[str, str] = {}
-    for dp, _dn, fn in os.walk(root):
-        for f in fn:
-            p = os.path.join(dp, f)
-            files[os.path.relpath(p, root).replace(os.sep, "/")] = hashlib.sha256(open(p, "rb").read()).hexdigest()
-    h = hashlib.sha256()
-    for rel in sorted(files):
-        h.update(f"{rel}\0{files[rel]}\n".encode())
-    return h.hexdigest(), files
+    return vendorlib.tree(root)
 
 
 def check_vendor(root: str, err, warn, ok) -> None:
@@ -58,7 +50,7 @@ def check_vendor(root: str, err, warn, ok) -> None:
             continue
         target = lk[: -len(".lock.json")]
         vrel = os.path.relpath(target, root).replace(os.sep, "/")
-        restricted = (lock.get("license") or "unknown") not in ("MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC")
+        restricted = (lock.get("license") or "unknown") not in vendorlib.FREE_LICENSES
         runtime = [f["path"] for f in lock.get("files", []) if f.get("purpose") == "runtime"]
         if restricted and runtime:
             err("VENDOR", f"{vrel} 许可证为「{lock.get('license')}」，使用者默认不下载，不能有 runtime 文件: {', '.join(runtime[:3])}")

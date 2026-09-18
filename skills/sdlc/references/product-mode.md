@@ -19,6 +19,7 @@ the supplied arguments
    7. **data-warehouse-engineer** (after data-collector — metrics are computed from events) → `data/metrics.yaml`, `data/tags.yaml`.
    8. **growth** (last — highlights sit on feature-map journeys, segments reference `tag:<id>`, KPIs reference `metric:<id>`; web research required) → `growth.md`.
    On an unknown type: one `general-purpose` fallback that Reads `PLUGIN_ROOT/agents/<role>.md` and the owning skill; note it in `progress.md`.
+   After dba (and the data hats when they ran): `python3 <PLUGIN_ROOT>/scripts/data_dictionary.py --product-root <product_root>` writes `data-dictionary.md`, a generated view of `erd.dbml` + the `domain-model.md` glossary + `data/metrics.yaml`. Nobody edits it; its 缺口 section goes back to the owners as open items.
 5. **Gate:** `bash <PLUGIN_ROOT>/scripts/check-sdlc.sh --hat product <product_root>`.
    - PRODUCTCTX → respawn the owner with the failing line.
    - DECISIONPENDING → back to step 4.2 (ask); not rework.
