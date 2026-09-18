@@ -27,7 +27,7 @@ Job: **implement a journey slice that works end-to-end for the user, and leave r
 ## Gotchas
 
 - **This file is the shared protocol, not a fourth implementation style.** After Orient, read the lane file for the hat you are.
-- **Evidence is command + exit code pasted verbatim.** "It passed" is not evidence.
+- **Evidence is command + exit code pasted verbatim.** "It passed" is not evidence. One evidence file per ticket and lane: `03-impl/T-<n>-<role>-evidence.md` (e.g. `T-3-backend-evidence.md`). Another lane's file for the same ticket never counts for yours.
 - **Tests green ≠ slice works.** A UI slice is done only after an integration run against the real backend: walk the journey steps, take screenshots (`bash PLUGIN_ROOT/scripts/ui-evidence.sh <url> 03-impl/screens/T-<n> 375,1440`), look at them, compare with the picked prototype, and write `03-impl/T-<n>-integration.md` ([templates/integration.md](templates/integration.md)). v4 gate `INTEGRATION`.
 - **Contract examples first.** Backend publishes example responses or a mock for the slice before building internals so frontend works in parallel; both sides then integrate on the real service.
 - **Events ship with the feature.** Implement `tracking.md` events in the same slice (server-side for results, client-side for UI behaviour) and check they fire during the integration run.

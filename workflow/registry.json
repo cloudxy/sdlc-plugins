@@ -640,6 +640,9 @@
       "skill": "market",
       "required": [
         "market"
+      ],
+      "evidence": [
+        "web"
       ]
     },
     {
@@ -649,6 +652,9 @@
       "skill": "compete",
       "required": [
         "compete"
+      ],
+      "evidence": [
+        "web"
       ]
     },
     {
@@ -658,6 +664,9 @@
       "skill": "growth",
       "required": [
         "growth"
+      ],
+      "evidence": [
+        "web"
       ]
     },
     {
@@ -690,6 +699,10 @@
       ],
       "companions": [
         "prototype"
+      ],
+      "evidence": [
+        "web",
+        "screenshots"
       ]
     },
     {
@@ -771,6 +784,10 @@
       "companions": [
         "tdd",
         "refactor"
+      ],
+      "evidence": [
+        "running_app",
+        "screenshots"
       ]
     },
     {
@@ -825,6 +842,10 @@
       "skill": "prd-gwt",
       "required": [
         "accept-pm"
+      ],
+      "evidence": [
+        "running_app",
+        "screenshots"
       ]
     },
     {
@@ -834,6 +855,10 @@
       "skill": "design-contract",
       "required": [
         "accept-designer"
+      ],
+      "evidence": [
+        "running_app",
+        "screenshots"
       ]
     },
     {
@@ -843,6 +868,10 @@
       "skill": "growth",
       "required": [
         "accept-growth"
+      ],
+      "evidence": [
+        "running_app",
+        "screenshots"
       ]
     },
     {
@@ -855,6 +884,12 @@
       ],
       "aliases": [
         "risk-based tests"
+      ],
+      "evidence": [
+        {
+          "kind": "e2e",
+          "when": "ui"
+        }
       ]
     },
     {
@@ -943,6 +978,9 @@
       "required": [],
       "product_outputs": [
         "growth.md"
+      ],
+      "evidence": [
+        "web"
       ]
     },
     {
@@ -953,6 +991,10 @@
       "required": [],
       "product_outputs": [
         "design-system.md"
+      ],
+      "evidence": [
+        "running_app",
+        "screenshots"
       ]
     },
     {

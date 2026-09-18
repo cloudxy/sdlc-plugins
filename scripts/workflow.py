@@ -13,6 +13,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+# Evidence a task must produce; a packet may add to these, never drop them (check_packet EVIDENCE).
+EVIDENCE_KINDS = {"web", "screenshots", "running_app", "e2e"}
 
 
 def load_registry(root=ROOT):
@@ -59,6 +61,10 @@ def validate_registry(registry, root=ROOT):
         for art in t["required"]:
             if art not in registry["artifacts"]:
                 errors.append(f"{key}: unknown artifact {art}")
+        for ev in t.get("evidence", []):
+            kind = ev.get("kind") if isinstance(ev, dict) else ev
+            if kind not in EVIDENCE_KINDS:
+                errors.append(f"{key}: unknown evidence kind {kind}")
         for companion in t.get("companions", []):
             if not (root / "skills" / companion / "SKILL.md").is_file():
                 errors.append(f"{key}: unknown companion {companion}")
@@ -101,24 +107,30 @@ def deliverable(p):
     return not UNFILLED.search(head.decode("utf-8", errors="replace"))
 
 
-def existing(root, patterns, task=None):
+def ticket_pattern(pattern, task=None, role=None):
+    """Implementation evidence is per ticket AND per lane: 03-impl/T-<n>-<role>-evidence.md.
+    Another ticket's evidence, or another lane's evidence for the same ticket, never satisfies a task (N02)."""
+    if task and re.fullmatch(r"T-[1-9][0-9]*", task):
+        return pattern.replace("*evidence*", f"{task}-{role}-*evidence*" if role else f"{task}-*evidence*")
+    return pattern
+
+
+def existing(root, patterns, task=None, role=None):
     for pattern in patterns:
-        # One ticket's evidence cannot satisfy a different ticket's task check.
-        if task and re.fullmatch(r"T-[1-9][0-9]*", task):
-            pattern = pattern.replace("*evidence*", task + "-*evidence*")
+        pattern = ticket_pattern(pattern, task, role)
         for p in Path(root).glob(pattern):
             if deliverable(p) and p.resolve().is_relative_to(Path(root).resolve()):
                 return p
     return None
 
 
-def check_groups(registry, root, groups, skipped=(), ui=False, task=None, legacy=True):
+def check_groups(registry, root, groups, skipped=(), ui=False, task=None, legacy=True, role=None):
     results = []
     for group in groups:
         if group.get("role") in skipped or (group.get("when") == "ui" and not ui):
             continue
         paths = artifact_paths(registry, group["any"])
-        if existing(root, paths, task):
+        if existing(root, paths, task, role):
             continue
         old = existing(root, artifact_paths(registry, group["any"], True), task) if legacy else None
         if old:
@@ -131,14 +143,38 @@ def check_groups(registry, root, groups, skipped=(), ui=False, task=None, legacy
     return results
 
 
-def check_task(registry, root, role, stage, task):
+def check_task(registry, root, role, stage, task, product_root=None):
     t = resolve_task(registry, role, stage, task)
-    results = check_groups(registry, root, [{"any": [a]} for a in t["required"]], task=task, legacy=False)
-    # Product tasks use product_root. Reviewer output is persisted by the manager separately.
-    for path in t.get("product_outputs", []):
-        if not existing(root, [path]):
-            results.append(("error", "HATMISS", f"missing product file {path}"))
+    results = []
+    for a in t["required"]:
+        paths = artifact_paths(registry, [a])
+        if existing(root, paths, task, role):
+            continue
+        legacy = [p for p in paths if "*evidence*" in p]
+        old = existing(root, [p.replace("*evidence*", f"{task}-evidence") for p in legacy]) if legacy and re.fullmatch(r"T-[1-9][0-9]*", task) else None
+        if old:
+            results.append(("warning", "DEPRECATED", f"{old}: rename to {task}-{role}-evidence.md (one file per lane)"))
+        else:
+            results += check_groups(registry, root, [{"any": [a]}], task=task, legacy=False, role=role)
+    # Product outputs live under product_root, not under the feature directory (N01).
+    if t.get("product_outputs"):
+        if not product_root:
+            results.append(("error", "USAGE", f"{role}/{stage}/{task} writes product files: pass --product-root <product_root>"))
+        else:
+            for path in t["product_outputs"]:
+                if not existing(product_root, [path]):
+                    results.append(("error", "HATMISS", f"missing or unfilled product file {path} under {product_root}"))
     return results
+
+
+def success_check(task):
+    """The one check-task command a packet must carry for this task (check_packet compares against it)."""
+    cmd = (f"python3 <PLUGIN_ROOT>/scripts/workflow.py check-task --role {task['role']} --stage {task['stage']} "
+           f"--task {task['task'] if not task.get('task_pattern') else '<T-n>'} "
+           f"--root {'<product_root>' if task['stage'] == 'product' else '<feature_dir>'}")
+    if task.get("product_outputs"):
+        cmd += " --product-root <product_root>"
+    return cmd
 
 
 def render_commands(registry):
@@ -199,6 +235,7 @@ def main():
             p.add_argument("--" + field, required=True)
         if command == "check-task":
             p.add_argument("--root", required=True)
+            p.add_argument("--product-root")
     p = sub.add_parser("check-stage")
     p.add_argument("--stage", required=True); p.add_argument("--root", required=True)
     p.add_argument("--skip", action="append", default=[]); p.add_argument("--ui", action="store_true")
@@ -241,11 +278,13 @@ def main():
         if args.command == "contract":
             task = dict(resolve_task(r, args.role, args.stage, args.task))
             task["artifacts"] = {key: r["artifacts"][key] for key in task["required"]}
+            task["success_check"] = success_check(task)
+            task.setdefault("evidence", [])
             print(json.dumps(task, ensure_ascii=False, indent=2)); return 0
         if not Path(args.root).is_dir():
             raise ValueError(f"artifact root does not exist: {args.root}")
         if args.command == "check-task":
-            results = check_task(r, args.root, args.role, args.stage, args.task)
+            results = check_task(r, args.root, args.role, args.stage, args.task, args.product_root)
         else:
             results = check_groups(r, args.root, r["stages"][args.stage]["required"], args.skip, args.ui)
         for result in results:

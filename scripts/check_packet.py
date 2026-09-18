@@ -26,7 +26,9 @@ import fnmatch
 from pathlib import Path
 from typing import Any
 
-from workflow import load_registry, resolve_task, artifact_paths
+import shlex
+
+from workflow import load_registry, resolve_task, artifact_paths, ticket_pattern
 
 REGISTRY = load_registry()
 STAGES = set(REGISTRY["stages"])
@@ -119,6 +121,65 @@ def parse_packet(block: str) -> dict[str, Any]:
     return data
 
 
+# ----------------------------------------------------------------------------- positive contracts
+def _flag(tokens, name):
+    return tokens[tokens.index(name) + 1] if name in tokens and tokens.index(name) + 1 < len(tokens) else None
+
+
+def check_success_checks(p, contract, hat, stage, err):
+    """The packet must carry this task's own check-task line (workflow.py contract → success_check), with the
+    real roots filled in. A check for another task, another root, or `echo ok` is not a success check (N05)."""
+    feature_dir = os.path.normpath(str(p.get("feature_dir") or ""))
+    product_root = os.path.normpath(str(p.get("product_root") or ""))
+    want_root = product_root if stage == "product" else feature_dir
+    found = []
+    for chk in p.get("success_checks") or []:
+        try:
+            tok = shlex.split(str(chk))
+        except ValueError:
+            continue
+        if "check-task" not in tok or not any(x.endswith("workflow.py") for x in tok):
+            continue
+        found.append(tok)
+        got = (_flag(tok, "--role"), _flag(tok, "--stage"), _flag(tok, "--task"))
+        if got != (hat, stage, str(p.get("task"))):
+            err("CHECKMISMATCH", f"success_checks runs check-task for {'/'.join(map(str, got))}, not {hat}/{stage}/{p.get('task')}")
+        if os.path.normpath(str(_flag(tok, "--root") or "")) != want_root:
+            err("CHECKMISMATCH", f"success_checks check-task --root must be {want_root}")
+        if contract.get("product_outputs") and os.path.normpath(str(_flag(tok, "--product-root") or "")) != product_root:
+            err("CHECKMISMATCH", f"success_checks check-task --product-root must be {product_root}")
+    if not found:
+        err("MISSING-CHECK", "success_checks must include this task's check: "
+            "python3 <PLUGIN_ROOT>/scripts/workflow.py contract … prints it as success_check (fill in the real paths)")
+
+
+def _ui_feature(p):
+    if str(p.get("ui", "")).lower() in ("yes", "true"):
+        return True
+    st = os.path.join(str(p.get("feature_dir") or ""), "state.yaml")
+    try:
+        return bool(re.search(r"^ui:\s*(yes|true)\b", open(st, encoding="utf-8").read(), re.M))
+    except OSError:
+        return False
+
+
+def check_evidence(p, contract, stage, err):
+    """Evidence the registry requires for this task must be listed under evidence_required. A packet can add
+    evidence, never drop it: rewording a waiver cannot lower what the gate later verifies (N06)."""
+    need = set()
+    for ev in contract.get("evidence", []):
+        if isinstance(ev, dict):
+            if ev.get("when") == "ui" and not _ui_feature(p):
+                continue
+            need.add(ev["kind"])
+        else:
+            need.add(ev)
+    have = {str(x).strip() for x in p.get("evidence_required") or []}
+    missing = sorted(need - have)
+    if missing:
+        err("EVIDENCE", f"evidence_required must list {', '.join(missing)} (registry contract for this task; a packet may add, never drop)")
+
+
 # ----------------------------------------------------------------------------- lint
 def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
     errors: list[dict[str, str]] = []
@@ -160,25 +221,32 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
             if p.get("slice_integrator") not in implementers:
                 err("INTEGRATOR", "implementation packets must name one implementation role as slice_integrator")
         declared = []
-        base = Path(str(p.get("feature_dir") or p.get("product_root") or "."))
+        base_raw = p.get("product_root") if stage == "product" else p.get("feature_dir")
+        base = Path(str(base_raw or "."))
+        owned = {os.path.normpath(str(w)) for w in p.get("product_writes") or []}
         for output in p.get("deliverable_paths") or []:
             path = Path(str(output))
             if path.is_absolute():
+                if os.path.normpath(str(path)) in owned:
+                    continue  # a product file this hat owns, checked with product_writes below
                 try:
-                    path = path.relative_to(base)
+                    path = Path(os.path.normpath(str(path))).relative_to(os.path.normpath(str(base)))
                 except ValueError:
-                    continue  # separately scoped product_writes are checked below
+                    # Writes outside the artifact root were silently allowed (N04): the hat is told
+                    # "do not write outside deliverable_paths", so listing a path authorises it.
+                    err("DELIVERABLE-SCOPE", f"deliverable outside the artifact root {base}: {output}")
+                    continue
             if ".." in path.parts:
                 err("DELIVERABLE", f"deliverable escapes artifact root: {output}")
             declared.append(path.as_posix().rstrip("/"))
         for key in contract["required"]:
-            patterns = artifact_paths(REGISTRY, [key])
-            if stage == "implement":
-                patterns = [s.replace("*evidence*", str(p["task"]) + "-*evidence*") for s in patterns]
+            patterns = [ticket_pattern(s, str(p["task"]), hat) for s in artifact_paths(REGISTRY, [key])]
             if not any(fnmatch.fnmatchcase(path, pattern) or
                        (pattern.endswith("/*") and path == pattern[:-2])
                        for path in declared for pattern in patterns):
                 err("DELIVERABLE", f"task requires an output matching {' or '.join(patterns)}")
+        check_success_checks(p, contract, hat, stage, err)
+        check_evidence(p, contract, stage, err)
     except ValueError as error:
         err("TASK", str(error))
 
@@ -331,6 +399,7 @@ def self_test() -> int:
                       "deliverable_paths:", "  - 01-define/spec.md",
                       "forbidden:", "  - Do not spawn further subagents (host depth 1).",
                       "success_checks:", f"  - bash {plugin}/scripts/check-sdlc.sh --require --hat define {feat}",
+                      f"  - python3 {plugin}/scripts/workflow.py check-task --role {fields['hat']} --stage {fields['stage']} --task {fields['task']} --root {feat}",
                       "return: output paths + summary"]
             return "\n".join(lines) + "\n"
 
@@ -365,6 +434,30 @@ def self_test() -> int:
         text = packet().replace(f"  - {prod}/feature-map.md\nproduct_writes:", f"  - {prod}/feature-map.md\n  - {prod}/big.md\nproduct_writes:")
         if "BUDGET" not in {e["code"] for e in lint(text)["errors"]}:
             return fail("an oversized product_context must be BUDGET")
+        # N04: a deliverable outside the feature directory is an unauthorised write
+        text = packet().replace("  - 01-define/spec.md", "  - 01-define/spec.md\n  - /etc/hosts")
+        if "DELIVERABLE-SCOPE" not in {e["code"] for e in lint(text)["errors"]}:
+            return fail("an absolute deliverable outside feature_dir must be DELIVERABLE-SCOPE")
+        # N05: a check-task for another task, or no check-task at all
+        text = packet().replace("--role pm --stage define --task spec", "--role designer --stage designer --task explore")
+        if "CHECKMISMATCH" not in {e["code"] for e in lint(text)["errors"]}:
+            return fail("a check-task for another task must be CHECKMISMATCH")
+        text = "\n".join(l for l in packet().splitlines() if "check-task" not in l) + "\n"
+        if "MISSING-CHECK" not in {e["code"] for e in lint(text)["errors"]}:
+            return fail("a packet without this task's check-task must be MISSING-CHECK")
+        # N06: evidence the registry requires cannot be dropped, however the waiver is worded
+        os.makedirs(os.path.join(plugin, "skills", "market"), exist_ok=True)
+        open(os.path.join(plugin, "skills", "market", "SKILL.md"), "w").close()
+        open(os.path.join(plugin, "agents", "researcher.md"), "w").close()
+        rs = packet(hat="researcher", stage="market", task="survey", subagent_type="sdlc-workflow:researcher",
+                    primary_skill="sdlc-workflow:market").replace("  - 01-define/spec.md", "  - 00-discover/market.md")
+        rs = rs.replace(f"  - {prod}/strategy.md\n  - {prod}/feature-map.md\ninputs:", "inputs:")
+        codes = {e["code"] for e in lint(rs + "notes: 这轮 WebSearch 非必需\n")["errors"]}
+        if "EVIDENCE" not in codes:
+            return fail("a research packet without evidence_required: web must be EVIDENCE", codes)
+        codes = {e["code"] for e in lint(rs.replace("forbidden:", "evidence_required:\n  - web\nforbidden:"))["errors"]}
+        if "EVIDENCE" in codes:
+            return fail("evidence_required listing web must satisfy the research contract", codes)
         if lint("no packet here")["errors"][0]["code"] != "NO-PACKET":
             return fail("text without a packet must be NO-PACKET")
     print("self-test ok")

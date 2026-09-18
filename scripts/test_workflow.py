@@ -24,14 +24,20 @@ class WorkflowTests(unittest.TestCase):
         p.write_text(text)
         return p
 
-    def packet(self, role="designer", stage="designer", task="explore", skill="design-contract", outputs=None, check="listed outputs exist"):
+    def packet(self, role="designer", stage="designer", task="explore", skill="design-contract", outputs=None,
+               check=None, evidence=None):
         if outputs is None:
             outputs = ["02-shape/design-brief.md", "02-shape/design-directions.md", "02-shape/prototypes/"]
+        if check is None:
+            check = f"python3 {ROOT}/scripts/workflow.py check-task --role {role} --stage {stage} --task {task} --root {self.root}"
+        if evidence is None:
+            evidence = ["web", "screenshots"] if (role, task) == ("designer", "explore") else []
         return (f"## SPAWN PACKET v2\nhat: {role}\nstage: {stage}\ntask: {task}\n"
                 f"subagent_type: sdlc-workflow:{role}\nPLUGIN_ROOT: {ROOT}\n"
                 f"feature_dir: {self.root}\nlane: L2\nprimary_skill: sdlc-workflow:{skill}\n"
                 "deliverable_paths:\n" + "".join(f"  - {p}\n" for p in outputs)
                 + f"success_checks:\n  - {check}\nreturn: output paths + summary\n"
+                + ("evidence_required:\n" + "".join(f"  - {e}\n" for e in evidence) if evidence else "")
                 + "forbidden:\n  - Do not spawn further subagents (host depth 1).\n")
 
     def errors(self, **kw):
@@ -96,10 +102,44 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("TASKLANE", self.errors(role="backend", stage="implement", task="T-1", skill="impl-evidence", outputs=["03-impl/T-1-evidence.md"]))
 
     def test_implementation_requires_one_integrator(self):
-        packet = self.packet(role="backend", stage="implement", task="T-1", skill="impl-evidence", outputs=["03-impl/T-1-evidence.md"])
+        packet = self.packet(role="backend", stage="implement", task="T-1", skill="impl-evidence", outputs=["03-impl/T-1-backend-evidence.md"])
         packet += "lane_file: api\n"
         self.assertIn("INTEGRATOR", {e["code"] for e in lint(packet)["errors"]})
         self.assertEqual(lint(packet + "slice_integrator: backend\n")["errors"], [])
+
+    # ---- second-diagnosis counterexamples N01-N06 (2026-09-18)
+    def test_product_outputs_resolve_under_product_root(self):  # N01
+        prod = self.root / "docs/product"
+        (prod).mkdir(parents=True)
+        (prod / "strategy.md").write_text("# s\n"); (prod / "feature-map.md").write_text("# f\n")
+        feat = self.root / ".sdlc/_product"; feat.mkdir(parents=True)
+        self.assertEqual(check_task(self.registry, feat, "pm", "product", "bootstrap", product_root=prod), [])
+        self.assertEqual({r[1] for r in check_task(self.registry, feat, "pm", "product", "bootstrap")}, {"USAGE"})
+
+    def test_other_lane_evidence_cannot_satisfy_task(self):  # N02
+        self.put("03-impl/T-1-frontend-evidence.md")
+        self.assertTrue(check_task(self.registry, self.root, "backend", "implement", "T-1"))
+        self.assertEqual(check_task(self.registry, self.root, "frontend", "implement", "T-1"), [])
+
+    def test_blank_hidden_or_template_files_are_not_deliverables(self):  # N03 + C03
+        self.put("02-shape/design-brief.md", "")
+        self.put("02-shape/design-directions.md", "<!-- sdlc:unfilled -->\n# D1\n")
+        self.put("02-shape/prototypes/.gitkeep", "")
+        missing = {r[2].split()[1] for r in check_task(self.registry, self.root, "designer", "designer", "explore")}
+        self.assertEqual(missing, {"02-shape/design-brief.md", "02-shape/design-directions.md", "02-shape/prototypes/*"})
+
+    def test_deliverable_outside_feature_dir_is_rejected(self):  # N04
+        codes = self.errors(outputs=["02-shape/design-brief.md", "02-shape/design-directions.md", "02-shape/prototypes/", "/etc/hosts"])
+        self.assertIn("DELIVERABLE-SCOPE", codes)
+
+    def test_success_check_must_be_this_tasks_check(self):  # N05
+        self.assertIn("MISSING-CHECK", self.errors(check="echo ok"))
+        wrong = f"python3 {ROOT}/scripts/workflow.py check-task --role pm --stage define --task spec --root /tmp"
+        self.assertIn("CHECKMISMATCH", self.errors(check=wrong))
+
+    def test_evidence_cannot_be_dropped_by_rewording(self):  # N06
+        self.assertIn("EVIDENCE", self.errors(evidence=["web"]))
+        self.assertEqual(self.errors(evidence=["web", "screenshots", "running_app"]), set())
 
     def test_symlink_outside_root_cannot_satisfy_task(self):
         self.put("02-shape/design-brief.md"); self.put("02-shape/design-directions.md")
