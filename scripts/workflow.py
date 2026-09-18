@@ -232,6 +232,7 @@ def main():
     sub.add_parser("roles")
     sub.add_parser("artifact-paths")
     rank = sub.add_parser("rank"); rank.add_argument("stage")
+    lane = sub.add_parser("lane"); lane.add_argument("lane"); lane.add_argument("--short", action="store_true")
     path = sub.add_parser("paths"); path.add_argument("artifact"); path.add_argument("--legacy", action="store_true")
     render = sub.add_parser("render"); render.add_argument("--check", action="store_true")
     for command in ("contract", "check-task"):
@@ -276,6 +277,11 @@ def main():
                     raise ValueError(f"invalid artifact id: {key}")
                 print(key.replace("-", "_") + "\t" + item["paths"][0])
             return 0
+        if args.command == "lane":
+            key = args.lane if args.lane in r["lanes"] else (f"{args.lane}-short" if args.short else f"{args.lane}-default")
+            if key not in r["lanes"]:
+                raise ValueError(f"unknown lane {args.lane}")
+            print(" ".join(r["lanes"][key])); return 0
         if args.command == "rank":
             print(r["stages"].get(args.stage, {}).get("rank", 0)); return 0
         if args.command == "paths":

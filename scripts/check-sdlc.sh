@@ -355,6 +355,13 @@ role_skipped() { # $1 = spawn_role token；读 state.yaml roles_skipped
   return 1
 }
 
+stage_rank() { python3 "$SCRIPT_DIR/workflow.py" rank "$1"; }
+checked_stage() { # 本次检查的阶段：--hat 指定的阶段，否则 state.yaml 的 current_hat
+  if [ "$HAT_GIVEN" = "1" ] && [ -n "$HATID" ]; then echo "$HATID"
+  else grep -m1 -E "^current_hat:" "$ST" 2>/dev/null | sed -E 's/^current_hat:[[:space:]]*//;s/["'\'']//g'
+  fi
+}
+
 q_security_yes() {
   [ -f "$ST" ] || return 1
   grep -qE '^q_security:[[:space:]]*yes' "$ST" && return 0
@@ -405,6 +412,9 @@ check_accept_file() { # $1 = 文件；$2 = 谁；$3 = 是否要求截图(1/0)
   if [ -z "$VD" ]; then red ACCEPT "$1: 缺「结论：通过|有条件通过|不通过」"
   elif [ "$VD" = "歧义" ]; then red ACCEPT "$1: 出现多个不同的「结论：」，只保留当前这一轮的结论（历史轮次移到「历史」小节并改写措辞）"
   elif [ "$VD" = "不通过" ]; then red ACCEPT "$1: $2 验收不通过（按差距清单返工 implement 后重验）"
+  elif [ "$VD" = "有条件通过" ]; then
+    WHO=$(basename "$1" .md); WHO=${WHO#accept-}
+    COUT=$(python3 "$SCRIPT_DIR/evidence.py" conditional --feature "$ROOT" --who "$WHO" 2>&1) || red ACCEPT "$1: ${COUT#✗ }"
   fi
   if [ "$3" = "1" ]; then need_images "$1" ACCEPT "$2 验收（有界面的变更须在运行中的产品上走查）"; fi
 }
@@ -535,7 +545,8 @@ if [ "$HAT_GIVEN" = "1" ]; then
       ;;
     verify)
       if is_v4 && ui_yes; then
-        e2e_passed || red E2E "$ST: ui: yes 但 gates[] 无 name: e2e 且 result: pass 的记录（有界面的变更 e2e 不得为 null）"
+        EOUT=$(python3 "$SCRIPT_DIR/evidence.py" gate --feature "$ROOT" --name e2e 2>&1) \
+          || red E2E "$ST: ${EOUT#✗ }（ui: yes 的变更须有当前代码上的 E2E 运行证据；自报 pass 不算）"
       fi
       ;;
     review)
@@ -676,6 +687,11 @@ fi
 # ---------- 5b. Q-security → contract.md 须有 [SEC-n] ----------
 if q_security_yes; then
   CON=$(find "$ROOT" -name "contract.md" 2>/dev/null | head -1)
+  if role_skipped architect; then
+    red NOSEC "$ST: q_security: yes 时不能跳过 architect——信任边界与 [SEC-n] 控制是必需责任，不随角色裁剪消失（P10）"
+  elif [ -z "$CON" ] && [ "$(stage_rank "$(checked_stage)")" -ge "$(stage_rank shape)" ]; then
+    red NOSEC "$ST: q_security: yes 但没有 02-shape/contract.md（威胁建模须落在合同）"
+  fi
   if [ -n "$CON" ]; then
     grep -qE '\[SEC-[0-9]+\]' "$CON" || red NOSEC "$CON: Q-security=yes 但无 [SEC-n]（threat-model 须落在合同）"
   fi
@@ -845,12 +861,31 @@ EOF
     fi
   fi
 
+  # CLOSED：关闭一个功能要看实际终点，而不是手写一行 phase: Closed（P06）
+  if is_v4 && grep -qE '^phase:[[:space:]]*Closed' "$ST"; then
+    CLANE=$(grep -m1 -E '^lane:' "$ST" | grep -oE 'L[0-4]')
+    CSHORT=""; grep -qE '^path:[[:space:]]*short' "$ST" && CSHORT="--short"
+    CDONE=$(grep -m1 -E '^hats_done:' "$ST")
+    for CS in $(python3 "$SCRIPT_DIR/workflow.py" lane "${CLANE:-L2}" $CSHORT 2>/dev/null); do
+      if [ "$CS" = "accept" ] && ! ui_yes; then continue; fi
+      printf '%s' "$CDONE" | grep -qE "(\[|[ ,])${CS}([],]|$)" || red CLOSED "$ST: phase: Closed 但 hats_done 没有 ${CS}（泳道 ${CLANE:-L2} 的阶段没走完不能关闭）"
+    done
+    CFIND=$(find "$ROOT" -path '*05-review/findings.md' 2>/dev/null | head -1)
+    { [ -n "$CFIND" ] && grep -q '[^[:space:]]' "$CFIND"; } || red CLOSED "$ST: phase: Closed 但 05-review/findings.md 缺失或为空"
+    { [ -f "$ROOT/product-delta.md" ] && grep -q '[^[:space:]]' "$ROOT/product-delta.md"; } \
+      || red CLOSED "$ST: phase: Closed 但 product-delta.md 缺失或为空（无产品层变更也要写「无产品层变更：理由」）"
+  fi
+
   # v4 ACCEPT：任何验收结论「不通过」都挡住整棵树，直到重新验收
   if is_v4; then
     for af in "$ROOT"/04-verify/accept-*.md; do
       [ -f "$af" ] || continue
       case "$(verdict_of "$af")" in
-        不通过) red ACCEPT "$af: 验收不通过未关闭（返工 implement → 重跑 verify → 重新验收）" ;;
+        不通过)
+          # 返工路径（implement → verify → accept）必须能走通（P05）：只挡验收之后的阶段与关闭
+          if [ "$HAT_GIVEN" != "1" ] || [ "$(stage_rank "$(checked_stage)")" -gt "$(stage_rank accept)" ] || grep -qE '^phase:[[:space:]]*Closed' "$ST"; then
+            red ACCEPT "$af: 验收不通过未关闭（返工 implement → 重跑 verify → 重新验收）"
+          fi ;;
         歧义) red ACCEPT "$af: 验收结论有歧义（多个不同的「结论：」）" ;;
       esac
     done

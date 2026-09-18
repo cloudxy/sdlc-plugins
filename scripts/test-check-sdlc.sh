@@ -595,7 +595,21 @@ gates:
     result: pass
     exit_code: 0
 Y
-assert_exit 0 "v4 --hat verify with E2E row and e2e pass" --hat verify "$F"
+assert_exit 1 "v4 a self-reported e2e pass without run evidence is E2E (C01)" --hat verify "$F"
+assert_tag E2E
+printf 'print(1)\n' >"$T/v1/app.py"
+REC=$(python3 "$ROOT/scripts/evidence.py" run --feature "$F" --name e2e -- python3 -c 'print("e2e ok")' | tail -1)
+printf '%s\n' "$REC" >>"$F/state.yaml"
+assert_exit 0 "v4 --hat verify with E2E row and a current e2e run record" --hat verify "$F"
+printf 'print(2)\n' >"$T/v1/app.py"
+assert_exit 1 "v4 e2e evidence is stale after the code changes" --hat verify "$F"
+assert_tag E2E
+printf '  - {name: e2e, kind: script, result: fail}\n' >>"$F/state.yaml"
+python3 "$ROOT/scripts/evidence.py" run --feature "$F" --name e2e -- python3 -c 'print(1)' | tail -1 >>"$F/state.yaml"
+assert_exit 0 "the latest e2e record decides: a new passing run after a fail" --hat verify "$F"
+printf '  - {name: e2e, kind: script, result: fail}\n' >>"$F/state.yaml"
+assert_exit 1 "an older pass never outweighs the latest fail (P03)" --hat verify "$F"
+assert_tag E2E
 mk_v4 v2
 F="$T/v2/.sdlc/f"
 printf '泳道：L2\n| J-1 | TC-1 | E2E |\n| EV-1 | TC-9 | 集成 |\n' >"$F/04-verify/coverage.md"
@@ -622,8 +636,16 @@ printf 'png' >"$F/03-impl/screens/j1.png"; printf 'png' >"$F/04-verify/shots/d2.
 printf '泳道：L2\nJ-1 走查 ![](../03-impl/screens/j1.png)\n结论：不通过\n' >"$F/04-verify/accept-pm.md"
 printf '泳道：L2\n对比原型 ![](shots/d2.png)\n结论：通过\n' >"$F/04-verify/accept-design.md"
 printf '泳道：L2\n卖点核验\n结论：通过\n' >"$F/04-verify/accept-growth.md"
-assert_exit 2 "v4 --hat accept with pm 不通过 (hat + global ACCEPT)" --hat accept "$F"
+assert_exit 1 "v4 --hat accept with pm 不通过 is ACCEPT" --hat accept "$F"
 assert_tag ACCEPT
+mkdir -p "$F/03-impl/screens" && printf 'png' >"$F/03-impl/screens/j1-1440.png"
+printf '泳道：L2\nnote\n' >"$F/03-impl/T-1-frontend-evidence.md"
+printf '泳道：L2\n![](screens/j1-1440.png)\n' >"$F/03-impl/T-1-integration.md"
+assert_exit 0 "an open 不通过 does not block the rework implement gate (P05)" --hat implement "$F"
+printf 'findings\n' >"$F/05-review/findings.md"; printf '无产品层变更：测试\n' >"$F/product-delta.md"
+assert_exit 1 "an open 不通过 blocks review until re-acceptance" --hat review "$F"
+assert_tag ACCEPT
+rm -f "$F/05-review/findings.md" "$F/product-delta.md" "$F/03-impl/T-1-frontend-evidence.md" "$F/03-impl/T-1-integration.md"
 printf '泳道：L2\nJ-1 走查 ![](../03-impl/screens/j1.png)\n结论：通过\n' >"$F/04-verify/accept-pm.md"
 assert_exit 0 "v4 --hat accept all 通过 with screenshots" --hat accept "$F"
 rm "$F/04-verify/accept-growth.md"
@@ -876,6 +898,31 @@ assert_exit 0 "a freshly generated data dictionary passes the product gate" --ha
 printf '\n手工补充一行\n' >>"$PR/data-dictionary.md"
 assert_exit 1 "a hand-edited data dictionary is PRODUCTCTX" --hat product "$PR"
 assert_tag PRODUCTCTX
+
+# 48. P04 有条件通过要有用户接受条件的原话记录
+mk_v4 cd
+F="$T/cd/.sdlc/f"
+mkdir -p "$F/03-impl/screens" && printf 'png' >"$F/03-impl/screens/j1.png"
+for w in pm design growth; do printf '泳道：L2\n![](../03-impl/screens/j1.png)\n结论：通过\n' >"$F/04-verify/accept-$w.md"; done
+printf '泳道：L2\n![](../03-impl/screens/j1.png)\n结论：有条件通过\n条件：空状态文案下个迭代补\n' >"$F/04-verify/accept-pm.md"
+assert_exit 1 "conditional acceptance without the user's recorded answer is ACCEPT (P04)" --hat accept "$F"
+assert_tag ACCEPT
+printf 'open_questions:\n  - id: Q-ACCEPT-PM\n    class: 战略\n    status: answered\n    by: user\n    quote: "同意，下个迭代补"\n' >>"$F/state.yaml"
+assert_exit 0 "conditional acceptance with the user's recorded answer passes" --hat accept "$F"
+
+# 49. P06 Closed 要看实际终点
+mk_v4 cl
+F="$T/cl/.sdlc/f"
+printf 'phase: Closed\n' >>"$F/state.yaml"
+assert_exit 8 "Closed without stages, findings or delta is CLOSED (P06): 6 stages + findings + delta" --hat define "$F"
+assert_tag CLOSED
+
+# 50. P10 安全责任不随角色跳过
+mk_v4 sec
+F="$T/sec/.sdlc/f"
+printf 'q_security: yes\nroles_skipped: [architect]\n' >>"$F/state.yaml"
+assert_exit 1 "q_security yes cannot skip architect (P10)" --hat define "$F"
+assert_tag NOSEC
 
 if [ "$fail" -ne 0 ]; then
   echo "----------------------------------------"
