@@ -245,6 +245,12 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
                        (pattern.endswith("/*") and path == pattern[:-2])
                        for path in declared for pattern in patterns):
                 err("DELIVERABLE", f"task requires an output matching {' or '.join(patterns)}")
+        allowed = set(contract.get("companions", []))
+        for c in p.get("companion_skills") or []:
+            name = str(c).split(":", 1)[-1].strip()
+            if name and name not in allowed:
+                err("COMPANION", f"companion_skills lists {name}, which {hat}/{stage}/{p.get('task')} does not use"
+                    + (" (prototype is throwaway discovery code; design prototypes follow design-contract direction-prototypes.md)" if name == "prototype" else ""))
         check_success_checks(p, contract, hat, stage, err)
         check_evidence(p, contract, stage, err)
     except ValueError as error:

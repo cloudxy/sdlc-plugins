@@ -6,11 +6,23 @@
 #   UI_EVIDENCE_WAIT_MS=1500 bash ui-evidence.sh ...            # extra wait for animations (default 800)
 #   UI_EVIDENCE_NAME=j1-step2 bash ui-evidence.sh ...           # file name prefix (default: derived from target)
 #
+#   bash ui-evidence.sh --probe                                 # can this machine take a screenshot at all? (check_config --probe)
+#
 # Exit codes: 0 all captured · 1 capture failed · 2 usage error · 3 Playwright not available (install hint printed)
 # After capturing, READ the PNG files and look at them — a screenshot nobody looked at is not evidence.
 set -u
 
-usage() { echo "usage: ui-evidence.sh <url|file.html> <out-dir> [widths e.g. 375,1440]" >&2; exit 2; }
+usage() { echo "usage: ui-evidence.sh <url|file.html> <out-dir> [widths e.g. 375,1440] | --probe" >&2; exit 2; }
+if [ "${1:-}" = "--probe" ]; then
+  # Capture a one-line local page into a temp dir: proves the whole chain (driver + browser), not just a package name.
+  PROBE_DIR="$(mktemp -d)"
+  printf '<!doctype html><title>probe</title><h1>ui-evidence probe</h1>\n' >"$PROBE_DIR/probe.html"
+  bash "$0" "$PROBE_DIR/probe.html" "$PROBE_DIR/out" 320 >/dev/null 2>"$PROBE_DIR/err"
+  RC=$?
+  [ "$RC" -eq 0 ] && echo "ui-evidence probe: ok" || { cat "$PROBE_DIR/err" >&2; echo "ui-evidence probe: failed (exit ${RC})" >&2; }
+  rm -rf "$PROBE_DIR"
+  exit "$RC"
+fi
 [ $# -ge 2 ] || usage
 TARGET="$1"
 OUT="$2"

@@ -112,7 +112,7 @@ product_writes:             # files this hat owns and must keep true; empty for 
 lane_file: <ui|api|ai|model|none>
 slice_integrator: <one implementation role, required for implement tasks>
 primary_skill: sdlc-workflow:<proc>
-companion_skills: []        # tdd | refactor (implement) · prototype (designer explore) · collect (pm when tracking: yes)
+companion_skills: []        # only what the contract lists: tdd | refactor (implement) · collect (pm when tracking: yes); prototype is for discovery only
 inputs:                     # files the hat must read — never directories
   - {path: <abs>, required: true|false}
 explore_roots:              # directories it may search with Grep/Glob, not read wholesale

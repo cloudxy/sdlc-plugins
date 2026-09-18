@@ -15,8 +15,8 @@ Task presence checks do not advance state. Use `check-sdlc.sh --hat <stage>` onl
 | growth | growth | positioning | growth | 00-discover/growth.md |
 | pm | define | spec | prd-gwt | 01-define/spec.md / 01-define/spec-s.md / spec-s.md |
 | ops | signals | listen | signals | 01-define/requirement-pool.md |
-| designer | designer | explore | design-contract | 02-shape/design-brief.md; 02-shape/design-directions.md; 02-shape/prototypes/* |
-| designer | designer | specify | design-contract | 02-shape/design-directions.md; 02-shape/flows.md; 02-shape/edge-states.md |
+| designer | designer | explore | design-contract | 02-shape/design-brief.md; 02-shape/design-directions.md; 02-shape/prototypes/* / 02-shape/prototypes/**/* |
+| designer | designer | specify | design-contract | 02-shape/design-directions.md; 02-shape/flows.md; 02-shape/edge-states.md; 02-shape/prototypes/final/* / 02-shape/prototypes/final/**/* |
 | architect | shape | contract | architecture | 02-shape/contract.md |
 | dba | dba | model | schema | 02-shape/db-spec.md; 02-shape/schema.dbml |
 | data-collector | collect | tracking | collect | 02-shape/collect/tracking-impl.md |

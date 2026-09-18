@@ -141,6 +141,22 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("EVIDENCE", self.errors(evidence=["web"]))
         self.assertEqual(self.errors(evidence=["web", "screenshots", "running_app"]), set())
 
+    def test_explore_does_not_borrow_throwaway_prototype(self):  # V08 / D3
+        packet = self.packet() + "companion_skills: [sdlc-workflow:prototype]\n"
+        self.assertIn("COMPANION", {e["code"] for e in lint(packet)["errors"]})
+
+    def test_direction_prototypes_live_in_subfolders(self):
+        self.put("02-shape/design-brief.md"); self.put("02-shape/design-directions.md")
+        self.put("02-shape/prototypes/D1/index.html", "<h1>D1</h1>\n")
+        self.assertEqual(check_task(self.registry, self.root, "designer", "designer", "explore"), [])
+
+    def test_specify_requires_final_prototype(self):
+        for path in ["02-shape/design-directions.md", "02-shape/flows.md", "02-shape/edge-states.md"]:
+            self.put(path)
+        self.assertEqual([r[1] for r in check_task(self.registry, self.root, "designer", "designer", "specify")], ["HATMISS"])
+        self.put("02-shape/prototypes/final/index.html", "<h1>final</h1>\n")
+        self.assertEqual(check_task(self.registry, self.root, "designer", "designer", "specify"), [])
+
     def test_symlink_outside_root_cannot_satisfy_task(self):
         self.put("02-shape/design-brief.md"); self.put("02-shape/design-directions.md")
         directory = self.root / "02-shape/prototypes"; directory.mkdir()

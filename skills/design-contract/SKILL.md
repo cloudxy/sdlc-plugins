@@ -10,9 +10,9 @@ Job: **design an experience people remember and can use without thinking, then s
 
 | Packet `task` | When | Deliverables | Template |
 |---|---|---|---|
-| `explore` | shape, before the architect (`ui: yes`) | `02-shape/design-brief.md` · `02-shape/design-directions.md` · `02-shape/prototypes/` (HTML + screenshots) | [templates/design-brief.md](templates/design-brief.md) · [templates/design-directions.md](templates/design-directions.md) |
+| `explore` | shape, before the architect (`ui: yes`) | `02-shape/design-brief.md` · `02-shape/design-directions.md` · `02-shape/prototypes/D<n>/` (HTML + screenshots) | [templates/design-brief.md](templates/design-brief.md) · [templates/design-directions.md](templates/design-directions.md) |
 | — | **human picks a direction** (manager runs it) | `state.design.picked` | — |
-| `specify` | after the pick | `02-shape/flows.md` · `02-shape/edge-states.md` · tokens · `选定：D<n>` recorded in design-directions.md | [templates/flow.md](templates/flow.md) · [templates/edge-states.md](templates/edge-states.md) · [templates/design-tokens.json](templates/design-tokens.json) |
+| `specify` | after the pick | `02-shape/flows.md` · `02-shape/edge-states.md` · tokens · `02-shape/prototypes/final/` (handoff prototype + screenshots) · `选定：D<n>` recorded in design-directions.md | [templates/flow.md](templates/flow.md) · [templates/edge-states.md](templates/edge-states.md) · [templates/design-tokens.json](templates/design-tokens.json) |
 | `design-qa` | stage accept, on the running build | `04-verify/accept-design.md` | [templates/accept-design.md](templates/accept-design.md) |
 | product layer | first time, or when principles, tokens or signature moments change | `<product_root>/design-system.md` | [templates/design-system.md](templates/design-system.md) |
 
@@ -46,7 +46,7 @@ Job: **design an experience people remember and can use without thinking, then s
 1. Read the spec (core value path, journeys J-n, FRs), briefing, `00-discover/growth.md` (highlight hypotheses), `00-discover/compete.md`, product `design-system.md` (principles, brand character — or bootstrap it from existing UI).
 2. Write the brief ([templates/design-brief.md](templates/design-brief.md)): users, context of use, surface type (daily tool vs first-run vs marketing), constraints, success signals.
 3. Study references with the web: 3–6 relevant products; note what to take and what to avoid ([design-exploration.md](references/design-exploration.md) §2).
-4. Build ≥3 directions that differ on structure or interaction model ([design-exploration.md](references/design-exploration.md) §3) as HTML prototypes (companion `prototype`, UI branch) covering the main journey to the Aha moment; render screenshots at mobile and desktop widths; look at them.
+4. Build ≥3 directions that differ on structure or interaction model ([design-exploration.md](references/design-exploration.md) §3) as HTML prototypes to the standard in [direction-prototypes.md](references/direction-prototypes.md) (not the throwaway `prototype` skill) covering the main journey to the Aha moment; render screenshots at mobile and desktop widths; look at them.
 5. For each direction record: concept in one line, signature moment, how it serves the value path, risks, rough build cost, accessibility concerns. Critique each against the AI-default clusters. Recommend one ([templates/design-directions.md](templates/design-directions.md)).
 
 ### `specify` — the contract for the picked direction
@@ -55,7 +55,8 @@ Job: **design an experience people remember and can use without thinking, then s
 2. IA and flows for every FR screen ([ia-and-flow.md](references/ia-and-flow.md), [templates/flow.md](templates/flow.md)), including the signature moment's exact behaviour (timing, motion, copy).
 3. 6-state matrix with copy ([templates/edge-states.md](templates/edge-states.md), [ux-writing.md](references/ux-writing.md)).
 4. Tokens: consume `design-system.md`; add tokens only on purpose ([tokens-and-a11y.md](references/tokens-and-a11y.md), [templates/design-tokens.json](templates/design-tokens.json)).
-5. Update product `design-system.md` (new patterns, signature moment status) and return the delta row (the manager records it).
+5. Final prototype for handoff: every FR screen and every edge state, tokens only, component IDs, screenshots looked at ([direction-prototypes.md](references/direction-prototypes.md) § Final prototype).
+6. Update product `design-system.md` (new patterns, signature moment status) and return the delta row (the manager records it).
 
 ### `design-qa` — on the running build
 
@@ -95,6 +96,7 @@ Follow [design-review.md](references/design-review.md): screenshot the build at 
 
 | Reference | Read when… |
 |---|---|
+| [direction-prototypes.md](references/direction-prototypes.md) | Tasks explore and specify: direction prototypes vs the final handoff prototype, paths, quality bar, evidence types |
 | [design-exploration.md](references/design-exploration.md) | Task explore: axes for genuinely different directions, signature moments, emotional design layers, fast prototypes, the direction scorecard |
 | [visual-direction.md](references/visual-direction.md) | Any surface with visual freedom — the AI-default clusters, the plan-then-critique method, where boldness belongs |
 | [design-review.md](references/design-review.md) | Task design-qa: comparing the build with the prototype, severity, verdict |

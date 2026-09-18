@@ -20,6 +20,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 import tempfile
 import threading
@@ -339,6 +340,24 @@ def check(root: str, probe: bool = False) -> dict[str, Any]:
             start = app.get("start")
             add({"level": "blocker", "code": "APP-DOWN",
                  "message": f"not reachable: {'; '.join(down)} — run app.start{f' ({start})' if not _placeholder(start) else ''}, probe again; still down → stop and ask the user"})
+        # The screenshot tool itself (E01): take one real screenshot from this project's directory, because
+        # ui-evidence.sh prefers the project's own Playwright. A package name in package.json proves nothing.
+        if os.environ.get("SDLC_SKIP_UI_PROBE") != "1":
+            ui = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ui-evidence.sh")
+            try:
+                pr = subprocess.run(["bash", ui, "--probe"], cwd=root, capture_output=True, text=True, timeout=180)
+                rc, detail = pr.returncode, (pr.stderr or pr.stdout).strip().splitlines()[-1:] or [""]
+            except (OSError, subprocess.TimeoutExpired) as e:
+                rc, detail = 1, [str(e)]
+            if rc == 0:
+                add({"level": "info", "code": "UI-TOOL", "message": "ui-evidence.sh took a probe screenshot"})
+            elif rc == 3:
+                add({"level": "blocker", "code": "UI-TOOL",
+                     "message": "no screenshot tool: designer directions, integration runs and walkthroughs cannot produce evidence. "
+                                "Install one: `pip3 install --user playwright && python3 -m playwright install chromium` "
+                                "(or in a Node project `npm i -D @playwright/test && npx playwright install chromium`)"})
+            else:
+                add({"level": "blocker", "code": "UI-TOOL", "message": f"ui-evidence.sh probe failed (exit {rc}): {detail[0]}"})
     if roots and not apps:
         add({"level": "info", "code": "UI-LIBS", "message": "UI packages without a dev/start script (libraries): " + ", ".join(r["path"] for r in roots)})
     compose = _compose_files(root)
@@ -400,6 +419,7 @@ def main_check(args: argparse.Namespace) -> int:
 
 # ----------------------------------------------------------------------------- self-test
 def self_test() -> int:
+    os.environ["SDLC_SKIP_UI_PROBE"] = "1"  # the self-test must not depend on this machine having a browser
     import http.server
     import socket
 

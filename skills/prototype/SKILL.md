@@ -10,7 +10,7 @@ Borrowed from mattpocock prototype. A prototype is **throwaway code that answers
 
 <!-- 来源（派生技能，只作追溯）：借鉴 mattpocock/skills skills/engineering/prototype；借鉴时的上游版本未记录，登记时上游为 mattpocock/skills@74ca5fe07745。已按本插件合同改写，上游变更不自动同步，也不放进 vendor/。 -->
 
-Load as a companion (discover Falsify cheapest-test rungs 5–6, or a designer/general-purpose spawn). Capture the verdict in briefing; do not merge the shell to main as implement evidence.
+Load as a companion for discovery (discover Falsify cheapest-test rungs 5–6). Design directions and the handoff prototype are not throwaways: they follow the direction-prototypes reference of `sdlc-workflow:design-contract`. Capture the verdict in briefing; do not merge the shell to main as implement evidence.
 
 | Branch | Question | Shape |
 |---|---|---|

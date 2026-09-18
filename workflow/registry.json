@@ -248,7 +248,8 @@
     },
     "prototypes": {
       "paths": [
-        "02-shape/prototypes/*"
+        "02-shape/prototypes/*",
+        "02-shape/prototypes/**/*"
       ],
       "legacy": []
     },
@@ -373,6 +374,13 @@
     "retro": {
       "paths": [
         "07-retro/retro.md"
+      ],
+      "legacy": []
+    },
+    "final-prototype": {
+      "paths": [
+        "02-shape/prototypes/final/*",
+        "02-shape/prototypes/final/**/*"
       ],
       "legacy": []
     }
@@ -697,9 +705,6 @@
         "directions",
         "prototypes"
       ],
-      "companions": [
-        "prototype"
-      ],
       "evidence": [
         "web",
         "screenshots"
@@ -713,7 +718,11 @@
       "required": [
         "directions",
         "flows",
-        "states"
+        "states",
+        "final-prototype"
+      ],
+      "evidence": [
+        "screenshots"
       ]
     },
     {
