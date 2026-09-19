@@ -1,103 +1,76 @@
 ---
 name: "architecture"
-description: "Use when shaping architecture (scenarios, options, ADRs, contracts, tickets). In sdlc-workflow:architect or $architecture. Do NOT use while /sdlc runs or for schemas."
-when_to_use: "Use when defining quality attribute scenarios, candidate architectures, module boundaries, ADRs, API contracts, or ticket decomposition. Load inside sdlc-workflow:architect. Do NOT use while /sdlc is running in this window. Do NOT use for implementation code or table schemas."
+description: "Use when assessing system feasibility, boundaries, quality/security, contracts or conformance. In architect or $architecture. Do NOT use for production code or schemas."
+when_to_use: "Use for architecture baselines, feasibility, contracts, change impact or conformance. Do NOT run as the /sdlc manager or replace PM, DBA, implementation or release approval."
 ---
 
-# Architecture — scenarios, options, boundaries, contracts, slices
+# Architecture — business goals to verifiable system decisions
 
-Job: **choose the structure that meets this product's quality goals today and can evolve to the next stage — and make it executable as journey-slice tickets.** Good architecture is a set of trade-offs made on purpose against measurable scenarios, not a diagram.
+Job: **turn business goals into the smallest actionable architecture change, with evidence, clear ownership and verifiable obligations.** Reuse a valid decision when it still fits; compare alternatives when there is a real unresolved choice. A diagram communicates a decision; it does not prove feasibility.
 
-| Task | Approach |
+## Select the task
+
+Task names, output paths and ownership have one source: `workflow/registry.json`. Scheduling belongs to the manager; task procedures and baseline state transitions belong to [lifecycle.md](references/lifecycle.md).
+
+| Task | Purpose |
 |---|---|
-| **New feature (v4 shape)** | Read product `architecture.md` + picked design direction → quality scenarios + capacity → ≥2 candidate options → decision + ADRs → boundaries → contracts → vertical-slice tickets → write back `architecture.md` |
-| **Product layer missing** | Reverse-engineer `architecture.md` from code, deploy files and dashboards ([templates/architecture-baseline.md](templates/architecture-baseline.md)); mark inferences `[推断]` |
-| **Technology selection** | Options with evidence → ADR with rejected alternatives → decision + revisit trigger |
-| **Integrate team outputs** | Consistency check (names / tables / keys / events across spec, contract, db-spec, tracking) → resolve conflicts |
-| **"Too big to estimate"** | Boundary derivation → module split → per-slice tickets |
+| product / bootstrap | Establish or refresh an evidence-backed architecture baseline |
+| define / feasibility | Test a risky assumption before PM/design freezes dependent choices |
+| shape / contract | Turn approved scope and design into boundaries, contracts and executable slices |
+| shape / change-impact | Assess a discovered mismatch; route decisions and invalidate affected artifacts |
+| verify / conformance | Compare the accepted architecture obligations with actual implementation and checks |
 
-## Gotchas
+These are conditional tasks in existing stages, not five mandatory stages. A small change can reuse the baseline and existing contracts. Early feasibility does not require a frozen spec or final prototype; a final UI contract does consume the approved design.
 
-- **Adjectives are not requirements.** "High performance", "scalable", "secure" decide nothing. Turn each into a quality attribute scenario with a measure (stimulus → environment → response → measure) before comparing options.
-- **One option is not a decision.** Compare at least two feasible options against the scenarios; a straw man does not count. Record what was rejected and why, with evidence.
-- **Feasibility pre-check is not drawing a diagram.** Read the existing code, run a spike, or query a table. List stores already in the topology before choosing a brand.
-- **Scheduling state is two facts.** Enqueue / lease / lock is coordination; task definition / final state / audit is record. A single-brand answer (Redis vs MySQL) to a compound noun is a false binary. Reusing an existing Redis for coordination is not "a second store"; the real bar is **two writers for the same fact**. Details: [adr-and-tradeoffs.md](references/adr-and-tradeoffs.md) §2.
-- **Capacity comes from the product, not from habit.** Estimate peak QPS and data growth from DAU, per-user actions and peak factor in the product layer; say which scenario breaks first and at what trigger.
-- **Horizontal tickets pass while journeys fail.** "Tables", "APIs" and "pages" as separate tickets can all be done while no user can complete the journey. Slice along journey steps, each ticket demonstrable end-to-end.
-- **"We'll decide later" is tech debt.** Either decide (ADR) or name a rabbit hole with a revisit trigger.
-- **Every ticket anchors to an FR and a journey step.** Unanchored tickets cannot be verified.
-- **Destructive changes carry expand-contract steps** in the ticket, or they ship as one-step breaks.
-- **Architecture rots without checks.** Boundaries and budgets that matter become fitness functions CI can run.
-- **Program-sized shape overflows one session.** If frozen FR count > 20, this spawn writes `contract.md` + ADRs + the ticket **table**; a follow-up spawn writes `tickets/T-nn.md`.
+## Working procedure
 
-## Excellence bar
+1. **Frame the decision.** Read the supplied versions of business goals, constraints, existing code, deployment configuration and accepted decisions. Identify the product surface (UI, API, SDK, batch, stream, native or model). Separate observed facts, assumptions and targets; name what evidence is missing.
+2. **Derive the relevant constraints.** Define measurable quality scenarios and a workload model suited to that surface ([quality-attributes.md](references/quality-attributes.md)). Assign one authority for each fact and invariant, with explicit collaborating modules ([boundary-derivation.md](references/boundary-derivation.md)). Multiple modules implementing one FR is normal; unclear ownership is the defect.
+3. **Resolve consequential uncertainty.** Inspect existing evidence first. If insufficient, run a bounded, isolated experiment under the packet's write scope and resource budget; retain the command, environment, inputs and raw results. An unavailable experiment remains unverified, never a fabricated measurement. See lifecycle for spike and verification ownership.
+4. **Decide within authority.** Reuse an applicable accepted ADR with evidence that its assumptions still hold. For a new consequential choice, compare credible alternatives and record trade-offs, evidence and revisit triggers ([adr-and-tradeoffs.md](references/adr-and-tradeoffs.md)). Respect existing authorization; refer new business, security or irreversible trade-offs to their decision owner. A technical limit does not authorize changing GWT or user-visible behavior.
+5. **Make the change consumable.** Reference canonical, versioned API/event/data contracts; hand data semantics to DBA and metric/event semantics to the data owners. Produce complete journey slices with one integrator; professional subtasks may contribute to a slice. UI tickets consume final prototype code, component IDs, tokens, flows and states. API/SDK/data products use their actual consumer-facing verification surface.
+6. **Close the loop.** Declare applicable deliverables and verification obligations, owners and due points. Report unknowns and blocked dependents. Keep proposed, accepted, implemented and deployed facts distinct; update current baseline facts only from evidence. When an input changes, route affected contracts, designs, tickets and checks for revalidation.
 
-| Excellent | Reject as mediocre |
+## Gotchas — security blind spots
+
+Read [threat-model.md](references/threat-model.md) for changes affecting assets, trust, privileges, credentials, data sensitivity, dependencies or security configuration. Q2/Q3/Q4 are minimum triggers, not an exhaustive threat model. If a new trigger is discovered, return it to the manager to update `q_security`; do not edit workflow state yourself. Security controls require an implementation owner, verification and explicit residual-risk authority.
+
+## Handoff and authority
+
+| Partner | Exchange |
 |---|---|
-| Quality scenarios with numbers, tied to NFRs and the capacity model | "系统需要高性能高可用" |
-| ≥2 real options in a trade-off matrix; decision, rejected reasons, revisit trigger | One option described in detail |
-| Evolution path: what changes at stage 2, triggered by what observable signal | Silent on growth, or premature microservices |
-| Contracts with error codes, idempotency, pagination, versioning; data semantics handed to dba | Endpoint list without failure semantics |
-| Journey-slice tickets, each demonstrable on the running product | Layer-by-layer tickets |
-| Fitness functions (boundary / latency / dependency checks) wired to CI | Boundaries only in prose |
+| PM / designer | Business constraints, feasibility results and options; they own scope/GWT and experience decisions |
+| DBA / data owners | Fact ownership, invariants, access patterns, lifecycle and event semantics; reference their schemas and dictionary instead of copying them |
+| Implementers | Versioned contracts, complete slice tickets, final UI source where applicable, architecture checks to implement |
+| QA / SRE | Quality/security obligations, test environments, failure scenarios, operational budgets and raw evidence |
+| Reviewer / manager | Changed files, decision authority, unresolved risks, stale consumers and conformance results; independent acceptance remains theirs |
 
-## Key decisions
+Write only the packet's `deliverable_paths` and owned `product_writes`, including explicitly declared experiment files. Production implementation and physical schemas belong to their implementing owners. Experiments do not imply permission to mutate production data or deploy. Return product-delta rows to the manager; do not write manager-owned logs or state.
 
-### Quality attribute scenarios and capacity
+## Excellence and self-check
 
-For each relevant attribute (performance, scalability, availability, security, modifiability, cost, observability): source · stimulus · environment · response · measure ([quality-attributes.md](references/quality-attributes.md) §1–2 has a scenario catalog and a worked capacity estimate). Reuse `QAS-n` from product `architecture.md`; new scenarios get ids and are written back. Capacity: `peak QPS = DAU × requests/user/day ÷ 86400 × peak factor`; storage growth from records/day × size × retention.
+- [ ] The actual decision and its business/consumer impact are explicit; scope matches the assigned task.
+- [ ] Every changing fact has one canonical source; links include the version used. No duplicated mutable acceptance criteria or schemas.
+- [ ] Quality/security claims distinguish targets, estimates, static inspection and executed evidence.
+- [ ] Fact/invariant ownership, dependency types and failure recovery are clear; no arbitrary module-count or option-count quota.
+- [ ] Reuse is justified, or credible alternatives answer an unresolved choice; authority and revisit triggers are recorded.
+- [ ] Each unknown, control and verification obligation has an owner and a due point; absent evidence stays unverified.
+- [ ] Slices have an integrator and an appropriate end-to-end demonstration; applicable outputs exist and are listed in the packet.
+- [ ] Baseline facts reflect evidence at a named version/environment; pending or cancelled plans are not reported as implemented.
 
-### Candidate options and decision
+## Deep references — read for the assigned work
 
-Compare options on scenario fit (with spike or measured evidence), build cost, operational cost (new dependencies, failure modes, monitoring), evolvability, risk. Irreversible choices get an ADR ([templates/adr.md](templates/adr.md)); every ADR names rejected alternatives with evidence (the body must say **rejected** / **否决**) and a revisit trigger.
-
-### Boundary derivation (from FRs to modules)
-
-Cluster FRs by shared data model → shared lifecycle → shared ownership; test each candidate with: who calls it, what it owns exclusively, what breaks if it is rewritten. Dependencies single-direction; cycles mean the boundary is wrong ([boundary-derivation.md](references/boundary-derivation.md)). Default to a well-bounded monolith; split services only on independent scaling, release cadence, stack, team or fault-isolation signals.
-
-### Evolution and fitness functions
-
-Write the next stage (trigger → change → cost) into product `architecture.md`. Turn load-bearing rules into checks: import boundaries, P95 budgets on core journeys, forbidden dependencies, migration reversibility.
-
-### Journey-slice tickets
-
-One ticket = one journey step range, backend + frontend + tests + integration run, with the demonstrable outcome written in the ticket ([templates/story.md](templates/story.md)). Backend publishes contract examples first so frontend can build in parallel.
-
-## Handoff contract
-
-| Direction | Content |
+| Reference | Use |
 |---|---|
-| **Input** | spec (FR/NFR, journeys J-n) · picked design direction + flows (ui: yes) · product `architecture.md`, `domain-model.md`, `strategy.md` (scale assumptions) · existing codebase |
-| **Output** | `02-shape/contract.md` ([templates/contract.md](templates/contract.md): scenarios, options, boundaries, contracts, slices, `[SEC-n]`) · `adr-*.md` · `contracts/` ([templates/api-contract.md](templates/api-contract.md)) · tickets · product `architecture.md` update + delta rows returned to the manager |
-| **Downstream** | dba (data semantics) · implementers (slices + contracts) · qa (risks, journeys) · sre (topology, capacity) |
-| **Refuse** | Implementation code · schema-level design · product picks (prepare options; humans decide product) |
+| [lifecycle.md](references/lifecycle.md) | Task procedure, experiment limits, change backflow and baseline promotion |
+| [quality-attributes.md](references/quality-attributes.md) | Scenarios, capacity, evolution and verification plans |
+| [adr-and-tradeoffs.md](references/adr-and-tradeoffs.md) | Reuse, alternatives, storage and consistency decisions |
+| [boundary-derivation.md](references/boundary-derivation.md) | Responsibility, invariant ownership and dependencies |
+| [contract-design.md](references/contract-design.md) | API, event and data semantics |
+| [threat-model.md](references/threat-model.md) | Trust boundaries, controls and residual risk |
+| [diagrams.md](references/diagrams.md) | Architecture, sequence and trust-boundary views from canonical sources |
+| [auto-agents-pitfalls.md](references/auto-agents-pitfalls.md) | Only when the supplied repository actually matches this project's verified traps |
+| [templates/architecture-baseline.md](templates/architecture-baseline.md) | Product baseline |
+| [templates/contract.md](templates/contract.md) · [templates/adr.md](templates/adr.md) · [templates/story.md](templates/story.md) · [templates/api-contract.md](templates/api-contract.md) | Applicable deliverables; omit inapplicable sections with a reason |
 
-## Self-check
-
-- [ ] Quality attribute scenarios with measures, linked to NFRs; capacity estimated when traffic or data grows?
-- [ ] ≥2 real options compared; decision with rejected reasons (rejected / 否决) and revisit trigger?
-- [ ] Module boundaries single-direction; storage ADRs split facts (coordination vs record)?
-- [ ] Contracts define errors, idempotency, pagination, versioning; data semantics handed to dba?
-- [ ] Tickets are journey slices with FR + J anchors and a demonstrable outcome?
-- [ ] Destructive changes note expand-contract steps; feasibility checked for the riskiest assumption?
-- [ ] Q-security = yes ⇒ contract has `[SEC-n]` (boundary → mitigation → NFR / qa)?
-- [ ] Evolution path and fitness functions updated in product `architecture.md`; delta row returned?
-- [ ] Named output paths exist on disk?
-
-## Deep references — when to read them
-
-| Reference | Read when… |
-|---|---|
-| [quality-attributes.md](references/quality-attributes.md) | Writing scenarios, estimating capacity, comparing options, planning evolution stages, choosing fitness functions |
-| [adr-and-tradeoffs.md](references/adr-and-tradeoffs.md) | Writing ADRs, storage and consistency trade-offs, sync vs async |
-| [boundary-derivation.md](references/boundary-derivation.md) | Deriving module boundaries from FRs, fixing cycles, when to split services |
-| [diagrams.md](references/diagrams.md) | Packet visuals architecture/sequence/trust-boundary (trust-boundary required when q_security: yes) |
-| [contract-design.md](references/contract-design.md) | API and event contracts |
-| [threat-model.md](references/threat-model.md) | Q-security = yes: STRIDE per trust boundary → `[SEC-n]` in the contract |
-| [auto-agents-pitfalls.md](references/auto-agents-pitfalls.md) | Verified auto_agents boundary traps |
-| [templates/architecture-baseline.md](templates/architecture-baseline.md) | Bootstrapping or updating product `architecture.md` |
-| [templates/contract.md](templates/contract.md) · [templates/adr.md](templates/adr.md) · [templates/story.md](templates/story.md) · [templates/api-contract.md](templates/api-contract.md) | Writing the deliverables |
-
-## Role-specific review
-
-For the assigned role, apply [references/role-quality.md](references/role-quality.md) alongside this procedure’s self-check. Reviewers use the same criteria.
+Reviewers use [references/role-quality.md](references/role-quality.md) to locate these same criteria.

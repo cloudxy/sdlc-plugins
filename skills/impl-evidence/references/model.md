@@ -11,15 +11,15 @@ Job: **extract predictable patterns from data without leaking future information
 ## Gotchas
 
 - **"Build a churn model" without defining the action is premature.** Churn → send coupon? → optimize precision. Churn → human outreach? → optimize recall. No action defined = don't build yet, ask `pm`.
-- **Random split on time-series data = data leakage.** Always split by time.
+- **Validation must match deployment.** Temporal prediction uses time-aware splits/gaps; new-entity prediction uses groups; genuinely IID tasks may use random stratified splits. Avoid future or target leakage.
 - **Full-dataset statistics before split = leakage.** Compute normalization/scaling on train set only, apply to test.
-- **Accuracy on imbalanced data is meaningless.** Use PR AUC / lift.
+- **Accuracy alone can hide minority-class errors.** Use PR AUC / lift.
 
 ## Handoff contract
 
 | Direction | Content |
 |---|---|
-| **Input** | Business question with quantified action · access to data warehouse (dwd_/dws_ layers) · metrics.yaml for business metric alignment |
+| **Input** | Business question with quantified action · authorized versioned data with known semantics (warehouse layers only when used) · metrics.yaml for business metric alignment |
 | **Output** | Feature dictionary (with as-of) · model-card (baseline + evaluation + bad cases + failure boundary) · offline-online consistency evidence |
 | **Downstream** | `backend` (serves the model) · `analyst` (compares online actual vs offline predicted) |
 | **Refuse** | Online AI services (LLM/RAG → algo) · modeling without defined action |
@@ -27,7 +27,7 @@ Job: **extract predictable patterns from data without leaking future information
 ## Self-check
 
 - [ ] Feature dictionary includes as-of for every feature?
-- [ ] Time-based split (not random)?
+- [ ] Split matches temporal/entity/IID generalization and avoids leakage?
 - [ ] No full-dataset statistics before split?
 - [ ] Baseline comparison present?
 - [ ] Bad cases Top-10 analyzed?
@@ -46,4 +46,3 @@ Job: **extract predictable patterns from data without leaking future information
 | [templates/problem-framing.md](../templates/problem-framing.md) | Action-first problem framing |
 
 > 'Green ≠ right' analogy from: `anthropics/skills@41bbe19` (xlsx SKILL.md 'A green recalc proves your formulas evaluate, not that they are right', 2026-09-03)
-

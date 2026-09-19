@@ -8,14 +8,14 @@ when_to_use: "Use this skill when the spawn packet names hat ops or the user typ
 
 This is the **product-operations** listen track on hat `ops`. Deploy, rollback, alerts, and incidents belong to `sre`. Do not write kubectl or runbooks here.
 
-Job: **translate scattered user voices into evidence-backed signals**, and translate launch data into honest assessments.
+Job: **translate scattered user voices into evidence-backed signals**, while preserving source scope and uncertainty.
 
 | Task | Approach |
 |---|---|
 | **Aggregate user feedback** | Signal extraction: each = source + affected users + frequency + initial recommendation |
-| **Competitor analysis** | If this change already has `00-discover/compete.md`, cite it — do not rewrite the snapshot. Long battlecards only for P9 / continuous listen |
-| **Growth review** | Compare against original assumptions (predicted vs actual) — not just good news |
-| **Release announcement** | User-perspective language, not internal jargon; only claims verified in `04-verify/accept-growth.md` |
+| **Competitor signal** | Capture the dated observation; send analysis to compete and reference its canonical result |
+| **Growth feedback** | Reference analyst retro for effects; collect qualitative feedback without a second statistical readout |
+| **Release announcement request** | Route to enablement; signals does not own release copy |
 
 ## Gotchas
 
@@ -29,14 +29,14 @@ Job: **translate scattered user voices into evidence-backed signals**, and trans
 | Direction | Content |
 |---|---|
 | **Input** | Support tickets / user comments / competitor updates / growth data |
-| **Output** | `requirement-pool.md` (signals with evidence) · `feedback-digest.md` (themes + assumption comparison) · `release-notes.md` |
+| **Output** | `requirement-pool.md` (signals with evidence) · `feedback-digest.md` (themes + assumption comparison) (release notes belong to enablement) |
 | **Downstream** | `pm` (signals become requirement candidates) · P9 digest feeds back into next P0 |
 | **Refuse** | Prioritizing requirements (→ pm's RICE call) · designing features (→ pm) · deploy/rollback/alerts (→ sre / 运维) |
 
 ## Self-check
 
 - [ ] Every signal has a source (ticket number / interview / data)?
-- [ ] Competitor analysis gives borrow/avoid/differentiate (not just "they have it")?
+- [ ] Competitor observations reference compete analysis rather than duplicating it?
 - [ ] P9 review compares against original P0 assumptions?
 - [ ] Growth data has time window and metric definition?
 
@@ -55,3 +55,9 @@ Job: **translate scattered user voices into evidence-backed signals**, and trans
 ## Role-specific review
 
 For the assigned role, apply [references/role-quality.md](references/role-quality.md) alongside this procedure’s self-check. Reviewers use the same criteria.
+
+## Evidence unit and ownership
+
+Record signal ID, original source/date, observation window, affected surface/version, distinct users/accounts, repeated contact count and collection bias. Ten tickets from one customer are one affected customer and ten contacts; report both, not ten users. A quoted request is evidence of that person's request, not proof of market demand. Separate raw observation, interpretation, proposed action and urgency constraint. Keep raw sensitive data in its authorized source; summaries reference it.
+
+`01-define/requirement-pool.md` (registry gate path) is the feature digest; the requirement pool is the canonical backlog of raw signals when the project uses one. Use stable IDs and references, not parallel copies. PM decides prioritization; compete owns comparative analysis; retro owns outcome interpretation; enablement owns support and release copy.

@@ -8,7 +8,7 @@ when_to_use: "User says /sdlc, follow the process, continue last task, or wants 
 
 This window is the **manager** (agents-as-tools): specialists run as nested spawns and you keep the user-facing reply. Do not handoff the conversation to a hat. You classify intent, keep `state.yaml` and the product layer, fill spawn packets, run gates, and run the human decision points. You never write specs, designs, schemas or code (Iron rule 4). Hats load their procedure skills (`prd-gwt`, `design-contract`, `architecture`, `schema`, …) with the Skill tool inside their own context — this window invokes only `sdlc-workflow:discover` / `falsify` in Step 1b.
 
-**What v4 optimizes for:** a product worth using, not artifacts that pass gates. Gates are the hygiene floor. Quality comes from the product layer every hat reads first, diverge-then-converge work with real evidence, experience design before architecture, and acceptance on the running build.
+**What v4 optimizes for:** a product worth using, not artifacts that pass gates. Gates are the hygiene floor. Quality comes from the product layer every hat reads first, diverge-then-converge work with real evidence, early technical feasibility and experience design before final architecture contracts, and acceptance on the running build.
 
 **Slice:** one feature change per `state.yaml`, plus the product layer it reads and writes back (`/sdlc-product` maintains the layer on its own). Not an organizational SDLC: no portfolio intake, vendor/HR/legal process, CI platform or registry ownership, production on-call, multi-repo release trains. Refuse those by quoting this paragraph.
 
@@ -28,7 +28,7 @@ Commands contain no procedures. Entry routing, role/stage/task mappings, artifac
 3. Unused mechanisms are explicit `N/A` with a reason — never silent skips.
 4. Role work never happens in this window — except Step 1b discovery HITL and presenting decisions (you present, the human decides).
 5. Every hat reads the product layer first; every producing hat keeps its product files true and returns delta rows, which only you record (`product-delta.md`, `CHANGELOG.md`).
-6. Experience before architecture: on a UI change the picked design direction exists before the architect starts.
+6. On a UI change, final architecture contracts consume the approved final design. Risky technical assumptions can be checked earlier with architect `define/feasibility`; that task does not choose the product experience or require a frozen spec.
 7. Acceptance on the build before the final review: pm walks the journeys, the designer runs design QA, growth checks claims.
 8. Strategic decisions belong to the operator. No explicit answer, no decision: stop and wait — never adopt a hat's recommendation as a default.
 
@@ -56,7 +56,7 @@ This file is `<plugin>/skills/sdlc/SKILL.md`; **PLUGIN_ROOT** is two directories
 
 ## Step 0 — init
 
-1. Read `sdlc.config.yaml` (or copy the template and ask for: constitution, gate commands including `e2e`, `app.start` / `app.base_url`, `product_root`). Run `python3 <PLUGIN_ROOT>/scripts/check_config.py --project-root <root>`: blockers go to the user with the suggested block (you never write their config), and no UI stage starts until the app can run ([orchestrator-gates.md](references/orchestrator-gates.md) §12).
+1. Read `sdlc.config.yaml` (or copy the template and ask for: constitution, gate commands including `e2e`, `app.start` / `app.base_url`, `product_root`). Run `python3 <PLUGIN_ROOT>/scripts/check_config.py --project-root <root>`: blockers go to the user with the suggested block (delegate approved project-config changes to the scoped SRE ci task), and stages requiring a real UI build wait until it runs; early design may run its own prototype ([orchestrator-gates.md](references/orchestrator-gates.md) §12).
 2. **Product layer:** resolve `product_root` (default `docs/product`). Copy missing templates per [product-layer.md](references/product-layer.md) — never overwrite. A new feature's `state.yaml` gets `sdlc_version: 4` and `product_root`. If the layer is mostly unfilled and the product already exists, recommend `/sdlc-product` before the first feature.
 3. **Resume:** an unfinished `<artifact_root>/.sdlc/*/state.yaml` → class `resume`. Normalize legacy Chinese hat words once. Last fresh-context `fail` → stay on the producing hat (HATADVANCE).
 4. Note whether `sdlc-workflow:<role>` types exist in the host spawn table; if not, use the `host_spawn` fallback ([orchestrator-gates.md](references/orchestrator-gates.md) §1).
@@ -74,14 +74,14 @@ Classify the user's **last substantive message** into `state.yaml` `intent: {cla
 | `product` | "build/refresh the product layer", "定位/核心功能/领域模型梳理" | execute product mode |
 | `eval` | "run the eval" | refuse; a fresh window with `/sdlc-eval` |
 | `out-of-slice` | org process / CI platform / on-call | refuse citing the slice paragraph |
-| `discovery` | "先调研/先讨论", or L2+ new feature with no briefing | Step 1b |
+| `discovery` | "先调研/先讨论", or an unresolved product decision | Step 1b |
 | `new-feature` | gated delivery and briefing `done`/`skipped` | Step 2 |
 
 Single-hat discipline: do not invoke `$prd-gwt` or any procedure skill here; do not inflate a single-hat request into a lane. "Also review it" → `/sdlc-review` after files land.
 
 ## Step 1b — discover (before lane, before pm)
 
-When class is `discovery`, or `new-feature` at L2+ without `discovery.status: done|skipped|killed`: invoke `sdlc-workflow:discover` in this window and follow it — Frame → market ∥ compete → **growth** → Discuss-P → Discuss-S → Falsify → freeze `00-discover/briefing.md`. No pm, architect or implement spawns in this step; no `spec.md`. Skip predicates (closed set): (a) briefing on disk and the user says continue; (b) explicit skip and a spec exists; (c) you will judge L1. Verdict `killed` → stop. After the freeze and the human's go → Step 2.
+When class is `discovery`, or `new-feature` at L2+ without `discovery.status: done|skipped|killed`: invoke `sdlc-workflow:discover` in this window and follow it — select the unresolved decisions and relevant evidence tracks using discover → freeze `00-discover/briefing.md`. No pm, architect or implement spawns in this step; no `spec.md`. Reuse accepted briefings, defect reports, contracts and explicit scope decisions; record the reference and why further discovery is unnecessary. Verdict `killed` → stop. After freeze and a current or prior authorization to continue → Step 2.
 
 ## Step 2 — lane and participation
 
@@ -105,6 +105,8 @@ feature_dir: <abs>
 PLUGIN_ROOT: <abs>
 constitution: <abs or none>
 product_root: <abs>
+project_root: <abs>          # actual code repository, required when source_writes is nonempty
+source_writes: []            # scoped relative project files/subdirectories for registered source-writing tasks
 product_context:            # read first — defaults in product-layer.md
   - <abs>
 product_writes:             # files this hat owns and must keep true; empty for reviewer/qc
@@ -112,7 +114,7 @@ product_writes:             # files this hat owns and must keep true; empty for 
 lane_file: <ui|api|ai|model|none>
 slice_integrator: <one implementation role, required for implement tasks>
 primary_skill: sdlc-workflow:<proc>
-companion_skills: []        # only what the contract lists: tdd | refactor (implement) · collect (pm when tracking: yes); prototype is for discovery only
+companion_skills: []        # only what the contract lists: read allowed companions from the registry; discovery prototypes have their own registered task
 inputs:                     # files the hat must read — never directories; include every contract `reads` path
   - {path: <abs>, required: true|false}
 explore_roots:              # directories it may search with Grep/Glob, not read wholesale
@@ -128,7 +130,7 @@ visuals: []                 # diagrams this task draws (contract `visuals`; trus
 forbidden:
   - Do not spawn further subagents (host depth 1).
   - Do not invoke procedure skills beyond primary_skill and companion_skills (reviewer/qc may load any to judge; debug_protocol adds sdlc-workflow:debug).
-  - Do not Write outside deliverable_paths and product_writes (reviewer/qc: do not Write at all).
+  - Do not Write outside deliverable_paths, product_writes, source_writes and the assigned memory_file (reviewer/qc: do not Write at all).
   - Do not read <feature>/memory/*.md unless it is your own memory_file.
 memory_file: <abs or empty>
 debug_protocol: <abs or empty>
@@ -138,14 +140,14 @@ success_checks:
 return: output paths + summary + decisions + open_questions (strategic → Q-* 待确认 + options + recommendation; operational → default applied) + product-delta rows
 ```
 
-**Scale the deliverable, never the evidence.** A packet never waives web research, screenshots, the running app or E2E — no "smoke run: no WebSearch needed", no "URLs optional", no "fall back to reading source code". To save cost, ask for a shorter artifact. Save every packet to `<feature>/packets/<nn>-<stage>-<hat>.md` and run `python3 <PLUGIN_ROOT>/scripts/check_packet.py <file>` before spawning. It rejects waivers like these, a missing or mismatched check-task line (`workflow.py contract` prints the exact `success_check`), an `evidence_required` list shorter than the contract's `evidence`, deliverables outside the feature directory, directory inputs, oversized `product_context`, writes to files a hat does not own (including `product-delta.md` and `CHANGELOG.md`, which only you write), and `--hat <role>`. Errors → fix the packet; never spawn around them.
+**Apply the task contract to its actual scope.** A packet never waives evidence required by the resolved task and participation flags — no "smoke run: no WebSearch needed", no "URLs optional", no "fall back to reading source code". To save cost, ask for a shorter artifact. Save every packet to `<feature>/packets/<nn>-<stage>-<hat>.md` and run `python3 <PLUGIN_ROOT>/scripts/check_packet.py <file>` before spawning. It rejects waivers like these, a missing or mismatched check-task line (`workflow.py contract` prints the exact `success_check`), an `evidence_required` list shorter than the contract's `evidence`, deliverables outside the feature directory, directory inputs, oversized `product_context`, writes to files a hat does not own (including `product-delta.md` and `CHANGELOG.md`, which only you write), and `--hat <role>`. Errors → fix the packet; never spawn around them.
 
 `subagent_type` is always the qualified name. Unknown type → one `general-purpose` fallback that Reads `PLUGIN_ROOT/agents/<role>.md` and the primary SKILL.md; record `host_spawn`. Native and fallback both succeeding for one hat is a dual-dispatch defect. Reviewer and qc: no `memory_file`, no `product_writes`; write their deliverable from the final message before any other spawn. For qc you run `skills/coverage-matrix/scripts/check-matrix.py` and paste its output into the packet. `mcp_adapters` in the config is a warning list only.
 
 ## Step 4 — human decision points (you present, the human decides)
 
 - **Discovery freeze** (Step 1b).
-- **Design direction pick** (`ui: yes`): after designer `explore`, show each direction in one line — signature moment, trade-off, screenshot paths — plus the designer's recommendation, and wait. Record `design: {picked: D<n>, picked_by: user|delegated, at}`. The designer's `specify` spawn writes `选定：D<n>` into `design-directions.md`.
+- **Design direction pick** (`ui: yes`): when a new direction decision is needed, after designer `explore`, show each direction in one line — signature moment, trade-off, screenshot paths — plus the designer's recommendation, and wait only if the decision is not already authorized or delegated. Record `design: {picked: D<n>, picked_by: user|delegated, at}`. The designer's `specify` spawn writes `选定：D<n>` into `design-directions.md`.
 - **Strategic decisions** (`Q-*` rows with 类别 战略, 状态 待确认): ask all of them in one round — question, options, the hat's recommendation — and **wait**. Only an explicit answer counts. Silence, a question tool that returns no answer, or a question the user never saw is not consent. "按推荐" or "你定" from the user is an answer; record it as such. Record each answer in `open_questions` (Step 5) and respawn the owner to write 已确认 with the operator's words. No answer → the dependent stage does not start: `phase: Stopped`, reason `waiting-for-operator`, and tell the user what is waiting.
 - **Operational defaults** (状态 默认): list them in your report; the user can overturn any of them later.
 - **Acceptance** verdict `有条件通过`: the user accepts the conditions or sends the slice back. Record acceptance as `open_questions` entry `{id: Q-ACCEPT-<PM|DESIGN|GROWTH>, status: answered, by: user, quote: "<their words>"}`; the gate checks it.
@@ -156,10 +158,10 @@ Update after every hat. `current_hat` / `hats_done` use English words from the s
 
 ## Step 6 — gates
 
-After each task, run its `workflow.py check-task` presence check and the owning skill’s checks. Only after all participating tasks in a stage have returned, run the stage gate below. In particular, designer explore does not require a picked direction or specify artifacts. Task success never alone adds `shape` or `accept` to `hats_done`.
+After each task, run its `workflow.py check-task` presence check and the owning skill’s checks. Only after all participating tasks in a stage have returned, run the stage gate below. In particular, partial-stage tasks use their own checks: designer explore needs no specify artifacts, and architecture feasibility needs no completed spec. Follow stage-procedure for change impact and conformance; a completed report does not settle pending decisions or unverified obligations. Task success never alone adds `shape` or `accept` to `hats_done`.
 
 - **G-script:** the config commands (test / lint / build / migration / e2e) + `bash <PLUGIN_ROOT>/scripts/check-sdlc.sh --require --hat <stage> <feature-dir>`. Agent said so ≠ file exists — `ls` first. Plain runs skip with exit 0; `--require` / `--hat` turn a missing file into a failure.
-- **G-fresh (L1+):** once per stage after all its producers return (define; shape = designer + architect + dba + invited data hats; implement), plus the final review after accept. The reviewer packet carries artifact paths and the product files named in `product-delta.md` — never your reasoning. Fail (blocker/major unwaived) → producer rework, `current_hat` stays; `review` enters `hats_done` only after the final review passes. L1: the implement G-fresh is the review. Same snapshot (sha256) → reuse `findings.md`; `/sdlc-review` is the report-only entry to the same reviewer.
+- **G-fresh (L1+):** once per stage after all its producers return (define; shape = designer + architect + dba + invited data hats; implement), plus the final review after accept. The reviewer packet carries artifact paths and the product files named in `product-delta.md` — never your reasoning. Fail (blocker/major unwaived) → producer rework, `current_hat` stays; `review` enters `hats_done` only after the final review passes. L1: the implement G-fresh is the review. Same snapshot, criteria, scope and relevant evidence → reuse `findings.md`; `/sdlc-review` is the report-only entry to the same reviewer.
 - **Acceptance (v4):** every participating `accept-*.md` ends with `结论：通过 | 有条件通过 | 不通过`. Any `不通过` → send its gap list to the implement hats (rework on implement, `rework_rounds` +1), then re-run verify and accept.
 - **Decisions (v4):** `DECISIONPENDING` is not rework — ask the operator (Step 4). `DEFAULTED` is rework on the producer: the strategic call goes back to 待确认 with options before you ask ([orchestrator-gates.md](references/orchestrator-gates.md) §10).
 - **G-self (L3/L4, one pass):** scope, irreversibility, cost, and launch timing vs capacity.
@@ -171,4 +173,8 @@ Subagents start from files, not your chat. `state.yaml` is the resume map; the p
 
 ## Metrics
 
-Per feature: acceptance first-pass rate, E2E pass on core journeys, escapes after release, rework rounds, gate intercepts, spawn count. A gate that never intercepts should be removed from config. Spawn count is a cost to explain — never a reason to skip the designer, dba, growth or acceptance.
+Per feature: acceptance first-pass rate, E2E pass on core journeys, escapes after release, rework rounds, gate intercepts, spawn count. Review gate value using risk coverage, escapes, execution cost and intercepts; zero intercepts alone does not justify removal. Spawn count is a cost to explain — never a reason to skip the designer, dba, growth or acceptance.
+
+## Task scope
+
+Apply [task-scope.md](references/task-scope.md) for project profile, delivery goal and source write boundaries. These scope records do not bypass lane gates.

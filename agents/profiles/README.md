@@ -14,3 +14,5 @@ Hermes / OpenClaw / this repo's `.claude/` all split **who / how it talks / what
 ZCode/Grok **不**在 `agents/*.md` 里展开 `@import` / `@include`（AGENTS.md 同样不展开）。所以 SOUL/IDENTITY 不能靠运行时引入；工厂是编译期引入。改身份或性格：只编辑本目录，再跑 `python3 scripts/render-role-agents.py`。不要手改 `agents/<role>.md`。已有 `IDENTITY.md` / `SOUL.md` **不会被覆盖**；生成器不再保存或恢复另一套身份种子。
 
 审查角色（reviewer / qc）没有运行时 memory 文件。
+
+Task routes, permitted companions, source-write capabilities and partial-stage checks are generated from workflow/registry.json. SOUL expresses tone only; professional methods and technical requirements belong to the task skill. Update sources and re-render all agents; do not maintain a second task/permission list in profiles.

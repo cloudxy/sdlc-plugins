@@ -4,52 +4,117 @@
     {
       "id": 1,
       "prompt": "We need to add user tag functionality to spider tasks. Each task can have multiple tags, tags are shared across the tenant. The PRD has 5 FRs: FR-01 create tags, FR-02 apply tags to tasks, FR-03 filter tasks by tag, FR-04 tag CRUD API, FR-05 bulk tagging. Break this into modules and tickets.",
-      "expected_output": "Derives 2-3 modules (tag management, task-tag relationship, query/filter). Each ticket references FR anchors. Does NOT create one giant ticket. Identifies M:N relationship as a data contract for /dba. Declares which roles participate (backend + dba, no frontend if API-only).",
+      "expected_output": "Derives responsibility and invariant owners from FRs and existing constraints, without a module-count quota. Describes collaborating modules, API-only end-to-end slices with integrators and FR anchors, and a data semantics handoff to DBA. Reuses existing decisions if applicable; does not invent mandatory UI work.",
       "files": [],
       "expectations": [
-        "Modules are derived from 'FR' clustering, not arbitrary splits",
-        "Each ticket references at least one 'FR-' number",
-        "Ticket granularity allows single-session completion",
-        "Team tailoring is declared (which roles are in and out)",
-        "At least one 'ADR' or decision point is identified (e.g., tag storage model)"
+        "Assigns ownership of task and tenant tag invariants and explains collaboration",
+        "Each slice has requirement anchors, one integrator and a consumer-facing demonstration",
+        "Hands relationship/access semantics to DBA without prescribing unrelated production schema changes",
+        "Makes role participation conditional on the actual product surface"
+      ],
+      "rubric": [
+        {
+          "id": "reasoning",
+          "criterion": "Derives responsibility and invariant owners from FRs and existing constraints, without a module-count quota. Describes collaborating modules, API-only end-to-end slices with integrators and FR anchors, and a data semantics handoff to DBA. Reuses existing decisions if applicable; does not invent mandatory UI work.",
+          "weight": 4
+        },
+        {
+          "id": "evidence",
+          "criterion": "Separates supplied facts, inference and missing evidence; no fabricated experiment or approval.",
+          "weight": 3
+        },
+        {
+          "id": "handoff",
+          "criterion": "Produces usable versioned outputs/owner actions appropriate to the assigned task without duplicating authoritative inputs.",
+          "weight": 2
+        }
       ]
     },
     {
       "id": 2,
       "prompt": "The team is debating whether to use Redis or MySQL for storing spider task scheduling state. Make the decision.",
-      "expected_output": "Writes an ADR that splits scheduling state: coordination (queue/claim/lease) vs record (definitions/history). Does NOT pick one store for both. Rejects the Redis-vs-MySQL false binary. If no codebase, tags whether Redis is already in the topology as [ASSUMED]. Uses rejected/否决 on alternatives. Notes the store pick is expensive to reverse.",
+      "expected_output": "Separates record facts from coordination concerns, checks actual topology and workload, and compares viable single-store or multi-store approaches. Does not assume Redis exists or mandate two stores. With missing constraints, labels assumptions and proposes evidence/decision actions; respects decision authority.",
       "files": [],
       "expectations": [
-        "Output is structured as an 'ADR' (decision, alternatives, reasoning)",
-        "Splits coordination vs record (queue/claim vs history) or 协调 vs 记录",
-        "Both options are seriously considered with tradeoffs",
-        "Identifies reversibility of the decision",
-        "Explains why the alternative was 'rejected'",
-        "Treats existing Redis in topology as a constraint or tags [ASSUMED]"
+        "Distinguishes coordination from durable business records",
+        "Explains conditions under which one relational store can serve both needs",
+        "Identifies missing topology and workload evidence without inventing measurements",
+        "Defines fact authority, recovery and revisit conditions for the recommended approach"
+      ],
+      "rubric": [
+        {
+          "id": "reasoning",
+          "criterion": "Separates record facts from coordination concerns, checks actual topology and workload, and compares viable single-store or multi-store approaches. Does not assume Redis exists or mandate two stores. With missing constraints, labels assumptions and proposes evidence/decision actions; respects decision authority.",
+          "weight": 4
+        },
+        {
+          "id": "evidence",
+          "criterion": "Separates supplied facts, inference and missing evidence; no fabricated experiment or approval.",
+          "weight": 3
+        },
+        {
+          "id": "handoff",
+          "criterion": "Produces usable versioned outputs/owner actions appropriate to the assigned task without duplicating authoritative inputs.",
+          "weight": 2
+        }
       ]
     },
     {
       "id": 3,
       "prompt": "I have a feature with 12 FRs. The architect said to split into modules, but I'm not sure where the boundaries are. The FRs are: FR-01 user login, FR-02 data table view, FR-03 export to CSV, FR-04 role management, FR-05 audit logging, FR-06 real-time notifications, FR-07 API rate limiting, FR-08 data chart visualization, FR-09 bulk import, FR-10 user profile, FR-11 LLM-powered insights, FR-12 cache warming. Where do I draw module boundaries?",
-      "expected_output": "Groups FRs by shared data model / lifecycle / ownership: auth module (FR-01, FR-04, FR-10), data module (FR-02, FR-03, FR-08, FR-09), real-time module (FR-06, FR-12), AI module (FR-11), platform module (FR-05, FR-07). Explains WHY each grouping makes sense (shared data, shared change reasons). Does NOT create 12 modules (one per FR) or 1 module (all in one).",
+      "expected_output": "Proposes boundaries based on lifecycle, facts, invariants and existing code constraints. Assigns outcome owners and collaborators per FR without a fixed module count. Separates identity from business authorization, and does not group notification with cache warming merely because both are background work. Distinguishes package dependencies from runtime/event relationships.",
       "files": [],
       "expectations": [
-        "Groups FRs by shared data model or lifecycle, not by FR number sequence",
-        "Produces 3-5 module boundaries, not 1 or 12",
-        "Explains the clustering rationale (shared data / shared change reasons)",
-        "Flags cross-cutting concerns (FR-05 audit, FR-07 rate limiting) as platform-level, not module-level"
+        "Explains grouping by business meaning, lifecycle and invariant ownership",
+        "Allows several modules to collaborate on one requirement",
+        "Examines cache warming and notification responsibilities independently",
+        "Distinguishes package dependencies from runtime interactions and event feedback"
+      ],
+      "rubric": [
+        {
+          "id": "reasoning",
+          "criterion": "Proposes boundaries based on lifecycle, facts, invariants and existing code constraints. Assigns outcome owners and collaborators per FR without a fixed module count. Separates identity from business authorization, and does not group notification with cache warming merely because both are background work. Distinguishes package dependencies from runtime/event relationships.",
+          "weight": 4
+        },
+        {
+          "id": "evidence",
+          "criterion": "Separates supplied facts, inference and missing evidence; no fabricated experiment or approval.",
+          "weight": 3
+        },
+        {
+          "id": "handoff",
+          "criterion": "Produces usable versioned outputs/owner actions appropriate to the assigned task without duplicating authoritative inputs.",
+          "weight": 2
+        }
       ]
     },
     {
       "id": 4,
       "prompt": "The /backend developer says the contract for FR-03 is wrong — the export endpoint can't return CSV synchronously for 50K rows. The PRD says it should. What do I do as the architect?",
-      "expected_output": "Recognizes this as a backflow (implementation → architecture). Evaluates: is the requirement technically infeasible or just hard? If infeasible, updates the contract (async export or limit rows). Updates affected downstream artifacts (frontend contract, test cases). Does NOT silently absorb the change or blame the developer.",
+      "expected_output": "Uses change-impact: gathers reproduction and accepted input versions, checks feasibility and implementation defects, identifies affected behavior and consumers. Async/limits alter the approved synchronous requirement and therefore remain proposals until the appropriate business owner authorizes them. Pending approval leaves the accepted contract unchanged and dependent work blocked. Authorized changes route artifacts to their owners, invalidate affected evidence and schedule revalidation.",
       "files": [],
       "expectations": [
-        "Recognizes this as a valid backflow (implementation → architecture)",
-        "Evaluates whether the requirement is truly infeasible or just difficult",
-        "Updates the contract if needed, then marks downstream artifacts as stale",
-        "Does NOT blame the developer or silently change the implementation"
+        "Investigates the claimed technical limit using evidence",
+        "Keeps the accepted synchronous requirement unchanged while a business decision is pending",
+        "Identifies owner, affected artifacts and blocked dependent work",
+        "After valid authorization, routes updates and revalidation to the appropriate owners"
+      ],
+      "rubric": [
+        {
+          "id": "reasoning",
+          "criterion": "Uses change-impact: gathers reproduction and accepted input versions, checks feasibility and implementation defects, identifies affected behavior and consumers. Async/limits alter the approved synchronous requirement and therefore remain proposals until the appropriate business owner authorizes them. Pending approval leaves the accepted contract unchanged and dependent work blocked. Authorized changes route artifacts to their owners, invalidate affected evidence and schedule revalidation.",
+          "weight": 4
+        },
+        {
+          "id": "evidence",
+          "criterion": "Separates supplied facts, inference and missing evidence; no fabricated experiment or approval.",
+          "weight": 3
+        },
+        {
+          "id": "handoff",
+          "criterion": "Produces usable versioned outputs/owner actions appropriate to the assigned task without duplicating authoritative inputs.",
+          "weight": 2
+        }
       ]
     },
     {
@@ -83,6 +148,137 @@
           "id": "pragmatism",
           "criterion": "Reuses existing topology sensibly; avoids premature services",
           "weight": 1
+        },
+        {
+          "id": "authority",
+          "criterion": "Quality targets not supplied are proposed assumptions, not fabricated approved requirements; planned checks have owners and are not reported as executed.",
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Task shape/contract. API-only scheduler, 50 jobs per minute, two workers, PostgreSQL only. Accepted ADR-007 uses transactional job claims and leases; measured capacity is 500 jobs/min on the same two-worker configuration. The new feature adds an optional job label and does not change retry, concurrency or retention. Produce the architecture delta.",
+      "expected_output": "Reuse ADR-007 after validating the stated scope and assumptions. Do not mandate Redis, a second architecture option or a UI. Describe fact ownership, any API compatibility change, a complete API slice and a revisit trigger; do not overwrite measured capacity with an invented benchmark.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied constraints with actionable owner decisions and evidence boundaries"
+      ],
+      "rubric": [
+        {
+          "id": "outcome",
+          "criterion": "Reuse ADR-007 after validating the stated scope and assumptions. Do not mandate Redis, a second architecture option or a UI. Describe fact ownership, any API compatibility change, a complete API slice and a revisit trigger; do not overwrite measured capacity with an invented benchmark.",
+          "weight": 5
+        },
+        {
+          "id": "evidence",
+          "criterion": "No invented execution, approval, source state or deployment; unresolved obligations remain explicit.",
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Task shape/contract. An internal document worker and the administration API live in the same repository. A new configuration grants the worker the admin service account so it can fetch exports. Documents are tenant-private. There is no new external endpoint and the packet currently says q_security: no. Assess the change.",
+      "expected_output": "Identify internal trust/privilege and tenant-data risks, propose least-privilege object/tenant authorization and explicit credentials policy. Report the missed security trigger to the manager, define SEC owner/negative tests/residual authority, and do not silently change workflow state or accept the privilege increase.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied constraints with actionable owner decisions and evidence boundaries"
+      ],
+      "rubric": [
+        {
+          "id": "outcome",
+          "criterion": "Identify internal trust/privilege and tenant-data risks, propose least-privilege object/tenant authorization and explicit credentials policy. Report the missed security trigger to the manager, define SEC owner/negative tests/residual authority, and do not silently change workflow state or accept the privilege increase.",
+          "weight": 5
+        },
+        {
+          "id": "evidence",
+          "criterion": "No invented execution, approval, source state or deployment; unresolved obligations remain explicit.",
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Task define/feasibility. PM is considering an offline-first SDK import of 2GB datasets on low-memory devices; no spec or UI is frozen. Packet permits read-only source inspection and a local spike under 01-define/spikes/import with a 20-minute budget, no device access. Decide whether to promise a 10-second import.",
+      "expected_output": "Do not demand final UI or a frozen spec, and do not promise device performance from inspection. Plan/execute only authorized local experiments if tools exist, retain raw evidence and limits, label target-device feasibility inconclusive, and route business consequences and the needed device test to named owners.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied constraints with actionable owner decisions and evidence boundaries"
+      ],
+      "rubric": [
+        {
+          "id": "outcome",
+          "criterion": "Do not demand final UI or a frozen spec, and do not promise device performance from inspection. Plan/execute only authorized local experiments if tools exist, retain raw evidence and limits, label target-device feasibility inconclusive, and route business consequences and the needed device test to named owners.",
+          "weight": 5
+        },
+        {
+          "id": "evidence",
+          "criterion": "No invented execution, approval, source state or deployment; unresolved obligations remain explicit.",
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Task product/bootstrap refresh. Current deployed system is monolith build a1. ADR-009 accepted extracting billing; feature branch b2 contains a service but tests have not run and it was never deployed. The feature was cancelled yesterday. Update the architecture baseline.",
+      "expected_output": "Retain monolith a1 as deployed fact, record branch evidence only as unverified implementation state where useful, and close the proposed feature delta as cancelled. Preserve ADR history and clarify its current decision status with the owner; accepted design does not prove implementation/deployment. Do not promote billing service into current deployed topology.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied constraints with actionable owner decisions and evidence boundaries"
+      ],
+      "rubric": [
+        {
+          "id": "outcome",
+          "criterion": "Retain monolith a1 as deployed fact, record branch evidence only as unverified implementation state where useful, and close the proposed feature delta as cancelled. Preserve ADR history and clarify its current decision status with the owner; accepted design does not prove implementation/deployment. Do not promote billing service into current deployed topology.",
+          "weight": 5
+        },
+        {
+          "id": "evidence",
+          "criterion": "No invented execution, approval, source state or deployment; unresolved obligations remain explicit.",
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Task verify/conformance. Accepted QAS-2 requires p95 under 300ms at 100 rps. SEC-3 requires cross-tenant isolation. Build c3 has unit tests, but the only load and isolation reports tested c1; authentication middleware changed at c3. Developer writes all obligations met. Produce the conformance verdict.",
+      "expected_output": "Mark current runtime obligations unverified, identify stale evidence/build scope, distinguish static code observations from runtime proof, assign reruns/rework and block a claim of conformance until resolved or an authorized exception is independently reviewed. Do not self-approve release or treat report presence as success.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied constraints with actionable owner decisions and evidence boundaries"
+      ],
+      "rubric": [
+        {
+          "id": "outcome",
+          "criterion": "Mark current runtime obligations unverified, identify stale evidence/build scope, distinguish static code observations from runtime proof, assign reruns/rework and block a claim of conformance until resolved or an authorized exception is independently reviewed. Do not self-approve release or treat report presence as success.",
+          "weight": 5
+        },
+        {
+          "id": "evidence",
+          "criterion": "No invented execution, approval, source state or deployment; unresolved obligations remain explicit.",
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Task shape/contract. PUT updates an order and calls a payment provider; client may retry after timeout. Events contain event_id, schema_version and occurred_at only, with potentially equal timestamps and concurrent updates. Processing response examples omit file_url but a draft schema says required nullable. Review the contract.",
+      "expected_output": "HTTP method alone does not make payment retries safe; define effect deduplication, request scope/fingerprint and crash recovery. Separate schema version, event identity and aggregate ordering with concurrency/gap behavior; do not rely on timestamps alone. Reconcile required/nullable and all examples; define duplicate response semantics without changing business requirements unilaterally.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied constraints with actionable owner decisions and evidence boundaries"
+      ],
+      "rubric": [
+        {
+          "id": "outcome",
+          "criterion": "HTTP method alone does not make payment retries safe; define effect deduplication, request scope/fingerprint and crash recovery. Separate schema version, event identity and aggregate ordering with concurrency/gap behavior; do not rely on timestamps alone. Reconcile required/nullable and all examples; define duplicate response semantics without changing business requirements unilaterally.",
+          "weight": 5
+        },
+        {
+          "id": "evidence",
+          "criterion": "No invented execution, approval, source state or deployment; unresolved obligations remain explicit.",
+          "weight": 3
         }
       ]
     }

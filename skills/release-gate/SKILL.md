@@ -11,7 +11,7 @@ Procedure for the **final release decision**. Your unique value is NOT re-review
 | Task | Approach |
 |---|---|
 | **"Can we ship this?"** | 6-point completeness check → gate fingerprint verification → residual risk → decision |
-| **"Are all findings resolved?"** | Check findings status against severity → blocker/major must be fixed or waived with reason |
+| **"Are all findings resolved?"** | Check findings status against severity → blocker/major require verified closure or explicit risk-authority escalation; QC cannot silently waive them |
 | **Coverage gap check** | FR↔matrix, FR↔design, FR↔tickets — find "everyone thought someone else did it" gaps |
 
 ## Gotchas
@@ -45,7 +45,7 @@ Gate failures are never waived by QC — they're fixed or escalated to human for
 
 | Direction | Content |
 |---|---|
-| **Input needed** | `qa` `04-verify/coverage.md` + test-report · `reviewer` findings + status · gate outputs (cmd + exit code) · spec FR/NFR · constitution. **Not** sre `checklist.md` — L3 is qc **then** sre ∥ ops. |
+| **Input needed** | `qa` `04-verify/coverage.md` + test-report · `reviewer` findings + status · gate outputs (cmd + exit code) · spec FR/NFR · constitution. SRE `06-deliver/readiness.md` when the target is release-ready; deployment execution follows QC and the existing release authorization. |
 | **Output** | Release opinion in your **final message** (ship / conditional / block) — do not Write files; the orchestrator saves [templates/release-opinion.md](templates/release-opinion.md) |
 | **Refuse** | Fixing code · re-reviewing (→ reviewer already did) · changing gate verdicts · writing test cases |
 
@@ -69,3 +69,9 @@ Gate failures are never waived by QC — they're fixed or escalated to human for
 ## Role-specific review
 
 For the assigned role, apply [references/role-quality.md](references/role-quality.md) alongside this procedure’s self-check. Reviewers use the same criteria.
+
+## Decision scope
+
+The packet declares the target: local verification or release readiness. A local verification opinion must say “local_verified”, not imply production readiness. For release readiness consume SRE `deliver/prepare` evidence before the opinion: artifact identity, deployment/config/migration compatibility, recovery feasibility, monitoring and ownership. Missing required operational evidence blocks **release readiness**, even when functional tests pass.
+
+“Ship” is a readiness opinion for a named version/environment, not permission to deploy or announce. `deliver/checklist` executes only within existing user/release authority; record actual deployment separately. A waiver must name the affected criterion/version/environment, risk owner, reason, compensating control and expiry/recheck condition. Never waive legal, security or organizational prohibitions the approver has no authority to override. Unknown/untested is not pass; applicable-gate omissions require a recorded scope decision.

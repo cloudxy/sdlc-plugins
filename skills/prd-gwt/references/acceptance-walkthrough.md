@@ -10,12 +10,12 @@
 | `01-define/spec.md` 的核心价值与 Aha、关键旅程 J-n | 走查脚本 |
 | `04-verify/coverage.md` 与 E2E 截图 | 已被自动化证明的部分 |
 | `03-impl/*integration*.md` | 联调时的实际表现 |
-| 运行中的构建（`sdlc.config.yaml` 的 `app.base_url`） | 亲自走 |
+| 实际构建/消费者入口（UI URL 或 API/CLI/SDK/批任务入口） | 亲自走 |
 
 ## 走查方法
 
 1. **以目标人群的身份**，从真实起点开始（例如新注册账号、空数据、手机宽度），不要从开发者常用的已登录已有数据状态开始。
-2. 按 J-n 逐步操作，每一步截图：`bash PLUGIN_ROOT/scripts/ui-evidence.sh <url> <feature>/04-verify/shots/pm <宽度>`，然后**打开截图看**。
+2. 按真实消费者入口逐步执行；UI 截图，API/CLI/SDK/数据任务记录请求/命令、结果、环境与版本，不要求浏览器截图。UI 截图命令：`bash PLUGIN_ROOT/scripts/ui-evidence.sh <url> <feature>/04-verify/shots/pm <宽度>`，然后**打开截图看**。
 3. 每一步记录：做了什么、看到什么、花了多久、有没有犹豫或卡住、是否符合 spec。
 4. 到达 Aha 时刻时判断：用户**是否能意识到**价值？（结果是否显眼、是否需要解释、是否被弹窗/加载/空态挡住）
 5. 走一条「不顺利」的路径：空数据、网络慢、没权限、输入错误——用户能否自己恢复？
@@ -43,7 +43,7 @@
 | 差距性质 | 交给谁 |
 |---|---|
 | 构建与 spec 不一致 | 实现帽（frontend / backend）返工 |
-| 构建符合 spec，但 spec 本身让价值出不来 | 自己（pm）改 spec → 标 stale → 下游重做 |
+| 构建符合 spec，但 spec 本身让价值出不来 | PM 提出变更，核对授权后改 canonical spec → 经理标 stale → 受影响者复验 |
 | 体验与选定设计方向不一致 | designer 的设计走查会给出，协同确认 |
 | 对外说法与构建不一致 | growth 的卖点核验 |
 

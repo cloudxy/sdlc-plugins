@@ -54,6 +54,16 @@ def validate_registry(registry, root=ROOT):
         if key in keys:
             errors.append(f"duplicate task {key}")
         keys.add(key)
+        if "writes_source" in t and not isinstance(t["writes_source"], bool):
+            errors.append(f"{key}: writes_source must be a boolean")
+        if "requires_source" in t and not isinstance(t["requires_source"], bool):
+            errors.append(f"{key}: requires_source must be a boolean")
+        if t.get("requires_source") and not t.get("writes_source"):
+            errors.append(f"{key}: requires_source needs writes_source")
+        if t.get("writes_source") and registry["roles"].get(t["role"], {}).get("fresh"):
+            errors.append(f"{key}: fresh reviewer cannot write source")
+        if "partial_stage" in t and not isinstance(t["partial_stage"], bool):
+            errors.append(f"{key}: partial_stage must be a boolean")
         if t["role"] not in registry["roles"] or t["stage"] not in registry["stages"]:
             errors.append(f"unknown role/stage {key}")
         if not (root / "skills" / t["skill"] / "SKILL.md").is_file():

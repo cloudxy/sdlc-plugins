@@ -36,7 +36,7 @@ FRESH = {name for name, role in REGISTRY["roles"].items() if role["fresh"]}
 OWNERS = {name: set(role["product_writes"]) for name, role in REGISTRY["roles"].items()}
 MANAGER_ONLY = set(REGISTRY["manager_only"])
 REQUIRED = ("hat", "stage", "task", "subagent_type", "PLUGIN_ROOT", "primary_skill", "deliverable_paths", "success_checks", "return")
-ABS_SCALARS = ("PLUGIN_ROOT", "feature_dir", "product_root", "memory_file", "debug_protocol")
+ABS_SCALARS = ("PLUGIN_ROOT", "feature_dir", "product_root", "project_root", "memory_file", "debug_protocol")
 WAIVERS = [
     r"不需要\s*(WebSearch|WebFetch|联网|上网|网络检索|网络搜索|搜索|截图|启动应用|E2E)",
     r"(无需|不用|不必|不要|别)\s*(联网|上网|WebSearch|WebFetch|网络检索|网络搜索|截图|启动应用|启动服务|跑\s*E2E|E2E)",
@@ -158,7 +158,7 @@ def _ui_feature(p):
         return True
     st = os.path.join(str(p.get("feature_dir") or ""), "state.yaml")
     try:
-        return bool(re.search(r"^ui:\s*(yes|true)\b", open(st, encoding="utf-8").read(), re.M))
+        return bool(re.search(r"^ui:\s*(yes|true)\b", Path(st).read_text(encoding="utf-8"), re.M))
     except OSError:
         return False
 
@@ -183,7 +183,7 @@ def check_evidence(p, contract, stage, err):
 def _security_feature(p):
     st = os.path.join(str(p.get("feature_dir") or ""), "state.yaml")
     try:
-        return bool(re.search(r"^q_security:\s*yes\b", open(st, encoding="utf-8").read(), re.M))
+        return bool(re.search(r"^q_security:\s*yes\b", Path(st).read_text(encoding="utf-8"), re.M))
     except OSError:
         return False
 
@@ -223,6 +223,45 @@ def check_visuals(p, contract, stage, err):
         err("DIAGRAM", f"the diagram check must use --root {base}")
 
 
+def check_source_writes(p, contract, hat, err):
+    writes = p.get("source_writes") or []
+    if not isinstance(writes, list):
+        err("SOURCE-SCOPE", "source_writes must be a list of project-relative files or trailing-slash subtrees")
+        return
+    if contract.get("requires_source") and not writes:
+        err("SOURCE-SCOPE", "this implementation task requires explicit source_writes")
+    if not writes:
+        return
+    if not contract.get("writes_source") or hat in FRESH:
+        err("SOURCE-SCOPE", "this task is not authorized to write project source")
+        return
+    raw = str(p.get("project_root") or "")
+    root = Path(raw).resolve()
+    if not Path(raw).is_absolute() or not root.is_dir() or root == Path(root.anchor):
+        err("SOURCE-SCOPE", "source_writes requires an existing absolute project_root, not filesystem root")
+        return
+    protected = [root / ".git", root / ".sdlc", root / ".agents", root / ".codex"]
+    for key in ("feature_dir", "product_root"):
+        if p.get(key):
+            protected.append(Path(str(p[key])).resolve())
+    for item in writes:
+        value = str(item)
+        rel = Path(value)
+        target = (root / rel).resolve()
+        bad = (not value or value in (".", "./") or rel.is_absolute() or ".." in rel.parts
+               or any(c in value for c in "*?[]") or "\\" in value
+               or not target.is_relative_to(root) or target == root)
+        # Neither a protected file nor a parent subtree may bypass product/manager ownership.
+        if any(target == q or target.is_relative_to(q) or q.is_relative_to(target) for q in protected):
+            bad = True
+        if target.name in MANAGER_ONLY:
+            bad = True
+        if target.is_dir() and not value.endswith("/"):
+            bad = True
+        if bad:
+            err("SOURCE-SCOPE", f"unsafe or unscoped source write: {value}")
+
+
 # ----------------------------------------------------------------------------- lint
 def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
     errors: list[dict[str, str]] = []
@@ -253,6 +292,7 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
     if stage and stage not in STAGES:
         err("STAGE", f"stage {stage!r} is not a stage id ({', '.join(sorted(STAGES))})")
 
+    contract = {}
     try:
         contract = resolve_task(REGISTRY, hat, stage, str(p.get("task", "")))
         if p.get("primary_skill") != "sdlc-workflow:" + contract["skill"]:
@@ -297,6 +337,7 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
         check_success_checks(p, contract, hat, stage, err)
         check_evidence(p, contract, stage, err)
         check_visuals(p, contract, stage, err)
+        check_source_writes(p, contract, hat, err)
         inputs = [str(i.get("path", "")) if isinstance(i, dict) else str(i) for i in p.get("inputs") or []]
         for rd in contract.get("reads", []):
             if not any(i.endswith(rd) for i in inputs):
@@ -396,16 +437,26 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
             err("HATARG", f"success_checks uses --hat {m.group(1)}: pass the stage id, never the spawn role")
         elif m and m.group(1) != stage:
             err("GATESTAGE", f"packet stage {stage} cannot use --hat {m.group(1)}")
-        elif m and stage == "designer" and p.get("task") == "explore":
-            err("EARLYGATE", "explore uses workflow.py check-task; the designer stage gate runs after specify")
+        elif m and contract.get("partial_stage"):
+            err("EARLYGATE", f"{hat}/{stage}/{p.get('task')} uses workflow.py check-task; run the stage gate only after all participating tasks finish")
     forbidden = " ".join(str(x) for x in p.get("forbidden") or [])
     if "spawn further subagents" not in forbidden:
         warn("FORBIDDEN", "forbidden should include 'Do not spawn further subagents (host depth 1).'")
 
+    demanded = set(str(x) for x in p.get("evidence_required") or [])
+    for ev in contract.get("evidence", []):
+        if isinstance(ev, str):
+            demanded.add(ev)
+        elif ev.get("when") != "ui" or _ui_feature(p):
+            demanded.add(ev["kind"])
+    # Explicit scope omissions are allowed for evidence not applicable to this task.
+    categories = {"web": r"web|brows|internet|联网|上网|搜索|来源|出处|URL|网址|链接",
+                  "screenshots": r"screenshot|截图", "e2e": r"E2E",
+                  "running_app": r"app|source|code|源码|启动"}
     # waivers anywhere in the packet text
     for n, line in enumerate(block.splitlines(), 1):
         for pat in WAIVERS:
-            if re.search(pat, line, re.I):
+            if re.search(pat, line, re.I) and any(re.search(categories.get(k, r"(?!)"), line, re.I) for k in demanded):
                 err("WAIVER", f"line {n} waives evidence: {line.strip()[:140]} — scale the deliverable, never the evidence")
                 break
     return {"errors": errors, "warnings": warns, "packet": {"hat": hat, "stage": stage}}
@@ -466,7 +517,7 @@ def self_test() -> int:
         bad_text = bad_text.replace(f"  - {prod}/feature-map.md\ninputs:", f"  - {prod}/feature-map.md\n  - {prod}/CHANGELOG.md\ninputs:")
         bad_text = bad_text.replace("--hat define", "--hat pm")
         codes = {e["code"] for e in lint(bad_text)["errors"]}
-        if not {"DIRINPUT", "WAIVER", "LOGWRITE", "HATARG"} <= codes:
+        if not {"DIRINPUT", "LOGWRITE", "HATARG"} <= codes:
             return fail("dir input, waiver, log write and role --hat must all be errors", codes)
         codes = {e["code"] for e in lint(packet(hat="designer", subagent_type="sdlc-workflow:designer", primary_skill="sdlc-workflow:design-contract"))["errors"]}
         if "UNOWNED" not in codes:
@@ -481,7 +532,7 @@ def self_test() -> int:
             return fail("a missing product_context file must be an error")
         text = packet().replace("return: output paths + summary",
                                                       "return: output paths + summary\nnotes: 本机无运行 UI 时按 packet 约定走源码考古")
-        if "WAIVER" not in {e["code"] for e in lint(text)["errors"]}:
+        if "WAIVER" not in {e["code"] for e in lint(text + "\nevidence_required: [web, running_app]\n")["errors"]}:
             return fail("'走源码考古' must be a waiver")
         with open(os.path.join(prod, "big.md"), "w") as f:
             f.write("x" * 450_000)
@@ -507,8 +558,8 @@ def self_test() -> int:
                     primary_skill="sdlc-workflow:market").replace("  - 01-define/spec.md", "  - 00-discover/market.md")
         rs = rs.replace(f"  - {prod}/strategy.md\n  - {prod}/feature-map.md\ninputs:", "inputs:")
         codes = {e["code"] for e in lint(rs + "notes: 这轮 WebSearch 非必需\n")["errors"]}
-        if "EVIDENCE" not in codes:
-            return fail("a research packet without evidence_required: web must be EVIDENCE", codes)
+        if "EVIDENCE" in codes:
+            return fail("internal research must not require web evidence", codes)
         codes = {e["code"] for e in lint(rs.replace("forbidden:", "evidence_required:\n  - web\nforbidden:"))["errors"]}
         if "EVIDENCE" in codes:
             return fail("evidence_required listing web must satisfy the research contract", codes)

@@ -70,6 +70,22 @@
           "weight": 2
         }
       ]
+    },
+    {
+      "id": 6,
+      "prompt": "已批准的内部工具修复有缺陷复现和明确验收，用户要求继续实现。还要市场竞品增长调研和两次确认吗？",
+      "expected_output": "引用现有证据和授权，记录不适用研究范围；只解决剩余风险，不重复确认；将接受的输入交sdlc进入define/后续任务。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "引用现有证据和授权，记录不适用研究范围；只解决剩余风险，不重复确认；将接受的输入交sdlc进入define/后续任务。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

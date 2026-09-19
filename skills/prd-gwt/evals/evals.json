@@ -111,6 +111,22 @@
           "weight": 2
         }
       ]
+    },
+    {
+      "id": 6,
+      "prompt": "Approved API-only customer change: return a stable conflict code for duplicate external order IDs. Existing scope is authorized. No UI or new analytics is needed. Write the spec delta and acceptance plan.",
+      "expected_output": "Reuse scope authorization, define observable success/conflict/concurrency behavior as applicable without three-concept/GWT quotas; cite canonical IDs. Acceptance uses API requests and business results, not invented UI or tracking. PM does not design physical schema.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "Reuse scope authorization, define observable success/conflict/concurrency behavior as applicable without three-concept/GWT quotas; cite canonical IDs. Acceptance uses API requests and business results, not invented UI or tracking. PM does not design physical schema.",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

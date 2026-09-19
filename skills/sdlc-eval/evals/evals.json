@@ -4,11 +4,11 @@
     {
       "id": 1,
       "prompt": "Run evals for all 16 SDLC roles.",
-      "expected_output": "Refuses the 16-role / 18-role sweep. Harness only runs the table's named skills (prd-gwt, findings, coverage-matrix, impl-evidence, debug, tdd, refactor, cicd, discover, market, compete, falsify, enablement, signals). Does not start all role agents.",
+      "expected_output": "Map requested roles to actual skills and registered tasks; propose bounded batches and a model-call budget, cover changed lanes, and report untested cases. Do not add this to scheduled health checks.",
       "files": [],
       "expectations": [
-        "States the harness table (named skills, not all roles)",
-        "Does not spawn 16 role agents",
+        "Maps roles to actual skill/task contracts",
+        "Respects a bounded evaluation budget",
         "Does not add the run to weekly health-check"
       ]
     },
@@ -20,6 +20,22 @@
       "expectations": [
         "Refuses cron/health-check integration",
         "Keeps grade_eval.py as a post-hoc script, not a model runner"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "要求对全部26个skill做质量回归，只有40次模型调用预算。实现skill含四条lane。",
+      "expected_output": "枚举真实案例、按风险和预算分批，记录未覆盖项；四lane纳入选择，双方相同输入/工具预算，使用注册任务；meta skill不递归；结构通过不能宣称质量提升。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "枚举真实案例、按风险和预算分批，记录未覆盖项；四lane纳入选择，双方相同输入/工具预算，使用注册任务；meta skill不递归；结构通过不能宣称质量提升。",
+          "weight": 5
+        }
       ]
     }
   ]

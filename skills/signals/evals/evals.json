@@ -59,6 +59,22 @@
         "Names 'sre' as the correct hat",
         "Does not write a 'rollback' plan"
       ]
+    },
+    {
+      "id": 6,
+      "prompt": "同一客户重复提交十张工单要求竞品功能，运营要求写“十个客户都需要”。",
+      "expected_output": "区分独立客户与重复触达，标出时间窗及偏差；保留原始证据引用，交PM判断优先级及compete分析，不冒充普遍需求。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "区分独立客户与重复触达，标出时间窗及偏差；保留原始证据引用，交PM判断优先级及compete分析，不冒充普遍需求。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

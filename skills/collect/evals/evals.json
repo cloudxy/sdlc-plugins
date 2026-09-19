@@ -91,6 +91,22 @@
         "Explains the downstream impact (backend crash, warehouse pollution)",
         "Does NOT say 'the backend should handle it' (garbage in = garbage out)"
       ]
+    },
+    {
+      "id": "review-6",
+      "prompt": "客户端上报请求返回 200，但目的仓没有记录。采集设计已验收，是否可宣布采集完成？",
+      "expected_output": "区分设计、发送、接收与持久化；追踪样本 ID 到目的端，定位重试/去重/迟到问题；提供实现和验证任务证据，不凭 HTTP 200 宣告完成。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "区分设计、发送、接收与持久化；追踪样本 ID 到目的端，定位重试/去重/迟到问题；提供实现和验证任务证据，不凭 HTTP 200 宣告完成。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

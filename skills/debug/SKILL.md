@@ -6,19 +6,19 @@ when_to_use: "Spawn packet carries debug_protocol, or $debug. Do NOT use from pa
 
 # Debug — locate the mechanism, then fix the minimum
 
-Procedure for **rework respawns** (round 2+ on the same hat). The producing hat keeps its identity and its primary procedure skill; this is the method it follows to stop the loop. Manager-side rules (when to attach, `root_cause` bookkeeping) live in the orchestrator's debug-loop reference (skills/sdlc/references/debug-loop) — do not read that file; your packet's `debug_protocol` field is your instruction to be here.
+Procedure for **technical diagnosis**, including the first failure when investigation is needed and repeated rework. The producing hat keeps its identity and its primary procedure skill; this is the method it follows to stop the loop. Manager-side rules (when to attach, `root_cause` bookkeeping) live in the orchestrator's debug-loop reference (skills/sdlc/references/debug-loop) — do not read that file; your packet's `debug_protocol` field is your instruction to be here.
 
 A repeated G-fresh fail is a **hypothesis problem, not an effort problem**. Re-running the same inputs and hoping is a bare retry — forbidden.
 
 ## The loop (in order, no skipping)
 
-1. **Reproduce.** One command + exit code showing the failure verbatim (failed gate, failing test, rejected artifact diff). Cannot reproduce → say so and return what you tried; do not "fix" what you cannot see.
+1. **Reproduce.** One command + exit code showing the failure verbatim (failed gate, failing test, rejected artifact diff). Cannot reproduce → say so and return what you tried; mark reproduction unavailable; collect logs/traces and bound hypotheses. Incident mitigation may proceed under its own authority before the root cause is established.
 2. **Isolate.** Bisect the surface until the failure has one smallest trigger. Record each eliminated hypothesis as one line: `hypothesis → probe → result`.
-3. **Root cause, one line.** Name the **mechanism** ("router imports ORM, transaction boundary lost", "GWT oracle contradicts FR-3"), never the symptom ("test fails"). If you cannot write the mechanism in one sentence, go back to step 2.
+3. **Mechanism and confidence.** Name the **mechanism** ("router imports ORM, transaction boundary lost", "GWT oracle contradicts FR-3"), never the symptom ("test fails"). Distinguish confirmed cause, suspected cause, ruled-out causes and unknowns; lack of certainty is not permission to invent a cause.
 4. **Minimal fix.** Touch the smallest surface the mechanism implies. No drive-by refactors, no unrelated cleanup in a rework round — that is how round 3 starts.
 5. **Re-run the failed gate.** The exact command from step 1. Paste verbatim output + exit code.
-6. **Debug record.** Append to `T-<n>-evidence.md` under `## Debug record`: reproduce command, eliminated hypotheses, root cause line, fix summary, re-run output.
-7. **Return** `root_cause: <the one line>` — the manager writes it into the gate record.
+6. **Debug record.** Append to the packet’s per-ticket/per-role evidence path under `## Debug record`: reproduce command, eliminated hypotheses, root cause line, fix summary, re-run output.
+7. **Return** `root_cause: <confirmed mechanism or unverified: hypothesis + next probe>` — the manager writes it into the gate record.
 
 ## Gotchas
 
@@ -31,7 +31,9 @@ A repeated G-fresh fail is a **hypothesis problem, not an effort problem**. Re-r
 
 - [ ] Failure reproduced verbatim before any edit?
 - [ ] Every eliminated hypothesis has its probe line?
-- [ ] Root cause is a mechanism, one sentence?
+- [ ] Mechanism evidence and remaining uncertainty explicit?
 - [ ] Fix touched only the surface the mechanism implies?
 - [ ] Failed gate re-run with verbatim output + exit code?
 - [ ] `root_cause` returned; second issues parked in open_questions?
+
+Business-direction or aesthetic disagreement routes to its decision owner; do not demand a shell reproduction for it. Multiple causal factors may form one failure chain. Report limits and the next discriminating test; one passing rerun does not prove an intermittent defect fixed. Incident response order belongs to deliver; diagnosis does not delay necessary mitigation.

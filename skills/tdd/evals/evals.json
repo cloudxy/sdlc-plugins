@@ -18,6 +18,22 @@
         "Does not pick an 'oracle' silently and code to it",
         "Does not edit the 'GWT' to resolve the ambiguity"
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "A payment requirement says do not charge twice but specifies no concurrency interleaving. Add a retry/race regression test.",
+      "expected_output": "Derive technical concurrent/retry invariants and test them without asking PM to authorize ordinary test design. Ask only for genuinely ambiguous business outcomes. Show meaningful red/green where executable, not fabricated runs.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "Derive technical concurrent/retry invariants and test them without asking PM to authorize ordinary test design. Ask only for genuinely ambiguous business outcomes. Show meaningful red/green where executable, not fabricated runs.",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

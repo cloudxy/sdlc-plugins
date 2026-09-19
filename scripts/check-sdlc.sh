@@ -157,12 +157,10 @@ research_offline() { # $1 = 起点目录：上溯找 sdlc.config.yaml；research
   done
   return 1
 }
-need_sources() { # $1 = 文件；$2 = 最少条数；$3 = 标签。数「URL 与日期同一行」的不同 URL
+need_sources() { # minimum traceability; evidence quality is reviewed by the owning skill
   [ -f "$1" ] || return 0
   research_offline "$(cd "$(dirname "$1")" && pwd)" && return 0
-  local n
-  n=$(grep -E 'https?://' "$1" 2>/dev/null | grep -E '20[0-9]{2}-[0-9]{2}-[0-9]{2}' | grep -oE 'https?://[^[:space:]|)>」,，；;]+' | sed -E 's#[.。]+$##' | sort -u | wc -l | tr -d ' ')
-  [ "${n:-0}" -ge "$2" ] || red SOURCES "$1: 网络来源 ${n:-0} 条，$3 需 ≥$2 条（同一行写 URL + 访问日期）。帽子有 WebSearch/WebFetch，包里写「不需要联网」不是理由；只有用户在 sdlc.config.yaml 设 research.offline: true 才豁免"
+  python3 "$(dirname "$0")/check_research_sources.py" "$1" || red SOURCES "$1: 缺少带日期的来源引用（URL 或真实本地文件链接）；引用数量不代表研究质量"
 }
 has_existing_image() { # $1 = md 文件：引用的 PNG/JPG/WebP 至少一张真实存在（相对文件目录，上溯到项目根）
   local f="$1" refs ref d nd j
@@ -462,7 +460,7 @@ if [ "$HAT_GIVEN" = "1" ]; then
         if [ -f "$ROOT/${ART_launch}" ]; then
           grep -qE '人群|分群|segment' "$ROOT/${ART_launch}" || red LAUNCH "$ROOT/06-deliver/launch.md: 缺目标人群/分群"
           grep -qE '渠道|channel' "$ROOT/${ART_launch}" || red LAUNCH "$ROOT/06-deliver/launch.md: 缺触达渠道"
-          grep -qE '对照|holdout|A/B|护栏' "$ROOT/${ART_launch}" || red LAUNCH "$ROOT/06-deliver/launch.md: 缺对照组/护栏（投放即实验）"
+          grep -qE '对照|holdout|A/B|护栏' "$ROOT/${ART_launch}" || red LAUNCH "$ROOT/06-deliver/launch.md: 缺测量/护栏说明（因果实验才要求对照组）"
         fi
       fi
       ;;
@@ -500,7 +498,6 @@ if [ "$HAT_GIVEN" = "1" ]; then
         need_product architecture.md "--hat shape"
         if [ -f "$ROOT/${ART_contract}" ]; then
           grep -qE '质量属性|QAS' "$ROOT/${ART_contract}" || red ARCH "$ROOT/02-shape/contract.md: 缺质量属性场景（v4：方案由可量化场景驱动）"
-          grep -qE '候选方案|备选方案' "$ROOT/${ART_contract}" || red ARCH "$ROOT/02-shape/contract.md: 缺候选方案对比（v4：没有单选项决策）"
         fi
         if ui_yes && ! role_skipped designer; then
           [ -f "$ROOT/${ART_directions}" ] && grep -qE '选定[:：][[:space:]]*D[0-9]+' "$ROOT/${ART_directions}" \
@@ -520,14 +517,13 @@ if [ "$HAT_GIVEN" = "1" ]; then
     designer)
       if is_v4 && ! role_skipped designer; then
         DD="$ROOT/${ART_directions}"
-        if [ ! -f "$DD" ]; then red HATMISS "--hat designer: 缺 02-shape/design-directions.md（≥3 个方向 + 选定）"
+        if [ ! -f "$DD" ]; then red HATMISS "--hat designer: 缺 02-shape/design-directions.md（适用方向 + 有效选定）"
         else
           ND=$(grep -oE '^#+[[:space:]]*D[0-9]+' "$DD" | grep -oE 'D[0-9]+' | sort -u | wc -l | tr -d ' ')
-          [ "${ND:-0}" -ge 3 ] || red DIRECTIONS "$DD: 设计方向 ${ND:-0} 个（v4 须 ≥3 个真正不同的方向，标题 ## D1 / ## D2 / ## D3）"
+          [ "${ND:-0}" -ge 1 ] || red DIRECTIONS "$DD: 设计方向 ${ND:-0} 个（至少保留实际采用/比较的方向，标题 ## D1 等；数量不代表质量）"
           grep -qE '选定[:：][[:space:]]*D[0-9]+' "$DD" || red DIRECTIONS "$DD: 缺「选定：D<n>」（人工选择后由 designer specify 记录）"
           need_images "$DD" DIRECTIONS "方向（没有渲染产物的方向不算方向）"
           grep -qE '缺陷检查' "$DD" || red DIRECTIONS "$DD: 缺「缺陷检查」（推荐前逐张看截图：重叠 / 截断 / 溢出 / 对齐 / 对比度 / 占位内容）"
-          need_sources "$DD" 3 "--hat designer（参考表）"
         fi
         need_product design-system.md "--hat designer"
       fi
@@ -567,6 +563,11 @@ if [ "$HAT_GIVEN" = "1" ]; then
       fi
       ;;
     qc)
+      case "$(st_val delivery_goal)" in
+        release_ready|deployed)
+          [ -s "$ROOT/${ART_readiness}" ] && ! is_unfilled "$ROOT/${ART_readiness}" || red READINESS "发布目标在 QC 前需要 SRE readiness 证据（文件存在不代表专业验收通过）"
+          ;;
+      esac
       ;;
     deliver)
       : # presence handled by registry

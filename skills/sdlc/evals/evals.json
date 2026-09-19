@@ -126,6 +126,22 @@
           "weight": 2
         }
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "项目只要求方案，但下次可能继续开发；另一个采集任务已交设计，代码还未写。如何记录完成？",
+      "expected_output": "记录proposal_ready与具体已完成任务，不伪造整条泳道完成；数据设计后派发实现/验证；源码独立source_writes，不把整个仓库塞进deliverable_paths。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "记录proposal_ready与具体已完成任务，不伪造整条泳道完成；数据设计后派发实现/验证；源码独立source_writes，不把整个仓库塞进deliverable_paths。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

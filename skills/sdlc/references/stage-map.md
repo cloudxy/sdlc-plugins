@@ -17,12 +17,15 @@ Task presence checks do not advance state. Use `check-sdlc.sh --hat <stage>` onl
 | ops | signals | listen | signals | 01-define/requirement-pool.md |
 | designer | designer | explore | design-contract | 02-shape/design-brief.md; 02-shape/design-directions.md; 02-shape/prototypes/* / 02-shape/prototypes/**/* |
 | designer | designer | specify | design-contract | 02-shape/design-directions.md; 02-shape/flows.md; 02-shape/edge-states.md; 02-shape/prototypes/final/* / 02-shape/prototypes/final/**/* |
+| architect | define | feasibility | architecture | 01-define/architecture-feasibility.md |
+| architect | shape | change-impact | architecture | 02-shape/architecture-change-impact.md |
+| architect | verify | conformance | architecture | 04-verify/architecture-conformance.md |
 | architect | shape | contract | architecture | 02-shape/contract.md |
 | dba | dba | model | schema | 02-shape/db-spec.md; 02-shape/schema.dbml |
 | data-collector | collect | tracking | collect | 02-shape/collect/tracking-impl.md |
 | data-collector | collect | source | collect | 02-shape/collect/data-source-analysis.md |
 | data-warehouse-engineer | warehouse | metrics | warehouse | 02-shape/warehouse/metrics.yaml |
-| data-warehouse-engineer | warehouse | tags | warehouse | 02-shape/warehouse/metrics.yaml |
+| data-warehouse-engineer | warehouse | tags | warehouse | 02-shape/warehouse/tags.yaml |
 | frontend | implement | T-<n> | impl-evidence | 03-impl/*evidence*.md |
 | backend | implement | T-<n> | impl-evidence | 03-impl/*evidence*.md |
 | algo | implement | T-<n> | impl-evidence | 03-impl/*evidence*.md |
@@ -46,6 +49,18 @@ Task presence checks do not advance state. Use `check-sdlc.sh --hat <stage>` onl
 | data-collector | product | bootstrap | collect | product:data/tracking-plan.yaml |
 | pm | product | apply-decisions | prd-gwt | product:feature-map.md; product:strategy.md |
 | reviewer | product | G-fresh | findings | manager: .sdlc/_product/findings.md |
+| dba | dba | optimize | schema | 02-shape/db-optimization.md |
+| dba | dba | migration | schema | 02-shape/migration-review.md |
+| data-collector | collect | implement | collect | 03-impl/collect-evidence.md |
+| data-collector | collect | validate | collect | 04-verify/collect-validation.md |
+| data-warehouse-engineer | warehouse | design | warehouse | 02-shape/warehouse/design.md |
+| data-warehouse-engineer | warehouse | implement | warehouse | 03-impl/warehouse-evidence.md |
+| data-warehouse-engineer | warehouse | validate | warehouse | 04-verify/warehouse-validation.md |
+| qa | define | test-plan | coverage-matrix | 01-define/test-plan.md |
+| sre | deliver | ci | cicd | 06-deliver/ci.md |
+| sre | deliver | prepare | deliver | 06-deliver/readiness.md |
+| analyst | define | measurement-plan | retro | 01-define/measurement-plan.md |
+| designer | market | prototype | prototype | 00-discover/prototypes/report.md |
 
 ## Progress and rank
 
@@ -92,6 +107,5 @@ Packet product_writes may narrow this scope. Manager-only files: CHANGELOG.md, p
 - designer: design-system.md
 - architect: architecture.md
 - dba: domain-model.md, erd.dbml
-- analyst: strategy.md
 - data-warehouse-engineer: data/metrics.yaml, data/tags.yaml
 - data-collector: data/tracking-plan.yaml

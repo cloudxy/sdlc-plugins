@@ -16,13 +16,17 @@ Job: **design an experience people remember and can use without thinking, then s
 | `design-qa` | stage accept, on the running build | `04-verify/accept-design.md` | [templates/accept-design.md](templates/accept-design.md) |
 | product layer | first time, or when principles, tokens or signature moments change | `<product_root>/design-system.md` | [templates/design-system.md](templates/design-system.md) |
 
+## Choose the scope before exploring
+
+Record mode `reuse`, `local-exploration` or `new-direction`, why it fits, the approved baseline/version and unresolved decisions. Reuse existing components/tokens and direction when valid; no new visual competition or external research is required for a settled local change. New consequential choices need credible alternatives and an authorized selection, not a fixed number. Cite existing user/delegated authority instead of asking again. Early architecture feasibility may precede final design.
+
 ## Gotchas
 
-- **References come from outside the operator's images.** At least three references in the 参考研究 table, each row with URL and access date (gate SOURCES); open them (WebFetch or a screenshot with `scripts/ui-evidence.sh`) before writing what to take and what to avoid. Only the user's `research.offline: true` waives this.
+- **References come from outside the operator's images.** Use relevant project/user references first; research externally for actual unknowns. External claims need accessed sources/dates and limitations; no source-count quota or compulsory web research for reuse.
 - **Look for defects in your own screenshots before recommending.** Overlap, clipped or overflowing text, horizontal scroll at 375, broken alignment, low contrast, placeholder content: fix the prototype, recapture, and record each screenshot in 缺陷检查. A direction with a visible defect is not recommendable. "Closest to the reference images" or "safest" is not a reason — argue from the user, the journey step and the signature moment.
 - **A markdown "direction" is not a direction.** Directions are rendered: clickable HTML prototypes with screenshots at real breakpoints, looked at before being described. Use `bash PLUGIN_ROOT/scripts/ui-evidence.sh <file.html> <out-dir> 375,1440` and Read the PNGs.
 - **Three variations of one idea are one direction.** Directions differ in structure or interaction model (e.g. dashboard-first vs conversational vs timeline), not only in colour.
-- **Every direction names its signature moment** — the one interaction or visual people will remember or share — and ties it to the journey step where growth's highlight lives. No signature moment → the direction is not finished.
+- **Where distinctiveness is an agreed goal, name its signature moment** — the one interaction or visual people will remember or share — and ties it to the journey step where growth's highlight lives. Routine workflows may instead prioritize task clarity and consistency; record that choice.
 - **AI-generated designs cluster around recognizable defaults** (cream + serif + terracotta, near-black + acid accent, SaaS card kit, ALL-CAPS eyebrows, `→` suffixes). Matching one must be a justified choice. Anchors in [visual-direction.md](references/visual-direction.md).
 - **The 6-state matrix's most commonly missed states are permission and offline.** Everyone remembers empty and loading.
 - **Tokens are not just colours**: spacing, typography, radius, shadow, motion and breakpoints are all tokens.
@@ -34,7 +38,7 @@ Job: **design an experience people remember and can use without thinking, then s
 
 | Excellent | Reject as mediocre |
 |---|---|
-| ≥3 structurally different rendered directions, each with a signature moment, trade-offs and build cost; a reasoned recommendation | One direction, or three recolours of one layout |
+| Appropriate reuse or credible rendered alternatives for an unresolved choice, with trade-offs and recommendation | Unjustified redesign, or nominal variants that do not address the unresolved question |
 | References studied (competitors, best-in-class, via web) with what to take and what to avoid | "Inspired by modern SaaS design" |
 | The chosen direction's contract covers every FR screen, all six states with real copy, tokens consistent with `design-system.md` | Happy-path flows only; placeholder copy |
 | Design QA with side-by-side screenshots, gaps ranked by severity, signature moment verified | "实现基本符合设计" |
@@ -45,8 +49,8 @@ Job: **design an experience people remember and can use without thinking, then s
 
 1. Read the spec (core value path, journeys J-n, FRs), briefing, `00-discover/growth.md` (highlight hypotheses), `00-discover/compete.md`, product `design-system.md` (principles, brand character — or bootstrap it from existing UI).
 2. Write the brief ([templates/design-brief.md](templates/design-brief.md)): users, context of use, surface type (daily tool vs first-run vs marketing), constraints, success signals.
-3. Study references with the web: 3–6 relevant products; note what to take and what to avoid ([design-exploration.md](references/design-exploration.md) §2).
-4. Build ≥3 directions that differ on structure or interaction model ([design-exploration.md](references/design-exploration.md) §3) as HTML prototypes to the standard in [direction-prototypes.md](references/direction-prototypes.md) (not the throwaway `prototype` skill) covering the main journey to the Aha moment; render screenshots at mobile and desktop widths; look at them.
+3. Study references with the web: relevant sources for unresolved questions; note what to take and what to avoid ([design-exploration.md](references/design-exploration.md) §2).
+4. Reuse the approved direction, or build credible alternatives differing on structure or interaction model ([design-exploration.md](references/design-exploration.md) §3) as HTML prototypes to the standard in [direction-prototypes.md](references/direction-prototypes.md) (not the throwaway `prototype` skill) covering the main journey to the Aha moment; render screenshots at mobile and desktop widths; look at them.
 5. For each direction record: concept in one line, signature moment, how it serves the value path, risks, rough build cost, accessibility concerns. Critique each against the AI-default clusters. Recommend one ([templates/design-directions.md](templates/design-directions.md)).
 
 ### `specify` — the contract for the picked direction
@@ -56,7 +60,7 @@ Job: **design an experience people remember and can use without thinking, then s
 3. 6-state matrix with copy ([templates/edge-states.md](templates/edge-states.md), [ux-writing.md](references/ux-writing.md)).
 4. Tokens: consume `design-system.md`; add tokens only on purpose ([tokens-and-a11y.md](references/tokens-and-a11y.md), [templates/design-tokens.json](templates/design-tokens.json)).
 5. Final prototype for handoff: every FR screen and every edge state, tokens only, component IDs, screenshots looked at ([direction-prototypes.md](references/direction-prototypes.md) § Final prototype).
-6. Update product `design-system.md` (new patterns, signature moment status) and return the delta row (the manager records it).
+6. Update product `design-system.md` with accepted patterns and links to the canonical token source (distinguish proposed design from implemented status) and return the delta row (the manager records it).
 
 ### `design-qa` — on the running build
 
@@ -79,14 +83,14 @@ Follow [design-review.md](references/design-review.md): screenshot the build at 
 |---|---|
 | **Input** | spec (value path, J-n, FR anchors) · briefing · growth hypotheses · compete · product `design-system.md` · existing component library |
 | **Output** | brief · directions + prototypes + screenshots · flows · edge-states · tokens · `accept-design.md` · product `design-system.md` updates |
-| **Downstream** | architect (flows shape contracts) · frontend (contract + screenshots) · qa (states → cases) · growth (signature moment for claims) |
+| **Downstream** | architect (flows shape contracts) · frontend (final prototype code/version, component IDs, canonical tokens, flows/states; screenshots as reference) · qa (states → cases) · growth (signature moment for claims) |
 | **Refuse** | Frontend implementation · API design · business logic decisions |
 
 ## Self-check
 
-- [ ] Explore: ≥3 structurally different directions, rendered, screenshots looked at, signature moment each, recommendation reasoned?
+- [ ] Explore: scope mode justified, reuse/selection authority cited, applicable directions rendered and inspected, recommendation grounded?
 - [ ] References studied and cited?
-- [ ] Specify: every FR screen covered; all six states with copy; permission and offline not skipped?
+- [ ] Specify: every FR screen covered; all applicable states with copy; permission/offline relevance explicitly assessed, not silently omitted?
 - [ ] Tokens complete (colour/spacing/type/radius/shadow/motion/breakpoints) and consistent with `design-system.md`?
 - [ ] Contrast pairs and focus order defined; reduced-motion honoured?
 - [ ] Design QA: side-by-side screenshots, gaps ranked, signature moment verified, verdict line present?

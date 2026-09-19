@@ -8,7 +8,7 @@
       "files": [],
       "expectations": [
         "Challenges the causal claim (no control group = correlation only)",
-        "Lists ≥2 alternative explanations",
+        "Examines material alternative explanations",
         "Asks for sample size and time window",
         "Does NOT accept 'because of the export feature' without an experiment"
       ]
@@ -16,10 +16,10 @@
     {
       "id": 2,
       "prompt": "Our dashboard shows that the average response time went from 200ms to 350ms after the last deployment. The developer says it's fine because the p99 is still under 1 second. What do you say?",
-      "expected_output": "Identifies the discrepancy between average and tail latency. Average 350ms is 75% worse than before — that IS significant even if p99 is fine. Checks: 1) what's the p95? 2) is this a bimodal distribution (some fast, some very slow)? 3) does the SLA define average or P95? Refers to metrics.yaml for the agreed metric definition. Does NOT accept 'p99 is fine' as dismissing the average regression.",
+      "expected_output": "Identifies the discrepancy between average and tail latency. Average 350ms is 75% worse than before — that warrants investigation even if p99 is fine; practical/statistical significance requires context. Checks: 1) what's the p95? 2) is this a bimodal distribution (some fast, some very slow)? 3) does the SLA define average or P95? Refers to metrics.yaml for the agreed metric definition. Does NOT accept 'p99 is fine' as dismissing the average regression.",
       "files": [],
       "expectations": [
-        "Identifies that 200ms→350ms is a 75% regression (significant)",
+        "Identifies that 200ms→350ms is a 75% observed increase, with significance assessed from context",
         "Checks p95 and distribution shape (may be bimodal)",
         "Refers to metrics.yaml for agreed metric definition",
         "Does NOT accept 'p99 is fine' as dismissing the average regression"
@@ -35,6 +35,22 @@
         "Recommends read-only replica or separate analysis environment",
         "Mentions off-peak scheduling as fallback",
         "Does NOT approve direct production queries"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "发布观察窗七天，今天第二天；后台全量记录的错误数从10变8。能宣布该功能使错误减少20%，直接更新strategy吗？",
+      "expected_output": "区分描述性变化与因果估计、未结束窗口；报告分母与数据质量，不机械强制全量计数CI，不宣称因果完成；建议由PM应用策略决策。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "区分描述性变化与因果估计、未结束窗口；报告分母与数据质量，不机械强制全量计数CI，不宣称因果完成；建议由PM应用策略决策。",
+          "weight": 5
+        }
       ]
     }
   ]

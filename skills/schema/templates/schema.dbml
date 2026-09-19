@@ -5,13 +5,13 @@
 // 语法参考：https://dbml.dbdiagram.io/docs
 
 Project <project_name> {
-  database_type: 'MySQL'
+  database_type: '<actual_engine>'
   note: '<一句话说明这组表的业务范围>'
 }
 
 // ─────────────────────────────────────────────
 // 枚举：用 VARCHAR + 应用层校验时，在此登记合法值供下游对齐
-// （不用 MySQL ENUM：改值需要 DDL）
+// 按项目引擎与演进策略选择 ENUM、CHECK 或引用表；此处只是示例。
 // ─────────────────────────────────────────────
 
 enum order_status {
@@ -28,7 +28,7 @@ enum order_status {
 Table orders {
   id           bigint       [pk, increment, note: '代理主键']
   tenant_id    bigint       [not null, note: '租户隔离，所有查询必带']
-  user_id      bigint       [not null, ref: > users.id]
+  user_id      bigint       [not null]
   order_no     varchar(32)  [not null, note: '业务单号，租户内唯一']
   status       varchar(20)  [not null, default: 'pending', note: '见 enum order_status']
   amount       decimal(12,2)[not null, note: '金额用 DECIMAL 不用 FLOAT']

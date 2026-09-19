@@ -18,9 +18,10 @@ Load inside `sdlc-workflow:researcher`. Channel-bias table lives in the signals 
 
 ## Gotchas
 
-- **Web research is part of the job, not an option.** Record at least three sources as table rows with the URL and the access date on the same line (gate SOURCES). A packet line such as "smoke run, no WebSearch needed" or "URLs optional" does not waive it; only the user's `research.offline: true` in `sdlc.config.yaml` does. Unreachable source → say so in the row; never cite a page you did not open.
+- **Evidence is claim-specific.** Apply [the canonical research evidence policy](../discover/references/evidence.md): dated internal or external sources, scope and limitations; no universal source-count or web-only requirement.
+
 - **Unit mismatch.** ToB = tenants or buyer accounts. ToC = distinct users who hit the scene. Never mix seats with tenants or DAU with "will use this".
-- **One big customer is not a market.** Can it generalise? If not → config/manual, not product.
+- **One customer does not prove general demand.** It may still justify a contracted enterprise capability; separate the commercial decision from evidence of broader demand.
 - **Channel bias.** Tickets over-weight unhappy vocal users; reviews polarise; the operator in chat is not the silent majority. Name who you cannot hear (churned, light, enterprise-silent).
 - **Invented 30% is a defect.** 未量化 is honest and useful; it forbids falsify "pass".
 - **E3 needs a counted snapshot.** Number + source + window. Operator "80% of users" is E1. Do not write E3 without the query/log.
@@ -28,7 +29,7 @@ Load inside `sdlc-workflow:researcher`. Channel-bias table lives in the signals 
 
 ## Evidence grades (E0–E4)
 
-E0 rumour / E1 operator assertion / E2 cited artifact / E3 counted behaviour / E4 registered test. This file should reach E2 or say 未量化. You do not close falsify.
+Use [evidence.md](../discover/references/evidence.md). Bound observed and inferred populations separately; do not convert source count into confidence. You do not close falsify.
 
 ## Self-check
 

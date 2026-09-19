@@ -209,6 +209,38 @@
           "weight": 1
         }
       ]
+    },
+    {
+      "id": "review-17",
+      "prompt": "Backend API-only slice: retry a payment callback concurrently. Existing GWT forbids double charge. The source write scope and contract are supplied. Use tdd and leave integration evidence.",
+      "expected_output": "Write meaningful implementation tests for concurrency/retry without altering business criteria, preserve contract/version and effect atomicity, run real API integration with raw evidence; no UI captures or blanket ban on test authoring.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "Write meaningful implementation tests for concurrency/retry without altering business criteria, preserve contract/version and effect atomicity, run real API integration with raw evidence; no UI captures or blanket ban on test authoring.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": "review-18",
+      "prompt": "AI candidate improves its prompt and changes labels on failing eval samples. It reports candidate 95% versus old baseline 90%. Review and finish the evidence.",
+      "expected_output": "Reject incomparable improvement claim; version/freeze data and graders, rerun both baseline and candidate on identical independent evaluation, report costs/regressions/uncertainty and appropriate failure handling. No fake runs or universal sample quota.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "Reject incomparable improvement claim; version/freeze data and graders, rerun both baseline and candidate on identical independent evaluation, report costs/regressions/uncertainty and appropriate failure handling. No fake runs or universal sample quota.",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

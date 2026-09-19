@@ -14,10 +14,26 @@
         "Does NOT write final launch copy or claim the feature is already verified"
       ],
       "rubric": [
-        {"id": "alternatives", "criterion": "Positioning is derived from the alternatives users actually use, citing the compete evidence", "weight": 2},
-        {"id": "options", "criterion": "At least two genuinely different positioning options with a reasoned recommendation", "weight": 2},
-        {"id": "moments", "criterion": "Highlights are concrete, demonstrable moments with proof and the objection they answer", "weight": 3},
-        {"id": "segments", "criterion": "Target segments are computable from product data; data gaps become tracking requests", "weight": 2}
+        {
+          "id": "alternatives",
+          "criterion": "Positioning is derived from the alternatives users actually use, citing the compete evidence",
+          "weight": 2
+        },
+        {
+          "id": "options",
+          "criterion": "At least two genuinely different positioning options with a reasoned recommendation",
+          "weight": 2
+        },
+        {
+          "id": "moments",
+          "criterion": "Highlights are concrete, demonstrable moments with proof and the objection they answer",
+          "weight": 3
+        },
+        {
+          "id": "segments",
+          "criterion": "Target segments are computable from product data; data gaps become tracking requests",
+          "weight": 2
+        }
       ]
     },
     {
@@ -32,9 +48,21 @@
         "Ends with a verdict line '结论：' followed by 通过 / 有条件通过 / 不通过"
       ],
       "rubric": [
-        {"id": "evidence", "criterion": "Each claim is judged from build evidence, not from the spec", "weight": 3},
-        {"id": "honesty", "criterion": "Overstated claims are rewritten to accurate wording or removed; core gaps escalated to pm", "weight": 3},
-        {"id": "verdict", "criterion": "Verdict follows the rules (core highlight broken → 不通过; wording only → 有条件通过)", "weight": 2}
+        {
+          "id": "evidence",
+          "criterion": "Each claim is judged from build evidence, not from the spec",
+          "weight": 3
+        },
+        {
+          "id": "honesty",
+          "criterion": "Overstated claims are rewritten to accurate wording or removed; core gaps escalated to pm",
+          "weight": 3
+        },
+        {
+          "id": "verdict",
+          "criterion": "Verdict follows the rules (core highlight broken → 不通过; wording only → 有条件通过)",
+          "weight": 2
+        }
       ]
     },
     {
@@ -50,9 +78,37 @@
         "Mentions frequency caps or consent"
       ],
       "rubric": [
-        {"id": "segmentation", "criterion": "Segments are behaviour/lifecycle based, sized, with exclusions", "weight": 2},
-        {"id": "experiment", "criterion": "Goal metric, guardrails, holdout, sample size and stop rule are all present and coherent", "weight": 3},
-        {"id": "respect", "criterion": "Frequency caps, consent and release timing are handled", "weight": 2}
+        {
+          "id": "segmentation",
+          "criterion": "Segments are behaviour/lifecycle based, sized, with exclusions",
+          "weight": 2
+        },
+        {
+          "id": "experiment",
+          "criterion": "Goal metric, guardrails, holdout, sample size and stop rule are all present and coherent",
+          "weight": 3
+        },
+        {
+          "id": "respect",
+          "criterion": "Frequency caps, consent and release timing are handled",
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "内部CLI增加导出格式，定位已确认，只要求更新说明。没有营销实验也没有UI。",
+      "expected_output": "复用定位，仅核实受影响声明及CLI证据；不强迫新市场调研、两种定位、截图或holdout；方案不等于已发送公告。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "复用定位，仅核实受影响声明及CLI证据；不强迫新市场调研、两种定位、截图或holdout；方案不等于已发送公告。",
+          "weight": 5
+        }
       ]
     }
   ]

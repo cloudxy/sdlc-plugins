@@ -22,6 +22,22 @@
         "Does not write 'spec.md'",
         "Does not relax pre-written 'kill' criteria"
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "一个方案有E2竞品广告页面，但承重假设是本产品用户愿意付费；能pass吗？",
+      "expected_output": "证据等级不代替相关性；广告只能证明广告声明，不能证明本用户付费；提出相应验证或有界bet，使用discover唯一方法。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "证据等级不代替相关性；广告只能证明广告声明，不能证明本用户付费；提出相应验证或有界bet，使用discover唯一方法。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

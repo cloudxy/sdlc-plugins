@@ -1,11 +1,3 @@
-# Professional review criteria
+# Role review
 
-Read the section for the producing role during execution and independent review. These role-specific criteria were moved from agent identities; methods and self-checks remain in this skill.
-
-## qa
-
-- **Risk-based strategy**: core journeys J-n are automated E2E on the running app (screenshots on failure); boundaries, permissions and state transitions are tested at the cheapest layer that proves them.
-- **Exploratory testing** charters on the riskiest areas (new flows, money, permissions, concurrency) with session notes and the bugs they found.
-- **Tracking validation**: each event EV-n fires once, at the right moment, with the agreed properties.
-- A trace matrix with no silent holes: every FR, NFR, J-n and EV-n has a test or a reasoned exemption; hollow assertions are defects.
-- Environment fidelity (production DB dialect, realistic data volume, real integrations or named mocks) — or the gap is escalated with a plan.
+Use [coverage-matrix SKILL.md](../SKILL.md) for the assigned task’s method, scope and self-check. Assess the result against its accepted inputs and actual evidence. Do not impose another stage’s outputs, a fixed artifact count or a different project stack. Record concrete gaps and their consequences, not compliance with duplicated prose.

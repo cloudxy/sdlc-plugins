@@ -10,19 +10,19 @@ Job: **find what will hurt users before they do** — prove the key journeys wor
 
 | Task | Approach |
 |---|---|
-| **New feature testing** | Risk map → journey E2E for every J-n → cases from GWT at the cheapest layer → tracking validation for every EV-n → exploratory charters → trace matrix → regression plan |
+| **New feature testing** | Risk map → critical consumer journey checks for every J-n → cases from GWT at the cheapest layer → tracking validation for every EV-n → exploratory charters → trace matrix → regression plan |
 | **"Is this well covered?"** | Check matrix holes → boundary review → edge-states comparison |
 | **Defect found** | Write defect ticket → verify fix → add to regression set |
 | **Pre-release** | Full regression on affected modules → coverage matrix final check |
 
 ## Gotchas
 
-- **Green unit tests, unusable product.** Every key journey J-n needs an E2E run on the running app from a real starting point (new account, empty data) to the Aha moment. `e2e: null` is not acceptable for a UI change (v4 gate `E2E`). Details: [e2e-and-exploratory.md](references/e2e-and-exploratory.md).
+- **Green unit tests, unusable product.** Every key journey J-n needs a real consumer-boundary check: browser for UI, API/CLI/SDK/batch execution for other products. Keep the E2E matrix label for journey-level checks, not a requirement that all assertions use a browser. `e2e: null` is not acceptable for a UI change (v4 gate `E2E`). Details: [e2e-and-exploratory.md](references/e2e-and-exploratory.md).
 - **Scripted tests only find what you imagined.** Run at least one exploratory charter on the riskiest area per L2+ feature and log it.
 - **Events are features.** Each EV-n gets a validation row (fired once, right properties, right identity), or the launch cannot be measured.
 - **The matrix proves "there is a mapping," not "the mapping is effective."** `assert True` can fill a cell. Hole detection is mechanical; hollow testing is not — that's G-fresh's job.
 - **SQLite silently accepts PostgreSQL syntax (like `NULLS LAST`).** SQL dialect features need real-DB verification — this caused a production incident.
-- **Test environment must match production dialect.** If tests pass on SQLite but production runs MySQL, you haven't tested.
+- **Test environment must match production dialect.** SQLite unit tests can be useful but do not establish production-dialect correctness for affected SQL behavior.
 - **Regression only runs affected surface** (from story dependency graph) — full regression is for pre-release, not every ticket.
 
 ## Key decisions
@@ -46,7 +46,7 @@ For each FR's acceptance criteria:
 
 ### Environment fidelity
 
-Test environment must match production. SQL dialect differences (SQLite vs MySQL vs PostgreSQL) are the most common silent escape. For any SQL feature that varies by dialect, either use the real DB or mark as "needs real-DB verification."
+Test environment must match the production properties relevant to the risk; record residual differences. SQL dialect differences (SQLite vs MySQL vs PostgreSQL) are the most common silent escape. For any SQL feature that varies by dialect, either use the real DB or mark as "needs real-DB verification."
 
 ## Handoff contract
 
@@ -88,3 +88,11 @@ Test environment must match production. SQL dialect differences (SQLite vs MySQL
 ## Role-specific review
 
 For the assigned role, apply [references/role-quality.md](references/role-quality.md) alongside this procedure’s self-check. Reviewers use the same criteria.
+
+## Early planning and evidence ownership
+
+Use `define/test-plan` before implementation to write `01-define/test-plan.md`: acceptance IDs, critical failure modes, appropriate test layers, data/fixtures, environment and pending decisions. It does not require execution results or a finished coverage matrix. Reuse this plan in `verify/risk-based-tests`; actual test code/results remain canonical, coverage.md indexes them by ID/version rather than copying assertions.
+
+QA may derive boundary, concurrency, security and compatibility cases from accepted invariants. Escalate ambiguous business outcomes to PM; do not stop merely because a test case was not literally specified. Choose the cheapest layer that can falsify each risk; keep a small set of actual consumer journeys. Select regression by change impact; full-suite requirements come from project release policy, not a universal feature rule. The `collect` companion owns event-validation method.
+
+QA verify tasks may write assigned test code, fixtures and test-runner configuration through optional project `source_writes`; inspection/execution-only tasks may omit it. This does not authorize product-code fixes or changing the accepted business oracle. Early test-plan tasks do not write project source.

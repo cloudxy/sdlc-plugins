@@ -6,7 +6,7 @@
       "expectations": [
         "Writes or runs 'characterization' tests on the seam before the first structural edit",
         "One seam per step with gates run per step",
-        "Zero edits to characterization 'assertions'",
+        "Preserves observable behavior and justifies any test-seam adaptations without weakening assertions",
         "Parks unrelated cleanup in 'open_questions' instead of doing it"
       ]
     },
@@ -17,6 +17,22 @@
         "Refuses to mix the 'bug fix' into the refactor ticket",
         "Opens a separate ticket / 'open_question' for the defect",
         "Keeps the refactor 'behavior-preserving'"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Move a parser module and update test imports/mocks. Public outputs and error behavior must stay unchanged. An unrelated pricing bug is discovered.",
+      "expected_output": "Allow justified test wiring updates with equivalent behavioral assertions and before/after evidence. Separate the pricing bug as a scoped objective, not a silent refactor change or mandatory full discovery restart.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "Allow justified test wiring updates with equivalent behavioral assertions and before/after evidence. Separate the pricing bug as a scoped objective, not a silent refactor change or mandatory full discovery restart.",
+          "weight": 5
+        }
       ]
     }
   ]

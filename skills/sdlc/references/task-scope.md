@@ -1,0 +1,7 @@
+## Project scope and completion target
+
+At entry record `project_profile` (surface, stack, maturity, data/security/release constraints) and `delivery_goal`: proposal_ready, local_verified, release_ready or deployed. These are manager scope records, not aliases for lane gate success. Proposal work uses selected single-task checks and ends as a scoped handoff; never mark missing implementation/release stages complete. Lane gates remain authoritative for a lane claimed complete. For narrower goals record completed tasks and the explicit remaining stages instead of pretending full-lane completion.
+
+Task selection, dependencies, early QA/measurement, data implementation and pre-QC preparation live only in [stage-procedure.md](stage-procedure.md). Registry owns role/task/artifact contracts; skills own methods; role profiles own role identity; commands route entry. Do not duplicate these rules into every layer.
+
+Production code is not a feature artifact. For tasks marked `writes_source` in the registry, source writes are permitted only within explicit project-relative `source_writes` (files or trailing-slash subtrees), plus `project_root`. Tasks marked `requires_source` need nonempty scope; a design-only DBA migration review may omit it. Review these against actual task scope and avoid concurrent overlapping writers. Product files and manager state remain under their separate ownership rules. A check-task pass only proves minimum artifact presence; verify actual code/data/runtime evidence before reporting capability complete.

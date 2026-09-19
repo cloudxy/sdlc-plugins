@@ -1,9 +1,9 @@
 <!-- sdlc:unfilled — 写入本次的真实内容后删除本行；带这一行的文件在闸门里等于没交 -->
 # 联调记录 · T-<nn> <旅程切片>
 
-> 作者：frontend 帽（与 backend 同一切片）｜泳道：L<n>｜日期：<YYYY-MM-DD>｜构建：<commit>
-> 切片：J-<n> 第 <a>–<b> 步｜对照：选定原型 `02-shape/prototypes/<d>-*.png` · `02-shape/edge-states.md`
-> **真实后端，不用 mock。** 截图必须打开看过。
+> 作者：<slice_integrator；参与角色>｜泳道：L<n>｜日期：<YYYY-MM-DD>｜构建：<commit>
+> 切片：J-<n> 第 <a>–<b> 步｜对照：最终原型源码 `02-shape/prototypes/final/` 的版本、状态入口和匹配截图（UI 适用） · `02-shape/edge-states.md`
+> 真实消费者入口与依赖；非 UI 用命令/请求/结果记录，UI 截图必须打开看过。Mock-only 明确未完成真实集成。
 
 ## 1. 环境
 

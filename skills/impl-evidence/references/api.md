@@ -7,12 +7,15 @@ One discipline: **contracts are input, not suggestions.** If the contract has pr
 | Task | Approach |
 |---|---|
 | **Implement a ticket (API endpoint)** | Full chain: read contract → map to layers → implement → self-test |
-| **"Should this have a transaction?"** | Contract analysis: multi-table write? → yes. Single read? → no. See [references/concurrency-and-transactions.md](api/concurrency-and-transactions.md) |
+| **"Should this have a transaction?"** | Contract analysis: multi-table write? → yes. Reads can also require a transaction/snapshot when consistency demands it. See [references/concurrency-and-transactions.md](api/concurrency-and-transactions.md) |
 | **"How to make this idempotent?"** | Unique constraint + upsert, or idempotency key |
 | **"This list is slow, add Redis?"** | Find N+1 / missing JOIN first. Cache on an N+1 path hides the shape |
 | **Debug a backend error** | Read logs → trace to layer → check contract → fix or escalate |
 
-## Gotchas
+## Gotchas — inspect applicability
+
+The following Python/SQLAlchemy/Redis and R10 examples describe the auto_agents stack. Check installed configuration and project conventions before applying; they are not requirements for every API project. Tests and contract/concurrency regressions are within backend implementation responsibility.
+
 
 - **async context calling `redis_client()` (sync) blocks the event loop.** Use `await get_async_redis()`. This caused backend freeze ([ESC from freeze pattern]).
 - **`session.commit()` expires ORM objects.** Accessing attributes after commit triggers a synchronous refresh that crashes async code. Capture `int(obj.id)` before commit.
@@ -37,7 +40,7 @@ One discipline: **contracts are input, not suggestions.** If the contract has pr
 
 ### Transaction, idempotency, concurrency
 
-**Transaction:** multi-table write → transaction. Single read → no. If a partial write can leave inconsistent data → transaction. Read [references/concurrency-and-transactions.md](api/concurrency-and-transactions.md) for isolation levels and deadlock patterns.
+**Transaction:** multi-table write → transaction. Read consistency may also need a transaction/snapshot. If a partial write can leave inconsistent data → transaction. Read [references/concurrency-and-transactions.md](api/concurrency-and-transactions.md) for isolation levels and deadlock patterns.
 
 **Idempotency:** retryable operations (payment, message processing) need idempotency. Implementation: unique constraint on business key + upsert, or idempotency key table with status tracking.
 
@@ -57,7 +60,7 @@ One discipline: **contracts are input, not suggestions.** If the contract has pr
 | **Input** | Ticket (`story-n.md`: FR anchors + boundaries + acceptance checklist) · API/event contracts (`architect`) · `schema.dbml` + `db-spec.md` (`dba`) · existing codebase conventions |
 | **Output** | Implementation code · ORM models · migration execution records · self-test evidence (command + exit code) · ticket evidence section |
 | **Downstream** | `qa` (testable API + known boundaries) · `architect` (contract issues found) · `frontend` (actual behavior vs contract, if different) |
-| **Refuse** | Defining table fields · changing contracts · changing acceptance criteria · writing test cases |
+| **Refuse** | Defining table fields · changing contracts · changing acceptance criteria ; implementer tests are required where applicable (QA remains independent) |
 
 **Three kinds of contract problems, three responses:**
 - **Contract ambiguity** (error codes undefined, nullability unclear, idempotency semantics missing) → **back to `architect`**
@@ -66,8 +69,8 @@ One discipline: **contracts are input, not suggestions.** If the contract has pr
 
 ## Self-check
 
-- [ ] `pytest -q backend/tests` exit code 0?
-- [ ] `check-arch.sh` zero violations?
+- [ ] Project-authoritative test command passes relevant cases?
+- [ ] Applicable project architecture checks pass?
 - [ ] Code matches existing project patterns (not self-invented style)?
 - [ ] Every story acceptance item has a corresponding implementation?
 - [ ] Self-test evidence = command + exit code pasted verbatim?
@@ -83,4 +86,3 @@ One discipline: **contracts are input, not suggestions.** If the contract has pr
 | [templates/impl-evidence.md](../templates/impl-evidence.md) | Story evidence (command + exit code) |
 
 > Gotchas based on: `anthropics/skills@41bbe19` (pdf SKILL.md IMPORTANT-warning pattern) · project incidents from auto_agents git history
-

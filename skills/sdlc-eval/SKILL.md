@@ -1,7 +1,7 @@
 ---
 name: sdlc-eval
 description: "Use this skill when the user says /sdlc-eval. Do NOT use from parent /sdlc or as a substitute for check-sdlc.sh."
-when_to_use: "Use this skill when the user says /sdlc-eval or names the eval harness (including rubric judging or regression runs). Do NOT use from parent /sdlc. Do NOT use for weekly maintenance, health-check, a 19-role sweep, or as a substitute for check-sdlc.sh."
+when_to_use: "Use this skill when the user says /sdlc-eval or names the eval harness (including rubric judging or regression runs). Do NOT use from parent /sdlc. Do NOT use for weekly maintenance, health-check, an unbudgeted role sweep, or as a substitute for check-sdlc.sh."
 ---
 
 # SDLC eval harness (v2 = mechanical hygiene + blind rubric judging + real-failure regressions)
@@ -16,7 +16,7 @@ This window is the **manager**. You orchestrate **one human-triggered eval pass*
 | `rubric` | Is the with-skill output actually better than a capable baseline on the dimensions that matter? | `blind_eval.py prepare / aggregate` |
 | `regression` | On a real feature that went badly, is today's plugin output better than what it produced then? | `blind_eval.py regression-prepare / prepare --regression / aggregate --skill regression` |
 
-## Harness tables (22 skills)
+## Harness routing (all local skills)
 
 Delivery:
 
@@ -25,7 +25,7 @@ Delivery:
 | `prd-gwt` | `sdlc-workflow:pm` | all |
 | `findings` | `sdlc-workflow:reviewer` | `1`, `4` by default; user may name others |
 | `coverage-matrix` | `sdlc-workflow:qa` | first 2 + rubric cases |
-| `impl-evidence` | `sdlc-workflow:frontend` | `ui-1`, `ui-5` |
+| `impl-evidence` | matching frontend / backend / algo / miner registry task | include every changed lane |
 | `debug` | `sdlc-workflow:frontend` + packet line `debug_protocol: <PLUGIN_ROOT>/skills/sdlc/references/debug-loop` | all |
 | `tdd` | `sdlc-workflow:backend` + packet line `companion_skills: [tdd]` | all |
 | `refactor` | `sdlc-workflow:backend` (ticket marked maintenance) | all |
@@ -51,7 +51,11 @@ Discovery / ops:
 | `compete` | `sdlc-workflow:competitor` | all |
 | `falsify` | `general-purpose` + PLUGIN_ROOT + follow `skills/falsify/SKILL.md` | all |
 | `enablement` | `sdlc-workflow:ops` + packet `stage: enablement` `primary_skill: sdlc-workflow:enablement` | all |
-| `signals` | `sdlc-workflow:ops` + packet `stage: signals` `primary_skill: sdlc-workflow:signals` | `1`, `5` |
+| `signals` | `sdlc-workflow:ops` + packet `stage: signals` `primary_skill: sdlc-workflow:signals` | all |
+| `deliver` | `sdlc-workflow:sre`, task selected from registry | all |
+| `retro` | `sdlc-workflow:analyst`, plan or readout | all |
+| `prototype` | designer/market/prototype | all |
+| `sdlc-eval` | isolated manager simulation; no recursive judge spawning | protocol cases |
 
 Orchestration:
 
@@ -63,10 +67,10 @@ Orchestration:
 ## Gotchas
 
 - **This is not a gate.** Do not add it to scheduled maintenance or `health-check.sh`. It burns real model calls and is non-deterministic.
-- **Scope = the rows above.** Refuse a 19-role sweep or skills not in the tables.
+- **Scope = the selected skill/case manifest.** Support an explicitly requested all-skill pass in bounded batches with a model-call budget. Task routes come from workflow/registry.json; tables are an index, not a second authority.
 - **Baseline is `general-purpose`.** That is the without-skill arm, not a role spawn. Do not invert.
 - **Do not paste SKILL.md** into any spawn prompt. with_skill gets PLUGIN_ROOT; without_skill must not read it.
-- **Spawn all arms of one skill in one turn** (fresh context each), and all judges of one skill in one turn.
+- **Schedule independent arms in bounded batches respecting the host concurrency and agreed budget** (fresh context each), and all judges of one skill in one turn.
 - **You never judge.** Neither you nor the producing arms score outputs. Judges are fresh `general-purpose` spawns that see only one blind folder; the unblinding map (`.blind-map-*.json`) is never in a judge prompt.
 - **Two judges per case, positions swapped** (`blind/` and `blind-swap/`) — LLM judges favour position and length; the swap and the scale anchors counter that. Disagreement between the two judges is information: read both rationales.
 - **Judgments are machine-checked.** Every score must quote its own side verbatim (「…」) or cite an image on its own side; the inventory must list the side's documents; a verified defect caps its criterion at 3. `validate` / `aggregate` reject paraphrases, skipped documents and quotes found only on the other side (suspected A/B swap). An unchecked judge once credited side A with side B's spec.
@@ -81,7 +85,7 @@ This file is `<plugin>/skills/sdlc-eval/SKILL.md`; PLUGIN_ROOT is two directorie
 
 ## Step 0 — refuse or init
 
-If the user asks for all roles, cron, or health-check integration → refuse with the Gotchas, stop. Else pick the mode (`mechanical` default; `rubric` when the user asks for quality / judging or the skill's cases carry `rubric`; `regression` when they name a regression case or "真实案例回归"), the skill (from the tables) and the case set. Create `<workspace>/iteration-<N>/<SKILL>-<id>/{with_skill,without_skill}/outputs/` for each case.
+Do not add model evals to cron or health-check. For an all-skill request, enumerate actual skills/*/evals/evals.json and plan bounded batches; otherwise pick the mode (`mechanical` default; `rubric` when the user asks for quality / judging or the skill's cases carry `rubric`; `regression` when they name a regression case or "真实案例回归"), the skill (from the tables) and the case set. Create `<workspace>/iteration-<N>/<SKILL>-<id>/{with_skill,without_skill}/outputs/` for each case.
 
 ## Step 1 — the arm spawns (same turn)
 
@@ -128,7 +132,7 @@ Show the table. Mechanical fail stays fail; skip is not pass.
 Cases live in `PLUGIN_ROOT/skills/sdlc-eval/regressions/*.json` (fields: [templates/regression-case.md](templates/regression-case.md)). Each names a real artifact produced by an earlier plugin version, the time before that work started, the inputs, the deliverables and a rubric.
 
 1. Ask for (or reuse) the project root, then per case: `python3 <PLUGIN_ROOT>/scripts/blind_eval.py regression-prepare --workspace <workspace> --iteration <N> --case <case.json> --project-root <project>`. It exports the project at the baseline commit into `regression-<id>/snapshot/`, copies inputs and the old artifact, fingerprints hindsight and writes `task.md`. It never writes to the project; `--force` discards an earlier arm's outputs.
-2. Spawn each case's hat (`subagent_type: sdlc-workflow:<hat>`) with its `task.md` as the prompt, all cases in one turn. Prefer a session whose working directory is not the live project. The arm writes only to `new/outputs/`.
+2. Spawn each case's hat (`subagent_type: sdlc-workflow:<hat>`) with its `task.md` as the prompt, cases in bounded batches. Prefer a session whose working directory is not the live project. The arm writes only to `new/outputs/`.
 3. `python3 <PLUGIN_ROOT>/scripts/blind_eval.py prepare --workspace <workspace> --iteration <N> --regression <case.json>` scans for leaks before it blinds anything:
    - **exit 4 = INVALID (leak).** Do not judge. Show the user the hits, then `regression-prepare --force` and re-run that arm.
    - **REVIEW (one or two later file names).** Show the user each hit (file:line and text) and ask whether the name follows from the task or inputs. Record their words: `blind_eval.py leak-review --workspace <workspace> --iteration <N> --case <id> --decision clear|reject --reason "<user's words>"`. Never decide it yourself.
@@ -141,9 +145,15 @@ Before merging a change to a role profile, skill or protocol: run the affected s
 
 ## Self-check
 
-- [ ] Arms of one skill spawned in one turn; with_skill uses the table's hat; without_skill is general-purpose?
+- [ ] Arms scheduled within the agreed budget; with_skill uses the table's hat; without_skill is general-purpose?
 - [ ] `grade_eval.py` ran (mechanical floor)?
 - [ ] Rubric mode: two blind judges per case (blind + blind-swap), judges saw only their folder, `aggregate` exited 0 or invalid judges were respawned once?
 - [ ] Regression mode: arms worked in `snapshot/` from `regression-prepare`; the leak scan ran; no INVALID case was judged; every REVIEW decision is the user's, recorded with `leak-review`?
 - [ ] Reported verdicts and rationales, not just numbers; every judge claim repeated was checked in the cited file; no judging in this window?
 - [ ] Did not touch health-check or crontab?
+
+## Reproducibility and result limits
+
+Write a run manifest with plugin revision/tree hash, case/rubric versions, selected registry task, model/settings, tools, input snapshot, budget and seed when supported. Both arms get equivalent task inputs, tool access, time and output budget; only the skill treatment differs. Use real check_packet-valid routing for role tasks, and explicit manager simulations for discover/sdlc/sdlc-eval. Companion skills require a valid primary task; do not invent primary_skill=tdd on a backend implementation task.
+
+Enumerate changed skills and their conditional branches rather than silently retaining old UI-only or two-case defaults. Unrun cases, unavailable host roles and unsupported graders are reported as untested, not pass. Mechanical checks validate structure; blind evaluation tests output quality; end-to-end host smoke tests delegation and tool integration. None substitutes for the others. The meta-harness skill is evaluated by protocol fixtures or isolated outputs, never by recursively launching itself.

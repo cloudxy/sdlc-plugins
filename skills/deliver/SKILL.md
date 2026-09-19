@@ -13,16 +13,16 @@ Job: **make deployment boring and recovery automatic** — rollback paths are ve
 | Task | Approach |
 |---|---|
 | **Deploy a feature** | Pre-deploy checklist (gate fingerprints) → deploy steps → verify → rollback check → monitoring |
-| **"This is down"** | Four-phase response: timeline → root cause → recovery → postmortem |
+| **"This is down"** | Four-phase response: mitigate/recover → preserve timeline → investigate cause → postmortem |
 | **"Set up alerts"** | Metrics → thresholds → routing (who/what/escalation) |
 | **Capacity review** | Quality scenarios + capacity model in product `architecture.md` → growth's expected traffic from `06-deliver/launch.md` → bottleneck identification |
 
 ## Gotchas
 
-- **macOS ARM and Linux x86_64 Docker builds produce different results.** Cross-platform images must be validated in CI, not just locally.
-- **npm 11 and npm 10 parse lockfiles differently.** CI Node 20 uses npm@10 — generate lockfiles with npm@10 or CI breaks.
-- **A zombie process holding the port means "port in use" but health check returns 000.** `lsof -i :PORT` to find PID, `kill -9` to clear — SIGTERM may be ignored.
-- **`git push` over HTTP/2 can fail with "Error in the HTTP2 framing layer"** when the network has a proxy/firewall. Set `git config --global http.version HTTP/1.1`.
+- Toolchains, target architecture and lockfile behavior are project/version-specific: inspect pinned versions and run the target build; do not prescribe a universal Node/npm pair.
+- Identify the owner and service manager of a port/process before acting; prefer graceful service stop, and escalate termination only when necessary and authorized. Never kill an unrelated process to make a check green.
+- Scope network/git workarounds to the affected command or repository after diagnosis; do not mutate global user configuration as a default fix.
+- A written rollback is a proposal. Record what was rehearsed, the environment and limits; data recovery may need roll-forward or restore, not a destructive downgrade.
 
 ## Key decisions
 
@@ -43,16 +43,16 @@ Job: **make deployment boring and recovery automatic** — rollback paths are ve
 
 ### Incident response (four phases)
 
-1. **Timeline**: what happened, when, who noticed
-2. **Root cause**: traced to code/infra/config, not "user error"
-3. **Recovery**: what was done to restore service
+1. **Triage and mitigation**: assess impact, stabilize service; record what happened, when and who noticed
+2. **Recovery**: use the fastest safe, authorized mitigation; preserve evidence concurrently
+3. **Root cause**: investigate after stabilization; distinguish confirmed, suspected and unknown causes
 4. **Postmortem**: blameless — every escape becomes a mechanism improvement, not a person to blame
 
 ## Handoff contract
 
 | Direction | Content |
 |---|---|
-| **Input** | `qc` release-opinion.md（L3 是 qc **然后** 本帽，不是本帽喂 qc）· architecture topology · infra state |
+| **Input** | accepted delivery target + architecture; prepare feeds QC, execute consumes `qc` release-opinion.md· architecture topology · infra state |
 | **Output** | `06-deliver/checklist.md` (verified rollback + monitoring + canary; template shape: [templates/release-checklist.md](templates/release-checklist.md)) |
 | **Downstream** | 运行时事实交给产品运营 `ops` 做 enablement / 复盘输入——**不**由本帽写用户公告 · incident postmortems feed `pm` as new requirements |
 | **Refuse** | Writing business code (root cause → backend ticket) · schema changes (→ dba) · user-facing copy / support scripts / signal aggregation (→ ops / 产品运营) |
@@ -80,3 +80,9 @@ Job: **make deployment boring and recovery automatic** — rollback paths are ve
 ## Role-specific review
 
 For the assigned role, apply [references/role-quality.md](references/role-quality.md) alongside this procedure’s self-check. Reviewers use the same criteria.
+
+## Prepare, execute and report
+
+`deliver/prepare` can run before QC: write `06-deliver/readiness.md` with exact artifact/config identity, applicable gate references, migration compatibility, recovery rehearsal/evidence limits, observation/promotion criteria and operator ownership. It is a partial task; it does not deploy or mark deliver complete.
+
+`deliver/checklist` consumes the scoped QC opinion and existing release authorization. If asked only for a plan, produce the plan with `not deployed` status. If execution is authorized, record environment, version, commands/results, time and observed health. The release checklist is the operational record; launch/enablement reference it. Recovery methods for changed data are owned by [schema](../schema/SKILL.md); operational orchestration references that decision instead of inventing a second migration policy.

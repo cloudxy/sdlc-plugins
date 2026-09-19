@@ -3,9 +3,9 @@
 
 > 作者：designer 帽（task explore）｜泳道：L<n>｜日期：<YYYY-MM-DD>
 > 上游：spec（核心价值 / J-n）· briefing · `00-discover/growth.md`（亮点假设）· 产品 `design-system.md`
-> 规则：≥3 个**结构或交互模式不同**的方向；每个方向都有可点击原型与截图；截图看过再写结论。
+> 模式：reuse / local-exploration / new-direction；已有授权/版本：<引用>。规则：真实未决选择比较可信方向，已决方案可只保留 D1；每个方向都有可点击原型与截图；截图看过再写结论。
 
-## 参考研究（≥3 条，操作者参考图之外；URL 与访问日期同一行，闸门 SOURCES）
+## 参考依据（项目/用户资料或实际访问的外部来源；日期、范围和未知）
 
 | 参考（产品 / URL / 访问日期） | 值得借鉴 | 要避免 |
 |---|---|---|
@@ -21,7 +21,7 @@
 - 粗估实现代价：<低 / 中 / 高 + 理由>
 - AI 默认风格自检：<命中哪一簇？是否有意为之？>
 
-## D2 <方向名>
+## D2 <需要比较时填写，否则删除>
 
 - 原型：`02-shape/prototypes/d2/index.html`
 - 截图：![D2 375](prototypes/d2-375.png) ![D2 1440](prototypes/d2-1440.png)
@@ -32,7 +32,7 @@
 - 粗估实现代价：
 - AI 默认风格自检：
 
-## D3 <方向名>
+## D3 <需要比较时填写，否则删除>
 
 - 原型：`02-shape/prototypes/d3/index.html`
 - 截图：![D3 375](prototypes/d3-375.png) ![D3 1440](prototypes/d3-1440.png)

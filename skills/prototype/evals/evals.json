@@ -22,6 +22,22 @@
         "Does not take 'payment'",
         "Does not write 'spec.md' FRs as if the demand were proven"
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "想知道批量算法能否在预算内处理100万条数据，是否用HTML模拟界面、跳过测试就够了？",
+      "expected_output": "选择最小可重复计算实验，设真实输入/预算/判据并记录资源环境；模拟UI不能证明性能；隔离scratch代码，不冒充生产证据。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "选择最小可重复计算实验，设真实输入/预算/判据并记录资源环境；模拟UI不能证明性能；隔离scratch代码，不冒充生产证据。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

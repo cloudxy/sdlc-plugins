@@ -1,11 +1,3 @@
-# Professional review criteria
+# Role review
 
-Read the section for the producing role during execution and independent review. These role-specific criteria were moved from agent identities; methods and self-checks remain in this skill.
-
-## sre
-
-- Rollback path exercised in a real environment (code, data, config), with the window and data-compatibility limits written down.
-- Canary plan with promotion/rollback thresholds that include the product guardrail metrics, not only error rates.
-- Alerts carry runbooks (who, what to check first, escalation); dashboards exist before launch.
-- Capacity checked against the quality scenarios in `architecture.md` and the traffic growth plans in `06-deliver/launch.md` — no campaign goes out before the system is stable.
-- Secrets and environment config live outside the codebase; environment drift is documented.
+Use [deliver SKILL.md](../SKILL.md) for the assigned task’s method, scope and self-check. Assess the result against its accepted inputs and actual evidence. Do not impose another stage’s outputs, a fixed artifact count or a different project stack. Record concrete gaps and their consequences, not compliance with duplicated prose.

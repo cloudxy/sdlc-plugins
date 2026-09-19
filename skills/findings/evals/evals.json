@@ -89,6 +89,22 @@
           "weight": 2
         }
       ]
+    },
+    {
+      "id": 7,
+      "prompt": "审核define阶段的API规格，没有运行截图。同一Given/When有“订单已创建”和“库存已减少”两个Then。是否两项major？",
+      "expected_output": "按阶段及非UI范围审查；无截图不自动major，两个兼容结果不冲突；要求业务不变量和可测标准，清楚区分静态审查与实际执行。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "按阶段及非UI范围审查；无截图不自动major，两个兼容结果不冲突；要求业务不变量和可测标准，清楚区分静态审查与实际执行。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

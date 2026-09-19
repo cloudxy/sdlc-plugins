@@ -1,6 +1,6 @@
 {
   "id": "R3-agents-market-architecture",
-  "title": "能力市场：架构师能否用质量属性与候选方案驱动设计（v3 contract 为基线）",
+  "title": "能力市场：架构约束、决策证据与消费者交付（历史 v3 输入回归）",
   "project": "auto_agents",
   "skill": "architecture",
   "hat": "architect",
@@ -31,12 +31,12 @@
     "02-shape/contracts/",
     "product/architecture.md"
   ],
-  "task": "stage: shape, task: contract. Write 02-shape/contract.md for this change (inputs: briefing, spec). There is no design direction file for this regression; use the spec's UI requirements.",
+  "task": "stage: shape, task: contract. Write the architecture delta for the supplied briefing and spec. This historical fixture lacks final design: assess independent architecture work, identify missing UI inputs, and leave dependent UI contracts/slices pending rather than inventing a design or claiming full shape completion. Preserve any observed product baseline; proposed decisions are not implemented facts.",
   "v3_gaps_observed": [
     "grep on baseline contract.md (2026-09-17): 质量属性/QAS 0 · P95/QPS 0 · 演进 0 matches; 候选/备选 3 matches",
     "Decisions AD-1…AD-11 are recorded individually; no measurable scenarios or capacity estimate drive them"
   ],
-  "what_good_looks_like": "Measurable quality scenarios (including what happens when the market opens to all tenants), at least two feasible options compared on those scenarios with evidence, explicit rejected alternatives and revisit triggers, an evolution path with checks CI can run, contracts with failure semantics, and tickets that are demonstrable journey slices.",
+  "what_good_looks_like": "Measurable scenarios and labeled workload assumptions drive decisions. Reuse applicable existing decisions; compare credible alternatives for new consequential choices. Include evidence limits, authorization, revisit triggers, owned verification obligations, failure contracts and complete consumer slices where inputs permit. Missing historical UI inputs remain explicit blockers; no invented screenshots or deployed topology.",
   "rubric": [
     {
       "id": "scenarios",
@@ -45,23 +45,28 @@
     },
     {
       "id": "options",
-      "criterion": "At least two feasible options compared on the scenarios with evidence; rejected reasons and revisit triggers",
+      "criterion": "Justifies decision reuse where valid or compares credible new alternatives, with evidence, authorization and revisit conditions; no option-count quota.",
       "weight": 3
     },
     {
       "id": "evolution",
-      "criterion": "Evolution path and fitness functions that CI can run",
+      "criterion": "Separates current baseline facts from proposed evolution; verification obligations have owners and planned/executed evidence states.",
       "weight": 2
     },
     {
       "id": "slices",
-      "criterion": "Tickets are journey slices, each demonstrable end-to-end",
+      "criterion": "Slices name an integrator and a consumer-facing end-to-end check; absent final design explicitly blocks dependent UI completion without blocking independent architecture analysis.",
       "weight": 2
     },
     {
       "id": "contracts",
       "criterion": "Contracts define errors, idempotency, pagination and versioning",
       "weight": 1
+    },
+    {
+      "id": "security",
+      "criterion": "Changed trust and privilege boundaries have controls, implementation/verification owners and residual-risk authority.",
+      "weight": 2
     }
   ]
 }

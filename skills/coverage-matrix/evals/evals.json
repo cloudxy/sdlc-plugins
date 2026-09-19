@@ -82,6 +82,22 @@
           "weight": 1
         }
       ]
+    },
+    {
+      "id": 6,
+      "prompt": "一个 CLI 批量导入工具正在 define，尚未实现。请求 QA 测试计划。",
+      "expected_output": "输出早期风险计划及CLI消费者旅程、契约/数据/边界测试层次；不要求浏览器截图，不伪造运行结果，不把所有断言都放E2E。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "输出早期风险计划及CLI消费者旅程、契约/数据/边界测试层次；不要求浏览器截图，不伪造运行结果，不把所有断言都放E2E。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

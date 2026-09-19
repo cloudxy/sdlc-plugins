@@ -17,6 +17,22 @@
         "Refuses: CI is 'G-script' only, G-fresh stays an independent reviewer",
         "Does not add 'LLM' auto-review to CI"
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "主分支含已归档的方案型 feature。相同 commit 的 CI 依赖和门禁配置发生变化，能复用旧绿灯吗？",
+      "expected_output": "按活动变更和已声明目标选择门禁，不扫描历史方案强迫上线；拒绝仅凭commit复用，核对配置、依赖、环境和工具版本。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "按活动变更和已声明目标选择门禁，不扫描历史方案强迫上线；拒绝仅凭commit复用，核对配置、依赖、环境和工具版本。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

@@ -18,11 +18,12 @@ Load inside `sdlc-workflow:competitor`. Long form (full battlecard) is `PLUGIN_R
 
 ## Gotchas
 
-- **Web research is part of the job, not an option.** Record at least three sources as table rows with the URL and the access date on the same line (gate SOURCES). A packet line such as "smoke run, no WebSearch needed" or "URLs optional" does not waive it; only the user's `research.offline: true` in `sdlc.config.yaml` does. Unreachable source → say so in the row; never cite a page you did not open.
+- **Evidence is claim-specific.** Apply [the canonical research evidence policy](../discover/references/evidence.md): dated internal or external sources, scope and limitations; no universal source-count or web-only requirement.
+
 - **Status quo is always in the set.** Empty set without 现状 fails the gate.
-- **Sales pages are E0.** Trial and docs are E2. Rumour is unusable.
-- **Borrow at feature-point grain.** Say what you will not copy. Avoid needs an alternative + revisit trigger. Differentiate needs why we can and they cannot.
-- **Gaps-only lists cause blind chase.** Name what we already have that they do not.
+- **A sales page supports what is advertised**, not proven performance. Record trial version, tier and date; absence from docs is unknown, not proof the competitor cannot do it.
+- **Borrow at feature-point grain.** Say what you will not copy. Avoid needs an alternative + revisit trigger. Differentiate needs observed differences and defensibility assumptions; do not invent claims about what others cannot build.
+- **Gaps-only lists cause blind chase.** Compare evidenced strengths and limitations; mark unverified cells unknown.
 - **Do not RICE or pick the FR.** Pass the snapshot to discover / pm.
 
 ## Self-check

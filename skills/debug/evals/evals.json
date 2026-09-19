@@ -19,6 +19,22 @@
         "Isolates with repeated runs / bisected fixtures before touching code",
         "Reports the root cause line and parks the second issue in 'open_questions'"
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "A timeout occurs once in 500 requests and is now passing on retry. Logs suggest two possible causes. A customer outage is ongoing.",
+      "expected_output": "Keep defect open; separate mitigation from confirmed diagnosis, state hypotheses and limits, use discriminating probes, preserve raw evidence and task path. Do not fabricate a single proven cause or wait for a complete root-cause report before authorized mitigation.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "Keep defect open; separate mitigation from confirmed diagnosis, state hypotheses and limits, use discriminating probes, preserve raw evidence and task path. Do not fabricate a single proven cause or wait for a complete root-cause report before authorized mitigation.",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

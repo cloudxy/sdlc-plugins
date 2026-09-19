@@ -1,5 +1,3 @@
-# Enablement quality
+# Role review
 
-Read during delivery and independent review.
-
-- Enablement gives a new user a first-success path, in-product entry points (cited from the designer's flows), three support Q&As with escalation, and user-language release notes that match what growth claims.
+Use [enablement SKILL.md](../SKILL.md) for the assigned task’s method, scope and self-check. Assess the result against its accepted inputs and actual evidence. Do not impose another stage’s outputs, a fixed artifact count or a different project stack. Record concrete gaps and their consequences, not compliance with duplicated prose.

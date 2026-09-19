@@ -67,10 +67,10 @@
     {
       "id": 6,
       "prompt": "task: explore. Feature: first-run experience of a personal finance app — after linking a bank account, the user should understand where their money went last month. Brand character: calm, trustworthy, a little warm. Produce the design directions deliverable.",
-      "expected_output": "Studies references and states what to take/avoid. Produces at least three structurally different directions (e.g. story-style month recap, category treemap dashboard, conversational Q&A) as rendered HTML prototypes with screenshots at mobile and desktop widths. Each direction names a signature moment tied to the Aha (e.g. the month's biggest surprise revealed with a gentle count-up), its trade-offs, risks, build cost and an AI-default self-check. Ends with a reasoned recommendation and leaves the pick to the human.",
+      "expected_output": "Studies references and states what to take/avoid. Produces credible structurally different options for unresolved choices (e.g. story-style month recap, category treemap dashboard, conversational Q&A) as rendered HTML prototypes with screenshots at supported target sizes. Each direction names a signature moment tied to the Aha (e.g. the month's biggest surprise revealed with a gentle count-up), its trade-offs, risks, build cost and an AI-default self-check. Ends with a reasoned recommendation and leaves the pick to the human.",
       "files": [],
       "expectations": [
-        "Presents at least three directions labelled D1, D2 and D3",
+        "Presents credible distinct options suited to the unresolved design decision without a fixed count quota",
         "Each direction names a signature moment",
         "References screenshots or rendered prototypes",
         "Gives a recommendation"
@@ -106,7 +106,7 @@
     {
       "id": 7,
       "prompt": "task: design-qa. The picked direction D2 shows the monthly recap with a count-up animation on the total and a highlighted 'biggest surprise' card. Build screenshots: the total appears instantly without animation, the surprise card uses the default grey card style, the empty state (no transactions) shows '暂无数据', and focus outlines were removed. Write accept-design.md.",
-      "expected_output": "Compares build vs prototype side by side, identifies the missing signature moment (no count-up, surprise card not highlighted) as blocking, the '暂无数据' empty state and removed focus outlines as major (accessibility floor), ranks gaps, routes them to frontend, and gives verdict 不通过.",
+      "expected_output": "Compare supplied build images to the approved final design; identify focus accessibility and state/experience deviations. Check reduced-motion context before treating absent animation as a defect. Label screenshot-only limits, rank by user impact and route actual mismatches without claiming live execution.",
       "files": [],
       "expectations": [
         "Identifies the missing signature moment",
@@ -122,7 +122,7 @@
         },
         {
           "id": "signature",
-          "criterion": "Recognises the loss of the signature moment as the most important gap",
+          "criterion": "Assesses the approved experience and reduced-motion behavior, without assuming animation loss outranks an accessibility defect.",
           "weight": 3
         },
         {
@@ -134,6 +134,22 @@
           "id": "verdict",
           "criterion": "Verdict follows the rules",
           "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "An existing desktop-only admin table needs an approved permission-denied state. Same layout/components/tokens; no brand change. Produce final handoff and design QA plan.",
+      "expected_output": "Use reuse mode and cite existing authorization; no mandatory three directions, web quota or mobile layout. Provide runnable final state source, component IDs and canonical token/version references; map frontend integration and compare real build at supported viewport. Do not treat prototype capture as implementation evidence.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "Use reuse mode and cite existing authorization; no mandatory three directions, web quota or mobile layout. Provide runnable final state source, component IDs and canonical token/version references; map frontend integration and compare real build at supported viewport. Do not treat prototype capture as implementation evidence.",
+          "weight": 5
         }
       ]
     }

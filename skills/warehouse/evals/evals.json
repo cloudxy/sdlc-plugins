@@ -66,6 +66,22 @@
           "weight": 1
         }
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "小型 B2B 产品已有 dbt staging/marts，仅需要用户标签；变更含迟到退款和 CDC 删除。",
+      "expected_output": "不强制四层或额外指标；tags 独立任务；明确粒度、迟到/删除重放策略，实际实现与源端对账；引用权威指标定义，退款允许负值。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "不强制四层或额外指标；tags 独立任务；明确粒度、迟到/删除重放策略，实际实现与源端对账；引用权威指标定义，退款允许负值。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

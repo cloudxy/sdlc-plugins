@@ -93,13 +93,14 @@ If the operator lists many roles, that is a **diagnostic fan-out**, not "L4 by d
 
 ## 7. Shape split
 
-If the frozen FR count > 20, the first architect spawn writes `contract.md` + ADRs + the ticket **table**; a second spawn writes `tickets/T-nn.md`.
+Split architecture work into waves when dependency structure or context size warrants it, following [architecture lifecycle](../../architecture/references/lifecycle.md). A contract/ticket table can precede detailed tickets, but each implementation packet needs its complete slice ticket and required accepted contracts. Do not use a fixed FR-count threshold or mark shape complete while applicable outputs are missing.
 
 ## 8. Design direction pick (v4, `ui: yes`)
 
-1. After designer `explore`, check `02-shape/design-directions.md` lists ≥3 directions (D1…Dn), each with screenshots under `02-shape/prototypes/`.
+1. After designer `explore`, check `02-shape/design-directions.md` lists the applicable rendered directions (D1…Dn), with the design skill's scope mode and existing authorization when reusing, each with screenshots under `02-shape/prototypes/`.
 2. Present one line per direction (signature moment · main trade-off · screenshot paths) and the designer's recommendation. Wait for the human.
 3. Record `design.picked`, `design.picked_by` (`user` or `delegated`), `design.at`. Spawn designer `specify` with the pick in the packet `task` line; the designer writes `选定：D<n>` into `design-directions.md`.
+Reuse a valid existing pick without asking again; only unresolved consequential choices require a new decision.
 4. The user rejects all directions → respawn `explore` with their feedback as an input file (`02-shape/direction-feedback.md`); this counts as design rework, not a new lane.
 
 ## 9. Discovery survey scale
@@ -123,9 +124,9 @@ Record fallbacks under `host_spawn.<role>`. Never replace a non-empty mapping wi
 
 ## 12. The app must run (v4)
 
-Screenshots, integration runs, E2E, design QA and acceptance walkthroughs all need the running product. Reading source code is not a substitute (2026-09-17: a whole run finished without once starting a project that has two frontends).
+Implementation screenshots, integration runs, E2E, design QA and acceptance walkthroughs need the corresponding running product. Early design needs its runnable prototype; a nonexistent future application cannot be required before design. Nonvisual products use actual CLI/API/SDK/data execution rather than a browser. Reading source code is not a substitute (2026-09-17: a whole run finished without once starting a project that has two frontends).
 
 1. **Step 0 / `/sdlc-product` step 1:** `python3 <PLUGIN_ROOT>/scripts/check_config.py --project-root <root>`. Blockers (APP-START, APP-URL, E2E, NO-CONFIG) → show the findings and the suggested block to the user and ask them to update `sdlc.config.yaml`. You never write the user's config.
-2. **Before a stage that needs the app** — designer explore/design QA on an existing product, `/sdlc-product` designer, implement integration, verify E2E, accept: `check_config.py --project-root <root> --probe`. It probes `app.base_url` and every `app.urls` entry (products with several UIs or an API health URL); put the URLs the stage needs into the packet.
+2. **Before a stage that needs the web app** — designer explore/design QA on an existing product, `/sdlc-product` designer, implement integration, verify E2E, accept: `check_config.py --project-root <root> --probe`. It probes `app.base_url` and every `app.urls` entry (products with several UIs or an API health URL); put the URLs the stage needs into the packet.
 3. **APP-DOWN** → run `app.start` in the background (keep its output in `.sdlc/<feature>/app-start.log`), wait, probe again — at most three probes over about a minute.
-4. **Still down** → stop (`phase: Stopped`, reason `app-not-running`) and tell the user the command, the URL and the last log lines. Do not continue on screenshots of prototypes, curl output or code reading in place of the product.
+4. **Still down** → stop (`phase: Stopped`, reason `app-not-running`) and tell the user the command, the URL and the last log lines. For web UI verification do not substitute prototype screenshots or source reading for the real UI. For an API task, actual API requests/responses can be valid product evidence. Scope the prerequisite to the task and record what remains unverified.

@@ -22,6 +22,22 @@
         "Does not fail for lack of a branded rival",
         "Still gives borrow/avoid/differentiate against the workaround"
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "只有一份已签客户需求与当前手工操作记录，没有公开竞品资料。如何分析这个企业项目？",
+      "expected_output": "引用有日期的内部证据和范围；不凑三个网页，不泛化为整体市场；竞品未知标未知，当前手工方式可作替代方案；商业决定不冒充研究事实。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "引用有日期的内部证据和范围；不凑三个网页，不泛化为整体市场；竞品未知标未知，当前手工方式可作替代方案；商业决定不冒充研究事实。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

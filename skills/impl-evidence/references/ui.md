@@ -1,6 +1,6 @@
 # Frontend — design contract to interactive reality
 
-Job: **turn design contracts into interactive reality** — tokens over hardcoding, component library over one-off components, react-query over manual loading.
+Job: **turn design contracts into interactive reality** — tokens over hardcoding, component library over one-off components, project-appropriate data/state handling.
 
 | Task | Approach |
 |---|---|
@@ -10,7 +10,10 @@ Job: **turn design contracts into interactive reality** — tokens over hardcodi
 | **Debug UI issue** | Screenshot → inspect DOM → trace to CSS/state → fix → re-screenshot |
 | **Add a11y** | Semantic tags → ARIA → keyboard navigation → contrast check |
 
-## Gotchas
+## Gotchas — auto_agents examples, only for a matching stack
+
+Use the current project framework, component library and authoritative build commands. The examples below do not mandate React, antd, npm or a two-app workspace. Native UI uses its device/preview/test tools.
+
 
 - **shared package: `main` points to `dist/`.** After editing shared source, run `npm run build -w @auto-agents/frontend-shared` or the app consumes stale output. This caused a runtime crash ([axios CJS interop]).
 - **`@ant-design/icons` uses ESM.** Jest needs `transformIgnorePatterns` exceptions for `@ant-design|antd|rc-|@rc-component|@auto-agents` — without them, all tests fail with "Cannot use import statement outside a module".
@@ -23,7 +26,7 @@ Job: **turn design contracts into interactive reality** — tokens over hardcodi
 
 The final prototype is the design target **in code**, not a picture. Screenshots of it are for reference only.
 
-1. Open `02-shape/prototypes/final/` (HTML/CSS). List its `data-component` IDs: each becomes a real component — reuse the component library first, extract on the second occurrence.
+1. Open `02-shape/prototypes/final/` (HTML/CSS). List its `data-component` IDs: each becomes a real component — reuse the component library first, extract when reuse or consistency warrants it.
 2. Its CSS variables are the tokens: map them to the project's token system; never copy literal values.
 3. Every state it can show (`?state=empty|loading|error|…`) is a state you implement, with its copy verbatim.
 4. Rebuild, do not paste: the prototype has fake data, no data layer and may skip semantics. Keep its layout and behaviour; write real components, real data fetching and accessible markup.
@@ -38,13 +41,13 @@ The final prototype is the design target **in code**, not a picture. Screenshots
 2. Color — tokens, no hardcoded hex
 3. Font — token-defined families and sizes
 4. Border radius / shadow — token consistency
-5. Icons — from `@ant-design/icons`, not emoji
+5. Icons — the project’s established accessible icon system
 6. Interaction states — hover/focus/disabled/loading all handled
 7. **State completeness** — every edge-state from design covered (empty/loading/error/boundary/permission/offline)
 8. Responsive — tested at mobile/tablet/desktop breakpoints
 9. Accessibility — semantic tags, ARIA, keyboard navigation, contrast ratio
 
-### Data fetching — react-query, not manual
+### Data fetching — React Query example where the project uses it
 
 ```jsx
 // ✅ react-query with conditional polling
@@ -58,7 +61,7 @@ const { data, isLoading } = useQuery({
 });
 ```
 
-No manual `setInterval`, no `useState` + `useEffect` + fetch, no manual loading booleans.
+Choose the existing framework’s data model; verify cancellation, stale responses, retry, polling shutdown and state consistency rather than requiring this library.
 
 ### Component library alignment
 
@@ -84,13 +87,13 @@ Second occurrence = extract to component library. Don't write the same Card+Tabl
 
 ## Self-check
 
-- [ ] Both apps `npm run build` exit 0?
+- [ ] Applicable project build/target checks exit 0?
 - [ ] `check-frontend.sh` zero violations?
 - [ ] 9 dimensions walked through?
 - [ ] Every `data-component` in the final prototype maps to a component, and every prototype state is implemented?
 - [ ] Edge-states matrix items covered?
 - [ ] No hardcoded color/spacing values?
-- [ ] Data fetching uses react-query (no setInterval)?
+- [ ] Data/state handling follows the project and handles cancellation/stale responses?
 - [ ] Routes have lazy/ErrorBoundary/404?
 
 ## Deep references — when to read them
@@ -104,4 +107,3 @@ Second occurrence = extract to component library. Don't write the same Card+Tabl
 | [templates/impl-evidence.md](../templates/impl-evidence.md) | Implementation evidence (command + exit code) |
 
 > Gotchas based on: `anthropics/skills@41bbe19` (docx SKILL.md footgun pattern — 'the model knows the API; these are the footguns') · project incidents from auto_agents git history
-

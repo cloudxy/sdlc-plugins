@@ -17,6 +17,9 @@ class WorkflowTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+        self.code_temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.code_temp.cleanup)
+        self.project = Path(self.code_temp.name)
 
     def put(self, path, text="test artifact\n"):
         p = self.root / path
@@ -36,8 +39,16 @@ class WorkflowTests(unittest.TestCase):
                  if (t["role"], t["stage"]) == (role, stage) and (t["task"] == task or t.get("task_pattern"))
                  for rd in t.get("reads", [])]
         extra_inputs = "inputs:\n" + "".join(f"  - {{path: {r}, required: true}}\n" for r in reads) if reads else ""
+        source_scope = ""
+        try:
+            if resolve_task(self.registry, role, stage, task).get("writes_source"):
+                project = self.project
+                project.mkdir(exist_ok=True)
+                source_scope = f"project_root: {project}\nsource_writes:\n  - src/\n"
+        except ValueError:
+            pass
         return (f"## SPAWN PACKET v2\nhat: {role}\nstage: {stage}\ntask: {task}\n" + extra_inputs + ""
-                f"subagent_type: sdlc-workflow:{role}\nPLUGIN_ROOT: {ROOT}\n"
+                f"subagent_type: sdlc-workflow:{role}\nPLUGIN_ROOT: {ROOT}\n" + source_scope +
                 f"feature_dir: {self.root}\nlane: L2\nprimary_skill: sdlc-workflow:{skill}\n"
                 "deliverable_paths:\n" + "".join(f"  - {p}\n" for p in outputs)
                 + f"success_checks:\n  - {check}\nreturn: output paths + summary\n"
@@ -84,6 +95,45 @@ class WorkflowTests(unittest.TestCase):
 
     def test_packet_rejects_different_stage_gate(self):
         self.assertIn("GATESTAGE", self.errors(check="bash check-sdlc.sh --hat shape ."))
+
+    def test_architecture_partial_tasks_are_independent_of_stage_outputs(self):
+        for stage, task, directory in [("define", "feasibility", "01-define"),
+                                        ("shape", "change-impact", "02-shape"),
+                                        ("verify", "conformance", "04-verify")]:
+            with self.subTest(task=task):
+                output = f"{directory}/architecture-{task}.md"
+                pk = self.packet(role="architect", stage=stage, task=task,
+                                 skill="architecture", outputs=[output])
+                self.assertEqual({e["code"] for e in lint(pk)["errors"]}, set())
+                self.assertTrue(check_task(self.registry, self.root, "architect", stage, task))
+                self.put(output, f"Completed {task} report; dependent decisions may remain open.\n")
+                self.assertEqual(check_task(self.registry, self.root, "architect", stage, task), [])
+                # A partial task's report cannot satisfy spec/contract/QA stage obligations.
+                self.assertTrue(check_groups(self.registry, self.root,
+                                            self.registry["stages"][stage]["required"]))
+                early = pk.replace("success_checks:\n", f"success_checks:\n  - bash check-sdlc.sh --hat {stage} {self.root}\n")
+                self.assertIn("EARLYGATE", {e["code"] for e in lint(early)["errors"]})
+
+    def test_architecture_outputs_cannot_substitute_for_other_tasks(self):
+        for path in ["01-define/spec.md", "02-shape/contract.md", "04-verify/coverage.md"]:
+            self.put(path)
+        for stage, task in [("define", "feasibility"), ("shape", "change-impact"), ("verify", "conformance")]:
+            with self.subTest(task=task):
+                self.assertTrue(check_task(self.registry, self.root, "architect", stage, task))
+                self.assertIn("DELIVERABLE", self.errors(role="architect", stage=stage, task=task,
+                              skill="architecture", outputs=["02-shape/contract.md"]))
+
+    def test_feasibility_can_declare_isolated_spike_without_final_security_diagram(self):
+        self.put("state.yaml", "feature: f\nq_security: yes\n")
+        self.assertEqual(self.errors(role="architect", stage="define", task="feasibility",
+                         skill="architecture", outputs=["01-define/architecture-feasibility.md",
+                         "01-define/spikes/lease/probe.py", "01-define/spikes/lease/results.txt"]), set())
+        self.assertIn("DELIVERABLE-SCOPE", self.errors(role="architect", stage="define", task="feasibility",
+                      skill="architecture", outputs=["01-define/architecture-feasibility.md", "/etc/probe.py"]))
+
+    def test_partial_stage_flag_is_typed(self):
+        self.registry["tasks"][0]["partial_stage"] = "false"
+        self.assertTrue(any("partial_stage" in e for e in validate_registry(self.registry)))
 
     def test_explore_passes_without_pick_or_flows(self):
         for path in ["02-shape/design-brief.md", "02-shape/design-directions.md", "02-shape/prototypes/D1.html"]:
@@ -243,6 +293,99 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("sdlc-workflow:signals", text)
         self.assertNotIn("Excellent looks like", text)
         self.assertFalse(hasattr(module, "seed_profile"))
+
+
+    def implementation_packet(self):
+        return self.packet(role="backend", stage="implement", task="T-1", skill="impl-evidence",
+                           outputs=["03-impl/T-1-backend-evidence.md"]) + "lane_file: api\nslice_integrator: backend\n"
+
+    def test_source_write_scope_is_required_and_bounded(self):
+        pk = self.implementation_packet()
+        self.assertEqual(lint(pk)["errors"], [])
+        for value in ("../outside", "/tmp/file", ".", ".git/config", ".sdlc/state.yaml", "src/*"):
+            with self.subTest(value=value):
+                self.assertIn("SOURCE-SCOPE", {e["code"] for e in lint(pk.replace("  - src/", "  - " + value))["errors"]})
+        self.assertIn("SOURCE-SCOPE", {e["code"] for e in lint(pk.replace("source_writes:\n  - src/", "source_writes: []"))["errors"]})
+
+    def test_source_scope_rejects_symlink_and_product_bypass(self):
+        (self.project / "escape").symlink_to(self.root, target_is_directory=True)
+        pk = self.implementation_packet()
+        for value in ("escape/test.py", "docs/", "docs/product/strategy.md"):
+            candidate = pk.replace("  - src/", "  - " + value) + f"product_root: {self.project}/docs/product\n"
+            self.assertIn("SOURCE-SCOPE", {e["code"] for e in lint(candidate)["errors"]})
+
+    def test_nonwriter_cannot_acquire_source_scope(self):
+        pk = self.packet() + f"project_root: {self.project}\nsource_writes: [src/]\n"
+        self.assertIn("SOURCE-SCOPE", {e["code"] for e in lint(pk)["errors"]})
+
+    def test_internal_research_does_not_require_web(self):
+        pk = self.packet(role="researcher", stage="market", task="survey", skill="market", outputs=["00-discover/market.md"])
+        pk += "scope: no web search; dated internal artifact answers this question\n"
+        self.assertEqual(lint(pk)["errors"], [])
+        # When web is explicitly required, contradicting it still fails.
+        self.assertIn("WAIVER", {e["code"] for e in lint(pk + "evidence_required: [web]\n")["errors"]})
+
+    def test_non_ui_acceptance_does_not_require_screenshot(self):
+        pk = self.packet(role="pm", stage="accept", task="walkthrough", skill="prd-gwt",
+                         outputs=["04-verify/accept-pm.md"], evidence=["running_app"])
+        self.assertEqual(lint(pk + "ui: no\n")["errors"], [])
+        self.assertIn("EVIDENCE", {e["code"] for e in lint(pk + "ui: yes\n")["errors"]})
+
+    def test_added_partial_tasks_can_be_dispatched_independently(self):
+        added = [("qa", "define", "test-plan"), ("analyst", "define", "measurement-plan"),
+                 ("sre", "deliver", "prepare"), ("sre", "deliver", "ci"),
+                 ("designer", "market", "prototype"), ("data-collector", "collect", "implement"),
+                 ("data-collector", "collect", "validate"), ("data-warehouse-engineer", "warehouse", "design"),
+                 ("data-warehouse-engineer", "warehouse", "implement"), ("data-warehouse-engineer", "warehouse", "validate")]
+        for role, stage, name in added:
+            with self.subTest(task=(role, stage, name)):
+                contract = resolve_task(self.registry, role, stage, name)
+                output = self.registry["artifacts"][contract["required"][0]]["paths"][0]
+                pk = self.packet(role=role, stage=stage, task=name, skill=contract["skill"], outputs=[output])
+                self.assertEqual(lint(pk)["errors"], [])
+                self.assertIn("EARLYGATE", {e["code"] for e in lint(pk.replace("return: output paths + summary", f"  - bash check-sdlc.sh --hat {stage} .\nreturn: output paths + summary"))["errors"]})
+
+    def test_tags_only_warehouse_contract(self):
+        self.put("02-shape/warehouse/tags.yaml", "tags: [active]\n")
+        self.assertEqual(check_task(self.registry, self.root, "data-warehouse-engineer", "warehouse", "tags"), [])
+        self.assertEqual(check_groups(self.registry, self.root, self.registry["stages"]["warehouse"]["required"]), [])
+
+    def test_source_writer_registry_flag_is_typed(self):
+        self.registry["tasks"][0]["writes_source"] = "true"
+        self.assertTrue(any("writes_source" in e for e in validate_registry(self.registry)))
+
+
+    def test_qa_test_sources_are_optional_and_planning_stays_read_only(self):
+        pk = self.packet(role="qa", stage="verify", task="risk-based-tests", skill="coverage-matrix",
+                         outputs=["04-verify/coverage.md"])
+        self.assertEqual(lint(pk)["errors"], [])
+        self.assertEqual(lint(pk.replace("source_writes:\n  - src/", "source_writes: []"))["errors"], [])
+        self.assertIn("SOURCE-SCOPE", {e["code"] for e in lint(pk.replace("  - src/", "  - ../outside"))["errors"]})
+        plan = self.packet(role="qa", stage="define", task="test-plan", skill="coverage-matrix",
+                           outputs=["01-define/test-plan.md"])
+        plan += f"project_root: {self.project}\nsource_writes: [tests/]\n"
+        self.assertIn("SOURCE-SCOPE", {e["code"] for e in lint(plan)["errors"]})
+
+    def test_generated_agents_preserve_reader_writer_capability_boundary(self):
+        spec = importlib.util.spec_from_file_location("render_agents", ROOT / "scripts/render-role-agents.py")
+        module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        for role in module.ROLES:
+            with self.subTest(role=role["name"]):
+                text = module.assemble(role, {})
+                self.assertNotIn("{{", text)
+                if role["fresh"] == "1":
+                    self.assertIn("You cannot execute commands", text)
+                    self.assertIn("no file writes", text)
+                    self.assertNotIn("Run applicable checks with the tools available", text)
+                else:
+                    self.assertIn("actual scoped source changes", text)
+                    self.assertIn("Do not create an implicit memory path", text)
+        # A registry permission change reaches the agent without a second handwritten rule.
+        task = next(t for t in module.REGISTRY["tasks"] if (t["role"], t["task"]) == ("sre", "ci"))
+        task["requires_source"] = False
+        sre = next(r for r in module.ROLES if r["name"] == "sre")
+        row = next(line for line in module.assemble(sre, {}).splitlines() if "`ci`" in line)
+        self.assertIn("optional scoped source_writes", row)
 
 
 if __name__ == "__main__":

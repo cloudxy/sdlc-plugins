@@ -151,22 +151,17 @@ def assemble(role: dict[str, str], extra: dict[str, list[str]]) -> str:
         orient_extra = "Do not read `<feature>/memory/*.md`."
         persist = "Nothing to persist. Do not write memory."
     else:
-        write_rule = (
-            "Stay in role; write only to `deliverable_paths` and `product_writes`. When the work is creative "
-            "(product, positioning, design, architecture, data model), diverge before converging: produce real "
-            "alternatives, compare them against the excellence bar, recommend one with reasons. Classify every open "
-            "question. Strategic (who to serve, positioning, core value and Aha, pricing and paywalls, launch or gate "
-            "timing, the north star, scope cuts, money, data loss, security, compliance, anything hard to reverse) "
-            "belongs to the operator: add a `Q-*` row with 类别 战略, options, your recommendation and 状态 待确认, "
-            "keep dependent parts visibly open, and return it — never write a strategic answer in as settled "
-            "(no 默认已定; silence is not consent). Operational (a reversible detail inside decided strategy): apply "
-            "your recommended default as 状态 默认 with the reason and keep going."
-        )
         orient_extra = "Read your memory file once if present."
+        # Methods and lifecycle rules belong to the task skill, not duplicated role shells.
+        write_rule = (
+            "Stay in role; write only to packet deliverable_paths, owned product_writes, scoped source_writes and the assigned memory_file. "
+            "Follow the primary skill's task, authority and exploration/reuse rules. Reuse accepted decisions "
+            "with their authority reference; return unresolved decisions with owner and affected work."
+        )
         persist = (
-            "Update the `product_writes` files you own so the product layer stays true. Do not edit `product-delta.md` "
-            "or `CHANGELOG.md`: return one row per product-file change (`file | section | change | reason`), or "
-            "`无产品层变更：<理由>` — the manager records them. Then rewrite your memory file."
+            "Apply the primary skill's lifecycle before updating owned product_writes; proposed, accepted and "
+            "observed facts are distinct. Return product-delta rows or an explicit no-change to the manager; "
+            "do not edit manager-owned logs. Update your assigned memory file if present."
         )
     lib = os.path.join(ROOT, "agents", "_lib")
     prof = os.path.join(ROOT, "agents", "profiles", name)
@@ -179,18 +174,27 @@ def assemble(role: dict[str, str], extra: dict[str, list[str]]) -> str:
         WRITE_RULE=write_rule,
         ORIENT_EXTRA=orient_extra,
         PERSIST=persist,
+        CHECK_RULE=("Inspect the supplied records and visible UI evidence where applicable. You cannot execute commands; report unavailable verification as unverified and return the needed check to the manager. Never claim independent reproduction from reading alone."
+                    if fresh else "Run applicable checks with the tools available and keep commands/results. Inspect actual rendered evidence for visual claims. Explicitly separate planned, executed and unverified work."),
     )
     tools_b = _sub(_read(os.path.join(lib, "TOOLS.md")), TOOLS=", ".join(tools), TOOL_NOTES=tool_notes(name, tools))
     skills = _sub(_read(os.path.join(lib, "SKILLS-reviewer.md" if fresh else "SKILLS.md")), ROLE=name, PROC=proc)
     memory = _sub(_read(os.path.join(lib, "MEMORY-reviewer.md" if fresh else "MEMORY-writer.md")), ROLE=name)
     contract = _sub(
         _read(os.path.join(lib, "CONTRACT.md")),
-        OUTPUTS="Packet deliverable_paths only; assignments above are defaults, not permission to write other tasks’ files.",
+        OUTPUTS=("Return the report in the final message for the manager to save to deliverable_paths; no file writes." if fresh else "Report the packet deliverable_paths, actual scoped source changes and owned product updates. Write only within the packet’s validated scopes and assigned memory_file; assignments are task capabilities, not blanket permission."),
         RETURN_RULE=("The complete review artifact in your final message; the manager persists it. Mark any check you could not execute as unverified and return its command to the manager. Never claim reproduction from reading alone."
-                     if fresh else "Output paths · short summary · decisions · open_questions (strategic: pending with options; operational: defaults applied) · product-delta rows. Return references, not full file bodies."),
+                     if fresh else "Output paths · short summary · decisions · open_questions (only unresolved decisions outside existing authority; include owner and affected work) · product-delta rows. Return references, not full file bodies."),
     )
     task_rows = [t for t in REGISTRY["tasks"] if t["role"] == name]
-    assignments = "\n".join(f"- `{t['stage']}` / `{t['task']}` → `sdlc-workflow:{t['skill']}`" for t in task_rows)
+    assignment_lines = []
+    for t in task_rows:
+        companions = ", ".join(t.get("companions", [])) or "none"
+        source = ("required scoped source_writes" if t.get("requires_source") else
+                  "optional scoped source_writes" if t.get("writes_source") else "no project source writes")
+        closure = "task check only until stage dependencies finish" if t.get("partial_stage") else "task check, then applicable stage gate"
+        assignment_lines.append(f"- `{t['stage']}` / `{t['task']}` → `sdlc-workflow:{t['skill']}`; companions: {companions}; {source}; {closure}.")
+    assignments = "\n".join(assignment_lines)
     ownership = ", ".join(REGISTRY["roles"][name]["product_writes"]) or "none"
     ident += f"\n\nAssignments (generated):\n{assignments}\n\nProduct write scope (generated): {ownership}. Packet may narrow it."
     extra_fm = ""

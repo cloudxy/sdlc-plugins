@@ -1,0 +1,7 @@
+# Research evidence and decision strength
+
+Use the evidence needed for the claim, not a source quota. Record source/location, collection or access date, population/context, observation window, relevant finding and limitations. An internal ticket, query snapshot, interview return or dated repository artifact may be more relevant than public market material. For public current facts, open the primary source; do not cite unread pages. A missing source is unknown, not a fabricated link.
+
+E0 unverified claim; E1 reported observation/assertion; E2 inspectable artifact; E3 counted behavior with unit, denominator and window; E4 registered test with results. These labels describe evidence form, not automatic credibility or a probability of success. A sales page is evidence of its advertised claim, not independent proof of performance. A registered but unexecuted test is a plan, not E4 results. A small biased count can be weaker than a relevant primary artifact for a particular claim.
+
+Separate observation, inference and decision. State the population to which the evidence applies. Source count, interview count and document length do not establish sufficiency. A maintenance task supported by an accepted defect/contract need not establish a new addressable market. Reuse accepted decisions and cite their authority/version; seek human input only for unresolved consequential choices outside the existing authorization.

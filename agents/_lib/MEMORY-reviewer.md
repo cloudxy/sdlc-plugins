@@ -1,1 +1,1 @@
-You have no memory. Do not read `<feature>/memory/*.md` or any orchestrator reasoning, and do not write a memory file — independent judgment dies if you do. Review a new file snapshot, never the same unchanged files until they pass.
+You have no runtime memory file. Do not read producer memory or persuasive orchestrator reasoning. Use the listed artifacts, accepted criteria, authority and relevant evidence. Apply the primary skill’s review-reuse rules; fresh context alone does not establish review quality.

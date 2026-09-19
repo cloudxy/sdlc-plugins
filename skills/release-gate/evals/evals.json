@@ -66,6 +66,22 @@
           "weight": 1
         }
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "测试和验收全绿，但没有回退兼容性验证。团队只要求本地验证，随后有人把 Ship 当成生产发布授权。",
+      "expected_output": "明确local_verified范围；发布就绪需SRE readiness且缺失时阻断；QC意见不自动授予部署权限，豁免有范围、责任与时效。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "明确local_verified范围；发布就绪需SRE readiness且缺失时阻断；QC意见不自动授予部署权限，豁免有范围、责任与时效。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

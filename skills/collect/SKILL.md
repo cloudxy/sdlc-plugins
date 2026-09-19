@@ -11,9 +11,9 @@ Job: **capture the data the product needs correctly the first time.** For an int
 | Who loads it | Track | Deliverable | Template |
 |---|---|---|---|
 | pm (companion, `tracking: yes`) | Event requirements for this change | `01-define/tracking.md` | [templates/tracking.md](templates/tracking.md) |
-| data-collector (stage `collect`) | Implementation design + product tracking plan | `02-shape/collect/tracking-impl.md` · product `data/tracking-plan.yaml` | [templates/tracking-impl.md](templates/tracking-impl.md) · [templates/tracking-plan.yaml](templates/tracking-plan.yaml) |
+| data-collector (stage `collect`) | Implementation design + proposed product tracking delta | `02-shape/collect/tracking-impl.md` · product `data/tracking-plan.yaml` | [templates/tracking-impl.md](templates/tracking-impl.md) · [templates/tracking-plan.yaml](templates/tracking-plan.yaml) |
 | qa (verify) | Event validation rows EV-n | rows in `04-verify/coverage.md` | see [tracking-validation.md](references/tracking-validation.md) |
-| data-collector (external source) | New partner API / CDC / crawler | `02-shape/collect/data-source-analysis.md` + code | [templates/data-source-analysis.md](templates/data-source-analysis.md) |
+| data-collector (external source) | New partner API / CDC / crawler | `02-shape/collect/data-source-analysis.md`; code only in implementation task | [templates/data-source-analysis.md](templates/data-source-analysis.md) |
 
 ## Gotchas
 
@@ -23,7 +23,7 @@ Job: **capture the data the product needs correctly the first time.** For an int
 - **Client events lie under ad blockers, retries and offline queues.** Money, orders and state changes are server-side events; client events are for UI behaviour.
 - **PII does not belong in event properties.** No phone numbers, emails, ids of third parties in clear text; consent state is itself a property or a gate.
 - **Every event serves a metric.** An event with no metric id in `data/metrics.yaml` (or a named analysis) is noise — do not add it.
-- **External crawler stack (auto_agents):** Scrapy is its own subsystem (B2: never imports backend), items flow through Redis queues rather than direct DB writes, DOWNLOAD_DELAY and UA rotation are mandatory (R5/R6), zero items for 3 runs → alert. SQLite accepts PostgreSQL-only syntax such as `NULLS LAST` that MySQL rejects — test on the production dialect.
+- **Only for projects adopting the auto_agents crawler stack:** Scrapy is its own subsystem (B2: never imports backend), items flow through Redis queues rather than direct DB writes, DOWNLOAD_DELAY and UA rotation are mandatory (R5/R6), zero items for 3 runs → alert. SQLite accepts PostgreSQL-only syntax such as `NULLS LAST` that MySQL rejects — test on the production dialect.
 
 ## Excellence bar
 
@@ -44,7 +44,7 @@ Job: **capture the data the product needs correctly the first time.** For an int
 
 ### Track: implementation design (data-collector, stage `collect`)
 
-1. Merge the feature's events into the product `data/tracking-plan.yaml` (conventions, identity, common properties stay consistent).
+1. Propose the feature's event delta against product `data/tracking-plan.yaml`; publish approved definitions with status/version, never label an unimplemented event as live. Apply the delta to the canonical product file only within packet ownership (conventions, identity, common properties stay consistent).
 2. Decide placement (client SDK / server / both), batching, offline behaviour, sampling, consent gating.
 3. Write validation steps per event ([tracking-validation.md](references/tracking-validation.md)) and post-launch data-quality monitors.
 4. Write `02-shape/collect/tracking-impl.md`; record the product-layer delta.
@@ -53,7 +53,7 @@ Job: **capture the data the product needs correctly the first time.** For an int
 
 1. Analyse the source with [templates/data-source-analysis.md](templates/data-source-analysis.md): type (API / HTML / RSS / CDC), scope, rate limits, ToS and legal review, freshness need, schema.
 2. Partner APIs and CDC: retries with backoff, idempotent ingestion keys, schema validation at ingestion, lag monitoring.
-3. Crawlers: follow [scrapy-redis-distributed.md](references/scrapy-redis-distributed.md) and [anti-scraping-playbook.md](references/anti-scraping-playbook.md); when blocked, diagnose with [anti-scraping-escalation.md](references/anti-scraping-escalation.md) and escalate countermeasures in cost order. Start from [templates/spider-template.py](templates/spider-template.py), [templates/spider-config.py](templates/spider-config.py) and [templates/item-definition.py](templates/item-definition.py).
+3. Crawlers: follow [scrapy-redis-distributed.md](references/scrapy-redis-distributed.md) and [anti-scraping-playbook.md](references/anti-scraping-playbook.md); when blocked, diagnose with [anti-scraping-escalation.md](references/anti-scraping-escalation.md) and respect the source access contract; use supported APIs, backoff and owner escalation when access is blocked. These stack-specific references are optional, not a requirement for every source. Start from [templates/spider-template.py](templates/spider-template.py), [templates/spider-config.py](templates/spider-config.py) and [templates/item-definition.py](templates/item-definition.py).
 
 ## Self-check
 
@@ -78,3 +78,11 @@ Job: **capture the data the product needs correctly the first time.** For an int
 ## Role-specific review
 
 For the assigned role, apply [references/role-quality.md](references/role-quality.md) alongside this procedure’s self-check. Reviewers use the same criteria.
+
+## Implementation and validation tasks
+
+Design completion is not collection completion. `collect/implement` consumes approved event/source contracts, obtains scoped project `source_writes`, implements the SDK/server/source adapter and writes `03-impl/collect-evidence.md` with changed files, commands, samples and limitations. Collaborate with frontend/backend for their owned code; do not claim their changes from a design document.
+
+`collect/validate` writes `04-verify/collect-validation.md`: correlate a known input through ingestion to the actual destination, check retries/deduplication, missing/late events, identity and consent where applicable. Distinguish request emitted, accepted, persisted and queryable. Record environment, source version and sample IDs; QA references this evidence rather than copying it. A mock-only run does not prove destination delivery.
+
+The product tracking plan is the unique event-definition source; feature requirements, implementation notes and validation reports reference event IDs and its version. Proposed/accepted/implemented/validated are distinct statuses. Transport may be at-least-once: validate the specified downstream deduplication boundary rather than promising exactly-once delivery. Alert thresholds depend on expected traffic and freshness, not universal event counts.

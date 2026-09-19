@@ -1,76 +1,65 @@
 #!/usr/bin/env python3
-"""EXPLAIN 输出解析器——检查是否达到索引命中标准。
+"""MySQL tabular EXPLAIN hygiene check; not a performance certification.
 
-用法：cat explain_output.txt | python check-explain.py
-     python check-explain.py explain_output.txt
-退出码：0 = 通过，违规数 = 非零
+Requires named columns. Unsupported/empty plans fail explicitly. Scan budget is
+configurable; use the engine/project-specific verifier for other plan formats.
 """
-import sys, re
+import argparse
+import re
+import sys
+from pathlib import Path
 
-def parse(text):
-    """解析 MySQL EXPLAIN 表格输出。"""
-    violations = []
-    lines = [l for l in text.split("\n") if l.strip()]
-    for line in lines:
-        # 匹配表格数据行
-        if "|" not in line or "select_type" in line or "---" in line:
+
+def parse(text, max_scan_rows=1000):
+    header = None
+    plans = []
+    for line in text.splitlines():
+        if '|' not in line or re.fullmatch(r'[\s+|:-]+', line):
             continue
-        cols = [c.strip() for c in line.split("|") if c.strip()]
-        if len(cols) < 7:
+        cols = [c.strip() for c in line.strip().strip('|').split('|')]
+        lowered = [c.lower() for c in cols]
+        if {'table', 'type', 'key', 'rows'}.issubset(lowered):
+            header = lowered
             continue
+        if header is not None and len(cols) == len(header):
+            plans.append(dict(zip(header, cols)))
+    if not plans:
+        return ['UNSUPPORTED: expected a MySQL tabular plan with table/type/key/rows headers; no plan validated']
+    issues = []
+    for plan in plans:
+        table = plan['table']
         try:
-            # 列序：| id | select_type | table | type | possible_keys | key | key_len | rows | filtered | Extra |
-            # 实际 MySQL EXPLAIN 可能 9-10 列，用关键词定位更稳
-            table = cols[2] if len(cols) > 2 else ""
-            etype = ""
-            key = ""
-            rows = "0"
-            extra = ""
-            for i, c in enumerate(cols):
-                if c in ("ALL", "ref", "eq_ref", "const", "range", "index", "system"):
-                    etype = c
-                    # key 通常在 type 后 1-2 列（possible_keys 和 key）
-                    for j in range(i+1, min(i+3, len(cols))):
-                        if cols[j] != "NULL" and cols[j] != "":
-                            key = cols[j]
-                            break
-                    # rows 在 key 后 1-2 列
-                    for j in range(i+2, min(i+4, len(cols))):
-                        if cols[j].isdigit():
-                            rows = cols[j]
-                            break
-                    # Extra 在最后
-                    extra = cols[-1] if len(cols) > i+2 else ""
-                    break
-        except (IndexError, ValueError):
+            rows = float(plan['rows'])
+            if not __import__('math').isfinite(rows) or rows < 0:
+                raise ValueError
+        except ValueError:
+            issues.append(f'UNSUPPORTED row estimate for {table}: {plan["rows"]}')
             continue
-        row_count = int(rows) if rows.isdigit() else 0
+        access = plan['type'].upper()
+        if access not in {'ALL', 'INDEX', 'RANGE', 'INDEX_MERGE', 'REF', 'REF_OR_NULL', 'EQ_REF', 'CONST', 'SYSTEM', 'FULLTEXT'}:
+            issues.append(f'UNSUPPORTED access type for {table}: {access}')
+            continue
+        if access in ('ALL', 'INDEX') and rows > max_scan_rows:
+            issues.append(f'SCAN BUDGET on {table}: type={access}, key={plan["key"]}, rows={rows:g} > {max_scan_rows}')
+        if rows > max_scan_rows and any(x in plan.get('extra', '').lower() for x in ('using filesort', 'using temporary')):
+            issues.append(f'SORT/TEMP REVIEW on {table}: rows={rows:g} exceeds configured diagnostic budget')
+    return issues
 
-        if etype == "ALL":
-            violations.append(f"FULL TABLE SCAN on {table} (type=ALL, rows={row_count})")
-        elif etype == "index" and row_count > 100:
-            violations.append(f"FULL INDEX SCAN on {table} (type=index, rows={row_count})")
 
-        if key == "NULL" and etype not in ("const", "system"):
-            violations.append(f"NO INDEX USED on {table} (key=NULL)")
-
-        if "Using filesort" in extra and row_count > 100:
-            violations.append(f"FILESORT on {table} (rows={row_count}) — sort column not in index")
-        if "Using temporary" in extra:
-            violations.append(f"TEMPORARY TABLE on {table} — consider index optimization")
-
-    return violations
-
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        text = open(sys.argv[1]).read()
-    else:
-        text = sys.stdin.read()
-    v = parse(text)
-    if v:
-        for x in v:
-            print(f"✗ [EXPLAIN] {x}")
-        sys.exit(len(v))
-    else:
-        print("✓ EXPLAIN check passed")
-        sys.exit(0)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('file', nargs='?')
+    parser.add_argument('--max-scan-rows', type=int, default=1000)
+    args = parser.parse_args()
+    if args.max_scan_rows < 0:
+        parser.error('scan budget must be nonnegative')
+    try:
+        text = Path(args.file).read_text() if args.file else sys.stdin.read()
+        issues = parse(text, args.max_scan_rows)
+    except OSError as error:
+        issues = [str(error)]
+    for issue in issues:
+        print(f'✗ [EXPLAIN] {issue}')
+    if not issues:
+        print('✓ MySQL EXPLAIN structural/budget check passed; runtime performance remains to be verified')
+    sys.exit(min(len(issues), 125))

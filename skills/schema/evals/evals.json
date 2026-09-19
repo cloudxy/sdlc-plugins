@@ -4,14 +4,11 @@
     {
       "id": 1,
       "prompt": "I'm building a new feature where users can tag their spider tasks. Each task can have multiple tags and each tag can be on multiple tasks. We also need to track who created each tag and when. How should I store this?",
-      "expected_output": "Identifies M:N relationship (tags ↔ tasks), creates a junction table (taggings) with proper business name (not task_tags), includes created_by and created_at as junction attributes, defines tenant_id, uses surrogate PK + UNIQUE for business constraints.",
+      "expected_output": "Model M:N task/tag association and creation metadata at their correct grains: who created the tag is not who applied it. Names and surrogate/composite keys follow project constraints, not fixed naming/type rules.",
       "files": [],
       "expectations": [
-        "Output includes a junction/association table for the M:N relationship",
-        "Junction table has a meaningful business name (e.g., taggings, not just task_tags)",
-        "Junction table includes created_by field for tracking who applied the tag",
-        "Composite unique key on (tenant_id, tag_id, resource_type, resource_id) or similar",
-        "Uses surrogate PK, not business fields as primary key"
+        "Separates tag creation facts from association facts",
+        "Expresses cardinality, uniqueness scope and row grain without mandatory surrogate key or invented tenancy"
       ]
     },
     {
@@ -29,13 +26,11 @@
     {
       "id": 3,
       "prompt": "I need to change the column user_name to username in the users table which has 500K rows and is actively being written to. Can I just do ALTER TABLE users RENAME COLUMN in a single migration?",
-      "expected_output": "Identifies this as a destructive change (rename). Explains the deployment window where old/new code runs simultaneously. Recommends expand-contract: 1) add new column, 2) dual-write/backfill, 3) drop old column. Provides 3 separate migrations.",
+      "expected_output": "Assess engine, old consumers and rollout compatibility; propose expand/migrate/contract where coexistence applies, plus backfill concurrency and recovery. Do not equate three files or successful down with data restoration.",
       "files": [],
       "expectations": [
-        "Identifies rename as destructive/destructive change requiring expand-contract",
-        "Explains WHY one-step is dangerous (old code still reading old column)",
-        "Proposes 3-step approach in 3 separate migrations",
-        "Mentions backfill strategy for existing 500K rows"
+        "Identifies old-consumer compatibility and data-recovery risks",
+        "Provides a conditional rollout/backfill/recovery plan with evidence limits"
       ]
     },
     {
@@ -53,13 +48,11 @@
     {
       "id": 5,
       "prompt": "Should every table in our system have a deleted_at column for soft delete? That way we never lose data.",
-      "expected_output": "Explains the exemption matrix: audit/history tables, child tables (cascade with parent), aggregate tables, and system tables should NOT have soft delete. Also explains that tables WITH soft delete need unique keys that include the deletion marker.",
+      "expected_output": "Decide deletion per lifecycle, retention and recovery needs. Explain nullable unique deletion-marker pitfalls and an engine-appropriate active-row constraint; no universal exemption list or unsafe app-only race.",
       "files": [],
       "expectations": [
-        "Does NOT approve universal soft delete",
-        "Mentions specific exemption categories (audit, child, aggregate, system)",
-        "Explains the unique key + deletion marker issue",
-        "Suggests checking the project's specific exemption matrix"
+        "Rejects universal soft delete",
+        "Defines active-row uniqueness and recovery semantics for the actual engine"
       ]
     },
     {
@@ -93,6 +86,22 @@
           "id": "correctness",
           "criterion": "Constraints, keys and snapshot-vs-reference decisions are correct",
           "weight": 2
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "PostgreSQL project, proposal-only: rename a field with live old clients, no DB credentials. Review migration and active-row uniqueness on nullable deleted_at.",
+      "expected_output": "Produce a compatible scoped plan with correct active-row constraint options, rollback/data-recovery distinction and explicit unverified database evidence. No MySQL commands as universal rules, invented EXPLAIN or claim that a backup file proves recovery.",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "Produce a compatible scoped plan with correct active-row constraint options, rollback/data-recovery distinction and explicit unverified database evidence. No MySQL commands as universal rules, invented EXPLAIN or claim that a backup file proves recovery.",
+          "weight": 5
         }
       ]
     }

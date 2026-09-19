@@ -4,15 +4,15 @@ Job: **make AI features measurable, degradable, and regressable** — an AI feat
 
 | Task | Approach |
 |---|---|
-| **New AI feature** | Task definition → eval set (≥50 samples) → cheapest baseline → iterate one variable at a time → degradation chain |
+| **New AI feature** | Task definition → versioned eval set with justified coverage/uncertainty → cheapest baseline → iterate one variable at a time → degradation chain |
 | **"Prompt is not working"** | Check eval set version → identify regression → change one variable → re-run |
 | **Model selection** | Candidates comparison (cost/latency/quality) → fallback chain (primary → backup → rules) |
 
 ## Gotchas
 
 - **Effect numbers without eval set version = meaningless.** "92% accuracy" without "v3 of eval-set-2024" is "I think it works."
-- **Prompt changed but eval set not updated = comparing against a stale target.** Same repo version control for both.
-- **No degradation chain = user sees 500 when the model times out.** Must have: primary → backup model → rule-based fallback.
+- **Freeze the comparison set across candidates.** Version prompts, models, graders and data separately; a dataset change requires re-running both baseline and candidate. Keep a held-out set independent of tuning.
+- **No degradation chain = user sees 500 when the model times out.** Choose a suitable failure policy: bounded retry, alternative model, deterministic fallback, abstention or human review; validate the actual risks and cost.
 
 ## Handoff contract
 
@@ -25,9 +25,9 @@ Job: **make AI features measurable, degradable, and regressable** — an AI feat
 
 ## Self-check
 
-- [ ] Evaluation set ≥ 50 samples with labeling criteria?
+- [ ] Evaluation set scope, labels, independence and uncertainty documented?
 - [ ] Cheapest baseline run first?
-- [ ] Degradation chain: primary → backup → rules?
+- [ ] Applicable fallback/abstention behavior validated?
 - [ ] Effect numbers include eval set version?
 - [ ] Each iteration changes one variable?
 - [ ] Evidence includes all rounds, not just the best one?
@@ -44,4 +44,3 @@ Job: **make AI features measurable, degradable, and regressable** — an AI feat
 | [templates/task-spec.md](../templates/task-spec.md) | AI task definition before eval construction |
 
 > Eval framework from: `anthropics/skills@41bbe19` (skill-creator SKILL.md 'Running and evaluating test cases' chapter, L163-L331, and `scripts/run_eval.py` · not a standalone file but a methodology within skill-creator)
-

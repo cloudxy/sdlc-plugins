@@ -270,7 +270,11 @@ def main() -> int:
                             if isinstance(r, dict) and (not r.get("criterion") or not isinstance(r.get("weight", 1), (int, float)) or r.get("weight", 1) <= 0):
                                 err("RUBRIC", f"{name}: evals[{i}] rubric {r.get('id')} 须有 criterion 且 weight > 0")
 
-        routed_refs = set(re.findall(r"references/([A-Za-z0-9_.-]+\.md)", text))
+        routed_refs = set(re.findall(r"(?<![/A-Za-z0-9_.-])references/([A-Za-z0-9_.-]+\.md)", text))
+        # Cross-skill references preserve a single method source; resolve the full link.
+        for link in re.findall(r"\]\((\.\./[^)#]+)(?:#[^)]*)?\)", text):
+            if not os.path.isfile(os.path.normpath(os.path.join(d, link))):
+                err("REF", f"{name}: cross-skill reference {link} does not exist")
         disk_refs = set()
         rd = os.path.join(d, "references")
         if os.path.isdir(rd):

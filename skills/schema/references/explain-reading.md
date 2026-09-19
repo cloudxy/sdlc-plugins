@@ -1,6 +1,6 @@
 # EXPLAIN 全字段判读
 
-面向 MySQL 8.0。`EXPLAIN` 给执行计划（预估），`EXPLAIN ANALYZE` 实跑给真实耗时与行数——**能用后者就用后者**，预估行数偏差大时只有它能暴露。
+面向 MySQL 8.0。`EXPLAIN` 给执行计划（预估），`EXPLAIN ANALYZE` 实跑给真实耗时与行数——仅在获准、负载可控且副作用已评估的环境执行；不要把 ANALYZE 当作只读的静态检查，预估行数偏差大时只有它能暴露。
 
 ```sql
 EXPLAIN ANALYZE SELECT ... ;   -- 实际执行，返回 actual time / actual rows / loops
@@ -41,7 +41,7 @@ EXPLAIN ANALYZE SELECT ... ;   -- 实际执行，返回 actual time / actual row
 ### `possible_keys` 与 `key`
 
 - `possible_keys` 有值但 `key` 为 `NULL` → 优化器认为走索引不如全表扫。常见原因：表太小、索引选择性太差、或查询条件让索引失效（见下文「索引失效」）
-- `possible_keys` 为 `NULL` → 压根没有可用索引，回去建
+- `possible_keys` 为 `NULL` → 先判断是否需要索引；小表或全量聚合可能合理扫描
 - `key` 命中的不是你预期的那个 → 用 `FORCE INDEX` 对比两者 `EXPLAIN ANALYZE` 的真实耗时再决定，不要盲目加 hint
 
 ### `key_len`
@@ -102,8 +102,8 @@ key_len = 4 + 82 + 5        → 三列全用上
 |---|---|---|
 | `WHERE DATE(created_at) = '2026-01-01'` | 列上套函数 | `WHERE created_at >= '2026-01-01' AND created_at < '2026-01-02'` |
 | `WHERE user_id = 123`（`user_id` 是 VARCHAR） | 隐式类型转换 = 全表扫 | `WHERE user_id = '123'`，或修正列类型 |
-| `WHERE name LIKE '%foo'` | 前导通配符无法用 B+ 树前缀 | 后缀匹配用 `LIKE 'foo%'`；全文检索用倒排索引 |
-| `WHERE a = 1 OR b = 2`（a、b 各自有索引） | 单索引无法同时满足 | 建 `(a, b)`，或拆成 `UNION`，或依赖 `index_merge` |
+| `WHERE name LIKE '%foo'` | 前导通配符无法用 B+ 树前缀 | 保持后缀匹配语义；评估引擎支持的反转列/专用索引或受控扫描，不能改成前缀匹配 |
+| `WHERE a = 1 OR b = 2`（a、b 各自有索引） | 单索引无法同时满足 | 评估 `index_merge` 或保持去重语义的 UNION；单个 `(a,b)` 不自动优化 b 单独条件 |
 | `WHERE status != 'done'` | 否定条件选择性差 | 改成 `IN` 列出目标值 |
 | 复合索引 `(a, b, c)` 只查 `b`、`c` | 跳过最左列 | 补 `(b, c)` 索引，或调整查询 |
 | 排序方向混用 `ORDER BY a ASC, b DESC` | 索引单一方向 | MySQL 8 支持降序索引：`INDEX (a ASC, b DESC)` |
@@ -146,10 +146,10 @@ EXPLAIN SELECT id, title FROM articles ORDER BY id LIMIT 100000, 20;
 -- type: index | key: PRIMARY | rows: 100020
 ```
 
-索引用上了，仍要扫 10 万行再丢掉。索引救不了深分页，只能改游标：
+索引用上了，仍要扫 10 万行再丢掉。索引救不了深分页，可评估游标、延迟关联或预计算；游标值应来自上一页最后一条实际记录：
 
 ```sql
-SELECT id, title FROM articles WHERE id > 100000 ORDER BY id LIMIT 20;
+SELECT id, title FROM articles WHERE id > :last_seen_id ORDER BY id LIMIT 20;
 -- type: range | rows: 20
 ```
 
@@ -165,3 +165,7 @@ SELECT id, title FROM articles WHERE id > 100000 ORDER BY id LIMIT 20;
 ```
 
 只贴「已优化，走索引了」不算证据。
+
+## 自动检查边界
+
+`check-explain.py` 只识别带列名的 MySQL 传统表格；空白或其他格式返回不支持，不能报通过。扫描预算是可配置的诊断阈值，不是普适性能结论；小表扫描可通过结构检查，大批量报表需按业务负载评估并配置预算。最终以环境、数据规模、耗时和资源证据判断。

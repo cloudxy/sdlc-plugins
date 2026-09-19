@@ -10,9 +10,9 @@ Job: **build the data foundation the product runs on** — one trusted definitio
 
 Three values guide everything:
 
-1. **Metrics as code.** Every metric has exactly one definition, in `metrics.yaml`, versioned in Git. If the same metric appears in two SQL queries, that's a defect.
-2. **Idempotent ETL.** Every pipeline must produce identical results when re-run on the same input. Partition overwrite + idempotent keys, never "append and hope."
-3. **Data flows one way.** OLTP/Redis → warehouse → analysis. Never write back to the online database — it corrupts both the connection pool and the lineage.
+1. **Metrics as code.** Every metric has exactly one definition, in `metrics.yaml`, versioned in Git. SQL and dashboards may reference the same metric ID; independently redefining its semantics is the defect. If the project already has a semantic catalog, metrics.yaml indexes that authoritative definition instead of duplicating it.
+2. **Idempotent ETL.** Every pipeline must produce identical results when re-run on the same input. Choose partition replacement, merge/upsert or immutable append plus deduplication from source semantics and the required replay boundary.
+3. **Data flows one way.** OLTP/Redis → warehouse → analysis. Reverse ETL is a separate, explicitly approved sink contract with access, rate, idempotency and ownership controls; ordinary analytics jobs cannot mutate OLTP.
 
 | Task | Approach |
 |---|---|
@@ -29,11 +29,13 @@ Three values guide everything:
 - **Analytics must not hurt production.** Project note (auto_agents): the online DB and the warehouse share one MySQL instance — use a read-only account, off-peak scheduling and table-prefix layering there. For event-heavy internet products the default is a separate analytical store (read replica for small scale; ClickHouse / Doris / cloud warehouse beyond it) decided in an ADR with a trigger.
 - **Events are the primary source for behaviour metrics.** Business tables tell what happened to records; `tracking-plan.yaml` events tell what users did. Funnels, activation and retention come from events joined to conformed user dimensions.
 - **A tag nobody can act on is noise; a tag that cannot be recomputed is a liability.** Every tag has logic, refresh cadence, owner, privacy class and consumers.
-- **Tenant isolation applies to warehouse tables too.** If the online DB uses tenant_id row-level filtering, the warehouse tables must either include tenant_id or be registered in the exemption list. ETL writes may trigger tenant assertions — use platform_scope for ETL connections.
+- **Tenant isolation applies to warehouse tables too.** If the online DB uses tenant_id row-level filtering, the warehouse tables must either include tenant_id or be registered in the exemption list. Use the project's authorized tenant isolation mechanism. `platform_scope` is an auto_agents-specific API, not a general prescription.
 - **A green ETL run proves the pipeline executes, not that the data is correct.** Always cross-check row counts, spot-check values, and verify against the source system.
-- **`dim_` and `fct_` prefixes** follow dbt medallion convention — they make future OLAP migration easier. Don't invent your own naming.
+- **`dim_` and `fct_` are dimensional-model conventions**, not mandatory dbt or medallion naming. Preserve an existing coherent naming contract.
 
-## The four layers (OneData / dbt medallion)
+## Optional four-layer modeling pattern (OneData)
+
+Choose layers by grain, scale and consumers. This is not dbt's required architecture or the same model as medallion. Small projects may use staging → models → serving; reuse the project convention and explain omitted layers. The rules below apply when this four-layer pattern is selected.
 
 | Layer | Prefix | Purpose | Prohibited |
 |---|---|---|---|
@@ -59,19 +61,19 @@ Every metric must have:
   owner: pm                        # who defined this
 ```
 
-**A metric defined in two places is a defect.** If `analyst` needs a different formula, they update metrics.yaml and re-run — they don't write a second SQL.
+**A metric defined in two places is a defect.** If `analyst` needs a different formula, they propose a versioned change to the metric owner; warehouse updates the canonical definition after the business semantics are accepted. SQL consumers reference its ID/version.
 
 ## ETL requirements
 
 Every ETL job must be:
-- **Idempotent**: re-run on the same partition produces identical output (partition overwrite, not append)
+- **Idempotent**: re-run on the same partition produces identical output (strategy chosen for source grain, updates/deletes and late arrivals)
 - **Verifiable**: quality assertions run after each job (primary key uniqueness, non-null checks, value range, row count delta)
 - **Traceable**: lineage registered — which source tables feed which target, with what transformation
 
 Quality assertions (four types, run after every ETL):
 1. Primary key uniqueness (no duplicates)
 2. Non-null on required fields
-3. Value range checks (no negative amounts, no future dates)
+3. Value range checks from business meaning (refunds may be negative; planned dates may be future)
 4. Row count delta (today vs yesterday, flag if > threshold)
 
 **A green ETL run proves the pipeline executes, not that the data is correct.** Cross-check against the source system.
@@ -83,11 +85,11 @@ Quality assertions (four types, run after every ETL):
 | **Input needed** | PRD metrics blueprint (from `pm`) · online schema (from `dba`) · access to source database (read-only account) |
 | **Output** | `02-shape/warehouse/metrics.yaml`（脚本合同 `--hat warehouse` 验这个路径）· layering design doc · ETL scripts · quality test results · lineage registry |
 | **Downstream** | `analyst` (consumes DWS/ADS for dashboards and experiments) · `miner` (consumes DWD/DWS for feature engineering) · `sre` (ETL scheduling and alerting) |
-| **Refuse** | Writing to online/OLTP tables · defining business requirements · online schema design (→ dba) |
+| **Refuse** | Unapproved writes to online/OLTP tables · defining business requirements · online schema design (→ dba) |
 
 **Missing inputs — two kinds:**
 - **Missing business semantics** (what does "active user" mean, what's the retention window) → **stop and ask `pm`**. Guessing the metric definition makes all downstream analysis untrustworthy.
-- **Missing source data** (the OLTP table doesn't have the field) → **stop and escalate to `dba`** — the online schema needs a change first.
+- **Missing source data** (the OLTP table doesn't have the field) → identify the source owner: collector for missing events/adapters, dba for OLTP fields, pm for semantics. Do not assume every absence needs a new OLTP column.
 
 ## Self-check
 
@@ -101,14 +103,14 @@ Quality assertions (four types, run after every ETL):
 - [ ] Every metric has a unique ID in metrics.yaml?
 - [ ] Every metric has an FR anchor?
 - [ ] Every metric has exclusions documented?
-- [ ] No duplicate metric definitions in SQL files?
+- [ ] SQL consumers reference the authoritative metric definition/version?
 
 **ETL:**
-- [ ] Partition overwrite (not append)?
+- [ ] Replay, updates/deletes and late arrivals handled with a justified strategy?
 - [ ] Idempotent: re-run produces identical output?
 - [ ] Quality assertions run after each job?
 - [ ] Lineage registered?
-- [ ] No write-back to online database?
+- [ ] Any reverse ETL has an explicitly approved sink contract?
 - [ ] PII masked before DWD?
 
 **Infrastructure:**
@@ -132,3 +134,11 @@ Quality assertions (four types, run after every ETL):
 ## Role-specific review
 
 For the assigned role, apply [references/role-quality.md](references/role-quality.md) alongside this procedure’s self-check. Reviewers use the same criteria.
+
+## Task scope and evidence
+
+`warehouse/metrics` and `warehouse/tags` design distinct artifacts; a tags-only request does not require invented metrics. `warehouse/design` records grain, keys, source contracts, lineage, isolation, retention and the chosen layering in `02-shape/warehouse/design.md`.
+
+`warehouse/implement` consumes accepted design and scoped project `source_writes`, produces actual transformations, orchestration/config and assertions; `03-impl/warehouse-evidence.md` links code and runs. `warehouse/validate` writes `04-verify/warehouse-validation.md` with source reconciliation, replay, late/update/delete handling and applicable isolation checks on representative data. A YAML design or a green scheduler is not correctness evidence. Record dataset, code and definition versions and untested production assumptions.
+
+The product data dictionary indexes canonical DBA schema, collector event definitions and warehouse metrics/tags by ID and version. Derived dictionary/lineage views are generated or reference their owners; do not maintain an independent second schema. Feature files describe proposed deltas; accepted product definitions are published through the existing ownership gate, not silently overwritten by analysis.

@@ -10,23 +10,23 @@ Job: **make data drive decisions** — start by asking "what decision does this 
 
 | Task | Approach |
 |---|---|
-| **Analyze a metric change** | Decision first → align metrics.yaml → data health check → conclusion with interval → alternative explanations |
-| **Post-launch retro (v4)** | North star / drivers / guardrails vs baseline → each growth campaign vs its holdout → which `strategy.md` hypotheses were validated or killed (write the status back) → next bet for pm and growth |
+| **Analyze a metric change** | Decision first → align metrics.yaml → data health check → conclusion with appropriate uncertainty → alternative explanations |
+| **Post-launch retro (v4)** | North star / drivers / guardrails vs baseline → each growth campaign vs its holdout → which `strategy.md` hypotheses were validated or killed (propose evidence-backed status changes for pm to apply) → next bet for pm and growth |
 | **Design an A/B test** | Six required fields before launch → run → interpret at deadline (no peeking) |
 | **Build a dashboard** | Metrics from metrics.yaml → data source mapping → visualization |
 
 ## Gotchas
 
 - **Correlation ≠ causation without a control group.** Write "changed" not "increased because we launched."
-- **No sample size = no percentage conclusion.** "Improved 20%" without n and CI interval = not trustworthy.
-- **Metrics from metrics.yaml, not from your own SQL.** A second SQL definition of the same metric = metric drift begins.
+- **Report denominators, window and uncertainty appropriate to the inference.** A descriptive census does not always need a confidence interval; sampled/experimental estimates need a justified uncertainty method.
+- **Reference the canonical metric ID/version.** Analysis SQL may consume its definition; independently redefining it creates drift. Propose semantic changes to the owner before use.
 
 ## Handoff contract
 
 | Direction | Content |
 |---|---|
 | **Input** | metrics.yaml (metric definitions) · access to analysis DB (read-only) · P1 metrics blueprint (what to measure) |
-| **Output** | Analysis conclusions (sample size + CI) · experiment design + interpretation · SQL (reproducible) |
+| **Output** | Analysis conclusions (population/sample, denominator and appropriate uncertainty) · experiment design + interpretation · SQL (reproducible) |
 | **Downstream** | `pm` (insights feed back as requirements) · `ops` (combined into feedback digest) |
 | **Refuse** | Implementing features (→ backend) · setting up infra (→ sre) · designing without a decision |
 
@@ -34,8 +34,8 @@ Job: **make data drive decisions** — start by asking "what decision does this 
 
 - [ ] Analysis supports a specific decision?
 - [ ] Metrics aligned with metrics.yaml (not self-defined)?
-- [ ] Conclusion includes sample size and confidence interval?
-- [ ] ≥2 alternative explanations explored or flagged?
+- [ ] Conclusion identifies descriptive/inferential/causal scope and suitable uncertainty?
+- [ ] Material alternative explanations explored or flagged?
 - [ ] SQL original text included (reproducible)?
 - [ ] No PII in output?
 
@@ -54,3 +54,9 @@ Job: **make data drive decisions** — start by asking "what decision does this 
 ## Role-specific review
 
 For the assigned role, apply [references/role-quality.md](references/role-quality.md) alongside this procedure’s self-check. Reviewers use the same criteria.
+
+## Early measurement and late readout
+
+`analyst/define/measurement-plan` writes `01-define/measurement-plan.md` before collection or launch: decision, canonical metrics, population/unit, baseline/window, data availability/quality checks and the analysis method. For an experiment include assignment, interference risks, power assumptions, guardrails and stopping/analysis rules; do not impose randomized experiments on every operational report. Growth references this plan instead of maintaining a second experimental protocol.
+
+`retro/readout` consumes that versioned plan and actual eligible data. Before the observation window closes report interim/descriptive results with limits; do not invent a completed outcome. Analysts own evidence and recommendations, PM owns strategy/backlog decisions, warehouse owns canonical metric implementation. Send proposed hypothesis-status changes to PM's apply-decisions task; do not independently overwrite strategy.md.

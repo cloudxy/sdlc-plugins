@@ -2,6 +2,9 @@
 feature: <feature-name>
 sdlc_version: 4       # v4 闸门（产品层 / 设计方向 / 联调 / E2E / 三方验收 / 回写）只对写了本键的功能生效
 product_root: docs/product   # 产品层目录（相对项目根，或绝对路径）；来自 sdlc.config.yaml
+delivery_goal: local_verified # proposal_ready|local_verified|release_ready|deployed；不是泳道完成豁免
+project_profile: {}   # 实际surface/stack/maturity及数据、安全、发布约束
+selected_tasks: []    # 经理维护具体task、依赖、状态和证据引用；合同仍在registry
 lane: L2              # L0-L4（L0 免 state.yaml，用 commit trailer lane=L0）
 appetite: 4h          # L2+ 必填；超 50% 停下重判泳道
 ui: yes               # Q-ui：有用户可见界面 → designer（explore/specify/accept）+ E2E + 设计走查
@@ -16,7 +19,7 @@ intent:
   class: new-feature  # L0|single-hat|review-only|product|eval|resume|discovery|new-feature|out-of-slice
   quote: ""           # 用户最近一条实质性消息（≤200 字）
   skip_shape: false   # true 仅当 (a) contract.md 已在磁盘，或 (b) 实现帽以 spec 替代合同
-  skip_discover: false  # 单独不够；须命中 discover 跳过闭集 (a) briefing 已在 (b) 显式跳过且 spec 已在 (c) L1
+  skip_discover: false  # 单独不够；记录现有授权/合同/缺陷证据，以及无需进一步探索的原因
   at: ""
 
 discovery:
@@ -32,7 +35,7 @@ discovery:
   at: ""              # iso8601
 
 design:               # ui: yes 时由经理在「设计方向选择」人工决策点后记账
-  directions: 0       # designer explore 交付的方向数（≥3）
+  directions: 0       # designer explore 交付的实际采用/比较的方向数（按复用/探索范围）
   picked: ""          # D1|D2|D3…
   picked_by: ""       # user|delegated（用户授权沿用设计师推荐）
   at: ""

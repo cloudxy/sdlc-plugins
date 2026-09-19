@@ -23,6 +23,22 @@
         "Names 'sre' as the hat",
         "Does not write a release 'checklist'"
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "L1修复只需支持团队的CLI故障排查说明，预发验证完成但尚未生产发布。",
+      "expected_output": "产出适合CLI的文档，按风险覆盖FAQ；无需强制四角色或营销任务，不能宣称已生产可用，未获明确授权不发送公告。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "产出适合CLI的文档，按风险覆盖FAQ；无需强制四角色或营销任务，不能宣称已生产可用，未获明确授权不发送公告。",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

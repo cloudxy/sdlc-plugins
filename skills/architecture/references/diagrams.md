@@ -1,6 +1,6 @@
 # Architecture, sequence and trust-boundary diagrams (architect)
 
-Draw them when the packet lists them in `visuals`. `trust-boundary` is required whenever `q_security: yes` (the packet check enforces it); `architecture` and `sequence` when calls between services or modules change. `contract.md` and the ADRs stay the source of truth; a diagram is a view of them.
+Draw them when the packet lists them in `visuals`. For `shape/contract`, `trust-boundary` is required whenever `q_security: yes` (the packet check enforces it); early feasibility and conformance do not require a new final-design diagram; `architecture` and `sequence` when calls between services or modules change. `contract.md`, referenced ADRs and the product baseline remain the respective canonical sources; a diagram is a view. Product diagrams cite `architecture.md` and distinguish implemented/deployed facts from planned deltas.
 
 ## How
 

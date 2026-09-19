@@ -538,7 +538,7 @@ sed -i.bak 's/^current_hat: define/current_hat: shape/' "$F/state.yaml" && rm -f
 printf '泳道：L2\n| 屏 | 空 |\n' >"$F/02-shape/edge-states.md"
 for d in d1 d2 d3; do printf 'png' >"$F/02-shape/prototypes/$d-1440.png"; done
 printf '泳道：L2\n| 参考 | https://a.example/x 2026-09-01 |\n| 参考 | https://b.example/y 2026-09-01 |\n| 参考 | https://c.example/z 2026-09-01 |\n## D1 卡片流\n![](prototypes/d1-1440.png)\n## D2 时间线\n' >"$F/02-shape/design-directions.md"
-assert_exit 3 "v4 --hat designer with 2 directions, no pick, no defect check is DIRECTIONS x3" --hat designer "$F"
+assert_exit 2 "v4 --hat designer without pick or defect inspection is rejected" --hat designer "$F"
 assert_tag DIRECTIONS
 printf '泳道：L2\n| 参考 | https://a.example/x 2026-09-01 |\n| 参考 | https://b.example/y 2026-09-01 |\n| 参考 | https://c.example/z 2026-09-01 |\n## D1 卡片流\n![](prototypes/d1-1440.png)\n## D2 时间线\n![](prototypes/d2-1440.png)\n## D3 对话式\n![](prototypes/d3-1440.png)\n## 缺陷检查\n| prototypes/d2-1440.png | 无重叠截断 | 无 |\n选定：D2（picked_by: user）\n' >"$F/02-shape/design-directions.md"
 assert_exit 0 "v4 --hat designer with 3 directions + pick + screenshots" --hat designer "$F"
@@ -546,16 +546,18 @@ rm "$F/02-shape/prototypes/d3-1440.png"
 assert_exit 1 "v4 --hat designer: a direction screenshot that does not exist is DIRECTIONS (P02)" --hat designer "$F"
 assert_tag DIRECTIONS
 
-# 26. shape: ui yes without pick → DESIGNFIRST; contract without QAS/options → ARCH
+# 26. shape: ui yes without pick → DESIGNFIRST; contract without QAS → ARCH
 mk_v4 s1
 F="$T/s1/.sdlc/f"
 printf '泳道：L2\nmodules only\n' >"$F/02-shape/contract.md"
-assert_exit 3 "v4 --hat shape: no design pick + no QAS + no options" --hat shape "$F"
+assert_exit 2 "v4 --hat shape: no design pick + no QAS" --hat shape "$F"
 assert_tag DESIGNFIRST
 assert_tag ARCH
 printf '泳道：L2\n## 质量属性场景\nP95<300ms\n## 候选方案\nA / B\n' >"$F/02-shape/contract.md"
 printf '泳道：L2\n## D1\n## D2\n## D3\n选定：D1\n' >"$F/02-shape/design-directions.md"
 assert_exit 0 "v4 --hat shape with QAS, options and design pick" --hat shape "$F"
+printf '泳道：L2\n## 质量属性场景\n沿用 architecture.md QAS-1；本次负载低于既有验证范围。\n复用 ADR-001，约束未变；无需重新选型。\n' >"$F/02-shape/contract.md"
+assert_exit 0 "v4 --hat shape accepts applicable ADR reuse without forced alternatives" --hat shape "$F"
 
 # 27. dba: db-spec without 路线压力测试 → STRESS
 mk_v4 b1
@@ -840,7 +842,7 @@ assert_tag PRODUCTCTX
 mk_v4 x1
 F="$T/x1/.sdlc/f"
 printf 'product_root: docs/product\nextra_gates: [explain]\n' >"$T/x1/sdlc.config.yaml"
-printf '| 1 | SIMPLE | orders | ALL | NULL | NULL | NULL | 10000 | 100 | Using temporary |\n' >"$F/explain.txt"
+printf '| id | select_type | table | type | possible_keys | key | key_len | rows | filtered | Extra |\n| 1 | SIMPLE | orders | ALL | NULL | NULL | NULL | 10000 | 100 | Using temporary |\n' >"$F/explain.txt"
 printf '泳道：L2\nnote\n' >"$F/03-impl/T-1-evidence.md"
 mkdir -p "$F/03-impl/screens" && printf 'png' >"$F/03-impl/screens/j1.png"
 printf '泳道：L2\n![](screens/j1.png)\n' >"$F/03-impl/T-1-integration.md"
@@ -923,6 +925,24 @@ F="$T/sec/.sdlc/f"
 printf 'q_security: yes\nroles_skipped: [architect]\n' >>"$F/state.yaml"
 assert_exit 1 "q_security yes cannot skip architect (P10)" --hat define "$F"
 assert_tag NOSEC
+
+# 51. Internal research evidence is a valid source; no web quota.
+mk_v4 internal_source
+F="$T/internal_source/.sdlc/f"
+mkdir -p "$F/00-discover"
+printf 'Customer observation\n' >"$F/00-discover/customer.md"
+printf '泳道：L2\n2026-09-19 [customer](customer.md)\n' >"$F/00-discover/market.md"
+assert_exit 0 "market accepts one dated internal primary artifact" --hat market "$F"
+
+# 52. Release-ready QC must see preparation; local verification does not pretend release readiness.
+mkdir -p "$T/readiness/05-review" "$T/readiness/06-deliver"
+F="$T/readiness"
+printf 'feature: t\nlane: L1\ncurrent_hat: qc\ndelivery_goal: release_ready\n' >"$F/state.yaml"
+printf '泳道：L1\nrelease opinion\n' >"$F/06-deliver/release-opinion.md"
+assert_exit 1 "release-ready QC missing SRE preparation" --hat qc "$F"
+assert_tag READINESS
+printf 'Prepared for version X; limitations recorded\n' >"$F/06-deliver/readiness.md"
+assert_exit 0 "release-ready QC has preparation artifact (content still reviewed)" --hat qc "$F"
 
 if [ "$fail" -ne 0 ]; then
   echo "----------------------------------------"

@@ -4,11 +4,11 @@
     {
       "id": 1,
       "prompt": "We need to deploy the new LLM cooldown feature. It has a migration (adds a new Redis key but no schema change), passes all tests, and the QC approved it. Write the release plan.",
-      "expected_output": "Pre-deploy checklist references actual gate output fingerprints (not 'it passed'). Deploy steps are replayable commands. Rollback plan is VERIFIED (actually run in staging) not just written. Monitoring includes the new Redis key's TTL and cooldown rate. Does NOT just say 'deploy and hope'.",
+      "expected_output": "Produce a release plan referencing available gate records and explicitly distinguish planned from executed recovery verification. If evidence is absent, list the rehearsal as outstanding; never fabricate a staging run. Include scoped commands, Redis compatibility/TTL behavior and monitoring.",
       "files": [],
       "expectations": [
         "Pre-deploy checklist references actual gate outputs (command + exit code)",
-        "Rollback plan includes actual verification evidence, not just steps",
+        "Distinguishes verified recovery evidence from outstanding rehearsal, without fabricated execution",
         "Monitoring covers the new feature's specific metrics (cooldown activation rate)",
         "No hardcoded ports or secrets in the deploy steps"
       ]
@@ -16,22 +16,22 @@
     {
       "id": 2,
       "prompt": "Production is down. The API returns 502 for all requests. The last deployment was 2 hours ago. What do you do?",
-      "expected_output": "Phase 1 - Timeline: when did it start, what changed 2 hours ago. Phase 2 - Immediate recovery: ROLLBACK FIRST (not debug in production), verify rollback works. Phase 3 - Root cause: check deploy diff, logs, monitoring. Phase 4 - Postmortem: blameless, every escape becomes a mechanism improvement. Does NOT debug in production before rolling back.",
+      "expected_output": "Triage impact and prioritize the fastest safe authorized mitigation (rollback if compatible, otherwise disable/degrade/recover), preserving the timeline concurrently. Confirm restored health, investigate cause and produce a blameless postmortem. Do not wait for confirmed root cause; do not assume rollback is always safe.",
       "files": [],
       "expectations": [
-        "Rolls back FIRST before debugging (recovery > root cause)",
+        "Prioritizes safe recovery over complete root-cause diagnosis",
         "Checks deploy diff as a likely cause (something changed 2 hours ago)",
-        "Follows four-phase response: timeline → root cause → recovery → postmortem",
+        "Follows four-phase response: mitigate/recover → timeline → root cause → postmortem",
         "Postmortem is blameless — every escape becomes a mechanism check"
       ]
     },
     {
       "id": 3,
       "prompt": "Our Docker build works locally on macOS ARM but fails in CI on Linux x86_64 with 'unsupported platform' errors. All tests pass locally. What's happening?",
-      "expected_output": "Identifies platform difference (macOS ARM vs Linux x86_64) as the root cause. Explains that local success does NOT guarantee CI success — different architectures resolve dependencies differently. Recommends: 1) validate Docker build in CI (not just locally), 2) pin platform-specific dependencies, 3) use buildx for multi-platform builds. Does NOT say 'it works on my machine'.",
+      "expected_output": "Identifies platform difference (macOS ARM vs Linux x86_64) as a leading hypothesis to verify against the build log and dependency/platform settings. Explains that local success does NOT guarantee CI success — different architectures resolve dependencies differently. Recommends: 1) validate Docker build in CI (not just locally), 2) pin platform-specific dependencies, 3) use buildx for multi-platform builds. Does NOT say 'it works on my machine'.",
       "files": [],
       "expectations": [
-        "Identifies platform difference (ARM vs x86_64) as root cause",
+        "Investigates architecture/platform incompatibility with concrete build evidence",
         "Explains that local success ≠ CI success (different dependency resolution)",
         "Recommends CI-level Docker build validation",
         "Does NOT dismiss as 'works on my machine'"
@@ -46,6 +46,22 @@
         "Refuses user-facing announcement / CS talk tracks",
         "Names 'ops' or 'enablement' as the correct hat",
         "Does not treat '亲爱的用户' copy as a deliverable of sre"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "生产故障原因未明，服务持续不可用；新增列已有新数据。请处理并说明能否直接 downgrade。",
+      "expected_output": "优先安全止损并保留证据，不等根因确认；评估新数据损失和兼容性，不承诺新增列回退无损；按授权和实际环境记录恢复结果。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "优先安全止损并保留证据，不等根因确认；评估新数据损失和兼容性，不承诺新增列回退无损；按授权和实际环境记录恢复结果。",
+          "weight": 5
+        }
       ]
     }
   ]
