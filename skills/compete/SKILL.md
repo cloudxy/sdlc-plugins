@@ -8,7 +8,7 @@ when_to_use: "Spawn packet names competitor / $compete. Do NOT use from parent /
 
 Job: **borrow / avoid / differentiate** for one change, with scene gap and source grade. "They have it" is a list, not analysis.
 
-Load inside `sdlc-workflow:competitor`. Long form (full battlecard) is `PLUGIN_ROOT/skills/signals/templates/competitor-analysis.md` — Read it when one row is not enough (L3/L4, new surface, differentiate-and-over-appetite). Default deliverable is the snapshot.
+Load inside `sdlc-workflow:competitor`. Long form (full battlecard) is [templates/competitor-analysis.md](templates/competitor-analysis.md) — Read it when one row is not enough (L3/L4, new surface, differentiate-and-over-appetite). Default deliverable is the snapshot.
 
 | Task | Approach |
 |---|---|
@@ -39,6 +39,7 @@ Load inside `sdlc-workflow:competitor`. Long form (full battlecard) is `PLUGIN_R
 | Reference | Read when... |
 |---|---|
 | [templates/snapshot.md](templates/snapshot.md) | Writing `00-discover/compete.md` |
+| [templates/competitor-analysis.md](templates/competitor-analysis.md) | The long-form battlecard, when one snapshot row is not enough |
 
 ## Role-specific review
 

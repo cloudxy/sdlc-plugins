@@ -1,8 +1,8 @@
 # sdlc-product mode
 
-Product-layer build. This window is the **manager**: do not handoff, do not write product files yourself (Iron rule 4), do not invoke procedure skills here. You are the only writer of `CHANGELOG.md`, `README.md` and `.sdlc/_product/*`. Every hat reads the product layer before feature work — this command makes it real instead of templates.
+Product-layer build. This window is the **manager**: do not handoff, do not write product files yourself (Iron rule 4), do not invoke procedure skills here. You are the only writer of `CHANGELOG.md`, `README.md` and the manager files under `.sdlc/_product/` (`progress.md`, `packets/`, `findings.md`); hats write only the paths their validated packet grants. Every hat reads the product layer before feature work — this command makes it real instead of templates.
 
-the supplied arguments
+The command's arguments name the refresh scope (step 3). Arguments starting with `cycle` run a product cycle instead: follow [§ Cycle mode](#cycle-mode--sdlc-product-cycle-id) below, not steps 1–7.
 
 1. **Resolve** PLUGIN_ROOT (prefer `$ZCODE_PLUGIN_ROOT`), the project root (folder with `sdlc.config.yaml`; copy the template if missing) and `product_root` (default `docs/product`). Read `PLUGIN_ROOT/skills/sdlc/references/product-layer.md`.
 2. **Preflight** (nothing spawned yet):
@@ -13,11 +13,11 @@ the supplied arguments
    1. **pm** (`task: bootstrap`) → `strategy.md`, `feature-map.md` from evidence: docs, existing features in code, user-facing copy, analytics. Strategic questions come back as `Q-*` rows (类别 战略, 状态 待确认) in `strategy.md` §9 with options and a recommendation.
    2. **Operator decisions — wait.** Ask every strategic `Q-*` in one round: question, options, pm's recommendation. Only an explicit answer counts: silence, a question tool that returns nothing, or a question the user never saw is not consent. "按推荐" said by the user is an answer. **No answer → stop here** and report what is waiting (the rest depends on positioning, the core value path and the business model; nothing continues on assumed answers). Record answers verbatim in `progress.md`.
    3. **pm** (`task: apply-decisions`, input `progress.md`) → writes 已确认 + the user's words into §9 and updates the text that depended on them.
-   4. **architect** (code, deploy files → `architecture.md`) ∥ **designer** (→ `design-system.md`). The designer needs the running product: `check_config.py --project-root <root> --probe`; APP-DOWN → start it per `skills/sdlc/references/orchestrator-gates.md` §12. It captures every UI surface in `app.urls` (else `app.base_url`) with `scripts/ui-evidence.sh` into `.sdlc/_product/screens/` and cites the PNGs (gate PRODUCTUI). The app cannot run → skip the designer, record why in `progress.md` and the report. Never let it reconstruct the UI from source code.
+   4. **architect** (code, deploy files → `architecture.md`) ∥ **designer** (→ `design-system.md`). The designer needs the running product: `check_config.py --project-root <root> --probe`; APP-DOWN → start it per `skills/sdlc/references/orchestrator-gates.md` §12. It captures every UI surface in `app.urls` (else `app.base_url`) with `scripts/ui-evidence.sh` into `<product_root>/assets/screens/` — the evidence path the registry declares for this task; list each PNG in `deliverable_paths` — and cites the PNGs (gate PRODUCTUI; it proves the files exist, not that they show the running product). The app cannot run → skip the designer, record why in `progress.md` and the report. Never let it reconstruct the UI from source code.
    5. **dba** (after architect) → `domain-model.md`, `erd.dbml` (migrations, ORM models, live schema if readable).
    6. **data-collector** (after dba — event objects use domain terms) → `data/tracking-plan.yaml`. Only if the product has a data line.
    7. **data-warehouse-engineer** (after data-collector — metrics are computed from events) → `data/metrics.yaml`, `data/tags.yaml`.
-   8. **growth** (last — highlights sit on feature-map journeys, segments reference `tag:<id>`, KPIs reference `metric:<id>`; web research required) → `growth.md`.
+   8. **growth** (last — highlights sit on feature-map journeys, segments reference `tag:<id>`, KPIs reference `metric:<id>`; every external market claim cites a dated source it actually opened, first-party facts cite dated internal artifacts) → `growth.md`.
    On an unknown type: one `general-purpose` fallback that Reads `PLUGIN_ROOT/agents/<role>.md` and the owning skill; note it in `progress.md`.
    After dba (and the data hats when they ran): `python3 <PLUGIN_ROOT>/scripts/data_dictionary.py --product-root <product_root>` writes `data-dictionary.md`, a generated view of `erd.dbml` + the `domain-model.md` glossary + `data/metrics.yaml`. Nobody edits it; its 缺口 section goes back to the owners as open items.
 5. **Gate:** `bash <PLUGIN_ROOT>/scripts/check-sdlc.sh --hat product <product_root>`.
@@ -25,10 +25,10 @@ the supplied arguments
    - DECISIONPENDING → back to step 4.2 (ask); not rework.
    - DEFAULTED → pm rework: back to 待确认 with options, then ask.
    - PRODUCTUI → designer with the running app.
-   - SOURCES → the owner redoes its web research.
+   - SOURCES → the owner adds the dated sources behind its claims (web for external facts, internal artifacts for first-party ones).
    - REFS (a `metric:` / `tag:` / `event:` reference with no definition) → respawn the owner of the referencing file once.
    - STALE and PRODUCTSIZE warnings → respawn the owner of the stale or oversized file once, or record why not in `progress.md`.
-6. **Independent review:** use `stage: product`, `task: G-fresh`, `primary_skill: sdlc-workflow:findings`, product_root and a packet with no memory/product_writes; save and validate it with `check_packet.py`, then spawn `sdlc-workflow:reviewer` (no memory, no Write) on all product files. Focus:
+6. **Independent review:** use `stage: product`, `task: G-fresh`, `primary_skill: sdlc-workflow:findings`, product_root, `project_root`, `deliverable_paths` = the absolute report path `<project_root>/.sdlc/_product/findings.md` (the registry `manager_output`, which you write from the reviewer's final message) and no memory/product_writes; save and validate it with `check_packet.py`, then spawn `sdlc-workflow:reviewer` (no memory, no Write) on all product files. Focus:
    - consistency across files: the north star in `strategy.md` exists in `data/metrics.yaml`; every highlight in `growth.md` maps to a journey in `feature-map.md`; domain terms match tracking event objects; `architecture.md` scenarios match `strategy.md` scale assumptions;
    - inferences marked `[推断]`;
    - strategic calls written as settled without the user's words;
@@ -42,3 +42,17 @@ the supplied arguments
    - key facts: positioning, core value path, north star, architecture stage, domain contexts;
    - anything still waiting on the user;
    - the recommended first feature to run through `/sdlc`.
+
+## Cycle mode — `/sdlc-product cycle <id>`
+
+A product cycle turns user signals, readouts and experiments into decisions without a feature lane. The user starts it; nothing is scheduled automatically.
+
+1. **Resolve** PLUGIN_ROOT, the project root and `product_root` as in step 1. The cycle directory is `<artifact_root>/.sdlc/_product/cycles/<id>/` (id from the arguments, e.g. `2026-10`). Create it with `cycle.yaml` from `skills/sdlc/templates/cycle.yaml`, or resume an existing one from its `cycle.yaml` (never overwrite). Record the observation window, the data cutoff, the input versions and the selected tasks. Do not re-run the product bootstrap or start an unrelated UI app.
+2. **Select tasks** from the registered cycle tasks (`workflow.py contract --role <role> --stage cycle --task <task>`): ops `signals-digest`, analyst `readout`, growth `experiments`, pm `apply-decisions`, data-warehouse-engineer `tags-refresh` (on demand). Order by data flow: signals and readout first, experiments after the readout, pm's decisions last. Select only what this cycle needs and record why the rest is left out.
+3. **Signals store.** The digest writes the product-level store named by `signals_path` in `sdlc.config.yaml` (reuse an existing canonical pool when the project has one). Not configured → ask the user where it lives before dispatching ops; a hat never picks the location. Copy `skills/signals/templates/signal-store.md` there the first time.
+4. **Packets** (SPAWN PACKET v2, saved to `<cycle_dir>/packets/<n>-<role>.md`, validated with `check_packet.py`): `stage: cycle`, `run_scope: cycle`, `cycle_dir`, `project_root`, `product_root`; `deliverable_paths` = the task's `outputs/…` file; `product_writes` only for files the role owns; `store_writes` only for the ops digest (its `forbidden` write line then names store_writes as well); `memory_file` may be `<cycle_dir>/memory/<role>.md`. List an earlier cycle's memory as an input only when it helps, and check it for stale facts. `inputs` are named files: excerpt a large signal store for the cycle (IDs, filter, version) instead of passing it whole.
+5. **After each return:** run the task's `check-task` with `--root <cycle_dir>`; update `cycle.yaml` (task status, proposals with ids); append delta rows to `CHANGELOG.md`; record verified lesson rows in `.sdlc/_lessons.md`. Two tasks never write the same product file at the same time.
+6. **Decisions:** pm's `apply-decisions` records a decision for every proposal. Strategic calls follow Step 4 of the sdlc skill — ask and wait; without an answer the proposal stays `pending` with its reason. Sending, publishing or spending that an experiment needs requires the user's explicit authorization: a plan is not an action.
+7. **Honest states:** no data yet, or an open window → `pending-observation` or an interim readout, never an invented result. A cycle may end without a product change; pm says what was not adopted, what needs more evidence and what waits for authorization.
+8. **Close:** give every selected task a final state (done, pending-observation, carried with `carried_to`, rejected, awaiting-authorization) and every proposal a disposition, write `closure`, set `status: closed`, then run `bash <PLUGIN_ROOT>/scripts/check-sdlc.sh --hat cycle <cycle_dir>` and fix every error. Report the decisions taken (the user's words for strategic ones), what moved to features or the next cycle, and what is still waiting.
+

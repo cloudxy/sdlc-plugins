@@ -10,6 +10,10 @@ Procedure for exporting the project's **existing** gates into CI. CI here is ano
 
 Purpose: a violation caught at push time costs one commit; the same violation discovered at the next hat's `--require` costs a context switch and often a rework round. CI is the cheapest place to intercept.
 
+## Registered task
+
+`sre/deliver/ci` writes `06-deliver/ci.md` with the gate-to-pipeline mapping, changed project CI files, runner/toolchain pinning, a real run URL/log (or an explicit unexecuted limitation), and evidence reuse conditions. It is a partial task and may run during implementation; it cannot imply deployment. Project `source_writes` authorizes scoped pipeline/config edits. Keep gate commands in the existing project command/config source and reference them from CI; do not copy a second authoritative command list into prose. CI changes should be validated by syntax/config checks and an appropriate representative run where available.
+
 ## The wiring
 
 1. **Inventory the gates.** From `sdlc.config.yaml`: test/lint/build/migration commands. From the plugin: `bash <PLUGIN_ROOT>/scripts/check-sdlc.sh --require --hat <stage> <feature-dir>` per producing stage the project actually uses.
@@ -33,7 +37,4 @@ Purpose: a violation caught at push time costs one commit; the same violation di
 - [ ] Gate logs uploaded as artifacts in `gates[]`-admissible form?
 - [ ] Secrets only by reference?
 - [ ] Branch scoping: `--hat` per done stages on feature branches, goal-appropriate completed-stage checks on main?
-
-## Registered task
-
-`sre/deliver/ci` writes `06-deliver/ci.md` with the gate-to-pipeline mapping, changed project CI files, runner/toolchain pinning, a real run URL/log (or an explicit unexecuted limitation), and evidence reuse conditions. It is a partial task and may run during implementation; it cannot imply deployment. Project `source_writes` authorizes scoped pipeline/config edits. Keep gate commands in the existing project command/config source and reference them from CI; do not copy a second authoritative command list into prose. CI changes should be validated by syntax/config checks and an appropriate representative run where available.
+- [ ] `06-deliver/ci.md` has the gate-to-step mapping, changed CI files, pinned toolchain and a real run URL/log — or states that the pipeline was not executed?

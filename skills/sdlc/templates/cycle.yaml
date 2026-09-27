@@ -1,0 +1,38 @@
+# sdlc:unfilled —— 写入本周期的真实内容后删除本行
+# cycle.yaml —— 一个产品周期的进度唯一事实源。放在 .sdlc/_product/cycles/<id>/，只由经理维护；
+# 角色只写各自包体授权的输出（outputs/…、自己的 memory、ops 的信号库）。收尾跑 check-sdlc.sh --hat cycle <本目录>。
+# 本读法不展开行内字典 {a: b}：一律用块式写法。
+id: 2026-09                 # 与目录名一致
+status: open                # open | closed
+window:                     # 观察窗口：读数只对这个窗口负责
+  from: 2026-09-01
+  to: 2026-09-30
+data_cutoff: 2026-10-02     # 数据截止；早于 window.to 时读数只能是 interim
+inputs:                     # 读取的输入及其版本（提交、sha256 或导出时间）
+  - path: docs/product/data/metrics.yaml
+    version: "<commit 或 sha256>"
+selected_tasks:             # 只列本周期选定的任务；依赖由数据流决定，不要求所有角色到场
+  - role: ops
+    task: signals-digest
+    depends_on: []
+    status: todo            # todo | doing | done | pending-observation | carried | rejected | awaiting-authorization
+    output: outputs/signals-digest.md
+  - role: analyst
+    task: readout
+    depends_on: []
+    status: todo
+    interim: false          # 观察窗口结束或数据截止之前，完成的读数必须写 interim: true
+    output: outputs/readout.md
+  - role: pm
+    task: apply-decisions
+    depends_on: [signals-digest, readout]
+    status: todo
+    output: outputs/decisions.md
+proposals:                  # 各任务交给 PM 的提议；每条都要有去向
+  - id: P-1
+    from: analyst/readout
+    status: pending         # accepted | deferred | rejected | pending | carried
+    decided_in: outputs/decisions.md
+    reason: ""              # 收尾时仍 pending，写明在等什么（证据 / 授权）
+    carried_to: ""          # carried 时写接收它的下一周期或功能
+closure: ""                 # 收尾时写：未完成的任务与提议去了哪里

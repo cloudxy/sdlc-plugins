@@ -2,7 +2,7 @@
 # Compete · <本变更>
 
 > 作者：competitor 帽｜日期：<YYYY-MM-DD>｜泳道：L2｜下游：discover briefing
-> 长文模板（仅当快照不够）：`skills/signals/templates/competitor-analysis.md`
+> 长文模板（仅当快照不够）：`skills/compete/templates/competitor-analysis.md`
 
 ## 集合
 

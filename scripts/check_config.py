@@ -238,6 +238,16 @@ def _probe(url: str) -> tuple[bool, str]:
 
 
 # ----------------------------------------------------------------------------- checks
+def _function_ids() -> set[str]:
+    """Function ids come from workflow/registry.json (one source); an unreadable registry skips the key check."""
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from workflow import load_registry  # noqa: PLC0415
+        return set(load_registry().get("functions", {}))
+    except Exception:  # noqa: BLE001
+        return set()
+
+
 def check(root: str, probe: bool = False) -> dict[str, Any]:
     cfg_path = os.path.join(root, "sdlc.config.yaml")
     result: dict[str, Any] = {"project_root": root, "config": cfg_path, "findings": [], "ui_roots": [], "suggested": {}}
@@ -316,6 +326,31 @@ def check(root: str, probe: bool = False) -> dict[str, Any]:
     constitution = cfg.get("constitution")
     if isinstance(constitution, str) and not _placeholder(constitution) and not os.path.exists(os.path.join(root, constitution)):
         add({"level": "warn", "code": "CONSTITUTION", "message": f"constitution {constitution} does not exist"})
+    signals = cfg.get("signals_path")
+    if signals is not None:
+        product = cfg.get("product_root") if isinstance(cfg.get("product_root"), str) else "docs/product"
+        sp = os.path.normpath(str(signals)) if isinstance(signals, str) else ""
+        if not sp or _placeholder(signals) or os.path.isabs(sp) or sp.startswith(".."):
+            add({"level": "warn", "code": "SIGNALS-PATH", "message": f"signals_path must be a project-relative directory, got {signals!r}"})
+        elif sp == ".sdlc" or sp.startswith(".sdlc" + os.sep) or sp == os.path.normpath(product) or sp.startswith(os.path.normpath(product) + os.sep):
+            add({"level": "warn", "code": "SIGNALS-PATH",
+                 "message": "signals_path must not sit inside product_root or .sdlc: the store is ops-owned raw evidence, not a product fact or a manager file"})
+    owners = cfg.get("owners")
+    if owners is not None:
+        known = _function_ids()
+        if not isinstance(owners, dict):
+            add({"level": "warn", "code": "OWNERS",
+                 "message": "owners must be a block mapping of function id → person or team (this reader does not expand inline {a: b})"})
+        else:
+            for key, who in owners.items():
+                if known and key not in known:
+                    add({"level": "warn", "code": "OWNERS",
+                         "message": f"owners.{key} is not a function id ({', '.join(sorted(known))})"})
+                elif not isinstance(who, str) or _placeholder(who):
+                    add({"level": "warn", "code": "OWNERS", "message": f"owners.{key} is empty or still a placeholder"})
+            add({"level": "info", "code": "OWNERS",
+                 "message": "owners only names who to ask for a decision; it grants no permission, does not replace the "
+                            "operator's recorded answer, and the plugin contacts nobody outside the conversation"})
     if research.get("offline") is True:
         add({"level": "info", "code": "RESEARCH-OFFLINE",
              "message": "research.offline: true — web-source requirements are waived; only the user sets this, never a hat or the manager"})
@@ -510,6 +545,23 @@ def self_test() -> int:
         r = check(td, probe=True)
         if [f["code"] for f in r["findings"] if f["level"] == "blocker"] != ["APP-DOWN"]:
             return fail("a closed port must be APP-DOWN", r["findings"])
+        with open(os.path.join(td, "sdlc.config.yaml"), "w") as f:
+            f.write("product_root: docs/product\ngates:\n  e2e: \"x\"\napp:\n  start: \"x\"\n  base_url: \"http://127.0.0.1:1/\"\n"
+                    "lane_rules:\n  ui_paths: [frontend/admin]\nowners:\n  product-mgmt: 张三\n  marketing: 李四\n  design: <人或团队>\n")
+        r = check(td)
+        if any(x["code"] == "SIGNALS-PATH" for x in r["findings"]):
+            return fail("no signals_path configured must not warn", r["findings"])
+        owner_warn = [x["message"] for x in r["findings"] if x["code"] == "OWNERS" and x["level"] == "warn"]
+        if len(owner_warn) != 2 or not any("marketing" in m for m in owner_warn) or not any("owners.design" in m for m in owner_warn):
+            return fail("owners must warn on an unknown function id and a placeholder, and accept a known one", r["findings"])
+        if any(x["level"] == "blocker" and x["code"] == "OWNERS" for x in r["findings"]):
+            return fail("owners never blocks: it only names who to ask")
+        for value, ok in (("docs/signals", True), ("docs/product/signals", False), (".sdlc/signals", False), ("../x", False)):
+            with open(os.path.join(td, "sdlc.config.yaml"), "w") as f:
+                f.write(f"product_root: docs/product\nsignals_path: {value}\n")
+            warned = any(x["code"] == "SIGNALS-PATH" for x in check(td)["findings"])
+            if warned == ok:
+                return fail(f"signals_path {value} should {'pass' if ok else 'warn'}")
         os.remove(os.path.join(td, "sdlc.config.yaml"))
         if main_check(argparse.Namespace(project_root=td, probe=False, json=True)) != 2:
             return fail("missing config must exit 2")

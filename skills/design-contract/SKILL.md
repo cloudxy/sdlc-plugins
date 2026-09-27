@@ -29,6 +29,7 @@ Record mode `reuse`, `local-exploration` or `new-direction`, why it fits, the ap
 - **Where distinctiveness is an agreed goal, name its signature moment** — the one interaction or visual people will remember or share — and ties it to the journey step where growth's highlight lives. Routine workflows may instead prioritize task clarity and consistency; record that choice.
 - **AI-generated designs cluster around recognizable defaults** (cream + serif + terracotta, near-black + acid accent, SaaS card kit, ALL-CAPS eyebrows, `→` suffixes). Matching one must be a justified choice. Anchors in [visual-direction.md](references/visual-direction.md).
 - **The 6-state matrix's most commonly missed states are permission and offline.** Everyone remembers empty and loading.
+- **Unknown is not denied, failure is not empty.** Permissions still loading, a failed load and a truly empty list each need their own state and copy; showing a failure or an unloaded permission set as 「暂无」 or hidden navigation tells users the product has nothing.
 - **Tokens are not just colours**: spacing, typography, radius, shadow, motion and breakpoints are all tokens.
 - **Vague copy is a design defect.** 「提交」「暂无数据」「出了点问题」 each cost the user a decision or a support ticket.
 - **Consistency beats novelty in daily tools; memorability beats polish on first-run and marketing surfaces.** Decide which surface you are designing before spending boldness ([visual-direction.md](references/visual-direction.md)).
@@ -39,7 +40,7 @@ Record mode `reuse`, `local-exploration` or `new-direction`, why it fits, the ap
 | Excellent | Reject as mediocre |
 |---|---|
 | Appropriate reuse or credible rendered alternatives for an unresolved choice, with trade-offs and recommendation | Unjustified redesign, or nominal variants that do not address the unresolved question |
-| References studied (competitors, best-in-class, via web) with what to take and what to avoid | "Inspired by modern SaaS design" |
+| Exploring an unresolved choice: references studied (competitors, best-in-class, via web) with what to take and what to avoid; a settled `reuse` cites the approved baseline instead | "Inspired by modern SaaS design" |
 | The chosen direction's contract covers every FR screen, all six states with real copy, tokens consistent with `design-system.md` | Happy-path flows only; placeholder copy |
 | Design QA with side-by-side screenshots, gaps ranked by severity, signature moment verified | "实现基本符合设计" |
 
@@ -89,7 +90,7 @@ Follow [design-review.md](references/design-review.md): screenshot the build at 
 ## Self-check
 
 - [ ] Explore: scope mode justified, reuse/selection authority cited, applicable directions rendered and inspected, recommendation grounded?
-- [ ] References studied and cited?
+- [ ] `new-direction` or an exploration with open questions: references studied and cited? (`reuse` cites the approved baseline and version instead)
 - [ ] Specify: every FR screen covered; all applicable states with copy; permission/offline relevance explicitly assessed, not silently omitted?
 - [ ] Tokens complete (colour/spacing/type/radius/shadow/motion/breakpoints) and consistent with `design-system.md`?
 - [ ] Contrast pairs and focus order defined; reduced-motion honoured?
@@ -109,7 +110,6 @@ Follow [design-review.md](references/design-review.md): screenshot the build at 
 | [tokens-and-a11y.md](references/tokens-and-a11y.md) | Tokens, contrast pairs, focus order |
 | [generated-imagery.md](references/generated-imagery.md) | The packet lists `imagery` — when a generated image is worth it, where its style anchors come from, how it lands in an artifact (a reference image is never the direction) |
 | [frontend-design (vendor)](../../vendor/anthropic-skills/skills/frontend-design/SKILL.md) | Deep background on visual direction (upstream original, Apache-2.0; kept current by plugin-updater, do not copy) |
-| [auto-agents-pitfalls.md](references/auto-agents-pitfalls.md) | Verified auto_agents traps (code+test / ESC / gate only) |
 
 ## Role-specific review
 

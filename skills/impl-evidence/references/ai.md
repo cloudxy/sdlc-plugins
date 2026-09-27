@@ -12,6 +12,9 @@ Job: **make AI features measurable, degradable, and regressable** — an AI feat
 
 - **Effect numbers without eval set version = meaningless.** "92% accuracy" without "v3 of eval-set-2024" is "I think it works."
 - **Freeze the comparison set across candidates.** Version prompts, models, graders and data separately; a dataset change requires re-running both baseline and candidate. Keep a held-out set independent of tuning.
+- **A mocked model response tests the contract, not quality.** Pin schemas and state handling with mocks; quality claims come only from a versioned eval set.
+- **Proxy scores are not accuracy.** Field completeness or non-empty rates must never be reported as extraction or answer quality.
+- **Switching provider protocol or adapter is a model change.** Rerun the same versioned eval set, one variable at a time; a config key the code never reads changes nothing.
 - **No degradation chain = user sees 500 when the model times out.** Choose a suitable failure policy: bounded retry, alternative model, deterministic fallback, abstention or human review; validate the actual risks and cost.
 
 ## Handoff contract
@@ -38,7 +41,6 @@ Job: **make AI features measurable, degradable, and regressable** — an AI feat
 |---|---|
 | [eval-and-iteration.md](ai/eval-and-iteration.md) | Building or updating an eval set, iterating a prompt |
 | [rag-pipeline.md](ai/rag-pipeline.md) | Designing retrieval, chunking, or citation |
-| [auto-agents-pitfalls.md](ai/auto-agents-pitfalls.md) | Verified auto_agents traps (code+test / ESC / gate only) |
 | [templates/eval-set.md](../templates/eval-set.md) | Eval set deliverable |
 | [templates/model-choice.md](../templates/model-choice.md) | Model comparison + fallback chain |
 | [templates/task-spec.md](../templates/task-spec.md) | AI task definition before eval construction |

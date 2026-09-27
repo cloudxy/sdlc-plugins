@@ -14,6 +14,7 @@ app:                             # 联调、截图、验收走查用（scripts/u
     # api: "http://127.0.0.1:9111/api/v1/health"
   widths: [375, 768, 1440]       # 截图断点，与 design-system.md 一致
 product_root: docs/product       # 产品层目录（策略/功能地图/增长/设计系统/架构/领域模型/数据）；v4 每个功能都读它并回写
+# signals_path: docs/signals     # 可选：产品级信号库目录（/sdlc-product cycle 用）。只有 ops 的周期信号汇总能写；不能放在 product_root 或 .sdlc 里
 imagery:                           # 生成图（Grok 出图）；默认关闭，因为它花你的订阅额度
   enabled: false                   # 只有用户能开；开之前先 /sdlc-grok login 再 /sdlc-grok probe
   provider: grok
@@ -28,6 +29,12 @@ imagery:                           # 生成图（Grok 出图）；默认关闭�
 research:
   offline: false                 # 只有用户能改成 true（内网 / 断网环境）：调研类产物不再要求网络来源；帽子与经理不得自行设置
 constitution: "<项目红线宪法路径>"   # 每帽产出前自检对象
+# owners:                          # 可选：按职能写「该问谁」（职能 id 见 skills/sdlc/references/function-map.md）。
+#   product-mgmt: <人或团队>       # 只在提问时点名负责人；不授予任何权限，不替代操作者的回答，插件也不会主动联系他们
+#   design: <人或团队>
+#   operations: <人或团队>
+#   engineering: <人或团队>
+#   quality: <人或团队>
 artifact_root: .                   # state.yaml 与 .sdlc/ 的根
 mcp_adapters: []                   # 经理警告清单 ONLY——不改任何帽子 YAML 的 tools。
   # 要给帽子真正加 MCP 工具：编辑插件 adapters/extra-tools.json（编译期白名单）后重渲染 agents。

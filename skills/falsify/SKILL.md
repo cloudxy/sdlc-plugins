@@ -1,12 +1,12 @@
 ---
 name: "falsify"
-description: "Use this skill when /sdlc-discover or /sdlc Step 1b reaches Falsify, or $falsify. Do NOT use for spec.md or launch A/B."
-when_to_use: "Discover Falsify or /sdlc Step 1b, or $falsify. Do NOT use to write spec.md or run post-launch experiments."
+description: "Use only when the user types $falsify, a deprecated alias of discover's method. Do NOT use from /sdlc or discover."
+when_to_use: "Only the user typing $falsify. Deprecated: sunset 2026-12-31. Do NOT use from /sdlc or /sdlc-discover (discover applies the method itself), to write spec.md or to run post-launch experiments."
 ---
 
-# Falsify — compatibility entry
+# Falsify — deprecated compatibility entry
 
-Apply [discover’s assumption-testing method](../discover/references/assumption-testing.md). That file owns the method and verdict criteria; this entry preserves `$falsify` and existing calls. Evidence grades live in [discover’s evidence reference](../discover/references/evidence.md).
+**Deprecated; sunset 2026-12-31.** Use `sdlc-workflow:discover`: its [assumption-testing method](../discover/references/assumption-testing.md) owns the method and verdict criteria, and Step 1b of `/sdlc` applies it inside discover. This entry only keeps `$falsify` working until then. Evidence grades live in [discover’s evidence reference](../discover/references/evidence.md).
 
 ## Gotchas
 
@@ -14,7 +14,7 @@ Do not invent evidence or change failure criteria after seeing results. Do not d
 
 ## Output
 
-Update briefing § Falsify with assumptions, evidence, failure criteria and a scoped kill/narrow/bet/pass verdict. For a standalone invocation use [the assumptions template](templates/assumptions.md) and link it from briefing instead of copying it.
+Update briefing § Falsify with assumptions, evidence, failure criteria and a scoped kill/narrow/bet/pass verdict. For a standalone invocation use discover's [assumptions template](../discover/templates/assumptions.md) and link it from briefing instead of copying it.
 
 ## Self-check
 

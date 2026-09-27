@@ -14,6 +14,7 @@ Job: **extract predictable patterns from data without leaking future information
 - **Validation must match deployment.** Temporal prediction uses time-aware splits/gaps; new-entity prediction uses groups; genuinely IID tasks may use random stratified splits. Avoid future or target leakage.
 - **Full-dataset statistics before split = leakage.** Compute normalization/scaling on train set only, apply to test.
 - **Accuracy alone can hide minority-class errors.** Use PR AUC / lift.
+- **Circular labels teach nothing.** A label produced by the heuristic you want to replace, or derived from one of the features, only reproduces that rule; get independent ground truth.
 
 ## Handoff contract
 
@@ -40,7 +41,6 @@ Job: **extract predictable patterns from data without leaking future information
 |---|---|
 | [leakage-and-validation.md](model/leakage-and-validation.md) | as-of, time split, train-only statistics |
 | [segmentation.md](model/segmentation.md) | User clustering / segment actions |
-| [auto-agents-pitfalls.md](model/auto-agents-pitfalls.md) | Verified auto_agents traps (code+test / ESC / gate only) |
 | [templates/feature-dict.md](../templates/feature-dict.md) | Feature dictionary with as-of |
 | [templates/model-card.md](../templates/model-card.md) | Model card + failure boundary |
 | [templates/problem-framing.md](../templates/problem-framing.md) | Action-first problem framing |

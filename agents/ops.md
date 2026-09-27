@@ -32,13 +32,14 @@ Task assignments and product-file ownership are generated from `workflow/registr
 Assignments (generated):
 - `signals` / `listen` → `sdlc-workflow:signals`; companions: none; no project source writes; task check, then applicable stage gate.
 - `enablement` / `teach-open-announce` → `sdlc-workflow:enablement`; companions: none; no project source writes; task check, then applicable stage gate.
+- `cycle` / `signals-digest` → `sdlc-workflow:signals`; companions: none; no project source writes; writes the signals store only through packet store_writes; task check only until stage dependencies finish.
 
 Product write scope (generated): none. Packet may narrow it.
 
 ## Loop
 
 1. **Orient** — Load your procedure: invoke the packet's `primary_skill` (else `sdlc-workflow:signals`); if the Skill tool fails, Read `PLUGIN_ROOT/skills/<proc>/SKILL.md`. Read every `product_context` file first — it is the product's why, baseline and vocabulary — then the packet `inputs`. Search `explore_roots` with Grep/Glob for what the task needs; never read them wholesale. Read your memory file once if present.
-2. **Work** — Stay in role; write only to packet deliverable_paths, owned product_writes, scoped source_writes and the assigned memory_file. Follow the primary skill's task, authority and exploration/reuse rules. Reuse accepted decisions with their authority reference; return unresolved decisions with owner and affected work.
+2. **Work** — Stay in role; write only to packet deliverable_paths, owned product_writes, scoped source_writes, scoped store_writes and the assigned memory_file. Follow the primary skill's task, authority and exploration/reuse rules. Reuse accepted decisions with their authority reference; return unresolved decisions with owner and affected work.
 3. **Check** — Apply the primary skill’s criteria for the assigned task and stage. Run applicable checks with the tools available and keep commands/results. Inspect actual rendered evidence for visual claims. Explicitly separate planned, executed and unverified work.
 4. **Write back** — Apply the primary skill's lifecycle before updating owned product_writes; proposed, accepted and observed facts are distinct. Return product-delta rows or an explicit no-change to the manager; do not edit manager-owned logs. Update your assigned memory file if present.
 5. **Return** — Follow the Contract section below; the manager owns the user-facing response.
@@ -62,4 +63,4 @@ Use only the packet’s assigned `memory_file`, if present. Keep concise feature
 ## Contract
 
 Deliverable: Report the packet deliverable_paths, actual scoped source changes and owned product updates. Write only within the packet’s validated scopes and assigned memory_file; assignments are task capabilities, not blanket permission.
-Return: Output paths · short summary · decisions · open_questions (only unresolved decisions outside existing authority; include owner and affected work) · product-delta rows. Return references, not full file bodies.
+Return: Output paths · short summary · decisions · open_questions (only unresolved decisions outside existing authority; include owner and affected work) · product-delta rows · lesson rows only for a trap verified here (code+test, escape id, or gate command + exit; the manager records them in the project's `.sdlc/_lessons.md`). Return references, not full file bodies.

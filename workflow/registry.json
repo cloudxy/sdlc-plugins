@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "commands": {
     "sdlc": {
       "skill": "sdlc",
@@ -16,8 +16,8 @@
     "sdlc-eval": {
       "skill": "sdlc-eval",
       "mode": "eval",
-      "description": "Run the SDLC eval harness (v2 — 22 skills; mechanical grade + blind rubric judging + real-failure regressions). Human-triggered only — not a weekly gate.",
-      "argument_hint": "[skill: prd-gwt|design-contract|architecture|schema|growth|collect|warehouse|coverage-matrix|findings|release-gate|impl-evidence|debug|tdd|refactor|cicd|discover|market|compete|falsify|enablement|signals|sdlc] [mechanical|rubric|regression <case-id|all>]"
+      "description": "Run the SDLC eval harness (v2: mechanical grade + blind rubric judging + real-failure regressions) for a skill its routing table supports. Human-triggered only — not a weekly gate.",
+      "argument_hint": "[skill: prd-gwt|design-contract|architecture|schema|growth|collect|warehouse|coverage-matrix|findings|release-gate|impl-evidence|debug|tdd|refactor|cicd|deliver|discover|market|compete|falsify|enablement|signals|retro|prototype|imagery|sdlc|sdlc-eval] [mechanical|rubric|regression <case-id|all>]"
     },
     "sdlc-grok": {
       "skill": "imagery",
@@ -28,8 +28,8 @@
     "sdlc-product": {
       "skill": "sdlc",
       "mode": "product",
-      "description": "Build or refresh the product layer (strategy, feature map, growth, design system, architecture, domain model, data) before or between features. Spawns the owning hats; this window stays the manager.",
-      "argument_hint": "[product name / what to refresh, e.g. '全部' | 'strategy feature-map' | 'domain-model']"
+      "description": "Build or refresh the product layer (strategy, feature map, growth, design system, architecture, domain model, data) before or between features, or run a product cycle (signals, readout, experiments, decisions). Spawns the owning hats; this window stays the manager.",
+      "argument_hint": "[product name / what to refresh, e.g. '全部' | 'strategy feature-map' | 'domain-model' | 'cycle <id>']"
     },
     "sdlc-research": {
       "skill": "discover",
@@ -53,7 +53,8 @@
       "product_writes": [
         "feature-map.md",
         "strategy.md"
-      ]
+      ],
+      "function": "product-mgmt"
     },
     "growth": {
       "skill": "growth",
@@ -62,14 +63,16 @@
       "fresh": false,
       "product_writes": [
         "growth.md"
-      ]
+      ],
+      "function": "operations"
     },
     "ops": {
       "skill": "signals",
       "description": "Use this agent ONLY when the spawn packet or the user names ops. Product operations (产品运营/用户运营): user signals, enablement (teach/open/announce), release notes. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Do NOT use for deploy, rollback, incidents, CI, or SRE (sre). Do NOT use for RICE, feature design (pm), or campaigns (growth).",
       "color": "blue",
       "fresh": false,
-      "product_writes": []
+      "product_writes": [],
+      "function": "operations"
     },
     "designer": {
       "skill": "design-contract",
@@ -78,7 +81,8 @@
       "fresh": false,
       "product_writes": [
         "design-system.md"
-      ]
+      ],
+      "function": "design"
     },
     "architect": {
       "skill": "architecture",
@@ -87,7 +91,8 @@
       "fresh": false,
       "product_writes": [
         "architecture.md"
-      ]
+      ],
+      "function": "engineering"
     },
     "dba": {
       "skill": "schema",
@@ -97,56 +102,64 @@
       "product_writes": [
         "domain-model.md",
         "erd.dbml"
-      ]
+      ],
+      "function": "engineering"
     },
     "frontend": {
       "skill": "impl-evidence",
       "description": "Use this agent when implementing UI slices from accepted final prototype code, tokens and state contracts, including integration runs with screenshots. Use proactively for UI tickets. Do NOT use while /sdlc is running in the parent window. Do NOT use for API implementation or token definition.",
       "color": "cyan",
       "fresh": false,
-      "product_writes": []
+      "product_writes": [],
+      "function": "engineering"
     },
     "backend": {
       "skill": "impl-evidence",
       "description": "Use this agent when implementing APIs, services, repositories, transactions, idempotency, or server-side events. Use proactively for API tickets. Do NOT use while /sdlc is running in the parent window. Do NOT use for schema design or changing GWT.",
       "color": "cyan",
       "fresh": false,
-      "product_writes": []
+      "product_writes": [],
+      "function": "engineering"
     },
     "sre": {
       "skill": "deliver",
       "description": "Use this agent ONLY when the spawn packet or the user names sre. SRE / 运维: pre-QC readiness, scoped CI wiring, authorized deployment, recovery, monitoring and incidents. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Do NOT use for user-facing copy, support scripts, or signal aggregation (ops / 产品运营). Do NOT use for business code or schema changes.",
       "color": "green",
       "fresh": false,
-      "product_writes": []
+      "product_writes": [],
+      "function": "engineering"
     },
     "qa": {
       "skill": "coverage-matrix",
       "description": "Use this agent when designing risk-based tests, E2E journeys, tracking validation, coverage matrices, or defect reports. Use for early test planning and post-implementation verification. Do NOT use while /sdlc is running in the parent window. Do NOT use for fixing defects or release decisions.",
       "color": "orange",
       "fresh": false,
-      "product_writes": []
+      "product_writes": [],
+      "function": "quality"
     },
     "algo": {
       "skill": "impl-evidence",
       "description": "Use this agent ONLY when the spawn packet or the user names algo. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Designs eval sets, model choice, RAG, AI fallback chains. Do NOT use for business CRUD or UI.",
       "color": "blue",
       "fresh": false,
-      "product_writes": []
+      "product_writes": [],
+      "function": "engineering"
     },
     "miner": {
       "skill": "impl-evidence",
       "description": "Use this agent ONLY when the spawn packet or the user names miner. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Builds predictive models, segmentation, feature as-of design. Do NOT use for online LLM/RAG (algo) or dashboards (analyst).",
       "color": "blue",
       "fresh": false,
-      "product_writes": []
+      "product_writes": [],
+      "function": "engineering"
     },
     "analyst": {
       "skill": "retro",
       "description": "Use this agent ONLY when the spawn packet or the user names analyst. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Early measurement plans, experiments, funnels, cohorts, readouts and metric interpretation; PM applies strategy decisions. Do NOT use for writing FRs or implementation.",
       "color": "blue",
       "fresh": false,
-      "product_writes": []
+      "product_writes": [],
+      "function": "operations"
     },
     "data-warehouse-engineer": {
       "skill": "warehouse",
@@ -156,7 +169,8 @@
       "product_writes": [
         "data/metrics.yaml",
         "data/tags.yaml"
-      ]
+      ],
+      "function": "engineering"
     },
     "data-collector": {
       "skill": "collect",
@@ -165,35 +179,193 @@
       "fresh": false,
       "product_writes": [
         "data/tracking-plan.yaml"
-      ]
+      ],
+      "function": "engineering"
     },
     "reviewer": {
       "skill": "findings",
       "description": "Use this agent ONLY when the spawn packet or the user names reviewer. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Memory-free review of artifacts (G-fresh), including product value and experience evidence. Do NOT use for writing code, fixing issues, or release approval (qc).",
       "color": "red",
       "fresh": true,
-      "product_writes": []
+      "product_writes": [],
+      "function": "quality"
     },
     "qc": {
       "skill": "release-gate",
       "description": "Use this agent ONLY when the spawn packet or the user names qc. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Scoped verification/release-readiness opinion from acceptance, SRE preparation and residual risk; no deployment authorization. Do NOT use for finding defects (reviewer) or writing tests (qa).",
       "color": "red",
       "fresh": true,
-      "product_writes": []
+      "product_writes": [],
+      "function": "quality"
     },
     "researcher": {
       "skill": "market",
       "description": "Use this agent ONLY when the spawn packet or the user names researcher. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Bounds who has the problem, how often, and today's alternatives, with cited sources. Do NOT use for RICE, spec.md, competitor borrow/avoid (competitor), or positioning (growth).",
       "color": "blue",
       "fresh": false,
-      "product_writes": []
+      "product_writes": [],
+      "function": "product-mgmt"
     },
     "competitor": {
       "skill": "compete",
       "description": "Use this agent ONLY when the spawn packet or the user names competitor. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. How rivals and the status quo serve this job, where users complain, where we can win. Do NOT use for RICE, spec.md, market sizing (researcher), or positioning (growth).",
       "color": "blue",
       "fresh": false,
-      "product_writes": []
+      "product_writes": [],
+      "function": "product-mgmt"
+    }
+  },
+  "functions": {
+    "product-mgmt": {
+      "name": "产品"
+    },
+    "operations": {
+      "name": "运营"
+    },
+    "design": {
+      "name": "设计"
+    },
+    "engineering": {
+      "name": "研发"
+    },
+    "quality": {
+      "name": "质量"
+    }
+  },
+  "skills": {
+    "sdlc": {
+      "kind": "manager",
+      "trigger": "command"
+    },
+    "discover": {
+      "kind": "manager",
+      "trigger": "command"
+    },
+    "sdlc-eval": {
+      "kind": "manager",
+      "trigger": "command"
+    },
+    "prd-gwt": {
+      "kind": "role",
+      "trigger": "domain"
+    },
+    "market": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "compete": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "growth": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "signals": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "enablement": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "retro": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "design-contract": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "architecture": {
+      "kind": "role",
+      "trigger": "domain"
+    },
+    "schema": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "impl-evidence": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "collect": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "warehouse": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "deliver": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "coverage-matrix": {
+      "kind": "role",
+      "trigger": "domain"
+    },
+    "findings": {
+      "kind": "role",
+      "trigger": "domain"
+    },
+    "release-gate": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "debug": {
+      "kind": "practice",
+      "trigger": "packet"
+    },
+    "tdd": {
+      "kind": "practice",
+      "trigger": "packet"
+    },
+    "refactor": {
+      "kind": "practice",
+      "trigger": "packet"
+    },
+    "prototype": {
+      "kind": "practice",
+      "trigger": "packet"
+    },
+    "cicd": {
+      "kind": "practice",
+      "trigger": "packet"
+    },
+    "imagery": {
+      "kind": "practice",
+      "trigger": "command"
+    },
+    "falsify": {
+      "kind": "compat",
+      "trigger": "domain",
+      "replaced_by": "discover",
+      "method": "skills/discover/references/assumption-testing.md",
+      "sunset": "2026-12-31"
+    }
+  },
+  "scopes": [
+    "feature",
+    "product",
+    "cycle"
+  ],
+  "lifecycle": [
+    "discover",
+    "define",
+    "shape",
+    "implement",
+    "verify",
+    "accept",
+    "review",
+    "release",
+    "learn"
+  ],
+  "stores": {
+    "signals": {
+      "config": "signals_path",
+      "owner": "ops",
+      "template": "skills/signals/templates/signal-store.md"
     }
   },
   "artifacts": {
@@ -501,6 +673,36 @@
         "*/assets/generated/*.webp"
       ],
       "legacy": []
+    },
+    "cycle-signals": {
+      "paths": [
+        "outputs/signals-digest.md"
+      ],
+      "legacy": []
+    },
+    "cycle-readout": {
+      "paths": [
+        "outputs/readout.md"
+      ],
+      "legacy": []
+    },
+    "cycle-experiments": {
+      "paths": [
+        "outputs/experiments.md"
+      ],
+      "legacy": []
+    },
+    "cycle-decisions": {
+      "paths": [
+        "outputs/decisions.md"
+      ],
+      "legacy": []
+    },
+    "cycle-tags": {
+      "paths": [
+        "outputs/tags-refresh.md"
+      ],
+      "legacy": []
     }
   },
   "stages": {
@@ -757,6 +959,11 @@
       "rank": 0,
       "progress": null,
       "required": []
+    },
+    "cycle": {
+      "rank": 0,
+      "progress": null,
+      "required": []
     }
   },
   "tasks": [
@@ -767,6 +974,12 @@
       "skill": "market",
       "required": [
         "market"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "discover"
       ]
     },
     {
@@ -776,6 +989,12 @@
       "skill": "compete",
       "required": [
         "compete"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "discover"
       ]
     },
     {
@@ -785,6 +1004,12 @@
       "skill": "growth",
       "required": [
         "growth"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "discover"
       ]
     },
     {
@@ -809,6 +1034,12 @@
       "diagram_dir": "01-define/assets",
       "companions": [
         "collect"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define"
       ]
     },
     {
@@ -818,6 +1049,12 @@
       "skill": "signals",
       "required": [
         "signals"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define"
       ]
     },
     {
@@ -843,7 +1080,13 @@
           "when": "visual_direction"
         }
       ],
-      "imagery_reference": "skills/design-contract/references/generated-imagery.md"
+      "imagery_reference": "skills/design-contract/references/generated-imagery.md",
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ]
     },
     {
       "role": "designer",
@@ -880,7 +1123,13 @@
           "when": "icon_set"
         }
       ],
-      "imagery_reference": "skills/design-contract/references/generated-imagery.md"
+      "imagery_reference": "skills/design-contract/references/generated-imagery.md",
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ]
     },
     {
       "role": "architect",
@@ -893,6 +1142,12 @@
       "partial_stage": true,
       "reads": [
         "skills/architecture/references/lifecycle.md"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define"
       ]
     },
     {
@@ -906,6 +1161,14 @@
       "partial_stage": true,
       "reads": [
         "skills/architecture/references/lifecycle.md"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape",
+        "implement",
+        "verify"
       ]
     },
     {
@@ -919,6 +1182,12 @@
       "partial_stage": true,
       "reads": [
         "skills/architecture/references/lifecycle.md"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "verify"
       ]
     },
     {
@@ -944,7 +1213,13 @@
         }
       ],
       "diagram_reference": "skills/architecture/references/diagrams.md",
-      "diagram_dir": "02-shape/assets"
+      "diagram_dir": "02-shape/assets",
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ]
     },
     {
       "role": "dba",
@@ -966,7 +1241,13 @@
         }
       ],
       "diagram_reference": "skills/schema/references/er-diagram.md",
-      "diagram_dir": "02-shape/assets"
+      "diagram_dir": "02-shape/assets",
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ]
     },
     {
       "role": "data-collector",
@@ -975,6 +1256,12 @@
       "skill": "collect",
       "required": [
         "tracking-impl"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
       ]
     },
     {
@@ -984,6 +1271,12 @@
       "skill": "collect",
       "required": [
         "data-source"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
       ]
     },
     {
@@ -1001,7 +1294,13 @@
         }
       ],
       "diagram_reference": "skills/warehouse/references/lineage-diagram.md",
-      "diagram_dir": "02-shape/assets"
+      "diagram_dir": "02-shape/assets",
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ]
     },
     {
       "role": "data-warehouse-engineer",
@@ -1010,6 +1309,12 @@
       "skill": "warehouse",
       "required": [
         "tags"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
       ]
     },
     {
@@ -1035,7 +1340,13 @@
         "vendor/anthropic-skills/skills/frontend-design/SKILL.md"
       ],
       "writes_source": true,
-      "requires_source": true
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ]
     },
     {
       "role": "backend",
@@ -1053,7 +1364,13 @@
         "debug"
       ],
       "writes_source": true,
-      "requires_source": true
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ]
     },
     {
       "role": "algo",
@@ -1071,7 +1388,13 @@
         "debug"
       ],
       "writes_source": true,
-      "requires_source": true
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ]
     },
     {
       "role": "miner",
@@ -1089,7 +1412,13 @@
         "debug"
       ],
       "writes_source": true,
-      "requires_source": true
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ]
     },
     {
       "role": "pm",
@@ -1105,6 +1434,12 @@
           "kind": "screenshots",
           "when": "ui"
         }
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "accept"
       ]
     },
     {
@@ -1118,6 +1453,12 @@
       "evidence": [
         "running_app",
         "screenshots"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "accept"
       ]
     },
     {
@@ -1134,6 +1475,12 @@
           "kind": "screenshots",
           "when": "ui"
         }
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "accept"
       ]
     },
     {
@@ -1157,7 +1504,13 @@
         "collect"
       ],
       "writes_source": true,
-      "requires_source": false
+      "requires_source": false,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "verify"
+      ]
     },
     {
       "role": "reviewer",
@@ -1167,7 +1520,16 @@
       "required": [
         "findings"
       ],
-      "aliases": []
+      "aliases": [],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define",
+        "shape",
+        "implement",
+        "review"
+      ]
     },
     {
       "role": "qc",
@@ -1179,6 +1541,12 @@
       ],
       "aliases": [
         "release opinion"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "release"
       ]
     },
     {
@@ -1189,7 +1557,13 @@
       "required": [
         "checklist"
       ],
-      "aliases": []
+      "aliases": [],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "release"
+      ]
     },
     {
       "role": "ops",
@@ -1201,6 +1575,12 @@
       ],
       "aliases": [
         "teach/open/announce"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "release"
       ]
     },
     {
@@ -1214,6 +1594,12 @@
       "aliases": [
         "precision marketing",
         "launch"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "release"
       ]
     },
     {
@@ -1224,7 +1610,13 @@
       "required": [
         "retro"
       ],
-      "aliases": []
+      "aliases": [],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ]
     },
     {
       "role": "pm",
@@ -1235,7 +1627,11 @@
       "product_outputs": [
         "feature-map.md",
         "strategy.md"
-      ]
+      ],
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": []
     },
     {
       "role": "growth",
@@ -1245,7 +1641,11 @@
       "required": [],
       "product_outputs": [
         "growth.md"
-      ]
+      ],
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": []
     },
     {
       "role": "designer",
@@ -1259,7 +1659,14 @@
       "evidence": [
         "running_app",
         "screenshots"
-      ]
+      ],
+      "evidence_paths": [
+        "assets/screens/*"
+      ],
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": []
     },
     {
       "role": "architect",
@@ -1277,7 +1684,11 @@
         }
       ],
       "diagram_reference": "skills/architecture/references/diagrams.md",
-      "diagram_dir": "assets"
+      "diagram_dir": "assets",
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": []
     },
     {
       "role": "dba",
@@ -1296,7 +1707,11 @@
         }
       ],
       "diagram_reference": "skills/schema/references/er-diagram.md",
-      "diagram_dir": "assets"
+      "diagram_dir": "assets",
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": []
     },
     {
       "role": "data-warehouse-engineer",
@@ -1307,7 +1722,11 @@
       "product_outputs": [
         "data/metrics.yaml",
         "data/tags.yaml"
-      ]
+      ],
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": []
     },
     {
       "role": "data-collector",
@@ -1317,7 +1736,11 @@
       "required": [],
       "product_outputs": [
         "data/tracking-plan.yaml"
-      ]
+      ],
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": []
     },
     {
       "role": "pm",
@@ -1328,7 +1751,11 @@
       "product_outputs": [
         "feature-map.md",
         "strategy.md"
-      ]
+      ],
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": []
     },
     {
       "role": "reviewer",
@@ -1336,7 +1763,11 @@
       "task": "G-fresh",
       "skill": "findings",
       "required": [],
-      "manager_output": ".sdlc/_product/findings.md"
+      "manager_output": ".sdlc/_product/findings.md",
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": []
     },
     {
       "role": "dba",
@@ -1346,7 +1777,14 @@
       "required": [
         "db-optimization"
       ],
-      "partial_stage": true
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape",
+        "implement"
+      ]
     },
     {
       "role": "dba",
@@ -1358,7 +1796,14 @@
       ],
       "partial_stage": true,
       "writes_source": true,
-      "requires_source": false
+      "requires_source": false,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape",
+        "implement"
+      ]
     },
     {
       "role": "data-collector",
@@ -1370,7 +1815,13 @@
       ],
       "partial_stage": true,
       "writes_source": true,
-      "requires_source": true
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ]
     },
     {
       "role": "data-collector",
@@ -1380,7 +1831,13 @@
       "required": [
         "collect-validation"
       ],
-      "partial_stage": true
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "verify"
+      ]
     },
     {
       "role": "data-warehouse-engineer",
@@ -1390,7 +1847,13 @@
       "required": [
         "warehouse-design"
       ],
-      "partial_stage": true
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ]
     },
     {
       "role": "data-warehouse-engineer",
@@ -1402,7 +1865,13 @@
       ],
       "partial_stage": true,
       "writes_source": true,
-      "requires_source": true
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ]
     },
     {
       "role": "data-warehouse-engineer",
@@ -1412,7 +1881,13 @@
       "required": [
         "warehouse-validation"
       ],
-      "partial_stage": true
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "verify"
+      ]
     },
     {
       "role": "qa",
@@ -1425,6 +1900,12 @@
       "partial_stage": true,
       "companions": [
         "collect"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define"
       ]
     },
     {
@@ -1437,7 +1918,14 @@
       ],
       "partial_stage": true,
       "writes_source": true,
-      "requires_source": true
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement",
+        "release"
+      ]
     },
     {
       "role": "sre",
@@ -1447,7 +1935,13 @@
       "required": [
         "readiness"
       ],
-      "partial_stage": true
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "release"
+      ]
     },
     {
       "role": "analyst",
@@ -1457,7 +1951,13 @@
       "required": [
         "measurement-plan"
       ],
-      "partial_stage": true
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define"
+      ]
     },
     {
       "role": "designer",
@@ -1467,7 +1967,94 @@
       "required": [
         "prototype-experiment"
       ],
-      "partial_stage": true
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "discover"
+      ]
+    },
+    {
+      "role": "ops",
+      "stage": "cycle",
+      "task": "signals-digest",
+      "skill": "signals",
+      "required": [
+        "cycle-signals"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "cycle"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ],
+      "store_writes": "signals"
+    },
+    {
+      "role": "analyst",
+      "stage": "cycle",
+      "task": "readout",
+      "skill": "retro",
+      "required": [
+        "cycle-readout"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "cycle"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ]
+    },
+    {
+      "role": "growth",
+      "stage": "cycle",
+      "task": "experiments",
+      "skill": "growth",
+      "required": [
+        "cycle-experiments"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "cycle"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ]
+    },
+    {
+      "role": "pm",
+      "stage": "cycle",
+      "task": "apply-decisions",
+      "skill": "prd-gwt",
+      "required": [
+        "cycle-decisions"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "cycle"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ]
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "cycle",
+      "task": "tags-refresh",
+      "skill": "warehouse",
+      "required": [
+        "cycle-tags"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "cycle"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ]
     }
   ],
   "manager_only": [

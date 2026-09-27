@@ -39,6 +39,15 @@
           "weight": 5
         }
       ]
+    },
+    {
+      "prompt": "给导出功能写首次成功指南和客服话术；另外把这周关于导出的 30 张工单分析一下，看看用户到底要什么。",
+      "expectations": [
+        "Writes the first-success guide and support handoff for the actual surface",
+        "Does not aggregate or prioritize the tickets here; hands the ticket analysis to the signals task (listen)",
+        "Uses only verified product facts and flags unverified claims for growth"
+      ],
+      "id": 4
     }
   ]
 }

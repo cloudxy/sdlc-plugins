@@ -14,12 +14,12 @@ One discipline: **contracts are input, not suggestions.** If the contract has pr
 
 ## Gotchas — inspect applicability
 
-The following Python/SQLAlchemy/Redis and R10 examples describe the auto_agents stack. Check installed configuration and project conventions before applying; they are not requirements for every API project. Tests and contract/concurrency regressions are within backend implementation responsibility.
+Check the installed stack and the project's conventions before applying a rule; these are verified lessons, not requirements for every API project. Tests and contract/concurrency regressions are within backend implementation responsibility.
 
-
-- **async context calling `redis_client()` (sync) blocks the event loop.** Use `await get_async_redis()`. This caused backend freeze ([ESC from freeze pattern]).
-- **`session.commit()` expires ORM objects.** Accessing attributes after commit triggers a synchronous refresh that crashes async code. Capture `int(obj.id)` before commit.
-- **Service methods must have a logger at entry.** R10 red line: `logger = get_logger("service.<domain>")`. No logger = no evidence trail.
+- **Never block the event loop.** In async code a synchronous client call (cache, DB, HTTP) on a hot path stalls every request; use the async client. A verified backend freeze came from exactly this.
+- **ORM sessions that expire objects on commit bite async code.** Reading attributes after commit can trigger a synchronous refresh that crashes; capture ids or project to DTOs before commit.
+- **A missing tenant is an error, never global scope.** Reject a request or row without a tenant; treating NULL as "platform" leaks data across tenants and slips past uniqueness constraints that ignore NULL.
+- **Log at service entry when the project requires it.** Follow the project's logging convention; no log = no evidence trail.
 - **Router must not import ORM models.** ORM leaks into the API layer and serialization becomes unpredictable. Use Pydantic schemas at the boundary.
 - **Don't write implementation matching your preferred style — match the existing codebase's style.** Two styles in one repo is worse than one imperfect style.
 
@@ -82,7 +82,6 @@ The following Python/SQLAlchemy/Redis and R10 examples describe the auto_agents 
 |---|---|
 | [concurrency-and-transactions.md](api/concurrency-and-transactions.md) | Handling concurrent writes, deciding transaction boundaries, or debugging deadlocks |
 | [layering-and-contracts.md](api/layering-and-contracts.md) | Router/Service/Repository boundaries, ORM leak, contract mapping |
-| [auto-agents-pitfalls.md](api/auto-agents-pitfalls.md) | Verified auto_agents traps (code+test / ESC / gate only) |
 | [templates/impl-evidence.md](../templates/impl-evidence.md) | Story evidence (command + exit code) |
 
-> Gotchas based on: `anthropics/skills@41bbe19` (pdf SKILL.md IMPORTANT-warning pattern) · project incidents from auto_agents git history
+> Gotchas based on: `anthropics/skills@41bbe19` (pdf SKILL.md IMPORTANT-warning pattern) · verified incidents from a user project's history

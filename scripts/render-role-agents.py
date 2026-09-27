@@ -153,8 +153,9 @@ def assemble(role: dict[str, str], extra: dict[str, list[str]]) -> str:
     else:
         orient_extra = "Read your memory file once if present."
         # Methods and lifecycle rules belong to the task skill, not duplicated role shells.
+        store = ", scoped store_writes" if any(t.get("store_writes") for t in REGISTRY["tasks"] if t["role"] == name) else ""
         write_rule = (
-            "Stay in role; write only to packet deliverable_paths, owned product_writes, scoped source_writes and the assigned memory_file. "
+            f"Stay in role; write only to packet deliverable_paths, owned product_writes, scoped source_writes{store} and the assigned memory_file. "
             "Follow the primary skill's task, authority and exploration/reuse rules. Reuse accepted decisions "
             "with their authority reference; return unresolved decisions with owner and affected work."
         )
@@ -184,7 +185,7 @@ def assemble(role: dict[str, str], extra: dict[str, list[str]]) -> str:
         _read(os.path.join(lib, "CONTRACT.md")),
         OUTPUTS=("Return the report in the final message for the manager to save to deliverable_paths; no file writes." if fresh else "Report the packet deliverable_paths, actual scoped source changes and owned product updates. Write only within the packet’s validated scopes and assigned memory_file; assignments are task capabilities, not blanket permission."),
         RETURN_RULE=("The complete review artifact in your final message; the manager persists it. Mark any check you could not execute as unverified and return its command to the manager. Never claim reproduction from reading alone."
-                     if fresh else "Output paths · short summary · decisions · open_questions (only unresolved decisions outside existing authority; include owner and affected work) · product-delta rows. Return references, not full file bodies."),
+                     if fresh else "Output paths · short summary · decisions · open_questions (only unresolved decisions outside existing authority; include owner and affected work) · product-delta rows · lesson rows only for a trap verified here (code+test, escape id, or gate command + exit; the manager records them in the project's `.sdlc/_lessons.md`). Return references, not full file bodies."),
     )
     task_rows = [t for t in REGISTRY["tasks"] if t["role"] == name]
     assignment_lines = []
@@ -193,7 +194,8 @@ def assemble(role: dict[str, str], extra: dict[str, list[str]]) -> str:
         source = ("required scoped source_writes" if t.get("requires_source") else
                   "optional scoped source_writes" if t.get("writes_source") else "no project source writes")
         closure = "task check only until stage dependencies finish" if t.get("partial_stage") else "task check, then applicable stage gate"
-        assignment_lines.append(f"- `{t['stage']}` / `{t['task']}` → `sdlc-workflow:{t['skill']}`; companions: {companions}; {source}; {closure}.")
+        store = f"; writes the {t['store_writes']} store only through packet store_writes" if t.get("store_writes") else ""
+        assignment_lines.append(f"- `{t['stage']}` / `{t['task']}` → `sdlc-workflow:{t['skill']}`; companions: {companions}; {source}{store}; {closure}.")
     assignments = "\n".join(assignment_lines)
     ownership = ", ".join(REGISTRY["roles"][name]["product_writes"]) or "none"
     ident += f"\n\nAssignments (generated):\n{assignments}\n\nProduct write scope (generated): {ownership}. Packet may narrow it."

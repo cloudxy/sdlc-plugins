@@ -10,20 +10,22 @@ Job: **find what will hurt users before they do** — prove the key journeys wor
 
 | Task | Approach |
 |---|---|
-| **New feature testing** | Risk map → critical consumer journey checks for every J-n → cases from GWT at the cheapest layer → tracking validation for every EV-n → exploratory charters → trace matrix → regression plan |
-| **"Is this well covered?"** | Check matrix holes → boundary review → edge-states comparison |
+| **Early test plan** (`define/test-plan`) | Before implementation, write `01-define/test-plan.md`: acceptance IDs, critical failure modes, the cheapest layer that can falsify each risk, data/fixtures, environment and pending decisions. No execution results, no finished matrix, no project source writes |
+| **New feature testing** (`verify/risk-based-tests`) | Reuse the test plan → risk map → a consumer-boundary journey check for every J-n → cases from GWT at the cheapest layer → tracking validation for every EV-n (`tracking: yes`) → exploratory charters → trace matrix → regression plan |
+| **"Is this well covered?"** | Check matrix holes → boundary review → edge-states comparison (UI) |
 | **Defect found** | Write defect ticket → verify fix → add to regression set |
-| **Pre-release** | Full regression on affected modules → coverage matrix final check |
+| **Pre-release** | Regression selected by change impact; a full suite only where the project's release policy requires it → coverage matrix final check |
 
 ## Gotchas
 
-- **Green unit tests, unusable product.** Every key journey J-n needs a real consumer-boundary check: browser for UI, API/CLI/SDK/batch execution for other products. Keep the E2E matrix label for journey-level checks, not a requirement that all assertions use a browser. `e2e: null` is not acceptable for a UI change (v4 gate `E2E`). Details: [e2e-and-exploratory.md](references/e2e-and-exploratory.md).
+- **Green unit tests, unusable product.** Every key journey J-n needs a real consumer-boundary check: a browser for UI, API/CLI/SDK/batch execution for other surfaces. The matrix label **E2E** marks journey-level checks; it does not require every assertion to use a browser, and screenshots are evidence only for UI. `e2e: null` is not acceptable for a UI change (v4 gate `E2E`). Details: [e2e-and-exploratory.md](references/e2e-and-exploratory.md).
 - **Scripted tests only find what you imagined.** Run at least one exploratory charter on the riskiest area per L2+ feature and log it.
-- **Events are features.** Each EV-n gets a validation row (fired once, right properties, right identity), or the launch cannot be measured.
-- **The matrix proves "there is a mapping," not "the mapping is effective."** `assert True` can fill a cell. Hole detection is mechanical; hollow testing is not — that's G-fresh's job.
-- **SQLite silently accepts PostgreSQL syntax (like `NULLS LAST`).** SQL dialect features need real-DB verification — this caused a production incident.
-- **Test environment must match production dialect.** SQLite unit tests can be useful but do not establish production-dialect correctness for affected SQL behavior.
-- **Regression only runs affected surface** (from story dependency graph) — full regression is for pre-release, not every ticket.
+- **Events are features.** With `tracking: yes`, each EV-n gets a validation row (fired once, right properties, right identity), or the launch cannot be measured. The `collect` companion owns the event-validation method.
+- **The matrix proves "there is a mapping," not "the mapping is effective."** `assert True` (or `… or True`) can fill a cell. Hole detection is mechanical; hollow testing is not — that's G-fresh's job.
+- **Preconditions must be real state.** A Given that reads data must commit or persist it inside the same test; a case that relies on another test's leftovers passes alone and fails in another order.
+- **SQLite silently accepts PostgreSQL syntax (like `NULLS LAST`).** SQLite unit tests can be useful but do not establish production-dialect correctness for affected SQL behavior — a verified production escape came from exactly this.
+- **Cases may go beyond the literal GWT.** Derive boundary, concurrency, security and compatibility cases from accepted invariants; escalate an ambiguous business outcome to PM instead of guessing it, and do not stop only because a case was not spelled out.
+- **Regression follows change impact** (story dependency graph). Full regression is a release-policy decision, not a per-ticket rule.
 
 ## Key decisions
 
@@ -42,7 +44,7 @@ For each FR's acceptance criteria:
 | FR-01 | TC-001 | test_file.py:12 | ✅ | |
 | FR-03 | — | — | ❌ hole | Must add test or document exemption |
 
-**Matrix holes are the verify exit condition** — every hole needs a test or a documented exemption with reasoning. Write the matrix to `04-verify/coverage.md` (gate path; not `trace-matrix.md` as the filename). `check-matrix.py` requires every FR / NFR / EV-n id in the matrix and every J-n on a row marked **E2E**.
+**Matrix holes are the verify exit condition** — every hole needs a test or a documented exemption with reasoning. Write the matrix to `04-verify/coverage.md` (gate path; not `trace-matrix.md` as the filename). `check-matrix.py` requires every FR / NFR / EV-n id in the matrix and every J-n on a row marked **E2E**. Test code and run results stay canonical; the matrix indexes them by ID and version instead of copying assertions.
 
 ### Environment fidelity
 
@@ -52,23 +54,25 @@ Test environment must match the production properties relevant to the risk; reco
 
 | Direction | Content |
 |---|---|
-| **Input** | spec (FR/NFR, journeys J-n) · `01-define/tracking.md` (EV-n) · implementation evidence + integration files · edge-states matrix · API contracts · running app (`app.base_url`) |
-| **Output** | `04-verify/coverage.md` (matrix shape: [templates/trace-matrix.md](templates/trace-matrix.md)) · E2E run (recorded as script gate `e2e`) · `test-report.md` incl. exploratory sessions · defect tickets |
+| **Input** | spec (FR/NFR, journeys J-n) · `01-define/test-plan.md` · `01-define/tracking.md` (EV-n) · implementation evidence + integration files · edge-states matrix (UI) · API contracts · running app (`app.base_url`) |
+| **Output** | define: `01-define/test-plan.md` · verify: `04-verify/coverage.md` (matrix shape: [templates/trace-matrix.md](templates/trace-matrix.md)) · E2E run (recorded as script gate `e2e`) · `test-report.md` incl. exploratory sessions · defect tickets |
+| **Source writes** | verify tasks may write assigned test code, fixtures and test-runner configuration through the packet's `source_writes`; inspection-only runs omit it; `define/test-plan` never writes project source. None of this authorizes product-code fixes or a changed business oracle |
 | **Downstream** | Defect tickets → implement rework · `04-verify/coverage.md` → `qc` |
 | **Refuse** | Fixing defects (write tickets, don't fix) · release decisions (→ qc) · writing implementation code |
 
 ## Self-check
 
-- [ ] Every journey J-n has an E2E row that ran on the running app, with failure screenshots configured?
-- [ ] Every EV-n has a validation row?
-- [ ] At least one exploratory charter run and logged (L2+)?
-- [ ] Every FR/NFR has at least one row in the matrix?
-- [ ] Boundary cases tested (empty/oversized/concurrent/unauthorized)?
-- [ ] Edge-states from design compared screen by screen?
+- [ ] define/test-plan: acceptance IDs, failure modes, layers, fixtures, environment and pending decisions — and no invented execution results?
+- [ ] verify: every journey J-n has an E2E row that actually ran at its consumer boundary (browser with failure screenshots for UI; real API/CLI/SDK/batch calls otherwise)?
+- [ ] `tracking: yes`: every EV-n has a validation row?
+- [ ] L2+ verify: at least one exploratory charter run and logged?
+- [ ] Every FR/NFR has at least one row in the matrix (or a documented exemption)?
+- [ ] Boundary cases tested where the risk applies (empty/oversized/concurrent/unauthorized)?
+- [ ] UI: edge-states from design compared screen by screen?
 - [ ] Assertions are related to the standard (not assert True)?
 - [ ] Defect reports have repro steps + expected vs actual + evidence?
 - [ ] Fixed defects added to regression set?
-- [ ] Test environment matches production dialect?
+- [ ] Test environment matches the production properties each risk depends on (SQL dialect when SQL behavior changed); residual differences recorded?
 
 ## Deep references — when to read them
 
@@ -77,22 +81,13 @@ Test environment must match the production properties relevant to the risk; reco
 | [e2e-and-exploratory.md](references/e2e-and-exploratory.md) | Journey E2E scope and discipline, tracking validation rows, exploratory charters and heuristics |
 | [case-derivation.md](references/case-derivation.md) | Deriving cases from GWT (happy / empty / unauthorized / transitions) |
 | [test-layering.md](references/test-layering.md) | Unit / integration / E2E split, dialect fidelity |
-| [auto-agents-pitfalls.md](references/auto-agents-pitfalls.md) | Verified auto_agents traps (code+test / ESC / gate only) |
 | [templates/trace-matrix.md](templates/trace-matrix.md) | FR ↔ case matrix |
 | [templates/test-report.md](templates/test-report.md) | Test report |
 | [templates/bug-report.md](templates/bug-report.md) | Defect ticket |
 | `scripts/check-matrix.py` | Mechanical hole detection. G-script `--hat verify` / any run with `coverage.md` on disk invokes this (FR **and** NFR). |
 
-> Gotchas based on: `anthropics/skills@41bbe19` (webapp-testing Common Pitfall pattern, 2026-09-03) · ESC-2 from auto_agents production incident
+> Gotchas based on: `anthropics/skills@41bbe19` (webapp-testing Common Pitfall pattern, 2026-09-03) · a verified production dialect escape (ESC-2)
 
 ## Role-specific review
 
 For the assigned role, apply [references/role-quality.md](references/role-quality.md) alongside this procedure’s self-check. Reviewers use the same criteria.
-
-## Early planning and evidence ownership
-
-Use `define/test-plan` before implementation to write `01-define/test-plan.md`: acceptance IDs, critical failure modes, appropriate test layers, data/fixtures, environment and pending decisions. It does not require execution results or a finished coverage matrix. Reuse this plan in `verify/risk-based-tests`; actual test code/results remain canonical, coverage.md indexes them by ID/version rather than copying assertions.
-
-QA may derive boundary, concurrency, security and compatibility cases from accepted invariants. Escalate ambiguous business outcomes to PM; do not stop merely because a test case was not literally specified. Choose the cheapest layer that can falsify each risk; keep a small set of actual consumer journeys. Select regression by change impact; full-suite requirements come from project release policy, not a universal feature rule. The `collect` companion owns event-validation method.
-
-QA verify tasks may write assigned test code, fixtures and test-runner configuration through optional project `source_writes`; inspection/execution-only tasks may omit it. This does not authorize product-code fixes or changing the accepted business oracle. Early test-plan tasks do not write project source.

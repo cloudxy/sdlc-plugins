@@ -49,12 +49,13 @@ Discovery / ops:
 | `discover` | `general-purpose` + PLUGIN_ROOT + follow `skills/discover/SKILL.md` | all |
 | `market` | `sdlc-workflow:researcher` | all |
 | `compete` | `sdlc-workflow:competitor` | all |
-| `falsify` | `general-purpose` + PLUGIN_ROOT + follow `skills/falsify/SKILL.md` | all |
+| `falsify` | `general-purpose` + PLUGIN_ROOT + follow `skills/falsify/SKILL.md` (deprecated compatibility entry until 2026-12-31; its cases move to `discover` before removal) | all |
 | `enablement` | `sdlc-workflow:ops` + packet `stage: enablement` `primary_skill: sdlc-workflow:enablement` | all |
 | `signals` | `sdlc-workflow:ops` + packet `stage: signals` `primary_skill: sdlc-workflow:signals` | all |
 | `deliver` | `sdlc-workflow:sre`, task selected from registry | all |
 | `retro` | `sdlc-workflow:analyst`, plan or readout | all |
 | `prototype` | designer/market/prototype | all |
+| `imagery` | `general-purpose` + PLUGIN_ROOT + follow `skills/imagery/SKILL.md`, offline: the arm must not run `scripts/grok/auth.py` or `scripts/image/generate.py` | all (policy cases). A case that needs a real image call runs only with the operator's authorization and `imagery.enabled`, reported separately |
 | `sdlc-eval` | isolated manager simulation; no recursive judge spawning | protocol cases |
 
 Orchestration:
@@ -78,6 +79,12 @@ Orchestration:
 - **A rubric delta is evidence, not proof.** Report scores with the judges' rationales and the number of cases; one case is an anecdote.
 - **Regressions run in the past.** The arm works in `snapshot/` (the project at the baseline commit), never in the live repository: at HEAD the old design is already built, reviewed and fixed, and copying it is hindsight. The leak scan decides — INVALID is never judged; REVIEW is the user's call, not yours.
 - **Judges see deliverables only.** Blind copies drop the `.sdlc/<feature>/` prefix and keep only the case's deliverables (skill mode: everything except memory/ and product-delta.md), so a side cannot be recognized by its folder layout.
+
+## Reproducibility and result limits
+
+Write a run manifest with plugin revision/tree hash, case/rubric versions, selected registry task, model/settings, tools, input snapshot, budget and seed when supported. Both arms get equivalent task inputs, tool access, time and output budget; only the skill treatment differs. Use real check_packet-valid routing for role tasks, and explicit manager simulations for discover/sdlc/sdlc-eval. Companion skills require a valid primary task; do not invent primary_skill=tdd on a backend implementation task.
+
+Enumerate changed skills and their conditional branches rather than silently retaining old UI-only or two-case defaults. Unrun cases, unavailable host roles and unsupported graders are reported as untested, not pass. Mechanical checks validate structure; blind evaluation tests output quality; end-to-end host smoke tests delegation and tool integration. None substitutes for the others. The meta-harness skill is evaluated by protocol fixtures or isolated outputs, never by recursively launching itself.
 
 ## Plugin root and workspace
 
@@ -151,9 +158,3 @@ Before merging a change to a role profile, skill or protocol: run the affected s
 - [ ] Regression mode: arms worked in `snapshot/` from `regression-prepare`; the leak scan ran; no INVALID case was judged; every REVIEW decision is the user's, recorded with `leak-review`?
 - [ ] Reported verdicts and rationales, not just numbers; every judge claim repeated was checked in the cited file; no judging in this window?
 - [ ] Did not touch health-check or crontab?
-
-## Reproducibility and result limits
-
-Write a run manifest with plugin revision/tree hash, case/rubric versions, selected registry task, model/settings, tools, input snapshot, budget and seed when supported. Both arms get equivalent task inputs, tool access, time and output budget; only the skill treatment differs. Use real check_packet-valid routing for role tasks, and explicit manager simulations for discover/sdlc/sdlc-eval. Companion skills require a valid primary task; do not invent primary_skill=tdd on a backend implementation task.
-
-Enumerate changed skills and their conditional branches rather than silently retaining old UI-only or two-case defaults. Unrun cases, unavailable host roles and unsupported graders are reported as untested, not pass. Mechanical checks validate structure; blind evaluation tests output quality; end-to-end host smoke tests delegation and tool integration. None substitutes for the others. The meta-harness skill is evaluated by protocol fixtures or isolated outputs, never by recursively launching itself.

@@ -15,7 +15,7 @@
 | granularity | ✅ | 时间粒度（daily/weekly/monthly） |
 | dimensions | ✅ | 可钻取的维度列表 |
 | exclusions | ✅ | 排除口径（哪些数据被排除、为什么） |
-| owner | ✅ | 谁负责这个指标的正确性 |
+| owner | ✅ | 业务负责人：决定指标的含义与阈值，对「这个数代表什么」负责；计算实现与本文件由 data-warehouse-engineer 维护 |
 
 ## 常见错误
 

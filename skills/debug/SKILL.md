@@ -26,6 +26,9 @@ A repeated G-fresh fail is a **hypothesis problem, not an effort problem**. Re-r
 - **One mechanism per round.** If you find two independent causes, fix the one that failed the gate; report the second in `open_questions` for its own round/ticket.
 - **Flaky ≠ fixed.** A test that passes after your fix but failed for a different reason each of the last 3 runs is still open; say so.
 - **Do not touch GWT/schema/tokens to make a failure disappear.** If the oracle itself is wrong, that is a pm/dba/designer decision — stop and return it as an open question.
+- **Not every disagreement is a defect.** Business-direction or aesthetic disagreement routes to its decision owner; do not demand a shell reproduction for it.
+- **Causes can chain.** Several causal factors may form one failure chain; report limits and the next discriminating test.
+- **Mitigation first in incidents.** Incident response order belongs to deliver; diagnosis never delays a necessary mitigation.
 
 ## Self-check
 
@@ -35,5 +38,3 @@ A repeated G-fresh fail is a **hypothesis problem, not an effort problem**. Re-r
 - [ ] Fix touched only the surface the mechanism implies?
 - [ ] Failed gate re-run with verbatim output + exit code?
 - [ ] `root_cause` returned; second issues parked in open_questions?
-
-Business-direction or aesthetic disagreement routes to its decision owner; do not demand a shell reproduction for it. Multiple causal factors may form one failure chain. Report limits and the next discriminating test; one passing rerun does not prove an intermittent defect fixed. Incident response order belongs to deliver; diagnosis does not delay necessary mitigation.

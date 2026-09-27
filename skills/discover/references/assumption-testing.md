@@ -40,7 +40,7 @@ See [evidence.md](evidence.md), the sole definition of evidence labels. Grades d
 - **Bet** → name the metric that define must use as north-star or driver.  
 - **Pass** → scoped assumptions supported by relevant evidence and failure criteria not triggered; disclose what remains unknown.
 
-Write the table into `00-discover/briefing.md` § Falsify (template lives with discover). Optional copy: [assumptions template](../../falsify/templates/assumptions.md).
+Write the table into `00-discover/briefing.md` § Falsify (template lives with discover). Optional copy: [assumptions template](../templates/assumptions.md).
 
 ## Self-check
 
@@ -53,4 +53,4 @@ Write the table into `00-discover/briefing.md` § Falsify (template lives with d
 
 | Reference | Read when... |
 |---|---|
-| [assumptions template](../../falsify/templates/assumptions.md) | Standalone assumption table |
+| [assumptions template](../templates/assumptions.md) | Standalone assumption table |

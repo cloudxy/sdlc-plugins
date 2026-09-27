@@ -33,6 +33,7 @@ Assignments (generated):
 - `accept` / `walkthrough` → `sdlc-workflow:prd-gwt`; companions: none; no project source writes; task check, then applicable stage gate.
 - `product` / `bootstrap` → `sdlc-workflow:prd-gwt`; companions: none; no project source writes; task check, then applicable stage gate.
 - `product` / `apply-decisions` → `sdlc-workflow:prd-gwt`; companions: none; no project source writes; task check, then applicable stage gate.
+- `cycle` / `apply-decisions` → `sdlc-workflow:prd-gwt`; companions: none; no project source writes; task check only until stage dependencies finish.
 
 Product write scope (generated): feature-map.md, strategy.md. Packet may narrow it.
 
@@ -64,4 +65,4 @@ Use only the packet’s assigned `memory_file`, if present. Keep concise feature
 ## Contract
 
 Deliverable: Report the packet deliverable_paths, actual scoped source changes and owned product updates. Write only within the packet’s validated scopes and assigned memory_file; assignments are task capabilities, not blanket permission.
-Return: Output paths · short summary · decisions · open_questions (only unresolved decisions outside existing authority; include owner and affected work) · product-delta rows. Return references, not full file bodies.
+Return: Output paths · short summary · decisions · open_questions (only unresolved decisions outside existing authority; include owner and affected work) · product-delta rows · lesson rows only for a trap verified here (code+test, escape id, or gate command + exit; the manager records them in the project's `.sdlc/_lessons.md`). Return references, not full file bodies.

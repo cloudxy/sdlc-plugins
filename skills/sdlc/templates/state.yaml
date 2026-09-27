@@ -60,6 +60,8 @@ stale_artifacts: []   # 上游变更导致失效的下游工件
 open_questions: []    # 必须含 spec/briefing 里「待确认」的 Q-* ；空数组而仍待确认 = OPENQ
                       # 推荐 {id, class: 战略|运营, status: open|answered|external, owner, recommended: <帽子的推荐>}；纯字符串视为 open
                       # 战略决策 answered 必须带 quote: "<操作者原话>", by: user, at；没回答 = open（沉默不是同意）
+                      # 由他人决定、操作者转达时另记 decided_by: <决定者>, relayed_by: user, authority: <为何有权决定>；
+                      # 闸门只检查会话里记录的原话，不核验身份：写明「据操作者转达」，不要写成已核实
                       # status≠answered 且 current_hat 已过 define = OPENQOPEN
 lane_changes: []      # [{from, to, reason, at}]
 # host_spawn:          # 缺省不要写 host_spawn: {} —— 整文件重写会覆盖已有回退记录

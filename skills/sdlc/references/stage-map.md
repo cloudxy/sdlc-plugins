@@ -8,59 +8,64 @@ Authoritative mappings: `workflow/registry.json`. Scheduling, inputs and partici
 Query one contract: `python3 PLUGIN_ROOT/scripts/workflow.py contract --role designer --stage designer --task explore`.
 Task presence checks do not advance state. Use `check-sdlc.sh --hat <stage>` only after that stage's participating tasks finish.
 
-| Role | Stage | Task | Skill | Required artifacts |
-|---|---|---|---|---|
-| researcher | market | survey | market | 00-discover/market.md |
-| competitor | compete | survey | compete | 00-discover/compete.md |
-| growth | growth | positioning | growth | 00-discover/growth.md |
-| pm | define | spec | prd-gwt | 01-define/spec.md / 01-define/spec-s.md / spec-s.md |
-| ops | signals | listen | signals | 01-define/requirement-pool.md |
-| designer | designer | explore | design-contract | 02-shape/design-brief.md; 02-shape/design-directions.md; 02-shape/prototypes/* / 02-shape/prototypes/**/* |
-| designer | designer | specify | design-contract | 02-shape/design-directions.md; 02-shape/flows.md; 02-shape/edge-states.md; 02-shape/prototypes/final/* / 02-shape/prototypes/final/**/* |
-| architect | define | feasibility | architecture | 01-define/architecture-feasibility.md |
-| architect | shape | change-impact | architecture | 02-shape/architecture-change-impact.md |
-| architect | verify | conformance | architecture | 04-verify/architecture-conformance.md |
-| architect | shape | contract | architecture | 02-shape/contract.md |
-| dba | dba | model | schema | 02-shape/db-spec.md; 02-shape/schema.dbml |
-| data-collector | collect | tracking | collect | 02-shape/collect/tracking-impl.md |
-| data-collector | collect | source | collect | 02-shape/collect/data-source-analysis.md |
-| data-warehouse-engineer | warehouse | metrics | warehouse | 02-shape/warehouse/metrics.yaml |
-| data-warehouse-engineer | warehouse | tags | warehouse | 02-shape/warehouse/tags.yaml |
-| frontend | implement | T-<n> | impl-evidence | 03-impl/*evidence*.md |
-| backend | implement | T-<n> | impl-evidence | 03-impl/*evidence*.md |
-| algo | implement | T-<n> | impl-evidence | 03-impl/*evidence*.md |
-| miner | implement | T-<n> | impl-evidence | 03-impl/*evidence*.md |
-| pm | accept | walkthrough | prd-gwt | 04-verify/accept-pm.md |
-| designer | accept | design-qa | design-contract | 04-verify/accept-design.md |
-| growth | accept | claims-check | growth | 04-verify/accept-growth.md |
-| qa | verify | risk-based-tests | coverage-matrix | 04-verify/coverage.md |
-| reviewer | review | G-fresh | findings | 05-review/findings.md |
-| qc | qc | release-opinion | release-gate | 06-deliver/release-opinion.md |
-| sre | deliver | checklist | deliver | 06-deliver/checklist.md |
-| ops | enablement | teach-open-announce | enablement | 06-deliver/enablement.md |
-| growth | launch | precision-marketing | growth | 06-deliver/launch.md |
-| analyst | retro | readout | retro | 07-retro/retro.md |
-| pm | product | bootstrap | prd-gwt | product:feature-map.md; product:strategy.md |
-| growth | product | bootstrap | growth | product:growth.md |
-| designer | product | bootstrap | design-contract | product:design-system.md |
-| architect | product | bootstrap | architecture | product:architecture.md |
-| dba | product | bootstrap | schema | product:domain-model.md; product:erd.dbml |
-| data-warehouse-engineer | product | bootstrap | warehouse | product:data/metrics.yaml; product:data/tags.yaml |
-| data-collector | product | bootstrap | collect | product:data/tracking-plan.yaml |
-| pm | product | apply-decisions | prd-gwt | product:feature-map.md; product:strategy.md |
-| reviewer | product | G-fresh | findings | manager: .sdlc/_product/findings.md |
-| dba | dba | optimize | schema | 02-shape/db-optimization.md |
-| dba | dba | migration | schema | 02-shape/migration-review.md |
-| data-collector | collect | implement | collect | 03-impl/collect-evidence.md |
-| data-collector | collect | validate | collect | 04-verify/collect-validation.md |
-| data-warehouse-engineer | warehouse | design | warehouse | 02-shape/warehouse/design.md |
-| data-warehouse-engineer | warehouse | implement | warehouse | 03-impl/warehouse-evidence.md |
-| data-warehouse-engineer | warehouse | validate | warehouse | 04-verify/warehouse-validation.md |
-| qa | define | test-plan | coverage-matrix | 01-define/test-plan.md |
-| sre | deliver | ci | cicd | 06-deliver/ci.md |
-| sre | deliver | prepare | deliver | 06-deliver/readiness.md |
-| analyst | define | measurement-plan | retro | 01-define/measurement-plan.md |
-| designer | market | prototype | prototype | 00-discover/prototypes/report.md |
+| Role | Stage | Task | Scope · lifecycle | Skill | Required artifacts |
+|---|---|---|---|---|---|
+| researcher | market | survey | feature · discover | market | 00-discover/market.md |
+| competitor | compete | survey | feature · discover | compete | 00-discover/compete.md |
+| growth | growth | positioning | feature · discover | growth | 00-discover/growth.md |
+| pm | define | spec | feature · define | prd-gwt | 01-define/spec.md / 01-define/spec-s.md / spec-s.md |
+| ops | signals | listen | feature · define | signals | 01-define/requirement-pool.md |
+| designer | designer | explore | feature · shape | design-contract | 02-shape/design-brief.md; 02-shape/design-directions.md; 02-shape/prototypes/* / 02-shape/prototypes/**/* |
+| designer | designer | specify | feature · shape | design-contract | 02-shape/design-directions.md; 02-shape/flows.md; 02-shape/edge-states.md; 02-shape/prototypes/final/* / 02-shape/prototypes/final/**/* |
+| architect | define | feasibility | feature · define | architecture | 01-define/architecture-feasibility.md |
+| architect | shape | change-impact | feature · shape, implement, verify | architecture | 02-shape/architecture-change-impact.md |
+| architect | verify | conformance | feature · verify | architecture | 04-verify/architecture-conformance.md |
+| architect | shape | contract | feature · shape | architecture | 02-shape/contract.md |
+| dba | dba | model | feature · shape | schema | 02-shape/db-spec.md; 02-shape/schema.dbml |
+| data-collector | collect | tracking | feature · shape | collect | 02-shape/collect/tracking-impl.md |
+| data-collector | collect | source | feature · shape | collect | 02-shape/collect/data-source-analysis.md |
+| data-warehouse-engineer | warehouse | metrics | feature · shape | warehouse | 02-shape/warehouse/metrics.yaml |
+| data-warehouse-engineer | warehouse | tags | feature · shape | warehouse | 02-shape/warehouse/tags.yaml |
+| frontend | implement | T-<n> | feature · implement | impl-evidence | 03-impl/*evidence*.md |
+| backend | implement | T-<n> | feature · implement | impl-evidence | 03-impl/*evidence*.md |
+| algo | implement | T-<n> | feature · implement | impl-evidence | 03-impl/*evidence*.md |
+| miner | implement | T-<n> | feature · implement | impl-evidence | 03-impl/*evidence*.md |
+| pm | accept | walkthrough | feature · accept | prd-gwt | 04-verify/accept-pm.md |
+| designer | accept | design-qa | feature · accept | design-contract | 04-verify/accept-design.md |
+| growth | accept | claims-check | feature · accept | growth | 04-verify/accept-growth.md |
+| qa | verify | risk-based-tests | feature · verify | coverage-matrix | 04-verify/coverage.md |
+| reviewer | review | G-fresh | feature · define, shape, implement, review | findings | 05-review/findings.md |
+| qc | qc | release-opinion | feature · release | release-gate | 06-deliver/release-opinion.md |
+| sre | deliver | checklist | feature · release | deliver | 06-deliver/checklist.md |
+| ops | enablement | teach-open-announce | feature · release | enablement | 06-deliver/enablement.md |
+| growth | launch | precision-marketing | feature · release | growth | 06-deliver/launch.md |
+| analyst | retro | readout | feature · learn | retro | 07-retro/retro.md |
+| pm | product | bootstrap | product · — | prd-gwt | product:feature-map.md; product:strategy.md |
+| growth | product | bootstrap | product · — | growth | product:growth.md |
+| designer | product | bootstrap | product · — | design-contract | product:design-system.md; evidence:assets/screens/* |
+| architect | product | bootstrap | product · — | architecture | product:architecture.md |
+| dba | product | bootstrap | product · — | schema | product:domain-model.md; product:erd.dbml |
+| data-warehouse-engineer | product | bootstrap | product · — | warehouse | product:data/metrics.yaml; product:data/tags.yaml |
+| data-collector | product | bootstrap | product · — | collect | product:data/tracking-plan.yaml |
+| pm | product | apply-decisions | product · — | prd-gwt | product:feature-map.md; product:strategy.md |
+| reviewer | product | G-fresh | product · — | findings | manager: .sdlc/_product/findings.md |
+| dba | dba | optimize | feature · shape, implement | schema | 02-shape/db-optimization.md |
+| dba | dba | migration | feature · shape, implement | schema | 02-shape/migration-review.md |
+| data-collector | collect | implement | feature · implement | collect | 03-impl/collect-evidence.md |
+| data-collector | collect | validate | feature · verify | collect | 04-verify/collect-validation.md |
+| data-warehouse-engineer | warehouse | design | feature · shape | warehouse | 02-shape/warehouse/design.md |
+| data-warehouse-engineer | warehouse | implement | feature · implement | warehouse | 03-impl/warehouse-evidence.md |
+| data-warehouse-engineer | warehouse | validate | feature · verify | warehouse | 04-verify/warehouse-validation.md |
+| qa | define | test-plan | feature · define | coverage-matrix | 01-define/test-plan.md |
+| sre | deliver | ci | feature · implement, release | cicd | 06-deliver/ci.md |
+| sre | deliver | prepare | feature · release | deliver | 06-deliver/readiness.md |
+| analyst | define | measurement-plan | feature · define | retro | 01-define/measurement-plan.md |
+| designer | market | prototype | feature · discover | prototype | 00-discover/prototypes/report.md |
+| ops | cycle | signals-digest | cycle · learn | signals | outputs/signals-digest.md |
+| analyst | cycle | readout | cycle · learn | retro | outputs/readout.md |
+| growth | cycle | experiments | cycle · learn | growth | outputs/experiments.md |
+| pm | cycle | apply-decisions | cycle · learn | prd-gwt | outputs/decisions.md |
+| data-warehouse-engineer | cycle | tags-refresh | cycle · learn | warehouse | outputs/tags-refresh.md |
 
 ## Progress and rank
 
@@ -86,6 +91,7 @@ Task presence checks do not advance state. Use `check-sdlc.sh --hat <stage>` onl
 | launch | deliver | 9 |
 | retro | retro | 10 |
 | product | — | 0 |
+| cycle | — | 0 |
 
 ## Lane completion vocabulary
 

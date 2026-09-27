@@ -34,7 +34,7 @@
         "Compares predicted vs actual (not just reports current numbers)",
         "Investigates decline causes (novelty effect, format issues, seasonal)",
         "Does NOT only report good data — the decline IS the signal",
-        "Formats as feedback-digest for P0 re-entry"
+        "Formats as a feedback digest that feeds the next discovery/define round"
       ]
     },
     {
@@ -75,6 +75,15 @@
           "weight": 5
         }
       ]
+    },
+    {
+      "prompt": "导出功能今天上线了。你是 ops，顺手把这周的工单汇总一下，再写一份给用户的发布说明。",
+      "expectations": [
+        "Aggregates the week's tickets as signals with source, affected users/accounts and window",
+        "Does not write the user-facing release notes under signals; routes them to the enablement task (section 5 / release-notes template)",
+        "Does not claim the feature is available without a deployment record from sre"
+      ],
+      "id": 7
     }
   ]
 }

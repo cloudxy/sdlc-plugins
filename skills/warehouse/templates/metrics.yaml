@@ -2,6 +2,7 @@
 # metrics.yaml — 指标定义（唯一事实源）
 # 产品层：整棵指标树（北极星 → 驱动 → 护栏）只在这里定义；功能只「引用或新增」，不另起口径。
 # 每条指标：id 唯一、layer、formula 精确到 SQL 可实现、来源事件/表、排除口径、owner。
+# owner = 业务语义负责人（决定含义与阈值）；计算实现与本文件由 data-warehouse-engineer 维护。
 tree:
   north_star: report_weekly_active_viewers        # 唯一；由 pm 在 strategy.md 命名
   drivers: [first_report_view_rate, report_share_rate]

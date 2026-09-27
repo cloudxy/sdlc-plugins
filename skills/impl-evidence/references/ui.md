@@ -10,17 +10,17 @@ Job: **turn design contracts into interactive reality** — tokens over hardcodi
 | **Debug UI issue** | Screenshot → inspect DOM → trace to CSS/state → fix → re-screenshot |
 | **Add a11y** | Semantic tags → ARIA → keyboard navigation → contrast check |
 
-## Gotchas — auto_agents examples, only for a matching stack
+## Gotchas — verified lessons; check they match your stack
 
 Use the current project framework, component library and authoritative build commands. The examples below do not mandate React, antd, npm or a two-app workspace. Native UI uses its device/preview/test tools.
 
 
-- **shared package: `main` points to `dist/`.** After editing shared source, run `npm run build -w @auto-agents/frontend-shared` or the app consumes stale output. This caused a runtime crash ([axios CJS interop]).
-- **`@ant-design/icons` uses ESM.** Jest needs `transformIgnorePatterns` exceptions for `@ant-design|antd|rc-|@rc-component|@auto-agents` — without them, all tests fail with "Cannot use import statement outside a module".
+- **Workspace packages consumed through build output go stale.** After editing a shared package's source, rebuild it (or point consumers at source) before running an app; a stale build caused a verified runtime crash.
+- **ESM-only dependencies need test-transform exceptions.** Configure the test runner to transpile them, or every suite fails with "Cannot use import statement outside a module".
 - **Fullwidth characters (`（）：`) adjacent to bare bash variables** cause bash 3.2 to parse them as part of the variable name. Use `${VAR}` always.
-- **antd v6 deprecates `Spin tip`, `Alert message`, `Drawer width`** — use `description`, `title`, `size` respectively. Warnings appear in test output.
 - **`status` is a read-only variable in zsh.** Don't use it as a variable name in build scripts.
-- **localStorage persists across browser restarts.** Permission caches stored there outlive the session — clear on logout or version change.
+- **An empty permission cache means "not loaded yet".** Refetch after a reload; never render it as "no permissions" (blank navigation) or as "all permissions" (privileged entries leak). Caches in localStorage outlive the session — clear on logout or version change.
+- **Untrusted third-party text renders as text.** Never pass it through a markdown/HTML renderer; when the page moves, its XSS test moves with it.
 
 ## From the final prototype to code
 
@@ -103,7 +103,6 @@ Second occurrence = extract to component library. Don't write the same Card+Tabl
 | [frontend-design](../../../vendor/anthropic-skills/skills/frontend-design/SKILL.md) | Deciding visual details the design did not specify (upstream original; install with `bash vendor/install.sh`) |
 | [edge-states-impl.md](ui/edge-states-impl.md) | Implementing a component with complex state (empty/loading/error/boundary) |
 | [state-and-data.md](ui/state-and-data.md) | Deciding state ownership, data fetching patterns, or debugging re-render issues |
-| [auto-agents-pitfalls.md](ui/auto-agents-pitfalls.md) | Verified auto_agents traps (code+test / ESC / gate only) |
 | [templates/impl-evidence.md](../templates/impl-evidence.md) | Implementation evidence (command + exit code) |
 
-> Gotchas based on: `anthropics/skills@41bbe19` (docx SKILL.md footgun pattern — 'the model knows the API; these are the footguns') · project incidents from auto_agents git history
+> Gotchas based on: `anthropics/skills@41bbe19` (docx SKILL.md footgun pattern — 'the model knows the API; these are the footguns') · verified incidents from a user project's history

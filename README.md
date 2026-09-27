@@ -15,7 +15,7 @@ ZCode 插件 · v4.1.0 · MIT
 | 泳道 L0–L4 | 按风险分级流程重量（一行修复免流程 → 标准功能链 → 放行/交付 → 数据线），参与角色由判定问题决定而非固定名单 |
 | 范围与完成目标 | `project_profile`（形态、技术栈、成熟度、数据/安全/发布约束）与 `delivery_goal` 决定这一趟做哪些任务；闸门只对声明完成的泳道有效，不为缩小的范围背书 |
 | 早期可行性 | 未决技术假设可能改变范围或体验时，先派 architect `define/feasibility` 回答问题，不要求先有完整 spec；结论回流 PM 与设计 |
-| 源码写权限 | 注册表按任务标 `writes_source` / `requires_source`，生产代码只能写进显式列出的 `source_writes` 路径；工件目录与产品层各有各的归属 |
+| 写入归属 | 注册表按任务标 `writes_source` / `requires_source`，生产代码只能写进显式列出的 `source_writes` 路径；派单包里的每个输出字段（交付物、产品文件、记忆、信号库）都按真实路径（解析符号链接与 `..`）和拥有者校验，位于某个目录内不等于有权写 |
 | 证据分级 E0–E4 | 研究与结论按证据形态分级（未证实 → 断言 → 可查工件 → 有口径的计数 → 已执行的测试），不以来源数量充数；缺来源即「未知」，不许编链接 |
 | 结构图与生成图 | 结构（流程/ER/架构）用 SVG 出图并对照权威来源做语义比对；位图素材（方向参考、空态插画、hero、图标）由 Grok 出图，按订阅授权调用，每张图留提示词与 digest。生成图不算渲染产物，也不算走查截图 |
 | 脚本闸门 G-script | `check-sdlc.sh` 以工件文件与内容判定各阶段是否可过，退出码即结论 |
@@ -24,6 +24,10 @@ ZCode 插件 · v4.1.0 · MIT
 | 三方验收 | PM 走查旅程、设计走查对照原型、增长核验卖点，任何一方不通过即返工 |
 | 验证与放行分开 | QA 早期就参与测试规划；QC 给的是有范围的放行意见，不等于部署授权；SRE 先做 QC 前的就绪准备，获授权后才执行发布 |
 | 状态账本 | 每个功能一份 `state.yaml`：目标与画像、当前阶段、已选任务、闸门记录、返工轮数；会话中断后从它恢复 |
+| 产品周期 | `/sdlc-product cycle <id>` 在功能泳道之外跑持续运营：ops 汇总用户信号进产品级信号库、analyst 读数、growth 实验、pm 逐条决定、按需刷新标签；周期有自己的目录与 `cycle.yaml`，关闭前逐项交代去向 |
+| 职能视图 | 19 个角色按产品 / 运营 / 设计 / 研发 / 质量分组，`function-map.md` 从注册表生成；分组不带任何权限。项目可在 `owners` 里写每个职能该问谁，经理提问时点名，回答仍以会话里记录的原话为准 |
+| 项目经验 | 在项目里核实过的坑（代码与测试、逃逸编号、闸门命令与退出码）由经理记进项目自己的 `.sdlc/_lessons.md`；插件的做法只保留跨项目成立的原则 |
+| 影响查询 | `workflow.py trace <ID>` 只读地列出一个 ID 的定义、上下游、验证记录与缺口；功能内的短 ID 按功能区分，状态只取自覆盖矩阵与证据记录 |
 
 ## 流程图
 
@@ -95,7 +99,7 @@ flowchart TD
 
   M -.->|L0| L0["一行修复：免流程，commit trailer lane=L0"]
   M -.->|single-hat / review-only| SH0["单帽产出 · /sdlc-review 只报告不推进"]
-  M -.->|product| PD["/sdlc-product 维护产品层"]
+  M -.->|product| PD["/sdlc-product 维护产品层 · cycle 产品周期"]
   M ==>|new-feature| D0
 
   D5 --> F1
@@ -165,6 +169,7 @@ flowchart TD
 | 05 review | reviewer 独立审查（无记忆新上下文，只读磁盘工件） | `05-review/findings.md` |
 | 06 qc / deliver | sre 先做就绪准备 → qc 给有范围的放行意见 → 获授权后 sre 执行发布，ops 开放公告、growth 投放 | `06-deliver/readiness.md`、`release-opinion.md`、`checklist.md`、`enablement.md`、`launch.md` |
 | 07 retro | analyst 按真实数据复盘 | `07-retro/retro.md` |
+| 周期（产品层） | 不属于某个功能：ops 信号汇总 → analyst 读数 → growth 实验 → pm 决定；数仓按需刷新标签 | `.sdlc/_product/cycles/<id>/cycle.yaml`、`outputs/*.md`、信号库 |
 
 ### 5. 三类闸门
 
@@ -174,7 +179,7 @@ flowchart TD
 
 ### 6. 人工决策点（经理呈现，人决定）
 
-发现带冻结 · 设计方向选定（`ui: yes` 且需要新方向时）· 战略问题（`Q-*` 类别为战略）· 验收「有条件通过」的取舍。战略问题一轮问完并**等**：沉默、没送达的提问、工具没返回都不算同意；没答案就 `phase: Stopped`，依赖它的阶段不开工。帽子擅自给战略问题填默认值（`DEFAULTED`）算返工，不是通过。
+发现带冻结 · 设计方向选定（`ui: yes` 且需要新方向时）· 战略问题（`Q-*` 类别为战略）· 验收「有条件通过」的取舍。战略问题一轮问完并**等**：沉默、没送达的提问、工具没返回都不算同意；没答案就 `phase: Stopped`，依赖它的阶段不开工。帽子擅自给战略问题填默认值（`DEFAULTED`）算返工，不是通过。配置了 `owners` 时，经理在提问里点名该由谁决定；他人决定、由你转达的回答另记 `decided_by`、`relayed_by` 与授权来源——闸门只核对记录的原话，不核验身份。
 
 ### 7. 状态、返工与恢复
 
@@ -208,10 +213,13 @@ flowchart TD
 | 一行修复 | 直接说「改个错别字，不要走流程」，经理判 L0 |
 | 评测插件本身 | 另开窗口 `/sdlc-eval <skill> <mechanical\|rubric\|regression>`（烧真实模型调用，人工触发） |
 | 开通出图能力 | `/sdlc-grok login` 用 Grok 订阅授权 → `/sdlc-grok probe` 确认这个档位真能出图 → 在项目 `sdlc.config.yaml` 把 `imagery.enabled` 设为 true |
+| 跑一轮产品周期 | 先在 `sdlc.config.yaml` 设 `signals_path`（信号库目录），再 `/sdlc-product cycle 2026-10`；收尾时经理跑 `check-sdlc.sh --hat cycle` |
+| 查一个 ID 牵动了什么 | `python3 scripts/workflow.py trace FR-3 --feature .sdlc/<功能>`；产品级 ID 用 `--project-root .`（如 `metric:<id>`、`SIG-202610-4`） |
+| 看自己的职能管哪些任务 | 读 `skills/sdlc/references/function-map.md` |
 
 ### 单独召唤做法技能
 
-不挂 `/sdlc` 时，27 个做法可以用 `$名称` 直接召唤，例如 `$prd-gwt` 写 spec、`$schema` 出库表设计、`$coverage-matrix` 出覆盖矩阵、`$debug` 走排障协议、`$tdd` 做测试先行。此时没有泳道与 G-fresh，产出质量由做法本身的标准保证。
+不挂 `/sdlc` 时，27 个做法可以用 `$名称` 直接召唤（`$falsify` 是 discover 方法的兼容入口，2026-12-31 退役），例如 `$prd-gwt` 写 spec、`$schema` 出库表设计、`$coverage-matrix` 出覆盖矩阵、`$debug` 走排障协议、`$tdd` 做测试先行。此时没有泳道与 G-fresh，产出质量由做法本身的标准保证。
 
 ### 交回来的东西在哪
 
@@ -231,7 +239,7 @@ flowchart TD
 
 19 个角色（`agents/`）：pm、researcher、competitor、growth、architect、dba、designer、frontend、backend、algo、miner、qa、reviewer、qc、sre、ops、analyst、data-collector、data-warehouse-engineer。角色定义身份、责任边界与红线，由 `profiles/` 与共享行为栈编译生成。
 
-27 个做法（`skills/`）以产出物命名（prd-gwt 产出 spec、schema 产出 db-spec、coverage-matrix 产出覆盖矩阵……），承载各专业的步骤与卓越标准。角色与做法的多对多映射、任务级工件路径、阶段等级、源码与产品写权限的唯一事实源是 `workflow/registry.json`，速查视图由其生成；角色按任务而非头衔接活，同一个帽在不同任务上的授权与产出各不相同（如 architect 的 feasibility / contract / change-impact / conformance）。
+27 个做法（`skills/`）以产出物命名（prd-gwt 产出 spec、schema 产出 db-spec、coverage-matrix 产出覆盖矩阵……），承载各专业的步骤与卓越标准。每个做法在注册表里登记类型（经理用 manager、角色主方法 role、实践方法 practice、兼容入口 compat）。角色与做法的多对多映射、任务的运行范围（功能 / 产品 / 周期）与生命周期阶段、任务级工件路径、阶段等级、源码与产品写权限的唯一事实源是 `workflow/registry.json`，速查视图由其生成；角色按任务而非头衔接活，同一个帽在不同任务上的授权与产出各不相同（如 architect 的 feasibility / contract / change-impact / conformance）。
 
 ## 目录结构
 
@@ -244,6 +252,7 @@ sdlc-workflow/
 ├── adapters/        宿主工具档、MCP 白名单与宿主事实
 ├── scripts/         闸门、健康检查、角色工厂、评测评分与一致性测试
 ├── vendor/          上游原件：仓库只含 install.sh 与锁文件，内容由使用者从源头下载
+├── maintainers/     维护者档案（不被任何 skill 加载），例如待项目方接收的项目经验归档
 └── .zcode-plugin/   插件清单
 ```
 
@@ -254,16 +263,20 @@ sdlc-workflow/
 - `sdlc.config.yaml`（项目根）：闸门命令、项目红线宪法路径、MCP 提醒清单、泳道阈值
 - `<product_root>/`：产品层
 - `.sdlc/<feature>/`：功能工件树（01-define → 02-shape → 03-impl → 04-verify → 05-review → 06-deliver → 07-retro）+ `state.yaml` + `evidence/runs/`（绑定代码版本的运行记录）+ 各角色运行时记忆
+- `.sdlc/_product/`：产品模式的进度与派单包；`cycles/<id>/` 是每个产品周期（`cycle.yaml`、`outputs/`、`packets/`、`memory/`）
+- `signals_path` 指向的信号库：跨功能的用户信号，只有 ops 的周期汇总能写，每条一个稳定的 `SIG-<年月>-<n>`
+- `.sdlc/_lessons.md`：本项目核实过的坑与逃逸记录
 
 ## 质量保障
 
 | 工具 | 职责 |
 |---|---|
-| `scripts/check-sdlc.sh` | 阶段工件闸门（存在性 + 内容语义） |
+| `scripts/check-sdlc.sh` | 阶段工件闸门（存在性 + 内容语义）；`--hat product` 查产品层，`--hat cycle` 查产品周期收尾 |
 | `scripts/health-check.sh` | 插件结构门禁：描述形态、预算上限、生成产物与源一致、防回归规则 |
 | `scripts/workflow.py` | 合同查询 / 任务级检查 / 生成 commands 与速查表 |
 | `scripts/check_config.py` | 开工前体检项目 `sdlc.config.yaml`（闸门命令、`app` 启动与 base_url、`product_root`），只读不改 |
-| `scripts/check_packet.py` | 派单前 lint 派单包：输入齐备、不许把调研与证据写成「可选」 |
+| `scripts/check_packet.py` | 派单前 lint 派单包：输入齐备、不许把调研与证据写成「可选」、所有输出字段按真实路径与拥有者校验 |
+| `scripts/sdlc_trace.py` | `workflow.py trace` 的实现：每次从工件重建只读索引，不写任何文件 |
 | `scripts/check_research_sources.py` | 只查带日期的 URL / 本地工件引用是否存在，不评判研究质量、不设来源配额 |
 | `scripts/evidence.py` | 把测试与验证的运行记录绑定到当时的代码版本（`state.yaml` 写「pass」不算证据） |
 | `scripts/diagram/` | 图示闸门：来源声明、安全检查、节点与边对照权威来源的语义比对 |

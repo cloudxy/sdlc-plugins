@@ -10,7 +10,7 @@ Read this at Step 0, when filling `product_context` / `product_writes` in any pa
 
 ## Files and templates
 
-Write ownership is generated in [stage-map.md](stage-map.md#product-write-ownership) from `workflow/registry.json`. Product packets may narrow that scope. PM contributes event proposals through tracking.md; the collector owns tracking-plan.yaml. Analyst updates only hypothesis status in strategy.md; PM owns strategy decisions.
+Write ownership is generated in [stage-map.md](stage-map.md#product-write-ownership) from `workflow/registry.json`. Product packets may narrow that scope. PM contributes event proposals through tracking.md; the collector owns tracking-plan.yaml. Analyst proposes hypothesis-status changes with evidence (retro readout); PM applies them to strategy.md through `apply-decisions` and records the outcome. PM owns strategy decisions; analyst has no product writes.
 
 | File under `product_root` | Template | Main readers |
 |---|---|---|
@@ -92,6 +92,10 @@ Markdown product files name data definitions instead of restating them: `metric:
 
 Upstream changes make downstream files stale: `strategy.md` → `growth.md`, `design-system.md`, `architecture.md`, `data/metrics.yaml`; `feature-map.md` → `growth.md`, `design-system.md`, `domain-model.md`, `data/tracking-plan.yaml`; `architecture.md` → `domain-model.md`; `domain-model.md` → `data/tracking-plan.yaml`; `data/tracking-plan.yaml` → `data/metrics.yaml`; `data/metrics.yaml` → `data/tags.yaml`, `growth.md`; `data/tags.yaml` → `growth.md`. `check-sdlc.sh --hat product` reads `CHANGELOG.md` in order and warns STALE when an upstream file changed after its downstream file was last written. Respawn the downstream owner, or record why the change does not affect it.
 
+## Signals store (not a product-layer file)
+
+Raw user signals across features live in the store named by `signals_path` in `sdlc.config.yaml` (template `skills/signals/templates/signal-store.md`), written only by ops' cycle digest, one stable `SIG-<yyyymm>-<n>` id per signal. It is not in any default `product_context` and has no line budget: packets carry a scoped excerpt (ids, filter, version) when a task needs it. PM's triage lives in the cycle's `outputs/decisions.md` and cites the ids; a feature's `01-define/requirement-pool.md` cites them too instead of copying the text.
+
 ## Writeback protocol
 
 - Owners edit their product files **in place** — the files describe the product as it is now, they are not append-only logs.
@@ -109,6 +113,7 @@ Product-level decisions live in `strategy.md` §9, feature-level ones in the spe
 | 战略 (strategic) | who to serve first, positioning, core value and Aha, pricing and paywalls, launch or gate timing, north star, scope cuts, money / data loss / security / compliance, anything hard to reverse | the operator, explicitly | 待确认 + options + the hat's recommendation; dependent text says 「待 Q-… 决定」 | 已确认 + 「the operator's words」 · who · date |
 | 运营 (operational) | a reversible detail inside decided strategy: page size, default sort, a threshold with a revisit trigger | the owning hat | — | 默认 + reason (listed in the manager's report) |
 
+- **Relayed answers.** When `sdlc.config.yaml` names `owners`, the manager says in the question who has to decide; the operator answers or relays. A relayed answer records the decider's words plus `decided_by`, `relayed_by` and the authority it rests on. The gates check the recorded words, not identity — write 「据操作者转达」 rather than implying verification. `owners` grants nothing.
 - **Silence is not consent.** A question the operator did not answer stays 待确认, and the work that depends on it waits. "按推荐" said by the operator is an answer. A question tool returning nothing is not.
 - **Gates.** DEFAULTED: a strategic row marked 默认, 已确认 without the operator's words, or 默认已定 / "未应答…按推荐" in product or feature text (CHANGELOG is history and is not scanned). DECISIONPENDING: a strategic row still 待确认 at the product gate or when a feature leaves define/shape.
 - 2026-09-17: `/sdlc-product` adopted five unanswered strategic calls (market opening, first paywall, checkout trigger, AI planning entry, the Aha gold standard) as 「默认已定·待复核」 and spread them through strategy, feature-map, growth and README. This section exists so that cannot pass a gate again.

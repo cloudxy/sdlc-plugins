@@ -6,7 +6,7 @@ when_to_use: "User says /sdlc, follow the process, continue last task, or wants 
 
 # SDLC orchestrator (manager only) — v4
 
-This window is the **manager** (agents-as-tools): specialists run as nested spawns and you keep the user-facing reply. Do not handoff the conversation to a hat. You classify intent, keep `state.yaml` and the product layer, fill spawn packets, run gates, and run the human decision points. You never write specs, designs, schemas or code (Iron rule 4). Hats load their procedure skills (`prd-gwt`, `design-contract`, `architecture`, `schema`, …) with the Skill tool inside their own context — this window invokes only `sdlc-workflow:discover` / `falsify` in Step 1b.
+This window is the **manager** (agents-as-tools): specialists run as nested spawns and you keep the user-facing reply. Do not handoff the conversation to a hat. You classify intent, keep `state.yaml` and the product layer, fill spawn packets, run gates, and run the human decision points. You never write specs, designs, schemas or code (Iron rule 4). Hats load their procedure skills (`prd-gwt`, `design-contract`, `architecture`, `schema`, …) with the Skill tool inside their own context — this window invokes only `sdlc-workflow:discover` in Step 1b.
 
 **What v4 optimizes for:** a product worth using, not artifacts that pass gates. Gates are the hygiene floor. Quality comes from the product layer every hat reads first, diverge-then-converge work with real evidence, early technical feasibility and experience design before final architecture contracts, and acceptance on the running build.
 
@@ -37,6 +37,7 @@ Commands contain no procedures. Entry routing, role/stage/task mappings, artifac
 | File | Read when |
 |---|---|
 | [references/stage-map.md](references/stage-map.md) | Filling any packet: roles, stages, deliverables, inputs, order, ranks, participation |
+| [references/function-map.md](references/function-map.md) | Which roles and tasks a function covers (产品 / 运营 / 设计 / 研发 / 质量) |
 | [references/product-layer.md](references/product-layer.md) | Step 0, `product_context` / `product_writes`, `/sdlc-product`, PRODUCTCTX or WRITEBACK failures |
 | [references/orchestrator-gates.md](references/orchestrator-gates.md) | A spawn fails, resuming, G-fresh or acceptance fail, rework ≥3, host facts |
 | [references/debug-loop.md](references/debug-loop.md) | Rework respawn with `rework_rounds >= 2` |
@@ -44,7 +45,7 @@ Commands contain no procedures. Entry routing, role/stage/task mappings, artifac
 | [references/role-agents.md](references/role-agents.md) · [references/subagent-design.md](references/subagent-design.md) | Changing how role prompts are built |
 | [templates/sdlc.config.yaml](templates/sdlc.config.yaml) | The project has no config (gates incl. e2e, app start/base_url, product_root) |
 | [templates/state.yaml](templates/state.yaml) | Starting or resuming a feature (v4 keys) |
-| [templates/product-readme.md](templates/product-readme.md) · [templates/product-changelog.md](templates/product-changelog.md) | Bootstrapping `product_root` |
+| [templates/product-readme.md](templates/product-readme.md) · [templates/product-changelog.md](templates/product-changelog.md) · [templates/cycle.yaml](templates/cycle.yaml) | Bootstrapping `product_root`; a product cycle |
 | [templates/product-delta.md](templates/product-delta.md) | Every v4 feature (writeback record) |
 | [templates/spec-s.md](templates/spec-s.md) | L1 / L2-short single-file spec |
 | [templates/m/README.md](templates/m/README.md) | L3+ directory layout |
@@ -115,7 +116,7 @@ lane_file: <ui|api|ai|model|none>
 slice_integrator: <one implementation role, required for implement tasks>
 primary_skill: sdlc-workflow:<proc>
 companion_skills: []        # only what the contract lists: read allowed companions from the registry; discovery prototypes have their own registered task
-inputs:                     # files the hat must read — never directories; include every contract `reads` path
+inputs:   # files the hat must read — never directories; include every contract `reads` path
   - {path: <abs>, required: true|false}
 explore_roots:              # directories it may search with Grep/Glob, not read wholesale
   - <abs>
@@ -123,13 +124,13 @@ deliverable_paths:
   - <relative to feature_dir>   # implement: 03-impl/T-<n>-<role>-evidence.md (one file per lane)
 evidence_required:          # copy the contract's `evidence` list (web | screenshots | running_app | e2e); add, never drop
   - <kind>
-visuals: []                 # diagrams this task draws (contract `visuals`; trust-boundary is required when q_security: yes).
-                            # Non-empty → add contract.diagram.inputs to inputs, contract.diagram.deliverable to
-                            # deliverable_paths and contract.diagram.check to success_checks. A diagram is a view of its
-                            # source: draw it only when it removes ambiguity for the next hat.
-imagery: []                 # generated images (contract `imagery`; never required). Non-empty → add contract.image
-                            # inputs/deliverable/check like visuals. Not a rendered direction, screenshot or UI
-                            # contract. Not authorized → ask the operator for /sdlc-grok login; a hat never logs in.
+visuals: []   # diagrams this task draws (contract `visuals`; trust-boundary is required when q_security: yes).
+    # Non-empty → add contract.diagram.inputs to inputs, contract.diagram.deliverable to
+    # deliverable_paths and contract.diagram.check to success_checks. A diagram is a view of its
+    # source: draw it only when it removes ambiguity for the next hat.
+imagery: []   # generated images (contract `imagery`; never required). Non-empty → add contract.image
+    # inputs/deliverable/check like visuals. Not a rendered direction, screenshot or UI
+    # contract. Not authorized → ask the operator for /sdlc-grok login; a hat never logs in.
 forbidden:
   - Do not spawn further subagents (host depth 1).
   - Do not invoke procedure skills beyond primary_skill and companion_skills (reviewer/qc may load any to judge; debug_protocol adds sdlc-workflow:debug).
@@ -140,7 +141,7 @@ debug_protocol: <abs or empty>
 success_checks:
   - each deliverable_paths exists on disk
   - <the contract's success_check with the real paths filled in>
-return: output paths + summary + decisions + open_questions (strategic → Q-* 待确认 + options + recommendation; operational → default applied) + product-delta rows
+return: output paths + summary + decisions + open_questions (strategic → Q-* 待确认 + options + recommendation; operational → default applied) + product-delta rows + lesson rows (verified traps only)
 ```
 
 **Apply the task contract to its actual scope.** A packet never waives evidence required by the resolved task and participation flags — no "smoke run: no WebSearch needed", no "URLs optional", no "fall back to reading source code". To save cost, ask for a shorter artifact. Save every packet to `<feature>/packets/<nn>-<stage>-<hat>.md` and run `python3 <PLUGIN_ROOT>/scripts/check_packet.py <file>` before spawning. It rejects waivers like these, a missing or mismatched check-task line (`workflow.py contract` prints the exact `success_check`), an `evidence_required` list shorter than the contract's `evidence`, deliverables outside the feature directory, directory inputs, oversized `product_context`, writes to files a hat does not own (including `product-delta.md` and `CHANGELOG.md`, which only you write), and `--hat <role>`. Errors → fix the packet; never spawn around them.
@@ -151,13 +152,13 @@ return: output paths + summary + decisions + open_questions (strategic → Q-* �
 
 - **Discovery freeze** (Step 1b).
 - **Design direction pick** (`ui: yes`): when a new direction decision is needed, after designer `explore`, show each direction in one line — signature moment, trade-off, screenshot paths — plus the designer's recommendation, and wait only if the decision is not already authorized or delegated. Record `design: {picked: D<n>, picked_by: user|delegated, at}`. The designer's `specify` spawn writes `选定：D<n>` into `design-directions.md`.
-- **Strategic decisions** (`Q-*` rows with 类别 战略, 状态 待确认): ask all of them in one round — question, options, the hat's recommendation — and **wait**. Only an explicit answer counts. Silence, a question tool that returns no answer, or a question the user never saw is not consent. "按推荐" or "你定" from the user is an answer; record it as such. Record each answer in `open_questions` (Step 5) and respawn the owner to write 已确认 with the operator's words. No answer → the dependent stage does not start: `phase: Stopped`, reason `waiting-for-operator`, and tell the user what is waiting.
+- **Strategic decisions** (`Q-*` rows with 类别 战略, 状态 待确认): ask all of them in one round — question, options, the hat's recommendation — and **wait**. Name the decider from `owners` if configured (product-layer § Decisions). Only an explicit answer counts. Silence, a question tool that returns no answer, or a question the user never saw is not consent. "按推荐" or "你定" from the user is an answer; record it as such. Record each answer in `open_questions` (Step 5) and respawn the owner to write 已确认 with the operator's words. No answer → the dependent stage does not start: `phase: Stopped`, reason `waiting-for-operator`, and tell the user what is waiting.
 - **Operational defaults** (状态 默认): list them in your report; the user can overturn any of them later.
 - **Acceptance** verdict `有条件通过`: the user accepts the conditions or sends the slice back. Record acceptance as `open_questions` entry `{id: Q-ACCEPT-<PM|DESIGN|GROWTH>, status: answered, by: user, quote: "<their words>"}`; the gate checks it.
 
 ## Step 5 — state.yaml
 
-Update after every hat. `current_hat` / `hats_done` use English words from the stage map. `phase` holds only the persistent enum (`Intent|Discovering|LaneJudge|HatReady|Spawned|Rework|HatDone|Closed|Stopped|Refused|L0done`). v4 keys: `sdlc_version: 4`, `product_root`, `ui`, `tracking`, `design`, `discovery.tracks.growth`. Gate kinds: `script | fresh-context | self-review`; `result: null` needs `reason`. Run E2E through `python3 <PLUGIN_ROOT>/scripts/evidence.py run --feature <feature_dir> --name e2e -- <e2e command>` and paste the gate record it prints (with `evidence:`); a pass without a current run record, or an older pass after a newer fail, does not count. A strategic answer goes into `open_questions` as `{id, class: 战略, status: answered, quote: "<the user's words>", by: user, at}`; you write `product-delta.md` and `CHANGELOG.md` rows from what hats return (hats do not edit them).
+Update after every hat. `current_hat` / `hats_done` use English words from the stage map. `phase` holds only the persistent enum (`Intent|Discovering|LaneJudge|HatReady|Spawned|Rework|HatDone|Closed|Stopped|Refused|L0done`). v4 keys: `sdlc_version: 4`, `product_root`, `ui`, `tracking`, `design`, `discovery.tracks.growth`. Gate kinds: `script | fresh-context | self-review`; `result: null` needs `reason`. Run E2E through `python3 <PLUGIN_ROOT>/scripts/evidence.py run --feature <feature_dir> --name e2e -- <e2e command>` and paste the gate record it prints (with `evidence:`); a pass without a current run record, or an older pass after a newer fail, does not count. A strategic answer goes into `open_questions` as `{id, class: 战略, status: answered, quote: "<the user's words>", by: user, at}` (a relayed answer adds `decided_by`, `relayed_by`, `authority`); you write `product-delta.md` and `CHANGELOG.md` rows from what hats return (hats do not edit them), and verified lesson rows to `.sdlc/_lessons.md` (orchestrator-gates §5).
 
 ## Step 6 — gates
 
@@ -176,7 +177,7 @@ Subagents start from files, not your chat. `state.yaml` is the resume map; the p
 
 ## Metrics
 
-Per feature: acceptance first-pass rate, E2E pass on core journeys, escapes after release, rework rounds, gate intercepts, spawn count. Review gate value using risk coverage, escapes, execution cost and intercepts; zero intercepts alone does not justify removal. Spawn count is a cost to explain — never a reason to skip the designer, dba, growth or acceptance.
+Per feature: acceptance first-pass rate, E2E pass on core journeys, escapes, rework rounds, gate intercepts, spawn count. Judge a gate by risk coverage, escapes, cost and intercepts — zero intercepts alone never justifies removal. Spawn count is a cost to explain, never a reason to skip the designer, dba, growth or acceptance.
 
 ## Task scope
 

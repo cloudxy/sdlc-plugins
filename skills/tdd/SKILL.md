@@ -10,6 +10,10 @@ Companion procedure for **implement hats** (frontend/backend/algo/miner) when th
 
 Purpose: a defect caught by a red test inside the implement hat costs one file edit; the same defect caught at verify/review costs a rework round — producer + fresh reviewer + gate re-run.
 
+## When it applies
+
+Use red-green-refactor for controllable behavior. Statistical model quality needs versioned comparable evaluations from the implementation lane; visual exploration and throwaway experiments need the checks appropriate to their question. Do not invent tests for reversible documentation-only edits. Tests added by developers do not replace independent QA.
+
 ## The loop (per FR / per ticket slice)
 
 1. **Pick one GWT row** from the ticket's FR (smallest first: happy path, then empty/boundary, then unauthorized/error).
@@ -33,7 +37,3 @@ Purpose: a defect caught by a red test inside the implement hat costs one file e
 - [ ] Refactoring only while green, only inside the touched seam?
 - [ ] Untestable rows returned as open questions, not improvised?
 - [ ] Coverage matrix holes (qa's domain) not pre-empted here — this is per-ticket execution, not the full matrix?
-
-## Applicability
-
-Use red-green-refactor for controllable behavior. Statistical model quality needs versioned comparable evaluations from the implementation lane; visual exploration and throwaway experiments need the checks appropriate to their question. Do not invent tests for reversible documentation-only edits. Tests added by developers do not replace independent QA.

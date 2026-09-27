@@ -28,29 +28,24 @@ Job: **implement a journey slice that works end-to-end for the user, and leave r
 
 - **This file is the shared protocol, not a fourth implementation style.** After Orient, read the lane file for the hat you are.
 - **Evidence is command + exit code pasted verbatim.** "It passed" is not evidence. One evidence file per ticket and lane: `03-impl/T-<n>-<role>-evidence.md` (e.g. `T-3-backend-evidence.md`). Another lane's file for the same ticket never counts for yours.
-- **Tests green ≠ slice works.** A UI slice is done only after an integration run against the real backend: walk the journey steps, take screenshots (`bash PLUGIN_ROOT/scripts/ui-evidence.sh <url> 03-impl/screens/T-<n> 375,1440`), look at them, compare with the final prototype at the matching version/state, and write `03-impl/T-<n>-integration.md` ([templates/integration.md](templates/integration.md)). v4 gate `INTEGRATION`.
+- **Tests green ≠ slice works.** Every slice has one `slice_integrator` and ends with a consumer-level integration outcome written to `03-impl/T-<n>-integration.md` ([templates/integration.md](templates/integration.md)): API/CLI/SDK/data/model work shows actual calls, commands or results; a UI slice walks the journey against the real backend, takes screenshots (`bash PLUGIN_ROOT/scripts/ui-evidence.sh <url> 03-impl/screens/T-<n> 375,1440`), looks at them and compares with the final prototype at the matching version/state (v4 gate `INTEGRATION`). A mock run is useful intermediate evidence, not integration proof; deployment status needs separate release evidence.
 - **Contract examples first.** Backend publishes example responses or a mock for the slice before building internals so frontend works in parallel; both sides then integrate on the real service.
 - **Events ship with the feature.** Implement `tracking.md` events in the same slice (server-side for results, client-side for UI behaviour) and check they fire during the integration run.
-- **Contracts are input.** Schema → dba. Tokens → designer. GWT changes → pm. Silent drift is a defect.
+- **Contracts are input.** Schema → dba. Tokens → designer. GWT changes → pm. Silent drift is a defect. When an input is wrong, cite its version, a reproduction and the affected consumers, and request the owner's decision (architecture change-impact where applicable). Until it is resolved, keep the accepted contract unchanged and the dependent work blocked; the manager invalidates affected downstream evidence.
+- **Source writes are scoped.** The packet names the project root and the authorized source/test/build paths separately from feature evidence paths. A missing source write scope is a packet defect, not permission to edit arbitrary files; implement only the assigned scope.
 - **Layering:** follow the accepted project boundaries. The bundled Python Router/ORM checker applies only to projects adopting that convention; it is not a universal stack rule.
 - **Rework respawns (debug_protocol in packet):** append a `## Debug record` to the evidence file — reproduce command, eliminated hypotheses, confirmed mechanism or explicitly unverified hypothesis, minimal fix, re-run output + exit code (procedure: `sdlc-workflow:debug`).
 - **Companion procedures:** packet `companion_skills` may add `tdd` (red before green per GWT row; evidence = both outputs) or `refactor` (maintenance tickets; characterization first, behavior preservation with justified test adaptations). They do not change lane discipline.
-
-## Source writes and change backflow
-
-The packet must name the actual project root and authorized source/test/build-artifact paths separately from feature evidence paths. Missing source write scope is a packet defect, not permission to rewrite arbitrary files. Implement only assigned scope. When an input is wrong, cite version, reproduction and affected consumers; request its owner’s decision through architecture change-impact where applicable. Until resolved, keep accepted contracts unchanged and dependent work blocked. The manager invalidates affected downstream evidence. A mock run is useful intermediate evidence, not real integration proof.
-
-All product surfaces need a consumer-level integration outcome and one slice_integrator. API/CLI/SDK/data/model work uses actual calls, commands or results; only UI needs browser/device captures. Product deployment status requires separate release evidence.
 
 ## Shared self-check
 
 - [ ] Packet `lane_file` present and valid (else you should have stopped)?
 - [ ] Primary lane loaded; any cross-lane read is justified by an interface dependency?
-- [ ] Deliverable path exists on disk?
-- [ ] UI slice: integration run on the real backend, screenshots looked at and compared with the prototype?
+- [ ] Deliverable path exists on disk; source changes stayed inside `source_writes`?
+- [ ] Integration outcome at the consumer boundary: UI slice on the real backend with screenshots looked at and compared with the prototype; other surfaces with real calls/commands/results?
 - [ ] Applicable events from `tracking.md` implemented and validated?
 - [ ] Evidence uses [templates/impl-evidence.md](templates/impl-evidence.md)?
-- [ ] Did not change GWT, schema, or design tokens?
+- [ ] Did not change GWT, schema, or design tokens; wrong inputs escalated to their owners?
 
 ## Templates and scripts — when to read them
 

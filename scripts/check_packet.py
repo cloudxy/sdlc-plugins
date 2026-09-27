@@ -12,7 +12,8 @@ Why it exists (2026-09-17 GLM run on a real project):
   python3 check_packet.py --self-test
 
 Exit: 0 no errors (warnings allowed) · 1 errors (fix the packet, do not spawn) · 2 usage / no packet found.
-Save packets as <feature>/packets/<nn>-<stage>-<hat>.md (features) or .sdlc/_product/packets/<n>-<hat>.md (/sdlc-product).
+Save packets as <feature>/packets/<nn>-<stage>-<hat>.md (features), .sdlc/_product/packets/<n>-<hat>.md (/sdlc-product)
+or .sdlc/_product/cycles/<id>/packets/<n>-<hat>.md (/sdlc-product cycle).
 """
 from __future__ import annotations
 
@@ -28,15 +29,16 @@ from typing import Any
 
 import shlex
 
-from workflow import load_registry, resolve_task, artifact_paths, ticket_pattern
+from workflow import load_registry, resolve_task, artifact_paths, ticket_pattern, task_scope, ROOT_FIELD, find_config
 
 REGISTRY = load_registry()
 STAGES = set(REGISTRY["stages"])
 FRESH = {name for name, role in REGISTRY["roles"].items() if role["fresh"]}
 OWNERS = {name: set(role["product_writes"]) for name, role in REGISTRY["roles"].items()}
+PRODUCT_FILES = set().union(*OWNERS.values())  # canonical product files: each has exactly one owning role
 MANAGER_ONLY = set(REGISTRY["manager_only"])
 REQUIRED = ("hat", "stage", "task", "subagent_type", "PLUGIN_ROOT", "primary_skill", "deliverable_paths", "success_checks", "return")
-ABS_SCALARS = ("PLUGIN_ROOT", "feature_dir", "product_root", "project_root", "memory_file", "debug_protocol")
+ABS_SCALARS = ("PLUGIN_ROOT", "feature_dir", "product_root", "project_root", "cycle_dir", "memory_file", "debug_protocol")
 WAIVERS = [
     r"不需要\s*(WebSearch|WebFetch|联网|上网|网络检索|网络搜索|搜索|截图|启动应用|E2E)",
     r"(无需|不用|不必|不要|别)\s*(联网|上网|WebSearch|WebFetch|网络检索|网络搜索|截图|启动应用|启动服务|跑\s*E2E|E2E)",
@@ -129,9 +131,8 @@ def _flag(tokens, name):
 def check_success_checks(p, contract, hat, stage, err):
     """The packet must carry this task's own check-task line (workflow.py contract → success_check), with the
     real roots filled in. A check for another task, another root, or `echo ok` is not a success check (N05)."""
-    feature_dir = os.path.normpath(str(p.get("feature_dir") or ""))
     product_root = os.path.normpath(str(p.get("product_root") or ""))
-    want_root = product_root if stage == "product" else feature_dir
+    want_root = os.path.normpath(str(p.get(ROOT_FIELD[task_scope(contract)]) or ""))
     found = []
     for chk in p.get("success_checks") or []:
         try:
@@ -201,7 +202,7 @@ def check_visuals(p, contract, stage, err):
     if not [v for v in asked if v in kinds]:
         return
     d = REGISTRY["diagram"]
-    base = os.path.normpath(str((p.get("product_root") if stage == "product" else p.get("feature_dir")) or ""))
+    base = os.path.normpath(str(p.get(ROOT_FIELD[task_scope(contract)]) or ""))
     outs = [str(o) for o in p.get("deliverable_paths") or []]
     if not any(fnmatch.fnmatchcase(o.replace(base + "/", ""), f"{contract['diagram_dir']}/*.svg") for o in outs):
         err("DIAGRAM", f"visuals need an SVG deliverable under {contract['diagram_dir']}/ (e.g. {contract['diagram_dir']}/<name>.svg)")
@@ -239,7 +240,7 @@ def check_imagery(p, contract, stage, err):
     if not asked:
         return
     g = REGISTRY["imagery"]
-    base = os.path.normpath(str((p.get("product_root") if stage == "product" else p.get("feature_dir")) or ""))
+    base = os.path.normpath(str(p.get(ROOT_FIELD[task_scope(contract)]) or ""))
     outs = [str(o) for o in p.get("deliverable_paths") or []]
     for kind in sorted({g["dirs"][k] for k in asked}):
         if not any(fnmatch.fnmatchcase(o.replace(base + "/", ""), f"{kind}/*") or
@@ -264,6 +265,167 @@ def check_imagery(p, contract, stage, err):
         err("IMAGERY", f"the imagery check must use --root {base}")
 
 
+def _compat_hint(name: str) -> str:
+    """An old packet naming a compatibility entry gets the migration target, not only a rejection."""
+    meta = REGISTRY.get("skills", {}).get(name.strip(), {})
+    if meta.get("kind") != "compat":
+        return ""
+    sunset = f", sunset {meta['sunset']}" if meta.get("sunset") else ""
+    return f" — {name.strip()} is a deprecated compatibility entry{sunset}; migrate to sdlc-workflow:{meta.get('replaced_by')}"
+
+
+def _real(value) -> Path:
+    """Resolve symlinks and `..` so every write field is compared on the path that would really be written."""
+    return Path(os.path.realpath(str(value)))
+
+
+def _within(path: Path, root: Path) -> bool:
+    return path == root or path.is_relative_to(root)
+
+
+def _matches(rel: str, patterns) -> bool:
+    return any(fnmatch.fnmatchcase(rel, pat) or (pat.endswith("/*") and rel == pat[:-2]) for pat in patterns)
+
+
+def check_outputs(p, contract, hat, stage, base, err):
+    """Classify every deliverable path by what it really is, whichever field names it (C06, C09).
+
+    A path inside product_root is never authorised just because it is inside the root: a canonical product file
+    needs its owning role *and* a product_writes entry; anything else there must be an evidence path the task
+    contract declares. A manager-persisted report (registry manager_output) is resolved under project_root and
+    is only legal for fresh-context judges, whose final message the manager writes to disk.
+    Returns the task-root-relative deliverables used to match the task's required artifacts.
+    """
+    declared = []
+    prod_raw = str(p.get("product_root") or "")
+    prod = _real(prod_raw) if os.path.isabs(prod_raw) else None
+    base_real = _real(base)
+    writes = {_real(w) for w in p.get("product_writes") or [] if os.path.isabs(str(w))}
+    evidence = list(contract.get("evidence_paths", []))
+    if contract.get("visuals") and contract.get("diagram_dir"):
+        evidence += [f"{contract['diagram_dir']}/*.svg", f"{contract['diagram_dir']}/shots/*"]
+    manager_out = None
+    if contract.get("manager_output"):
+        proj = str(p.get("project_root") or "")
+        if os.path.isabs(proj):
+            manager_out = _real(os.path.join(proj, contract["manager_output"]))
+    for output in p.get("deliverable_paths") or []:
+        raw = str(output)
+        if not os.path.isabs(raw) and ".." in Path(raw).parts:
+            err("DELIVERABLE", f"deliverable escapes artifact root: {output}")
+            continue
+        target = _real(raw if os.path.isabs(raw) else base / raw)
+        if manager_out is not None and target == manager_out:
+            if hat not in FRESH:
+                err("DELIVERABLE-SCOPE", f"{output} is the manager's report path ({contract['manager_output']}); "
+                                         "only a fresh-context judge returns it for the manager to write")
+            continue
+        if prod is not None and _within(target, prod):
+            rel = target.relative_to(prod).as_posix()
+            if rel in PRODUCT_FILES:
+                if hat in FRESH or rel not in OWNERS.get(hat, set()):
+                    err("UNOWNED", f"{hat} does not own product file {rel} (owners: workflow/registry.json) — "
+                                   "raise an open question to the owner instead")
+                elif target not in writes:
+                    err("UNOWNED", f"{rel} is a product file: list it in product_writes, not only in deliverable_paths")
+            elif not _matches(rel, evidence):
+                err("DELIVERABLE-SCOPE", f"{output} is inside product_root but is neither an owned product file nor an "
+                                         f"evidence path this task declares ({', '.join(evidence) or 'none'})")
+            continue
+        if target != base_real and _within(target, base_real):
+            declared.append(target.relative_to(base_real).as_posix().rstrip("/"))
+            continue
+        if contract.get("manager_output") and manager_out is None and raw.endswith(contract["manager_output"]):
+            err("DELIVERABLE-SCOPE", f"{output}: pass project_root so the manager report path "
+                                     f"{contract['manager_output']} can be resolved")
+            continue
+        # Writes outside the artifact root were silently allowed (N04): the hat is told
+        # "do not write outside deliverable_paths", so listing a path authorises it.
+        err("DELIVERABLE-SCOPE", f"deliverable outside the artifact root {base}: {output}")
+    return declared
+
+
+def check_memory_file(p, hat, scope, err):
+    """memory_file is a write too: it must stay in the task's memory folder, never a product or manager file."""
+    mf = str(p.get("memory_file") or "").strip()
+    if not mf or mf in ("none", "empty") or not os.path.isabs(mf) or hat in FRESH:
+        return
+    target = _real(mf)
+    prod_raw = str(p.get("product_root") or "")
+    if os.path.isabs(prod_raw) and _within(target, _real(prod_raw)):
+        err("MEMORY", f"memory_file {mf} is inside product_root; product facts go through product_writes")
+        return
+    if target.name in MANAGER_ONLY:
+        err("LOGWRITE", f"memory_file {mf} names a manager-only file")
+        return
+    home = str(p.get(ROOT_FIELD.get(scope, "")) or "") if scope in ("feature", "cycle") else ""
+    if home and os.path.isabs(home) and not _within(target, _real(home) / "memory"):
+        err("MEMORY", f"memory_file must live under {home}/memory/")
+    elif target.parent.name != "memory" or target.name != f"{hat}.md":
+        err("MEMORY", f"memory_file must be memory/{hat}.md (one file per role; others' memory is not yours)")
+
+
+def check_cycle_dir(p, err):
+    """A cycle runs in <artifact_root>/.sdlc/_product/cycles/<id>: its own root, separate from product facts."""
+    raw = str(p.get("cycle_dir") or "")
+    if not raw:
+        err("MISSING", "cycle_dir is required for cycle tasks")
+        return
+    path = _real(raw)
+    if not os.path.isabs(raw) or not path.is_dir():
+        err("CYCLE-DIR", f"cycle_dir must be an existing absolute directory: {raw}")
+    elif path.parent.name != "cycles" or path.parent.parent.name != "_product" or path.parent.parent.parent.name != ".sdlc":
+        err("CYCLE-DIR", f"cycle_dir must be .sdlc/_product/cycles/<id>, not {raw}")
+    prod = str(p.get("product_root") or "")
+    if os.path.isabs(prod) and _within(path, _real(prod)):
+        err("CYCLE-DIR", "cycle_dir cannot live inside product_root (cycle records are not product facts)")
+
+
+def _store_dir(p, store):
+    """Resolve a registered store (e.g. signals) from the project's config; None when unset."""
+    proj = str(p.get("project_root") or "")
+    meta = REGISTRY.get("stores", {}).get(store, {})
+    if not os.path.isabs(proj) or not meta:
+        return None
+    cfg = Path(proj) / "sdlc.config.yaml"
+    if not cfg.is_file():
+        return None
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from check_config import parse_yaml  # noqa: PLC0415
+    value = parse_yaml(cfg.read_text(encoding="utf-8")).get(meta.get("config"))
+    if not isinstance(value, str) or not value.strip() or "<" in value:
+        return None
+    return _real(os.path.join(proj, value))
+
+
+def check_store_writes(p, contract, hat, err):
+    """A store (the product-level signals store) has one owning task and a configured location: a path in the
+    config is not a grant; only the registered task may write, and only inside that directory."""
+    writes = p.get("store_writes") or []
+    if not writes:
+        return
+    store = contract.get("store_writes")
+    if not store:
+        err("STORE-SCOPE", f"{hat}/{contract['stage']}/{contract['task']} may not write a store")
+        return
+    base = _store_dir(p, store)
+    if base is None:
+        err("STORE-SCOPE", f"store_writes needs project_root and {REGISTRY['stores'][store]['config']} in its sdlc.config.yaml")
+        return
+    proj = _real(str(p.get("project_root")))
+    guarded = [proj / ".sdlc", proj / ".git"] + [_real(str(p[k])) for k in ("product_root", "feature_dir", "cycle_dir") if p.get(k)]
+    if base == proj or not _within(base, proj) or any(_within(base, g) or _within(g, base) for g in guarded):
+        err("STORE-SCOPE", f"the {store} store {base} must be its own directory inside the project, apart from product, feature and manager files")
+        return
+    for item in writes:
+        value = str(item)
+        rel = Path(value)
+        target = _real(os.path.join(str(base), value))
+        if (not value or rel.is_absolute() or ".." in rel.parts or any(c in value for c in "*?[]")
+                or not _within(target, base) or target == base):
+            err("STORE-SCOPE", f"store write must be a file or subtree inside the {store} store: {value}")
+
+
 def check_source_writes(p, contract, hat, err):
     writes = p.get("source_writes") or []
     if not isinstance(writes, list):
@@ -282,7 +444,11 @@ def check_source_writes(p, contract, hat, err):
         err("SOURCE-SCOPE", "source_writes requires an existing absolute project_root, not filesystem root")
         return
     protected = [root / ".git", root / ".sdlc", root / ".agents", root / ".codex"]
-    for key in ("feature_dir", "product_root"):
+    for store in REGISTRY.get("stores", {}):
+        store_dir = _store_dir(p, store)
+        if store_dir is not None:
+            protected.append(store_dir)  # owned by its store task; source writes cannot reach it
+    for key in ("feature_dir", "product_root", "cycle_dir"):
         if p.get(key):
             protected.append(Path(str(p[key])).resolve())
     for item in writes:
@@ -324,12 +490,18 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
     for k in REQUIRED:
         if p.get(k) in (None, "", []):
             err("MISSING", f"{k} is missing or empty")
-    if stage and stage != "product":
+    try:
+        scope = task_scope(resolve_task(REGISTRY, hat, stage, str(p.get("task", ""))))
+    except ValueError:
+        scope = "product" if stage == "product" else "feature"
+    if stage and scope == "feature":
         for k in ("feature_dir", "lane"):
             if not p.get(k):
                 err("MISSING", f"{k} is required for feature stages")
-    if stage == "product" and not p.get("product_root"):
+    if scope == "product" and not p.get("product_root"):
         err("MISSING", "product_root is required for stage: product")
+    if scope == "cycle":
+        check_cycle_dir(p, err)
     if stage and stage not in STAGES:
         err("STAGE", f"stage {stage!r} is not a stage id ({', '.join(sorted(STAGES))})")
 
@@ -337,32 +509,22 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
     try:
         contract = resolve_task(REGISTRY, hat, stage, str(p.get("task", "")))
         if p.get("primary_skill") != "sdlc-workflow:" + contract["skill"]:
-            err("TASKSKILL", f"{hat}/{stage}/{p.get('task')} requires sdlc-workflow:{contract['skill']}")
+            err("TASKSKILL", f"{hat}/{stage}/{p.get('task')} requires sdlc-workflow:{contract['skill']}"
+                + _compat_hint(str(p.get("primary_skill", "")).split(":", 1)[-1]))
+        # run_scope is optional: an old packet keeps the stage-derived scope. A declared one must be a scope the
+        # task contract allows — a caller cannot change a task's permissions or evidence by writing another scope.
+        declared_scope = str(p.get("run_scope") or "").strip()
+        if declared_scope and declared_scope not in (contract.get("scopes") or [task_scope(contract)]):
+            err("SCOPE", f"run_scope {declared_scope!r} is not a scope of {hat}/{stage}/{p.get('task')} "
+                         f"({', '.join(contract.get('scopes') or [task_scope(contract)])})")
         if contract.get("lane_file") and p.get("lane_file") != contract["lane_file"]:
             err("TASKLANE", f"{hat} implementation requires lane_file: {contract['lane_file']}")
         if stage == "implement":
             implementers = {t["role"] for t in REGISTRY["tasks"] if t["stage"] == "implement"}
             if p.get("slice_integrator") not in implementers:
                 err("INTEGRATOR", "implementation packets must name one implementation role as slice_integrator")
-        declared = []
-        base_raw = p.get("product_root") if stage == "product" else p.get("feature_dir")
-        base = Path(str(base_raw or "."))
-        owned = {os.path.normpath(str(w)) for w in p.get("product_writes") or []}
-        for output in p.get("deliverable_paths") or []:
-            path = Path(str(output))
-            if path.is_absolute():
-                if os.path.normpath(str(path)) in owned:
-                    continue  # a product file this hat owns, checked with product_writes below
-                try:
-                    path = Path(os.path.normpath(str(path))).relative_to(os.path.normpath(str(base)))
-                except ValueError:
-                    # Writes outside the artifact root were silently allowed (N04): the hat is told
-                    # "do not write outside deliverable_paths", so listing a path authorises it.
-                    err("DELIVERABLE-SCOPE", f"deliverable outside the artifact root {base}: {output}")
-                    continue
-            if ".." in path.parts:
-                err("DELIVERABLE", f"deliverable escapes artifact root: {output}")
-            declared.append(path.as_posix().rstrip("/"))
+        base = Path(str(p.get(ROOT_FIELD[task_scope(contract)]) or "."))
+        declared = check_outputs(p, contract, hat, stage, base, err)
         for key in contract["required"]:
             patterns = [ticket_pattern(s, str(p["task"]), hat) for s in artifact_paths(REGISTRY, [key])]
             if not any(fnmatch.fnmatchcase(path, pattern) or
@@ -374,12 +536,14 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
             name = str(c).split(":", 1)[-1].strip()
             if name and name not in allowed:
                 err("COMPANION", f"companion_skills lists {name}, which {hat}/{stage}/{p.get('task')} does not use"
-                    + (" (prototype is throwaway discovery code; design prototypes follow design-contract direction-prototypes.md)" if name == "prototype" else ""))
+                    + (" (prototype is throwaway discovery code; design prototypes follow design-contract direction-prototypes.md)" if name == "prototype" else "")
+                    + _compat_hint(name))
         check_success_checks(p, contract, hat, stage, err)
         check_evidence(p, contract, stage, err)
         check_visuals(p, contract, stage, err)
         check_imagery(p, contract, stage, err)
         check_source_writes(p, contract, hat, err)
+        check_store_writes(p, contract, hat, err)
         inputs = [str(i.get("path", "")) if isinstance(i, dict) else str(i) for i in p.get("inputs") or []]
         for rd in contract.get("reads", []):
             if not any(i.endswith(rd) for i in inputs):
@@ -455,22 +619,25 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
     elif budget > CONTEXT_WARN:
         warn("BUDGET", f"product_context + required inputs = {budget // 1000} KB (> {CONTEXT_WARN // 1000} KB)")
 
-    # write scope
+    # write scope: product_writes resolve under product_root on their real path (symlinks, `..`)
     writes = [str(w) for w in p.get("product_writes") or []]
+    prod_real = _real(pr) if pr and os.path.isabs(pr) else None
     for w in writes:
-        rel = os.path.relpath(w, pr) if pr and os.path.isabs(w) else w
-        rel = rel.replace("\\", "/")
+        target = _real(w if os.path.isabs(w) or not pr else os.path.join(pr, w))
+        inside = prod_real is not None and _within(target, prod_real)
+        rel = target.relative_to(prod_real).as_posix() if inside else w.replace("\\", "/")
         if os.path.basename(rel) in MANAGER_ONLY:
             err("LOGWRITE", f"{rel} is written by the manager only; hats return delta rows")
         elif hat in FRESH:
             err("FRESHWRITE", f"{hat} is a fresh-context judge and must not have product_writes ({rel})")
-        elif rel not in OWNERS.get(hat, set()):
+        elif not inside or rel not in OWNERS.get(hat, set()):
             err("UNOWNED", f"{hat} does not own {rel} (owners: workflow/registry.json) — raise an open question to the owner instead")
     for d in p.get("deliverable_paths") or []:
         if os.path.basename(str(d)) in MANAGER_ONLY:
             err("LOGWRITE", f"deliverable_paths names {d}, which only the manager writes")
     if hat in FRESH and str(p.get("memory_file", "")).strip() not in ("", "none", "empty"):
         err("FRESHWRITE", f"{hat} must not have a memory_file")
+    check_memory_file(p, hat, scope, err)
 
     # success checks use stage ids
     for chk in p.get("success_checks") or []:

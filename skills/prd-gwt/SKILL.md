@@ -21,6 +21,7 @@ Job: **decide what is worth building, make its core value unmistakable, and make
 | **Scope too big** | Appetite slicing along the journey: keep the path to Aha, cut around it |
 | **Stage `accept`** | Walk J-n on the build ([acceptance-walkthrough.md](references/acceptance-walkthrough.md)) → `04-verify/accept-pm.md` ([templates/accept-pm.md](templates/accept-pm.md)) |
 | **Frozen FRs change** | Re-triage + `superseded` annotation (numbering discipline) |
+| **Product cycle decisions** (`cycle/apply-decisions`) | Decide every proposal of the cycle (signals, readout, experiments) in `outputs/decisions.md` ([templates/cycle-decisions.md](templates/cycle-decisions.md)); apply accepted changes to strategy.md / feature-map.md within `product_writes`; reference `SIG-…` ids, never edit the signal store; strategic calls stay 待确认 until the operator answers |
 
 ## Gotchas — things that go wrong without being told
 
@@ -102,7 +103,7 @@ PM may sketch to clarify business intent, but final UI decisions live in the des
 - [ ] No technical decisions made for downstream?
 
 **Metrics & scope:**
-- [ ] North star / drivers / guardrails with ids, baselines, targets?
+- [ ] The metrics this feature moves (north star, drivers, guardrails as applicable) cite canonical ids with baselines and targets — none invented to fill a layer?
 - [ ] `tracking.md` written (tracking: yes) or `埋点：N/A（理由）`?
 - [ ] Appetite declared; out-of-scope listed; security/permissions/consistency not cut?
 - [ ] Open decisions cite owner, recommendation and blocked scope; already authorized decisions are reused?
@@ -118,7 +119,6 @@ PM may sketch to clarify business intent, but final UI decisions live in the des
 | [flow-diagram.md](references/flow-diagram.md) | Packet visuals flow/state: drawing a checked business flow or state diagram from the spec |
 | [metrics-blueprint.md](references/metrics-blueprint.md) | Designing metrics and instrumentation gaps |
 | [acceptance-walkthrough.md](references/acceptance-walkthrough.md) | Stage accept: walking journeys on the build, severity, verdict |
-| [auto-agents-pitfalls.md](references/auto-agents-pitfalls.md) | Verified auto_agents product-contract traps (xlsx vs Excel, dual public gates) |
 | [templates/spec.md](templates/spec.md) · [templates/user-story.md](templates/user-story.md) | Writing the spec / lightweight stories |
 | [templates/product-strategy.md](templates/product-strategy.md) · [templates/feature-map.md](templates/feature-map.md) | Bootstrapping or updating the product layer |
 | [templates/accept-pm.md](templates/accept-pm.md) | Writing `04-verify/accept-pm.md` |

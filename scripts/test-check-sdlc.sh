@@ -771,6 +771,10 @@ mkdir -p "$T/pu1/.sdlc/_product/screens"
 printf 'png' >"$T/pu1/.sdlc/_product/screens/admin-home-1440.png"
 printf '# design-system.md\n![admin](.sdlc/_product/screens/admin-home-1440.png)\n' >"$PR/design-system.md"
 assert_exit 0 "--hat product: screenshot resolved from the project root" --hat product "$PR"
+mkdir -p "$PR/assets/screens"
+printf 'png' >"$PR/assets/screens/admin-home-375.png"
+printf '# design-system.md\n![admin](assets/screens/admin-home-375.png)\n' >"$PR/design-system.md"
+assert_exit 0 "--hat product: screenshot under the declared evidence path <product_root>/assets/screens (C06)" --hat product "$PR"
 
 # 39. SOURCES: research artifacts need URL + access date rows; only the user's research.offline waives it
 mk_v4 so1
@@ -961,6 +965,42 @@ for d in d1; do printf 'png' >"$F/02-shape/prototypes/$d-1440.png"; done
 printf '泳道：L2\n| 参考 | https://a.example/x 2026-09-01 |\n| 参考 | https://b.example/y 2026-09-01 |\n| 参考 | https://c.example/z 2026-09-01 |\n## D1 暖中性\n![](prototypes/d1-1440.png)\n参考图（AI 生成）：![](assets/refs/probe-warm.png)\n## 缺陷检查\n| prototypes/d1-1440.png | 看过 | 无 |\n选定：D1（picked_by: user）\n' >"$F/02-shape/design-directions.md"
 assert_exit 1 "a generated image without evidence is IMAGE" --require "$F"
 assert_tag IMAGE
+
+# 60. --hat cycle: a product cycle closes with honest states (batch D)
+CP="$T/cyc"
+CY="$CP/.sdlc/_product/cycles/2026-09"
+mkdir -p "$CY/outputs" "$CP/docs/signals"
+printf 'product_root: docs/product\nsignals_path: docs/signals\n' >"$CP/sdlc.config.yaml"
+assert_exit 1 "--hat cycle without cycle.yaml is CYCLE" --hat cycle "$CY"
+assert_tag CYCLE
+cycle_yaml() { # $1 status $2 readout status $3 window end $4 extra
+  printf 'id: 2026-09\nstatus: %s\nwindow:\n  from: 2026-08-01\n  to: %s\ndata_cutoff: 2026-09-02\nselected_tasks:\n  - role: ops\n    task: signals-digest\n    status: done\n  - role: analyst\n    task: readout\n    status: %s\n%b' "$1" "$3" "$2" "$4" >"$CY/cycle.yaml"
+}
+printf '# digest\n| SIG-202608-1 | 工单 · 2026-08-03 |\n' >"$CY/outputs/signals-digest.md"
+cycle_yaml open todo 2026-08-31 ""
+assert_exit 0 "an open cycle may hold unfinished tasks" --hat cycle "$CY"
+printf '# readout\n' >"$CY/outputs/readout.md"
+cycle_yaml open done 2999-12-31 ""
+assert_exit 1 "a readout done while the window is still open is CYCLE-INTERIM" --hat cycle "$CY"
+assert_tag CYCLE-INTERIM
+cycle_yaml open done 2999-12-31 "    interim: true\n"
+assert_exit 0 "an interim readout during the window is honest" --hat cycle "$CY"
+cycle_yaml closed todo 2026-08-31 ""
+assert_exit 2 "closing with a todo task and no closure note is CYCLE-CLOSE" --hat cycle "$CY"
+assert_tag CYCLE-CLOSE
+cycle_yaml closed done 2026-08-31 "proposals:\n  - id: P-1\n    status: pending\nclosure: \"P-1 等本月数据\"\n"
+assert_exit 1 "a pending proposal at closure needs its reason" --hat cycle "$CY"
+assert_tag CYCLE-CLOSE
+printf '# decisions\n| P-1 | analyst readout | 采纳 |\n' >"$CY/outputs/decisions.md"
+cycle_yaml closed done 2026-08-31 "proposals:\n  - id: P-1\n    status: accepted\n    decided_in: outputs/decisions.md\nclosure: \"全部处理完\"\n"
+assert_exit 0 "a closed cycle with every task and proposal accounted for passes" --hat cycle "$CY"
+printf '| ID | 来源 |\n|---|---|\n| SIG-202608-1 | 工单 |\n| SIG-202608-1 | 访谈 |\n' >"$CP/docs/signals/signals.md"
+assert_exit 1 "a signal ID defined twice in the store is SIGDUP" --hat cycle "$CY"
+assert_tag SIGDUP
+printf '| ID | 来源 |\n|---|---|\n| SIG-202608-1 | 工单 |\n| SIG-202608-2 | 访谈 |\n' >"$CP/docs/signals/signals.md"
+printf '| Q-PRICE | 付费墙 | 战略 | 首月免费（推荐） | 默认 | |\n' >>"$CY/outputs/decisions.md"
+assert_exit 1 "a strategic call defaulted inside a cycle is DEFAULTED" --hat cycle "$CY"
+assert_tag DEFAULTED
 
 if [ "$fail" -ne 0 ]; then
   echo "----------------------------------------"

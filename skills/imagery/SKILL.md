@@ -1,6 +1,6 @@
 ---
 name: "imagery"
-description: "Use for /sdlc-grok (Grok subscription authorization) or when a packet lists imagery. Do NOT use to replace a prototype, a rendered direction or a screenshot."
+description: "Use this skill when the user says /sdlc-grok or a packet lists imagery. Do NOT use in place of a prototype, direction or screenshot."
 when_to_use: "Command /sdlc-grok (login / status / logout / probe), or a spawn packet whose imagery list is non-empty, or $imagery. Do NOT use for diagrams (svg-diagram + scripts/diagram), for UI implementation, or as acceptance evidence."
 ---
 

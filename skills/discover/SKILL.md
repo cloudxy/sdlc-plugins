@@ -81,7 +81,7 @@ Interview script / questionnaire: [discuss-protocol.md](references/discuss-proto
 
 ### 4. Falsify (HITL)
 
-Apply [assumption-testing.md](references/assumption-testing.md); `falsify` remains a compatibility entry to that same method. Problem-layer uses survey evidence (triage tree). Solution-layer uses Discuss-S. Verdict: kill | narrow | bet | pass. Bet requires a named metric that later becomes the spec north-star or driver.
+Apply [assumption-testing.md](references/assumption-testing.md); `$falsify` is only a deprecated compatibility entry to that same method (sunset 2026-12-31). Problem-layer uses survey evidence (triage tree). Solution-layer uses Discuss-S. Verdict: kill | narrow | bet | pass. Bet requires a named metric that later becomes the spec north-star or driver.
 
 Optional: use registered `designer/market/prototype` task for a scoped experiment. Prototype code is not implement evidence.
 
@@ -108,3 +108,4 @@ If continuation is already authorized, return the frozen briefing to the sdlc ma
 | [discuss-protocol.md](references/discuss-protocol.md) | Grilling rounds, Mom Test script, questionnaire |
 | [product-surfaces.md](references/product-surfaces.md) | ToB/ToC probe card in Discuss-S |
 | [templates/briefing.md](templates/briefing.md) | Writing the freeze artifact |
+| [templates/assumptions.md](templates/assumptions.md) | A standalone assumption table, linked from briefing § Falsify |

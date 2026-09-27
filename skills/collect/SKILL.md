@@ -11,9 +11,11 @@ Job: **capture the data the product needs correctly the first time.** For an int
 | Who loads it | Track | Deliverable | Template |
 |---|---|---|---|
 | pm (companion, `tracking: yes`) | Event requirements for this change | `01-define/tracking.md` | [templates/tracking.md](templates/tracking.md) |
-| data-collector (stage `collect`) | Implementation design + proposed product tracking delta | `02-shape/collect/tracking-impl.md` · product `data/tracking-plan.yaml` | [templates/tracking-impl.md](templates/tracking-impl.md) · [templates/tracking-plan.yaml](templates/tracking-plan.yaml) |
-| qa (verify) | Event validation rows EV-n | rows in `04-verify/coverage.md` | see [tracking-validation.md](references/tracking-validation.md) |
-| data-collector (external source) | New partner API / CDC / crawler | `02-shape/collect/data-source-analysis.md`; code only in implementation task | [templates/data-source-analysis.md](templates/data-source-analysis.md) |
+| data-collector (`collect/tracking`) | Implementation design + proposed product tracking delta | `02-shape/collect/tracking-impl.md` · product `data/tracking-plan.yaml` | [templates/tracking-impl.md](templates/tracking-impl.md) · [templates/tracking-plan.yaml](templates/tracking-plan.yaml) |
+| data-collector (`collect/source`) | New partner API / CDC / crawler | `02-shape/collect/data-source-analysis.md`; code only in the implement task | [templates/data-source-analysis.md](templates/data-source-analysis.md) |
+| data-collector (`collect/implement`) | Implement approved event/source contracts: SDK, server events, source adapter — inside the packet's scoped `source_writes` | `03-impl/collect-evidence.md`: changed files, commands, samples, limitations | — |
+| data-collector (`collect/validate`) | Correlate a known input through ingestion to the actual destination | `04-verify/collect-validation.md` | see [tracking-validation.md](references/tracking-validation.md) |
+| qa (companion, verify) | Event validation rows EV-n | rows in `04-verify/coverage.md`, referencing collect-validation instead of copying it | see [tracking-validation.md](references/tracking-validation.md) |
 
 ## Gotchas
 
@@ -23,7 +25,9 @@ Job: **capture the data the product needs correctly the first time.** For an int
 - **Client events lie under ad blockers, retries and offline queues.** Money, orders and state changes are server-side events; client events are for UI behaviour.
 - **PII does not belong in event properties.** No phone numbers, emails, ids of third parties in clear text; consent state is itself a property or a gate.
 - **Every event serves a metric.** An event with no metric id in `data/metrics.yaml` (or a named analysis) is noise — do not add it.
-- **Only for projects adopting the auto_agents crawler stack:** Scrapy is its own subsystem (B2: never imports backend), items flow through Redis queues rather than direct DB writes, DOWNLOAD_DELAY and UA rotation are mandatory (R5/R6), zero items for 3 runs → alert. SQLite accepts PostgreSQL-only syntax such as `NULLS LAST` that MySQL rejects — test on the production dialect.
+- **Design completion is not collection completion.** A design document proves nothing about delivery: distinguish request emitted, accepted, persisted and queryable. A mock-only run does not prove destination delivery. Frontend/backend own their code; do not claim their changes from a design document.
+- **Transport may be at-least-once.** Validate the specified downstream deduplication boundary rather than promising exactly-once delivery. Alert thresholds depend on expected traffic and freshness, not universal event counts.
+- **Crawlers are their own subsystem.** They never import the application backend; items reach ingestion through a queue with idempotent keys rather than direct table writes; rate limits and the source's access contract are respected; repeated zero-item runs raise an alert. SQLite accepts PostgreSQL-only syntax such as `NULLS LAST` that MySQL rejects — test on the production dialect.
 
 ## Excellence bar
 
@@ -42,18 +46,25 @@ Job: **capture the data the product needs correctly the first time.** For an int
 2. Design events with [event-design.md](references/event-design.md): reuse objects and properties from the product `data/tracking-plan.yaml` first.
 3. Number events `EV-n`; tie each to a journey step `J-n` and a metric id. Write `01-define/tracking.md`.
 
-### Track: implementation design (data-collector, stage `collect`)
+### Track: implementation design (data-collector, `collect/tracking`)
 
 1. Propose the feature's event delta against product `data/tracking-plan.yaml`; publish approved definitions with status/version, never label an unimplemented event as live. Apply the delta to the canonical product file only within packet ownership (conventions, identity, common properties stay consistent).
 2. Decide placement (client SDK / server / both), batching, offline behaviour, sampling, consent gating.
 3. Write validation steps per event ([tracking-validation.md](references/tracking-validation.md)) and post-launch data-quality monitors.
 4. Write `02-shape/collect/tracking-impl.md`; record the product-layer delta.
 
-### Track: external sources
+### Track: external sources (`collect/source`)
 
 1. Analyse the source with [templates/data-source-analysis.md](templates/data-source-analysis.md): type (API / HTML / RSS / CDC), scope, rate limits, ToS and legal review, freshness need, schema.
 2. Partner APIs and CDC: retries with backoff, idempotent ingestion keys, schema validation at ingestion, lag monitoring.
 3. Crawlers: follow [scrapy-redis-distributed.md](references/scrapy-redis-distributed.md) and [anti-scraping-playbook.md](references/anti-scraping-playbook.md); when blocked, diagnose with [anti-scraping-escalation.md](references/anti-scraping-escalation.md) and respect the source access contract; use supported APIs, backoff and owner escalation when access is blocked. These stack-specific references are optional, not a requirement for every source. Start from [templates/spider-template.py](templates/spider-template.py), [templates/spider-config.py](templates/spider-config.py) and [templates/item-definition.py](templates/item-definition.py).
+
+### Track: implement and validate (`collect/implement`, `collect/validate`)
+
+1. Implement only approved contracts, inside `source_writes`; record changed files, commands, samples and limitations in `03-impl/collect-evidence.md`.
+2. Validate end to end: a known input through ingestion to the real destination; check retries/deduplication, missing and late events, identity and consent where applicable. Record environment, source version and sample IDs in `04-verify/collect-validation.md`.
+
+The product tracking plan is the unique event-definition source; feature requirements, implementation notes and validation reports reference event IDs and its version. Proposed, accepted, implemented and validated are distinct statuses.
 
 ## Self-check
 
@@ -61,8 +72,9 @@ Job: **capture the data the product needs correctly the first time.** For an int
 - [ ] Names and properties reuse the product tracking plan conventions?
 - [ ] Identity stitching, consent and PII rules referenced, not reinvented?
 - [ ] Validation steps exist for every EV-n, and qa's matrix can reference them?
-- [ ] Product `data/tracking-plan.yaml` updated and the delta recorded?
+- [ ] Product `data/tracking-plan.yaml` updated and the delta recorded (with the right status)?
 - [ ] External sources: rate limit, ToS/legal, retries, schema checks, zero-data alert?
+- [ ] Implement/validate: evidence distinguishes emitted, accepted, persisted and queryable; no mock-only claim of delivery?
 
 ## Deep references — when to read them
 
@@ -78,11 +90,3 @@ Job: **capture the data the product needs correctly the first time.** For an int
 ## Role-specific review
 
 For the assigned role, apply [references/role-quality.md](references/role-quality.md) alongside this procedure’s self-check. Reviewers use the same criteria.
-
-## Implementation and validation tasks
-
-Design completion is not collection completion. `collect/implement` consumes approved event/source contracts, obtains scoped project `source_writes`, implements the SDK/server/source adapter and writes `03-impl/collect-evidence.md` with changed files, commands, samples and limitations. Collaborate with frontend/backend for their owned code; do not claim their changes from a design document.
-
-`collect/validate` writes `04-verify/collect-validation.md`: correlate a known input through ingestion to the actual destination, check retries/deduplication, missing/late events, identity and consent where applicable. Distinguish request emitted, accepted, persisted and queryable. Record environment, source version and sample IDs; QA references this evidence rather than copying it. A mock-only run does not prove destination delivery.
-
-The product tracking plan is the unique event-definition source; feature requirements, implementation notes and validation reports reference event IDs and its version. Proposed/accepted/implemented/validated are distinct statuses. Transport may be at-least-once: validate the specified downstream deduplication boundary rather than promising exactly-once delivery. Alert thresholds depend on expected traffic and freshness, not universal event counts.

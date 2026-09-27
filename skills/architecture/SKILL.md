@@ -69,7 +69,6 @@ Write only the packet's `deliverable_paths` and owned `product_writes`, includin
 | [contract-design.md](references/contract-design.md) | API, event and data semantics |
 | [threat-model.md](references/threat-model.md) | Trust boundaries, controls and residual risk |
 | [diagrams.md](references/diagrams.md) | Architecture, sequence and trust-boundary views from canonical sources |
-| [auto-agents-pitfalls.md](references/auto-agents-pitfalls.md) | Only when the supplied repository actually matches this project's verified traps |
 | [templates/architecture-baseline.md](templates/architecture-baseline.md) | Product baseline |
 | [templates/contract.md](templates/contract.md) · [templates/adr.md](templates/adr.md) · [templates/story.md](templates/story.md) · [templates/api-contract.md](templates/api-contract.md) | Applicable deliverables; omit inapplicable sections with a reason |
 

@@ -2,7 +2,7 @@
 
 Independent G-fresh review. This window is the **manager** (OpenAI agents-as-tools). Do not handoff the conversation. Do not invoke procedure skills here. Do not spawn producers. **This entry is report-only: it never advances `hats_done` / `current_hat`.**
 
-the supplied arguments
+The command's arguments name the feature directory or the artifact paths to review (step 1).
 
 1. Resolve PLUGIN_ROOT (folder of the enabled sdlc-workflow plugin; prefer `$ZCODE_PLUGIN_ROOT`). Resolve the artifact list (feature dir → its listed artifacts, or the explicit paths given). Exclude generated findings, archived findings and manager logs from the reviewed snapshot. For explicit paths without a feature directory, create a report work directory with lane L1 for packet bookkeeping; do not create feature state.
 2. **Checksum reuse (no time-based rule):** compute `shasum -a 256` for every listed artifact. If `05-review/findings.md` exists and its `## Snapshot` block lists the same paths with identical sha256 → do **not** spawn; report the existing findings verbatim (unless the user explicitly forces a re-review). Any changed hash = new snapshot = spawn.

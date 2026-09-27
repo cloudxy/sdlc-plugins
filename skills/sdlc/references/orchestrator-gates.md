@@ -83,9 +83,11 @@ Normalize legacy Chinese `current_hat` / `hats_done` to English first (once). Th
 
 After each spawn, `ls` the deliverable paths from the packet. Missing path = hat not done. An empty `tickets/` with the table only in `contract.md` is allowed only if the packet said Wave 1 stays in the table.
 
-## 5. Skill pitfalls files
+## 5. Lessons learned: project ledger, not plugin files
 
-Write `skills/<proc>/references/*-pitfalls.md` only for items with **code + test, an escape id, or a gate command + exit code**. Speculation stays in diagnosis notes.
+A trap verified in this project (**code + test, an escape id, or a gate command + exit code**) belongs to the project. Hats return it as a lesson row — evidence, the condition under which it holds, and when to recheck it; you check the evidence and append it to the project's `.sdlc/_lessons.md` (or the knowledge file the project already uses). When a later task touches the same area, list the relevant entries in the packet `inputs`. Speculation stays in diagnosis notes.
+
+Never write lessons into `PLUGIN_ROOT` during project work: plugin skills hold only cross-project principles, and promoting a project lesson into one is a plugin-maintainer change that strips project names, stacks and paths. Earlier project-specific pitfalls files were moved out of the skills to `maintainers/archive/` and are not loaded.
 
 ## 6. User-named all-roles diagnosis
 

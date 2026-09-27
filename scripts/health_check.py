@@ -197,16 +197,13 @@ def main() -> int:
             err("DESC", f"{name}: description 缺触发语（Use this skill when / Use when）")
         if desc and not re.search(r"Do NOT", desc, re.I):
             warn("DESC", f"{name}: description 缺 Do NOT 排除项")
-        SATELLITES = {
-            "sdlc-eval", "signals", "schema", "design-contract", "release-gate",
-            "deliver", "retro", "warehouse", "collect", "growth",
-            "debug", "tdd", "refactor", "cicd",
-            "market", "compete", "prototype", "enablement",
-        }
-        if name in SATELLITES and desc and not re.match(
-            r"Use this skill when (the user says /sdlc-eval|the spawn packet)", desc
-        ):
-            warn("DESC", f"{name}: 卫星 skill description 应以 spawn-packet/hat 触发语开头（前 250 字不放领域名词，PR10）")
+        # Trigger style comes from registry.skills (no hand-written list): packet-loaded methods lead with the
+        # packet trigger, command entries with the command; domain-first skills are also solo entries.
+        trigger = registry.get("skills", {}).get(name, {}).get("trigger")
+        if desc and trigger == "packet" and not desc.startswith("Use this skill when the spawn packet"):
+            warn("DESC", f"{name}: packet 触发的 skill description 应以 spawn-packet/hat 触发语开头（前 250 字不放领域名词，PR10）")
+        if desc and trigger == "command" and not desc.startswith("Use this skill when the user says /"):
+            warn("DESC", f"{name}: 命令入口 skill description 应以 'Use this skill when the user says /<命令>' 开头")
         wtu = fm_field(front, "when_to_use")
         if not wtu:
             warn("WTU", f"{name}: 缺 when_to_use（字段保留作前向兼容；当前 build asar 0 命中该键，host 不读。触发面 = name + description，上限 1024）")
@@ -282,8 +279,8 @@ def main() -> int:
         for f in sorted(routed_refs - disk_refs):
             err("REF", f"{name}: 引用 references/{f} 但不存在")
         for f in sorted(disk_refs - routed_refs):
-            if f.endswith("-pitfalls.md"):
-                continue
+            # No exemption for *-pitfalls.md: project lessons live in the project's .sdlc/_lessons.md,
+            # and plugin references hold only routed, cross-project principles (orchestrator-gates §5).
             err("REF", f"{name}: 孤儿 references/{f}（SKILL.md 未路由）")
 
         routed_tpl = set(re.findall(r"templates/([A-Za-z0-9_.-]+)", text))
@@ -351,10 +348,8 @@ def main() -> int:
         if not os.path.isfile(os.path.join(lib, lib_name)):
             err("AGENT", f"agents/_lib/{lib_name} 缺失（共享 prompt 源）")
     AGENT_PROC = {name: role["skill"] for name, role in registry["roles"].items()}
-    ALIASES = {"pm": "prd-gwt", "dba": "schema", "qa": "coverage-matrix"}
-    ORCH = {"sdlc", "sdlc-eval", "discover"}
-    NO_HAT_PROCS = {"debug", "tdd", "refactor", "cicd", "falsify", "prototype", "imagery"}
-    SECOND_HAT_PROCS = {"enablement"}  # ops 第二做法（教/开/告），主做法仍是 signals
+    ALIASES = {"pm": "prd-gwt", "dba": "schema", "qa": "coverage-matrix"}  # legacy $role aliases, already deleted
+    SKILL_META = registry.get("skills", {})
     skill_dirs = {
         n for n in os.listdir(skills_dir)
         if os.path.isdir(os.path.join(skills_dir, n)) and os.path.isfile(os.path.join(skills_dir, n, "SKILL.md"))
@@ -390,8 +385,27 @@ def main() -> int:
             if at.count("\n") > 40:
                 warn("ALIAS", f"skills/{alias}/SKILL.md 过长（薄跳转应 <40 行）")
             warn("ALIAS", f"${alias} deprecated，删除期限 2026-10-09（主入口 ${target}）")
-    for name in sorted(skill_dirs - ORCH - set(ALIASES) - set(AGENT_PROC.values()) - NO_HAT_PROCS - SECOND_HAT_PROCS):
-        warn("SKILL", f"skills/{name}/ 不在做法池/别名/编排器/同伴做法表")
+    # Every skill's kind is registered (validate_registry reports missing entries). Role methods carry shared
+    # professional criteria; compatibility entries stay thin, name their replacement and honour their sunset.
+    for name, meta in sorted(SKILL_META.items()):
+        sk = os.path.join(skills_dir, name, "SKILL.md")
+        if not os.path.isfile(sk):
+            continue
+        if meta.get("kind") == "role" and not os.path.isfile(os.path.join(skills_dir, name, "references", "role-quality.md")):
+            err("EXCELLENCE", f"{name}: kind role 缺 references/role-quality.md（生产者与审查者共用的专业标准）")
+        if meta.get("kind") == "compat":
+            body = open(sk, encoding="utf-8").read()
+            if meta.get("replaced_by", "\0") not in body:
+                err("COMPAT", f"skills/{name}/SKILL.md 须指向替代方法 {meta.get('replaced_by')}")
+            if body.count("\n") > 40:
+                warn("COMPAT", f"skills/{name}/SKILL.md 过长（兼容入口应是 <40 行的薄入口）")
+            sunset = meta.get("sunset")
+            if sunset:
+                import datetime as _d
+                if _d.date.today() >= _d.date.fromisoformat(str(sunset)):
+                    err("COMPAT", f"skills/{name}/ 已过退役日期 {sunset}：迁移调用方后删除（替代：{meta.get('replaced_by')}）")
+                else:
+                    warn("COMPAT", f"${name} 为兼容入口，{sunset} 退役（替代：{meta.get('replaced_by')}）")
 
     # 发现面预算：excerpt 截断到 250（ZCode 注入形态），超固定预算会退化成只剩名字
     budget = excerpt_total + name_total

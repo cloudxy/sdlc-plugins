@@ -9,6 +9,7 @@
 # --report：/sdlc-review 报告模式。只验 findings.md + ## Snapshot；跳过 NOLANE/MATRIX/NOSEC 等泳道检查。
 #   stage-id 来自 workflow/registry.json（spawn 角色名如 pm 非法）。
 #   --hat product <product_root>：只验产品层文件（已填、无 sdlc:unfilled），不跑泳道检查。
+#   --hat cycle <cycle_dir>：只验产品周期的收尾（cycle.yaml、选定任务的输出、提议去向、信号 ID 唯一、决策未默认），不跑泳道检查。
 #   v4：state.yaml 含 sdlc_version: 4 时启用产品层 / 设计方向 / 联调 / E2E / 三方验收 / 回写闸门；旧档不受影响。
 #   未知/空 stage-id → 用法错误（exit 64）。skip 由 state.yaml roles_skipped
 #   单行 flow 列表精确 token 决定（block-style 无效，见 H.1）。
@@ -157,7 +158,7 @@ research_offline() { # $1 = 起点目录：上溯找 sdlc.config.yaml；research
   done
   return 1
 }
-need_sources() { # minimum traceability; evidence quality is reviewed by the owning skill
+need_sources() { # $1 = file. Minimum traceability only: no source-count quota; evidence quality is reviewed by the owning skill
   [ -f "$1" ] || return 0
   research_offline "$(cd "$(dirname "$1")" && pwd)" && return 0
   python3 "$(dirname "$0")/check_research_sources.py" "$1" || red SOURCES "$1: 缺少带日期的来源引用（URL 或真实本地文件链接）；引用数量不代表研究质量"
@@ -241,7 +242,7 @@ if [ "$HAT_GIVEN" = "1" ] && [ "$HATID" = "product" ]; then
         printf "\033[0;33m⚠ [SDLC-PRODUCTOPT] %s 仍是模板（可选文件：该产品无此面时删掉文件并在 README 写明理由）\033[0m\n" "$PRD/$pf"
       fi
     done
-    if [ -f "$PRD/growth.md" ] && ! is_unfilled "$PRD/growth.md"; then need_sources "$PRD/growth.md" 3 "--hat product growth.md"; fi
+    if [ -f "$PRD/growth.md" ] && ! is_unfilled "$PRD/growth.md"; then need_sources "$PRD/growth.md"; fi
     if [ -f "$PRD/data-dictionary.md" ]; then
       python3 "$SCRIPT_DIR/data_dictionary.py" --product-root "$PRD" --check >/dev/null 2>&1 \
         || red PRODUCTCTX "$PRD/data-dictionary.md: 与 erd.dbml / domain-model.md / data/metrics.yaml 不一致（来源已变或被手改）——重新生成：python3 PLUGIN_ROOT/scripts/data_dictionary.py --product-root $PRD"
@@ -314,6 +315,36 @@ EOF
   fi
   echo "----------------------------------------"
   if [ $V -eq 0 ]; then grn "产品层检查通过"
+  else printf "\033[0;31m✗ [SDLC-SUMMARY] 共 %s 处违规\033[0m\n" "$V"
+  fi
+  exit $V
+fi
+# ---------- --hat cycle：产品周期收尾检查（/sdlc-product cycle 用；不跑泳道检查） ----------
+if [ "$HAT_GIVEN" = "1" ] && [ "$HATID" = "cycle" ]; then
+  CY="$TARGET"
+  if [ ! -d "$CY" ]; then
+    red CYCLE "--hat cycle: 周期目录 $CY 不存在"
+  else
+    python3 "$SCRIPT_DIR/workflow.py" check-cycle --root "$CY" > "$TMPF" 2>&1
+    CRC=$?
+    if [ "$CRC" -ge 2 ]; then
+      red CYCLE "--hat cycle: 无法检查周期：$(cat "$TMPF")"
+    else
+      while IFS=$'\t' read -r LEVEL CODE MESSAGE; do
+        [ -z "$LEVEL" ] && continue
+        red "$CODE" "--hat cycle: $MESSAGE"
+      done < "$TMPF"
+    fi
+    CMD=$(find "$CY" -name '*.md' -not -path '*/memory/*' 2>/dev/null)
+    if [ -n "$CMD" ]; then
+      check_defaulted red $CMD
+      if grep -qE '^status:[[:space:]]*closed' "$CY/cycle.yaml" 2>/dev/null; then
+        check_pending "周期关闭前，战略决策须有操作者的回答" $CMD
+      fi
+    fi
+  fi
+  echo "----------------------------------------"
+  if [ $V -eq 0 ]; then grn "产品周期检查通过"
   else printf "\033[0;31m✗ [SDLC-SUMMARY] 共 %s 处违规\033[0m\n" "$V"
   fi
   exit $V
@@ -459,15 +490,15 @@ if [ "$HAT_GIVEN" = "1" ]; then
   done < "$TMPF"
   case "$HATID" in
     market)
-      is_v4 && ! role_skipped researcher && need_sources "$ROOT/${ART_market}" 3 "--hat market"
+      is_v4 && ! role_skipped researcher && need_sources "$ROOT/${ART_market}"
       ;;
     compete)
-      is_v4 && ! role_skipped competitor && need_sources "$ROOT/${ART_compete}" 3 "--hat compete"
+      is_v4 && ! role_skipped competitor && need_sources "$ROOT/${ART_compete}"
       ;;
     growth)
       if ! role_skipped growth; then
         is_v4 && need_product growth.md "--hat growth"
-        is_v4 && need_sources "$ROOT/${ART_growth}" 3 "--hat growth"
+        is_v4 && need_sources "$ROOT/${ART_growth}"
       fi
       ;;
     launch)

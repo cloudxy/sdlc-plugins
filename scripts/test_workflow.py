@@ -309,6 +309,18 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(self.registry["commands"]["sdlc-product"]["mode"], "product")
         self.assertEqual(self.registry["commands"]["sdlc-grok"]["skill"], "imagery")
 
+    def test_eval_entry_lists_exactly_the_routed_skills(self):
+        import re
+        hint = self.registry["commands"]["sdlc-eval"]["argument_hint"]
+        hinted = set(re.search(r"\[skill: ([^\]]+)\]", hint).group(1).split("|"))
+        text = (ROOT / "skills/sdlc-eval/SKILL.md").read_text()
+        table = text[text.index("## Harness routing"):text.index("## Gotchas")]
+        routed = set(re.findall(r"^\| `([a-z0-9-]+)` \|", table, re.M))
+        with_evals = {p.parent.parent.name for p in (ROOT / "skills").glob("*/evals/evals.json")}
+        self.assertEqual(hinted, routed)
+        self.assertEqual(routed, with_evals)
+        self.assertNotRegex(self.registry["commands"]["sdlc-eval"]["description"], r"\d+ skills")
+
     def test_renderer_uses_registry_and_preserves_profiles(self):
         spec = importlib.util.spec_from_file_location("render_roles", ROOT / "scripts/render-role-agents.py")
         module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
@@ -319,6 +331,317 @@ class WorkflowTests(unittest.TestCase):
         self.assertNotIn("Excellent looks like", text)
         self.assertFalse(hasattr(module, "seed_profile"))
 
+
+    # ---- C06/C09: every output field is judged by what it really writes, not by the field that names it
+    def product_packet(self, role="designer", task="bootstrap", skill="design-contract", outputs=None, writes=None,
+                       evidence=("running_app", "screenshots"), extra=""):
+        prod = self.root / "docs/product"
+        prod.mkdir(parents=True, exist_ok=True)
+        for name in ("strategy.md", "design-system.md"):
+            (prod / name).write_text(f"# {name}\n")
+        outputs = [f"{prod}/design-system.md"] if outputs is None else outputs
+        writes = [f"{prod}/design-system.md"] if writes is None else writes
+        check = f"python3 {ROOT}/scripts/workflow.py check-task --role {role} --stage product --task {task} --root {prod}"
+        if resolve_task(self.registry, role, "product", task).get("product_outputs"):
+            check += f" --product-root {prod}"
+        return (f"## SPAWN PACKET v2\nhat: {role}\nstage: product\ntask: {task}\n"
+                f"subagent_type: sdlc-workflow:{role}\nPLUGIN_ROOT: {ROOT}\nproduct_root: {prod}\n"
+                f"primary_skill: sdlc-workflow:{skill}\n"
+                + ("product_writes:\n" + "".join(f"  - {w}\n" for w in writes) if writes else "")
+                + "deliverable_paths:\n" + "".join(f"  - {o}\n" for o in outputs)
+                + f"success_checks:\n  - {check}\nreturn: output paths + summary\n"
+                + ("evidence_required:\n" + "".join(f"  - {e}\n" for e in evidence) if evidence else "")
+                + "forbidden:\n  - Do not spawn further subagents (host depth 1).\n" + extra)
+
+    def codes(self, packet):
+        return {e["code"] for e in lint(packet)["errors"]}
+
+    def test_product_screenshots_need_a_declared_evidence_path(self):  # C06
+        prod = self.root / "docs/product"
+        self.assertEqual(self.codes(self.product_packet()), set())
+        work = f"{self.root}/.sdlc/_product/screens/main.png"
+        self.assertIn("DELIVERABLE-SCOPE", self.codes(self.product_packet(outputs=[f"{prod}/design-system.md", work])))
+        shot = f"{prod}/assets/screens/main.png"
+        self.assertEqual(self.codes(self.product_packet(outputs=[f"{prod}/design-system.md", shot])), set())
+        stray = f"{prod}/notes.md"  # inside product_root, but neither owned product file nor declared evidence
+        self.assertIn("DELIVERABLE-SCOPE", self.codes(self.product_packet(outputs=[f"{prod}/design-system.md", stray])))
+
+    def test_product_file_ownership_is_checked_in_every_output_field(self):  # C09
+        prod = self.root / "docs/product"
+        own = f"{prod}/design-system.md"
+        self.product_packet()  # creates the product files
+        (prod / "assets").mkdir()
+        (prod / "assets/alias.md").symlink_to(prod / "strategy.md")
+        outside = self.project / "elsewhere"; outside.mkdir()
+        (prod / "assets/out").symlink_to(outside, target_is_directory=True)
+        for variant in (f"{prod}/strategy.md", "strategy.md", f"{prod}/assets/../strategy.md", f"{prod}/assets/alias.md"):
+            with self.subTest(deliverable=variant):
+                self.assertIn("UNOWNED", self.codes(self.product_packet(outputs=[own, variant])))
+        self.assertIn("UNOWNED", self.codes(self.product_packet(writes=[own, f"{prod}/strategy.md"])))
+        self.assertIn("DELIVERABLE", self.codes(self.product_packet(outputs=[own, "assets/../strategy.md"])))
+        self.assertIn("DELIVERABLE-SCOPE", self.codes(self.product_packet(outputs=[own, f"{prod}/assets/out/x.md"])))
+        # An owned file still needs a product_writes entry: deliverable_paths alone is not a grant.
+        self.assertIn("UNOWNED", self.codes(self.product_packet(writes=[])))
+        # The same rule holds from a feature stage.
+        feature = self.packet() + f"product_root: {prod}\n"
+        feature = feature.replace("deliverable_paths:\n", f"deliverable_paths:\n  - {prod}/strategy.md\n")
+        self.assertIn("UNOWNED", self.codes(feature))
+
+    def test_manager_report_path_is_legal_only_for_the_judge(self):  # C06
+        prod = self.root / "docs/product"
+        report = f"{self.root}/.sdlc/_product/findings.md"
+        review = self.product_packet(role="reviewer", task="G-fresh", skill="findings", outputs=[report],
+                                     writes=[], evidence=())
+        self.assertEqual(self.codes(review + f"project_root: {self.root}\n"), set())
+        self.assertIn("DELIVERABLE-SCOPE", self.codes(review))  # cannot resolve the report without project_root
+        self.assertIn("DELIVERABLE-SCOPE", self.codes(self.product_packet(outputs=[f"{prod}/design-system.md", report])
+                                                      + f"project_root: {self.root}\n"))
+        self.assertIn("UNOWNED", self.codes(self.product_packet(role="reviewer", task="G-fresh", skill="findings",
+                                                                outputs=[report, f"{prod}/strategy.md"], writes=[],
+                                                                evidence=()) + f"project_root: {self.root}\n"))
+
+    def test_memory_file_stays_in_the_roles_memory_folder(self):  # C09
+        prod = self.root / "docs/product"
+        self.product_packet()
+        base = self.packet() + f"product_root: {prod}\n"
+        self.assertEqual(self.codes(base + f"memory_file: {self.root}/memory/designer.md\n"), set())
+        self.assertIn("MEMORY", self.codes(base + f"memory_file: {prod}/strategy.md\n"))
+        self.assertIn("MEMORY", self.codes(base + f"memory_file: {self.root}/memory/pm.md\n"))
+        self.assertIn("MEMORY", self.codes(base + f"memory_file: {self.project}/memory/designer.md\n"))
+
+    def test_evidence_paths_are_validated(self):
+        broken = copy.deepcopy(self.registry)
+        task = next(t for t in broken["tasks"] if (t["role"], t["stage"]) == ("designer", "product"))
+        for bad in ("../screens/*", "/abs/*", "strategy.md"):
+            with self.subTest(pattern=bad):
+                task["evidence_paths"] = [bad]
+                self.assertTrue(any("evidence path" in e for e in validate_registry(broken)))
+
+    # ---- batch B: lifecycle/scope metadata, skill kinds, role functions, decision records
+    def test_model_metadata_is_complete(self):
+        self.assertEqual(set(self.registry["functions"]), {"product-mgmt", "operations", "design", "engineering", "quality"})
+        for role, item in self.registry["roles"].items():
+            self.assertIn(item["function"], self.registry["functions"], role)
+        for t in self.registry["tasks"]:
+            self.assertEqual(t["scopes"], {"product": ["product"], "cycle": ["cycle"]}.get(t["stage"], ["feature"]), t)
+            self.assertTrue(set(t["lifecycle_phases"]) <= set(self.registry["lifecycle"]), t)
+        on_disk = {p.parent.name for p in (ROOT / "skills").glob("*/SKILL.md")}
+        self.assertEqual(set(self.registry["skills"]), on_disk)
+        self.assertEqual(self.registry["skills"]["falsify"]["kind"], "compat")
+
+    def test_model_metadata_errors_are_reported(self):
+        cases = [
+            (lambda r: r["roles"]["pm"].__setitem__("function", "marketing"), "function"),
+            (lambda r: r["tasks"][0].__setitem__("scopes", ["everywhere"]), "scopes"),
+            (lambda r: r["tasks"][0].__setitem__("scopes", ["product"]), "go together"),
+            (lambda r: r["tasks"][0].__setitem__("lifecycle_phases", ["operate"]), "lifecycle"),
+            (lambda r: r["skills"].pop("tdd"), "missing from registry.skills"),
+            (lambda r: r["tasks"][0].__setitem__("skill", "discover"), "not a task method"),
+            (lambda r: r["skills"]["falsify"].__setitem__("replaced_by", "nope"), "live replacement"),
+            (lambda r: r["skills"]["prd-gwt"].__setitem__("kind", "practice"), "must be kind role"),
+        ]
+        for mutate, needle in cases:
+            with self.subTest(needle=needle):
+                broken = copy.deepcopy(self.registry)
+                mutate(broken)
+                self.assertTrue(any(needle in e for e in validate_registry(broken)), validate_registry(broken))
+
+    def test_compat_entry_gets_a_migration_hint(self):  # batch C: falsify is deprecated, not silently remapped
+        self.assertEqual(self.registry["skills"]["falsify"]["sunset"], "2026-12-31")
+        messages = [e["message"] for e in lint(self.packet() + "companion_skills: [sdlc-workflow:falsify]\n")["errors"]]
+        self.assertTrue(any("migrate to sdlc-workflow:discover" in m for m in messages), messages)
+        messages = [e["message"] for e in lint(self.packet(skill="falsify"))["errors"]]
+        self.assertTrue(any("migrate to sdlc-workflow:discover" in m for m in messages), messages)
+        broken = copy.deepcopy(self.registry)
+        broken["skills"]["falsify"]["sunset"] = "soon"
+        self.assertTrue(any("sunset" in e for e in validate_registry(broken)))
+        # The method's template now lives with its owner, so retiring the entry cannot break discover.
+        self.assertTrue((ROOT / "skills/discover/templates/assumptions.md").is_file())
+        self.assertNotIn("falsify/templates", (ROOT / "skills/discover/references/assumption-testing.md").read_text())
+
+    def test_run_scope_is_optional_and_bounded(self):
+        self.assertEqual(self.errors(), set())
+        self.assertEqual(self.codes(self.packet() + "run_scope: feature\n"), set())
+        self.assertIn("SCOPE", self.codes(self.packet() + "run_scope: product\n"))
+        # Free-text `scope:` notes in old packets are not the run scope and stay legal.
+        self.assertEqual(self.codes(self.packet() + "scope: smaller deliverable, same evidence\n"), set())
+
+    def test_function_map_is_a_generated_view(self):
+        from workflow import render_function_map
+        text = render_function_map(self.registry)
+        for fn, meta in self.registry["functions"].items():
+            self.assertIn(f"## {meta['name']} (`{fn}`)", text)
+        self.assertIn("grants no product writes", text)
+        self.assertIn("| ops | enablement / teach-open-announce |", text)
+
+    def test_relayed_decision_record_stays_compatible(self):
+        spec = importlib.util.spec_from_file_location("evidence_mod", ROOT / "scripts/evidence.py")
+        evidence = importlib.util.module_from_spec(spec); spec.loader.exec_module(evidence)
+        base = "feature: f\nopen_questions:\n  - id: Q-ACCEPT-PM\n    status: answered\n    by: user\n"
+        self.put("state.yaml", base + "    quote: \"同意，下个迭代补\"\n    decided_by: 产品负责人\n    relayed_by: user\n    authority: owners.product-mgmt\n")
+        self.assertTrue(evidence.check_conditional(self.root, "pm")[0])
+        self.put("state.yaml", base + "    decided_by: 产品负责人\n    relayed_by: user\n")
+        self.assertFalse(evidence.check_conditional(self.root, "pm")[0])  # names without the recorded words are not an answer
+
+    # ---- batch D: product cycles run in their own root with their own write rules
+    def cycle_packet(self, role="ops", task="signals-digest", skill="signals", outputs=None, extra="",
+                     cycle=None, check_root=None, config="product_root: docs/product\nsignals_path: docs/signals\n"):
+        cycle = cycle if cycle is not None else self.root / ".sdlc/_product/cycles/2026-09"
+        Path(cycle).mkdir(parents=True, exist_ok=True)
+        (self.root / "docs/product").mkdir(parents=True, exist_ok=True)
+        (self.root / "docs/signals").mkdir(parents=True, exist_ok=True)
+        (self.root / "docs/product/growth.md").write_text("# growth\n")
+        (self.root / "sdlc.config.yaml").write_text(config)
+        output = self.registry["artifacts"][resolve_task(self.registry, role, "cycle", task)["required"][0]]["paths"][0]
+        outputs = [output] if outputs is None else outputs
+        check = (f"python3 {ROOT}/scripts/workflow.py check-task --role {role} --stage cycle --task {task} "
+                 f"--root {check_root or cycle}")
+        return (f"## SPAWN PACKET v2\nhat: {role}\nstage: cycle\ntask: {task}\nrun_scope: cycle\n"
+                f"subagent_type: sdlc-workflow:{role}\nPLUGIN_ROOT: {ROOT}\ncycle_dir: {cycle}\n"
+                f"product_root: {self.root}/docs/product\nproject_root: {self.root}\nprimary_skill: sdlc-workflow:{skill}\n"
+                "deliverable_paths:\n" + "".join(f"  - {o}\n" for o in outputs)
+                + f"success_checks:\n  - {check}\nreturn: output paths + summary\n"
+                + "forbidden:\n  - Do not spawn further subagents (host depth 1).\n" + extra)
+
+    def test_cycle_packet_runs_in_its_own_root(self):
+        self.assertEqual(self.codes(self.cycle_packet()), set())
+        self.assertIn("MISSING", self.codes(self.cycle_packet().replace(f"cycle_dir: {self.root}/.sdlc/_product/cycles/2026-09\n", "")))
+        elsewhere = self.root / "notes/2026-09"
+        self.assertIn("CYCLE-DIR", self.codes(self.cycle_packet(cycle=elsewhere)))
+        self.assertIn("SCOPE", self.codes(self.cycle_packet().replace("run_scope: cycle", "run_scope: feature")))
+        self.assertIn("DELIVERABLE-SCOPE", self.codes(self.cycle_packet(outputs=["outputs/signals-digest.md", f"{self.root}/elsewhere.md"])))
+        self.assertIn("CHECKMISMATCH", self.codes(self.cycle_packet(check_root=self.root / "docs/product")))
+        contract = resolve_task(self.registry, "analyst", "cycle", "readout")
+        from workflow import success_check
+        self.assertIn("--root <cycle_dir>", success_check(contract))
+
+    def test_cycle_product_writes_follow_ownership(self):
+        growth = self.cycle_packet(role="growth", task="experiments", skill="growth",
+                                   extra=f"product_writes:\n  - {self.root}/docs/product/growth.md\n")
+        self.assertEqual(self.codes(growth), set())
+        ops = self.cycle_packet(extra=f"product_writes:\n  - {self.root}/docs/product/growth.md\n")
+        self.assertIn("UNOWNED", self.codes(ops))
+        cycle = self.root / ".sdlc/_product/cycles/2026-09"
+        self.assertEqual(self.codes(self.cycle_packet(extra=f"memory_file: {cycle}/memory/ops.md\n")), set())
+        self.assertIn("MEMORY", self.codes(self.cycle_packet(extra=f"memory_file: {self.root}/docs/product/ops.md\n")))
+
+    def test_signals_store_has_one_writer_inside_its_directory(self):
+        self.assertEqual(self.codes(self.cycle_packet(extra="store_writes:\n  - signals.md\n")), set())
+        for value in ("../product/strategy.md", "/tmp/x.md", "*.md"):
+            with self.subTest(value=value):
+                self.assertIn("STORE-SCOPE", self.codes(self.cycle_packet(extra=f"store_writes:\n  - {value}\n")))
+        readout = self.cycle_packet(role="analyst", task="readout", skill="retro", extra="store_writes:\n  - signals.md\n")
+        self.assertIn("STORE-SCOPE", self.codes(readout))
+        unset = self.cycle_packet(extra="store_writes:\n  - signals.md\n", config="product_root: docs/product\n")
+        self.assertIn("STORE-SCOPE", self.codes(unset))
+        inside_product = self.cycle_packet(extra="store_writes:\n  - s.md\n",
+                                           config="product_root: docs/product\nsignals_path: docs/product/signals\n")
+        (self.root / "docs/product/signals").mkdir(parents=True, exist_ok=True)
+        self.assertIn("STORE-SCOPE", self.codes(inside_product))
+
+    def test_source_writes_cannot_reach_the_signals_store(self):
+        (self.project / "sdlc.config.yaml").write_text("signals_path: docs/signals\n")
+        (self.project / "docs/signals").mkdir(parents=True)
+        pk = self.implementation_packet().replace("  - src/", "  - docs/signals/")
+        self.assertIn("SOURCE-SCOPE", self.codes(pk))
+
+    def test_runner_refuses_an_unknown_schema(self):
+        from workflow import SUPPORTED_SCHEMAS, load_registry as load
+        self.assertIn(2, SUPPORTED_SCHEMAS)
+        self.assertEqual(self.registry["schema_version"], 2)
+        fake = self.root / "workflow"; fake.mkdir()
+        data = copy.deepcopy(self.registry); data["schema_version"] = 3
+        import json
+        (fake / "registry.json").write_text(json.dumps(data))
+        with self.assertRaises(ValueError):
+            load(self.root)
+
+    def test_cycle_readout_is_interim_until_the_window_closes(self):
+        import datetime as dt
+        from workflow import check_cycle
+        cycle = self.root / ".sdlc/_product/cycles/2026-09"
+        (cycle / "outputs").mkdir(parents=True)
+        (cycle / "outputs/readout.md").write_text("# readout\n")
+        base = ("id: 2026-09\nstatus: open\nwindow:\n  from: 2026-09-01\n  to: 2026-09-30\ndata_cutoff: 2026-10-02\n"
+                "selected_tasks:\n  - role: analyst\n    task: readout\n    status: done\n")
+        (cycle / "cycle.yaml").write_text(base)
+        codes = {r[1] for r in check_cycle(self.registry, cycle, today=dt.date(2026, 9, 20))}
+        self.assertIn("CYCLE-INTERIM", codes)
+        self.assertEqual(check_cycle(self.registry, cycle, today=dt.date(2026, 10, 5)), [])
+        (cycle / "cycle.yaml").write_text(base.replace("data_cutoff: 2026-10-02", "data_cutoff: 2026-09-15"))
+        self.assertIn("CYCLE-INTERIM", {r[1] for r in check_cycle(self.registry, cycle, today=dt.date(2026, 10, 5))})
+
+    # ---- batch E: read-only trace over scoped, versioned ids
+    def trace_fixture(self):
+        files = {
+            "sdlc.config.yaml": "product_root: docs/product\nsignals_path: docs/signals\n",
+            "docs/product/data/metrics.yaml": "metrics:\n  - id: export_rate\n    owner: pm\n    version: 3\n  - id: churn\n    formula: x\n",
+            "docs/product/strategy.md": "北极星：metric:export_rate\n",
+            "docs/signals/signals.md": "| ID | 来源 |\n|---|---|\n| SIG-202609-1 | 工单 #12 |\n",
+            ".sdlc/export/01-define/spec.md": "| J-1 | 导出本周工单 |\n| FR-01 | 一键导出（J-1）；来自 SIG-202609-1 |\n| FR-02 | 失败给原因（J-1） |\n| FR-03 | 只在验收里提到 |\n",
+            ".sdlc/export/01-define/tracking.md": "| EV-1 | export_clicked | J-1 | metric:export_rate |\n",
+            ".sdlc/export/02-shape/contract.md": "| T-1 | 导出 | FR-01, FR-02 | J-1 |\n",
+            ".sdlc/export/03-impl/T-1-backend-evidence.md": "exit code 0\n",
+            ".sdlc/export/04-verify/coverage.md": "| FR/NFR | Case | File | Result |\n|---|---|---|---|\n| FR-01 | TC-1 | t.py:1 | ✅ |\n| FR-02 | — | — | ❌ hole |\n",
+            ".sdlc/export/04-verify/accept-pm.md": "FR-03 走查通过（这只是提到，不是验证记录）\n",
+            ".sdlc/export/state.yaml": "feature: export\nstale_artifacts: [01-define/tracking.md]\n",
+            ".sdlc/billing/01-define/spec.md": "| FR-01 | 按月出账 |\n",
+            ".sdlc/_product/cycles/2026-09/outputs/decisions.md": "| P-1 | SIG-202609-1 | 采纳 |\n",
+        }
+        for rel, text in files.items():
+            self.put(rel, text)
+
+    def trace(self, ident, **kw):
+        from sdlc_trace import build_index, query
+        return query(build_index(**{k: str(v) for k, v in kw.items()}), ident)
+
+    def test_trace_scopes_short_ids_and_refuses_ambiguity(self):
+        self.trace_fixture()
+        code, result = self.trace("FR-01", project_root=self.root)
+        self.assertEqual(code, 2)
+        self.assertIn("pass --feature", result["error"])
+        code, result = self.trace("FR-01", feature=self.root / ".sdlc/export")
+        self.assertEqual(code, 0)
+        self.assertEqual(result["container"], "feature:export")
+        self.assertEqual(result["status"][0]["status"], "verified by coverage rows")
+        self.assertIn(("anchored to journey", "J-1"), {(r["relation"], r["id"]) for r in result["upstream"]})
+        self.assertIn(("implemented by ticket", "T-1"), {(r["relation"], r["id"]) for r in result["downstream"]})
+        self.assertIn(("from signal", "SIG-202609-1"), {(r["relation"], r["id"]) for r in result["upstream"]})
+
+    def test_trace_status_comes_only_from_records(self):
+        self.trace_fixture()
+        feature = self.root / ".sdlc/export"
+        self.assertEqual(self.trace("FR-02", feature=feature)[1]["status"][0]["status"], "unverified (matrix hole)")
+        mentioned = self.trace("FR-03", feature=feature)[1]  # an acceptance note mentions it; no coverage row
+        self.assertNotIn("verified by coverage rows", [s["status"] for s in mentioned["status"]])
+        self.assertIn("coverage.md exists but has no row for this id", mentioned["gaps"])
+        ticket = self.trace("T-1", feature=feature)[1]
+        self.assertEqual(ticket["status"][0], {"status": "evidence recorded", "records": ["03-impl/T-1-backend-evidence.md"]})
+        event = self.trace("EV-1", feature=feature)[1]
+        self.assertIn("stale (listed in state.yaml stale_artifacts)", [s["status"] for s in event["status"]])
+
+    def test_trace_product_ids_are_versioned_and_global(self):
+        self.trace_fixture()
+        code, metric = self.trace("metric:export_rate", project_root=self.root)
+        self.assertEqual(code, 0)
+        self.assertEqual(metric["definitions"][0]["version"], "3")
+        self.assertIn(("fed by event", "EV-1"), {(r["relation"], r["id"]) for r in metric["upstream"]})
+        churn = self.trace("metric:churn", product_root=self.root / "docs/product")[1]
+        self.assertNotEqual(churn["definitions"][0]["version"], "3")  # the next entry's version is not borrowed
+        signal = self.trace("SIG-202609-1", project_root=self.root)[1]
+        self.assertIn("cycle:2026-09", {m["container"] for m in signal["mentions"]})
+        self.assertEqual(self.trace("metric:missing", project_root=self.root)[0], 1)
+
+    def test_trace_is_read_only(self):
+        self.trace_fixture()
+        before = sorted((p.as_posix(), p.stat().st_mtime_ns) for p in self.root.rglob("*") if p.is_file())
+        from sdlc_trace import main as trace_main
+        import contextlib, io
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(trace_main(["FR-01", "--feature", str(self.root / ".sdlc/export"), "--json"]), 0)
+            self.assertEqual(trace_main(["FR-01"]), 2)
+        after = sorted((p.as_posix(), p.stat().st_mtime_ns) for p in self.root.rglob("*") if p.is_file())
+        self.assertEqual(before, after)
 
     def implementation_packet(self):
         return self.packet(role="backend", stage="implement", task="T-1", skill="impl-evidence",

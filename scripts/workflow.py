@@ -17,10 +17,17 @@ ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_KINDS = {"web", "screenshots", "running_app", "e2e"}
 
 
+# schema 2 adds run scopes (cycle) with their own roots and write rules. A runner that only knows schema 1 must
+# refuse such a registry instead of treating a cycle task as a feature task.
+SUPPORTED_SCHEMAS = {1, 2}
+ROOT_PLACEHOLDER = {"feature": "<feature_dir>", "product": "<product_root>", "cycle": "<cycle_dir>"}
+ROOT_FIELD = {"feature": "feature_dir", "product": "product_root", "cycle": "cycle_dir"}
+
+
 def load_registry(root=ROOT):
     data = json.loads((Path(root) / "workflow/registry.json").read_text())
-    if data.get("schema_version") != 1:
-        raise ValueError("unsupported workflow schema_version")
+    if data.get("schema_version") not in SUPPORTED_SCHEMAS:
+        raise ValueError(f"unsupported workflow schema_version {data.get('schema_version')!r} (this runner supports {sorted(SUPPORTED_SCHEMAS)})")
     return data
 
 
@@ -37,9 +44,77 @@ def resolve_task(registry, role, stage, task):
     return matches[0]
 
 
+SKILL_KINDS = {"manager", "role", "practice", "compat"}
+SKILL_TRIGGERS = {"packet", "command", "domain"}
+
+
+def task_scope(task):
+    """The run scope a task executes in: feature, product (or cycle). Old tasks without the field keep the
+    stage-derived meaning, so an old registry or packet never changes behaviour silently."""
+    scopes = task.get("scopes") or (["product"] if task["stage"] == "product" else ["feature"])
+    return scopes[0]
+
+
+def root_placeholder(task):
+    return ROOT_PLACEHOLDER[task_scope(task)]
+
+
+def _validate_model(registry, root, errors):
+    """Batch-B metadata: role functions, task scopes and lifecycle phases, and the skills table."""
+    functions = registry.get("functions", {})
+    scopes = set(registry.get("scopes", []))
+    lifecycle = set(registry.get("lifecycle", []))
+    for role, item in registry["roles"].items():
+        if item.get("function") not in functions:
+            errors.append(f"{role}: function {item.get('function')!r} is not in registry.functions")
+    for t in registry["tasks"]:
+        key = (t["role"], t["stage"], t["task"])
+        ts = t.get("scopes")
+        if not ts or any(s not in scopes for s in ts):
+            errors.append(f"{key}: scopes {ts!r} must be a non-empty subset of {sorted(scopes)}")
+        elif (t["stage"] == "product") != (ts == ["product"]):
+            errors.append(f"{key}: stage product and scope product go together")
+        elif (t["stage"] == "cycle") != (ts == ["cycle"]):
+            errors.append(f"{key}: stage cycle and scope cycle go together")
+        store = t.get("store_writes")
+        if store is not None:
+            meta = registry.get("stores", {}).get(store)
+            if meta is None:
+                errors.append(f"{key}: store_writes names unknown store {store!r}")
+            elif meta.get("owner") != t["role"]:
+                errors.append(f"{key}: only the store owner {meta.get('owner')} may write store {store}")
+        if any(ph not in lifecycle for ph in t.get("lifecycle_phases", [])):
+            errors.append(f"{key}: unknown lifecycle phase in {t.get('lifecycle_phases')}")
+    skills = registry.get("skills", {})
+    on_disk = {p.parent.name for p in (root / "skills").glob("*/SKILL.md")}
+    for name in sorted(on_disk - set(skills)):
+        errors.append(f"skills/{name}: missing from registry.skills (kind and trigger)")
+    for name in sorted(set(skills) - on_disk):
+        errors.append(f"registry.skills.{name}: no skills/{name}/SKILL.md")
+    for name, meta in skills.items():
+        if meta.get("kind") not in SKILL_KINDS or meta.get("trigger") not in SKILL_TRIGGERS:
+            errors.append(f"registry.skills.{name}: kind must be one of {sorted(SKILL_KINDS)}, trigger one of {sorted(SKILL_TRIGGERS)}")
+        if meta.get("kind") == "compat":
+            if meta.get("replaced_by") not in skills or skills[meta["replaced_by"]].get("kind") == "compat":
+                errors.append(f"registry.skills.{name}: a compat entry names a live replacement skill")
+            if meta.get("method") and not (root / meta["method"]).is_file():
+                errors.append(f"registry.skills.{name}: method {meta['method']} does not exist")
+            sunset = meta.get("sunset")
+            if sunset is not None and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(sunset)):
+                errors.append(f"registry.skills.{name}: sunset must be null or YYYY-MM-DD")
+    for t in registry["tasks"]:
+        for used in [t["skill"]] + t.get("companions", []):
+            if skills.get(used, {}).get("kind") in ("manager", "compat"):
+                errors.append(f"{(t['role'], t['stage'], t['task'])}: {used} is a {skills[used]['kind']} skill, not a task method")
+    for role, item in registry["roles"].items():
+        if skills.get(item["skill"], {}).get("kind") != "role":
+            errors.append(f"{role}: default skill {item['skill']} must be kind role")
+
+
 def validate_registry(registry, root=ROOT):
     errors = []
     root = Path(root)
+    _validate_model(registry, root, errors)
     for role, item in registry["roles"].items():
         if not (root / "skills" / item["skill"] / "SKILL.md").is_file():
             errors.append(f"{role}: missing skill {item['skill']}")
@@ -92,6 +167,14 @@ def validate_registry(registry, root=ROOT):
         for companion in t.get("companions", []):
             if not (root / "skills" / companion / "SKILL.md").is_file():
                 errors.append(f"{key}: unknown companion {companion}")
+        for pattern in t.get("evidence_paths", []):
+            # Evidence paths are relative to the task root; they never name a canonical product file.
+            if Path(pattern).is_absolute() or ".." in Path(pattern).parts or not pattern:
+                errors.append(f"{key}: evidence path must stay inside the task root: {pattern}")
+            elif pattern in _product_files(registry):
+                errors.append(f"{key}: evidence path {pattern} is an owned product file; use product_writes")
+        if t.get("manager_output") and (Path(t["manager_output"]).is_absolute() or ".." in Path(t["manager_output"]).parts):
+            errors.append(f"{key}: manager_output must be project-relative")
     for name, stage in registry["stages"].items():
         for group in stage["required"]:
             if not group["any"] or any(a not in registry["artifacts"] for a in group["any"]):
@@ -109,6 +192,11 @@ def validate_registry(registry, root=ROOT):
             if Path(p).is_absolute() or ".." in Path(p).parts:
                 errors.append(f"{key}: path must stay inside artifact root")
     return errors
+
+
+def _product_files(registry):
+    """Canonical product files: every file some role owns under product_root."""
+    return {f for role in registry["roles"].values() for f in role["product_writes"]}
 
 
 def _vendor_lists(root, rel):
@@ -202,11 +290,131 @@ def check_task(registry, root, role, stage, task, product_root=None):
     return results
 
 
+CYCLE_TASK_STATES = {"todo", "doing", "done", "pending-observation", "carried", "rejected", "awaiting-authorization"}
+PROPOSAL_STATES = {"accepted", "deferred", "rejected", "pending", "carried"}
+SIG_ROW = re.compile(r"^\|\s*(SIG-\d{6}-\d+)\s*\|", re.M)
+
+
+def find_config(start):
+    """sdlc.config.yaml of the project that contains `start` (walks up a few levels)."""
+    d = Path(start).resolve()
+    for _ in range(8):
+        if (d / "sdlc.config.yaml").is_file():
+            return d / "sdlc.config.yaml"
+        if d.parent == d:
+            break
+        d = d.parent
+    return None
+
+
+def check_cycle(registry, cycle_dir, today=None):
+    """Closure checks for one product cycle (.sdlc/_product/cycles/<id>/cycle.yaml). Mechanical only: it proves
+    the cycle's bookkeeping is complete and honest about open windows, never that an analysis is right."""
+    import datetime as dt
+    from check_config import parse_yaml  # lazy: check_config imports this module lazily as well
+    root = Path(cycle_dir)
+    results = []
+
+    def bad(code, msg):
+        results.append(("error", code, msg))
+
+    state = root / "cycle.yaml"
+    if not state.is_file():
+        bad("CYCLE", f"missing {state} (start from skills/sdlc/templates/cycle.yaml)")
+        return results
+    text = state.read_text(encoding="utf-8")
+    if UNFILLED.search(text):
+        bad("CYCLE", f"{state} is still the template (sdlc:unfilled)")
+        return results
+    cy = parse_yaml(text)
+    if str(cy.get("id") or "") != root.name:
+        bad("CYCLE", f"cycle.yaml id {cy.get('id')!r} must equal the directory name {root.name!r}")
+    status = cy.get("status")
+    if status not in ("open", "closed"):
+        bad("CYCLE", f"status {status!r} must be open or closed")
+
+    def day(value, name):
+        try:
+            return dt.date.fromisoformat(str(value))
+        except ValueError:
+            bad("CYCLE", f"{name} must be YYYY-MM-DD, got {value!r}")
+            return None
+
+    window = cy.get("window") if isinstance(cy.get("window"), dict) else {}
+    day(window.get("from"), "window.from")
+    w_to = day(window.get("to"), "window.to")
+    cutoff = day(cy.get("data_cutoff"), "data_cutoff")
+    today = today or dt.date.today()
+    tasks = cy.get("selected_tasks") if isinstance(cy.get("selected_tasks"), list) else []
+    if not tasks:
+        bad("CYCLE", "selected_tasks is empty — a cycle runs only the tasks it selects")
+    for i, st in enumerate(tasks):
+        if not isinstance(st, dict):
+            bad("CYCLE", f"selected_tasks[{i}] must be a mapping")
+            continue
+        name, run = str(st.get("task")), st.get("status")
+        label = f"selected_tasks[{i}] {st.get('role')}/{name}"
+        try:
+            contract = resolve_task(registry, str(st.get("role")), "cycle", name)
+        except ValueError:
+            bad("CYCLE", f"{label}: not a registered cycle task")
+            continue
+        if run not in CYCLE_TASK_STATES:
+            bad("CYCLE", f"{label}: status {run!r} is not one of {', '.join(sorted(CYCLE_TASK_STATES))}")
+        if run == "done":
+            for art in contract["required"]:
+                if not existing(root, artifact_paths(registry, [art])):
+                    bad("CYCLE", f"{label}: done, but {' or '.join(artifact_paths(registry, [art]))} is missing or unfilled")
+            if name == "readout" and st.get("interim") is not True and w_to:
+                if w_to >= today:
+                    bad("CYCLE-INTERIM", f"{label}: the observation window runs until {w_to}; before then a readout is interim "
+                                         "(interim: true) or pending-observation, never a completed result")
+                elif cutoff and cutoff < w_to:
+                    bad("CYCLE-INTERIM", f"{label}: data_cutoff {cutoff} is before the window end {w_to}; mark the readout interim")
+        if run == "carried" and not st.get("carried_to"):
+            bad("CYCLE", f"{label}: carried needs carried_to (the cycle or feature that received it)")
+        if status == "closed" and run in ("todo", "doing"):
+            bad("CYCLE-CLOSE", f"{label}: the cycle is closed but this task is {run} — record done, pending-observation, "
+                               "carried, rejected or awaiting-authorization")
+    proposals = cy.get("proposals") if isinstance(cy.get("proposals"), list) else []
+    for i, pr in enumerate(proposals):
+        if not isinstance(pr, dict):
+            continue
+        ps, label = pr.get("status"), f"proposals[{i}] {pr.get('id')}"
+        if ps not in PROPOSAL_STATES:
+            bad("CYCLE", f"{label}: status {ps!r} is not one of {', '.join(sorted(PROPOSAL_STATES))}")
+        if ps == "carried" and not pr.get("carried_to"):
+            bad("CYCLE", f"{label}: carried needs carried_to")
+        if ps in ("accepted", "deferred", "rejected") and not (pr.get("decided_in") and existing(root, [str(pr["decided_in"])])):
+            bad("CYCLE", f"{label}: {ps} needs decided_in pointing at the filled decision record")
+        if status == "closed" and ps == "pending" and not pr.get("reason"):
+            bad("CYCLE-CLOSE", f"{label}: still pending at closure — say what it waits for (evidence, authorization)")
+    if status == "closed" and not str(cy.get("closure") or "").strip():
+        bad("CYCLE-CLOSE", "a closed cycle states where its unfinished items went (closure)")
+    config = find_config(root)
+    if config:
+        store = parse_yaml(config.read_text(encoding="utf-8")).get("signals_path")
+        if isinstance(store, str) and store.strip() and "<" not in store:
+            path = config.parent / store
+            files = [path] if path.is_file() else sorted(path.rglob("*.md")) if path.is_dir() else []
+            seen = {}
+            for f in files:
+                body = f.read_text(encoding="utf-8", errors="replace")
+                if UNFILLED.search(body):
+                    continue
+                for m in SIG_ROW.finditer(body):
+                    if m.group(1) in seen:
+                        where = f"in {f}" if seen[m.group(1)] == f else f"in {seen[m.group(1)]} and {f}"
+                        bad("SIGDUP", f"{m.group(1)} is defined twice {where}; a signal ID is never reused")
+                    seen.setdefault(m.group(1), f)
+    return results
+
+
 def success_check(task):
     """The one check-task command a packet must carry for this task (check_packet compares against it)."""
     cmd = (f"python3 <PLUGIN_ROOT>/scripts/workflow.py check-task --role {task['role']} --stage {task['stage']} "
            f"--task {task['task'] if not task.get('task_pattern') else '<T-n>'} "
-           f"--root {'<product_root>' if task['stage'] == 'product' else '<feature_dir>'}")
+           f"--root {root_placeholder(task)}")
     if task.get("product_outputs"):
         cmd += " --product-root <product_root>"
     return cmd
@@ -229,13 +437,9 @@ def render_stage_map(registry):
              "", "`hat` is the role; `stage` is the gate ID; `task` selects the contract; `primary_skill` is the method.",
              "Query one contract: `python3 PLUGIN_ROOT/scripts/workflow.py contract --role designer --stage designer --task explore`.",
              "Task presence checks do not advance state. Use `check-sdlc.sh --hat <stage>` only after that stage's participating tasks finish.",
-             "", "| Role | Stage | Task | Skill | Required artifacts |", "|---|---|---|---|---|"]
+             "", "| Role | Stage | Task | Scope · lifecycle | Skill | Required artifacts |", "|---|---|---|---|---|---|"]
     for t in registry["tasks"]:
-        paths = [" / ".join(registry["artifacts"][a]["paths"]) for a in t["required"]]
-        paths += ["product:" + p for p in t.get("product_outputs", [])]
-        if t.get("manager_output"):
-            paths.append("manager: " + t["manager_output"])
-        lines.append(f"| {t['role']} | {t['stage']} | {t['task']} | {t['skill']} | {'; '.join(paths)} |")
+        lines.append(f"| {t['role']} | {t['stage']} | {t['task']} | {_scope_life(t)} | {t['skill']} | {'; '.join(_outputs(registry, t))} |")
     lines += ["", "## Progress and rank", "", "| Stage | Progress word | Rank |", "|---|---|---|"]
     for name, s in registry["stages"].items():
         lines.append(f"| {name} | {s['progress'] or '—'} | {s['rank']} |")
@@ -249,12 +453,61 @@ def render_stage_map(registry):
     return "\n".join(lines) + "\n"
 
 
+def _outputs(registry, t):
+    paths = [" / ".join(registry["artifacts"][a]["paths"]) for a in t["required"]]
+    paths += ["product:" + p for p in t.get("product_outputs", [])]
+    paths += ["evidence:" + p for p in t.get("evidence_paths", [])]
+    if t.get("manager_output"):
+        paths.append("manager: " + t["manager_output"])
+    return paths
+
+
+def _scope_life(t):
+    phases = ", ".join(t.get("lifecycle_phases", [])) or "—"
+    return f"{task_scope(t)} · {phases}"
+
+
+def render_function_map(registry):
+    """A view for people: which roles and tasks each function covers. Not a second source of truth."""
+    lines = ["# Function map (generated)", "", "<!-- GENERATED by scripts/workflow.py render. Edit workflow/registry.json. -->", "",
+             "Which roles and tasks belong to each function — a view for people, not a new source. Mappings come from "
+             "`workflow/registry.json`. What a task reads, when it runs and who must decide live in "
+             "[stage-procedure.md](stage-procedure.md) (scheduling and required inputs), [product-layer.md](product-layer.md) "
+             "(decisions: who decides what) and the manager's human decision points (`skills/sdlc/SKILL.md` Step 4).",
+             "", "`function` groups roles for display only: it grants no product writes, tool access or waiver authority, "
+             "and a team may organise differently (an analyst may sit with product or with a data team).", ""]
+    by_fn = {}
+    for role, item in registry["roles"].items():
+        by_fn.setdefault(item["function"], []).append(role)
+    for fn, meta in registry["functions"].items():
+        roles = by_fn.get(fn, [])
+        lines += [f"## {meta['name']} (`{fn}`)", "", "Roles: " + ", ".join(f"`{r}`" for r in roles), "",
+                  "| Role | Stage / task | Scope · lifecycle | Primary skill | Companions | Outputs | Source writes |",
+                  "|---|---|---|---|---|---|---|"]
+        for t in registry["tasks"]:
+            if t["role"] not in roles:
+                continue
+            source = "required" if t.get("requires_source") else "optional" if t.get("writes_source") else "—"
+            lines.append(f"| {t['role']} | {t['stage']} / {t['task']} | {_scope_life(t)} | {t['skill']} | "
+                         f"{', '.join(t.get('companions', [])) or '—'} | {'; '.join(_outputs(registry, t)) or '—'} | {source} |")
+        owned = [f"{r}: {', '.join(registry['roles'][r]['product_writes'])}" for r in roles if registry["roles"][r]["product_writes"]]
+        reads = sorted({rd for t in registry["tasks"] if t["role"] in roles for rd in t.get("reads", [])})
+        lines += ["", "Product files owned: " + ("; ".join(owned) if owned else "none") + ".",
+                  "Required plugin reading: " + (", ".join(f"`{rd}`" for rd in reads) if reads else "none") + ".", ""]
+    return "\n".join(lines)
+
+
 def generated_files(registry):
     yield from render_commands(registry)
     yield "skills/sdlc/references/stage-map.md", render_stage_map(registry)
+    yield "skills/sdlc/references/function-map.md", render_function_map(registry)
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "trace":
+        # Read-only impact query; the index is rebuilt from artifacts on every run (sdlc_trace.py).
+        from sdlc_trace import main as trace_main
+        return trace_main(sys.argv[2:])
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("validate")
@@ -272,6 +525,8 @@ def main():
         if command == "check-task":
             p.add_argument("--root", required=True)
             p.add_argument("--product-root")
+    p = sub.add_parser("check-cycle")
+    p.add_argument("--root", required=True)
     p = sub.add_parser("check-stage")
     p.add_argument("--stage", required=True); p.add_argument("--root", required=True)
     p.add_argument("--skip", action="append", default=[]); p.add_argument("--ui", action="store_true")
@@ -324,7 +579,7 @@ def main():
                 task["reads"] = [f"<PLUGIN_ROOT>/{rd}" for rd in task["reads"]]  # add each to packet inputs
             if task.get("visuals"):
                 d = r["diagram"]
-                base = "<product_root>" if task["stage"] == "product" else "<feature_dir>"
+                base = root_placeholder(task)
                 task["diagram"] = {
                     "when": {v["type"]: d["when"][v["when"]] for v in task["visuals"]},
                     "enforced": [v["type"] for v in task["visuals"] if v["when"] in d["enforced_when"]],
@@ -335,7 +590,7 @@ def main():
                 }
             if task.get("imagery"):
                 g = r["imagery"]
-                base = "<product_root>" if task["stage"] == "product" else "<feature_dir>"
+                base = root_placeholder(task)
                 dirs = sorted({g["dirs"][im["kind"]] for im in task["imagery"]})
                 task["image"] = {
                     "when": {im["kind"]: g["when"][im["when"]] for im in task["imagery"]},
@@ -355,6 +610,8 @@ def main():
             raise ValueError(f"artifact root does not exist: {args.root}")
         if args.command == "check-task":
             results = check_task(r, args.root, args.role, args.stage, args.task, args.product_root)
+        elif args.command == "check-cycle":
+            results = check_cycle(r, args.root)
         else:
             results = check_groups(r, args.root, r["stages"][args.stage]["required"], args.skip, args.ui)
         for result in results:
