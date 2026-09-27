@@ -8,7 +8,13 @@ from pathlib import Path
 
 from workflow import (ROOT, load_registry, resolve_task, validate_registry,
                       check_task, check_groups, render_commands, generated_files)
-from check_packet import lint
+from check_packet import lint as lint_packet
+
+
+def lint(text):
+    # These 75 historical tests exercise the shared v2 authority adapter.
+    # Public pilot downgrade rejection and v3 dispatch are tested in test_task_runtime.py.
+    return lint_packet(text, enforce_protocol=False)
 
 
 class WorkflowTests(unittest.TestCase):
@@ -548,9 +554,9 @@ class WorkflowTests(unittest.TestCase):
     def test_runner_refuses_an_unknown_schema(self):
         from workflow import SUPPORTED_SCHEMAS, load_registry as load
         self.assertIn(2, SUPPORTED_SCHEMAS)
-        self.assertEqual(self.registry["schema_version"], 2)
+        self.assertEqual(self.registry["schema_version"], 3)
         fake = self.root / "workflow"; fake.mkdir()
-        data = copy.deepcopy(self.registry); data["schema_version"] = 3
+        data = copy.deepcopy(self.registry); data["schema_version"] = 999
         import json
         (fake / "registry.json").write_text(json.dumps(data))
         with self.assertRaises(ValueError):

@@ -154,7 +154,7 @@ flowchart TD
 
 ### 3. 派单包 v2（唯一的派单形式）
 
-每次派单写一份 SPAWN PACKET v2（帽子、阶段、任务、输入文件、可搜索目录、交付路径、证据要求、`product_context` / `product_writes` / `source_writes`、成功检查、禁止事项），存到 `<feature>/packets/`，派单前先跑 `check_packet.py`。它会拦掉常见偷工：把调研写成「可选」、证据清单比合同短、交付物写到功能目录外、给帽子不属于它的写权限。合同本身用 `workflow.py contract --role … --stage … --task …` 现查，不靠记忆。
+三个 feature 试点（PM spec、architect conformance、backend T-n）使用 `prepare → seal → record → check-tasks` 和封存的 SPAWN PACKET v3，详见 [任务协议](skills/sdlc/references/task-protocol.md)。其余任务沿用 SPAWN PACKET v2（帽子、阶段、任务、输入文件、可搜索目录、交付路径、证据要求、`product_context` / `product_writes` / `source_writes`、成功检查、禁止事项），存到 `<feature>/packets/`，派单前先跑 `check_packet.py`。它会拦掉常见偷工：把调研写成「可选」、证据清单比合同短、交付物写到功能目录外、给帽子不属于它的写权限。合同本身用 `workflow.py contract --role … --stage … --task …` 现查，不靠记忆。
 
 ### 4. 阶段与产出
 

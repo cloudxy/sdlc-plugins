@@ -92,61 +92,15 @@ Lane completion requirements are generated in [references/stage-map.md](referenc
 
 **L2-short predicate (closed set) — skips only the architect:** (a) `intent.skip_shape: true` and `02-shape/contract.md` already on disk; or (b) the implement packet marks the contract `required: false` and names `spec.md` as its substitute. `path: short` or appetite < 4h alone is not enough.
 
-## Step 3 — spawn packet v2 (the only spawn form)
+## Step 3 — prepare and dispatch the selected task
 
-```
-## SPAWN PACKET v2
-hat: <spawn_role>
-stage: <stage-id from stage-map.md>
-task: <explore|specify|walkthrough|design-qa|claims-check|positioning|launch|T-n|…>
-subagent_type: sdlc-workflow:<spawn_role>
-intent_quote: "<user's last substantive message, ≤200 chars>"
-lane: L1|L2|L3|L4
-feature_dir: <abs>
-PLUGIN_ROOT: <abs>
-constitution: <abs or none>
-product_root: <abs>
-project_root: <abs>          # actual code repository, required when source_writes is nonempty
-source_writes: []            # scoped relative project files/subdirectories for registered source-writing tasks
-product_context:            # read first — defaults in product-layer.md
-  - <abs>
-product_writes:             # files this hat owns and must keep true; empty for reviewer/qc
-  - <abs>
-lane_file: <ui|api|ai|model|none>
-slice_integrator: <one implementation role, required for implement tasks>
-primary_skill: sdlc-workflow:<proc>
-companion_skills: []        # only what the contract lists: read allowed companions from the registry; discovery prototypes have their own registered task
-inputs:   # files the hat must read — never directories; include every contract `reads` path
-  - {path: <abs>, required: true|false}
-explore_roots:              # directories it may search with Grep/Glob, not read wholesale
-  - <abs>
-deliverable_paths:
-  - <relative to feature_dir>   # implement: 03-impl/T-<n>-<role>-evidence.md (one file per lane)
-evidence_required:          # copy the contract's `evidence` list (web | screenshots | running_app | e2e); add, never drop
-  - <kind>
-visuals: []   # diagrams this task draws (contract `visuals`; trust-boundary is required when q_security: yes).
-    # Non-empty → add contract.diagram.inputs to inputs, contract.diagram.deliverable to
-    # deliverable_paths and contract.diagram.check to success_checks. A diagram is a view of its
-    # source: draw it only when it removes ambiguity for the next hat.
-imagery: []   # generated images (contract `imagery`; never required). Non-empty → add contract.image
-    # inputs/deliverable/check like visuals. Not a rendered direction, screenshot or UI
-    # contract. Not authorized → ask the operator for /sdlc-grok login; a hat never logs in.
-forbidden:
-  - Do not spawn further subagents (host depth 1).
-  - Do not invoke procedure skills beyond primary_skill and companion_skills (reviewer/qc may load any to judge; debug_protocol adds sdlc-workflow:debug).
-  - Do not Write outside deliverable_paths, product_writes, source_writes and the assigned memory_file (reviewer/qc: do not Write at all).
-  - Do not read <feature>/memory/*.md unless it is your own memory_file.
-memory_file: <abs or empty>
-debug_protocol: <abs or empty>
-success_checks:
-  - each deliverable_paths exists on disk
-  - <the contract's success_check with the real paths filled in>
-return: output paths + summary + decisions + open_questions (strategic → Q-* 待确认 + options + recommendation; operational → default applied) + product-delta rows + lesson rows (verified traps only)
-```
+Resolve the exact role/stage/concrete task in `workflow/registry.json`. Tasks with `protocol_required: 1` use [references/task-protocol.md](references/task-protocol.md): complete explicit task selection and bindings → `workflow.py prepare` → inspect missing prerequisites → `seal` immediately before dispatch → validate the generated v3 packet. Offline drafts cannot be dispatched. Keep each pilot in an isolated execution window. Reuse recorded authorization; missing facts remain blocked, not waived.
 
-**Apply the task contract to its actual scope.** A packet never waives evidence required by the resolved task and participation flags — no "smoke run: no WebSearch needed", no "URLs optional", no "fall back to reading source code". To save cost, ask for a shorter artifact. Save every packet to `<feature>/packets/<nn>-<stage>-<hat>.md` and run `python3 <PLUGIN_ROOT>/scripts/check_packet.py <file>` before spawning. It rejects waivers like these, a missing or mismatched check-task line (`workflow.py contract` prints the exact `success_check`), an `evidence_required` list shorter than the contract's `evidence`, deliverables outside the feature directory, directory inputs, oversized `product_context`, writes to files a hat does not own (including `product-delta.md` and `CHANGELOG.md`, which only you write), and `--hat <role>`. Errors → fix the packet; never spawn around them.
+Other tasks use [references/packet.md](references/packet.md), the explicit v2 route. Product and cycle retain their own commands; the new runtime rejects these scopes until evaluated. Apply task ownership, evidence, fresh-review boundaries and conditional debug rules on either route. Generated inputs are indexed in [references/task-inputs.md](references/task-inputs.md); scheduling remains in stage-procedure.
 
-`subagent_type` is always the qualified name. Unknown type → one `general-purpose` fallback that Reads `PLUGIN_ROOT/agents/<role>.md` and the primary SKILL.md; record `host_spawn`. Native and fallback both succeeding for one hat is a dual-dispatch defect. Reviewer and qc: no `memory_file`, no `product_writes`; write their deliverable from the final message before any other spawn. For qc you run `skills/coverage-matrix/scripts/check-matrix.py` and paste its output into the packet. `mcp_adapters` in the config is a warning list only.
+Use the qualified role name. If the host cannot resolve it, make one general-purpose fallback read that role's generated agent and primary procedure; record host_spawn. Do not dispatch both forms. Reviewer/qc remain read-only and return their full report; the manager persists it. Never give them producer memory or writable paths. For qc, run `skills/coverage-matrix/scripts/check-matrix.py` and supply its output.
+
+After execution, save the full return and `record` it; bind the immutable result path and digest in state. Run `check-tasks` for task readiness, then existing independent reviews and acceptance, then `check-tasks --stage <gate_stage> --closure`. Stage checks do not automatically advance state. All new packet/run/return/log filenames carry the actual Beijing date and a unique suffix.
 
 ## Step 4 — human decision points (you present, the human decides)
 

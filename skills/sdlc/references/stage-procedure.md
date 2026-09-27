@@ -63,3 +63,7 @@ Optional architecture tasks do not add a new mandatory lane stage. They must sti
 - Use designer `market/prototype` only for a question-driven scratch experiment. Final product design prototypes stay under design-contract and do not satisfy production implementation evidence.
 - Cycle tasks (`stage: cycle`) run only inside a product cycle (`/sdlc-product cycle <id>`, [product-mode.md](product-mode.md) § Cycle mode); a feature lane never dispatches them. A feature's define reads the cycle's decisions and cites signal ids as inputs.
 - Record selected tasks, prerequisites, outputs, status and unresolved obligations in manager state. Ranks are stage vocabulary, not a prohibition on early partial tasks. A report's existence never closes another task's dependency.
+
+## Protocol-1 pilot inputs
+
+For pm/define/spec, architect/verify/conformance and backend/implement/T-n, use the generated [task-inputs.md](task-inputs.md) and [task-protocol.md](task-protocol.md). These override prose shortcuts for those exact tasks. Early feasibility, test-plan and explore keep their own contracts; this table remains the scheduling authority for unencoded participation choices.

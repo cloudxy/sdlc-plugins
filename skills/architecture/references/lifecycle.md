@@ -53,7 +53,7 @@ Can be dispatched when a mismatch is discovered in any later stage. This task be
 
 ## Conformance — verify / conformance
 
-Use when the change adds or alters consequential boundaries, quality/security obligations or accepted architecture decisions, or implementation evidence indicates drift. Read accepted obligations, actual code/build revision and raw check records.
+Use when the change adds or alters consequential boundaries, quality/security obligations or accepted architecture decisions, or implementation evidence indicates drift. Read accepted obligations, actual code/build revision and raw check records. For the protocol-1 task, follow [conformance-task.md](conformance-task.md) to distinguish sealed inputs, actual execution records and unresolved obligations.
 
 | Obligation ID/source | Expected behavior | Implementation revision | Evidence, run/environment | Observed result | Status | Owner/action |
 |---|---|---|---|---|---|---|

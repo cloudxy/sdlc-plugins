@@ -380,6 +380,16 @@ done < "$TMPF"
 ST="$ROOT/state.yaml"
 [ -f "$ST" ] || ST="$TARGET"
 
+# Protocol task checks are read-only. A producer can finish before G-fresh;
+# only phase Closed invokes whole-feature closure here. Stage closure is an explicit manager step.
+if [ -f "$ROOT/state.yaml" ]; then
+  TASK_ARGS=(--root "$ROOT" --scope feature)
+  if grep -qE '^phase:[[:space:]]*Closed' "$ROOT/state.yaml"; then TASK_ARGS+=(--closure); fi
+  TASK_OUT=$(python3 "$SCRIPT_DIR/workflow.py" check-tasks "${TASK_ARGS[@]}" 2>&1)
+  TASK_CODE=$?
+  [ "$TASK_CODE" -eq 0 ] || red TASKPROTOCOL "$TASK_OUT"
+fi
+
 # ---------- roles_skipped 精确 token（单行 flow 列表；block-style 无效） ----------
 role_skipped() { # $1 = spawn_role token；读 state.yaml roles_skipped
   [ -f "$ST" ] || return 1

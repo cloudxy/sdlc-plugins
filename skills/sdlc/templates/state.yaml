@@ -1,10 +1,14 @@
-# state.yaml 模板——进度唯一事实源（每帽第一动作读，最后动作更新）
+# state.yaml 模板——进度唯一事实源（角色只读；经理在任务返回后更新）
 feature: <feature-name>
 sdlc_version: 4       # v4 闸门（产品层 / 设计方向 / 联调 / E2E / 三方验收 / 回写）只对写了本键的功能生效
 product_root: docs/product   # 产品层目录（相对项目根，或绝对路径）；来自 sdlc.config.yaml
 delivery_goal: local_verified # proposal_ready|local_verified|release_ready|deployed；不是泳道完成豁免
 project_profile: {}   # 实际surface/stack/maturity及数据、安全、发布约束
-selected_tasks: []    # 经理维护具体task、依赖、状态和证据引用；合同仍在registry
+# 新试点须由经理显式迁移，参照 references/task-protocol.md；不要直接取消注释空表。
+# task_protocol: 1
+# required_capabilities: [input-contract-v1, result-v1, task-closure-v1]
+selected_tasks: []    # legacy 初始值；protocol 1 必须为非空块式任务映射，包含 selection/depends_on/gate_stage
+# obligations: []     # protocol 1 未决义务；blocker 由独立 resolution 记录解除，不能修改旧 result
 lane: L2              # L0-L4（L0 免 state.yaml，用 commit trailer lane=L0）
 appetite: 4h          # L2+ 必填；超 50% 停下重判泳道
 ui: yes               # Q-ui：有用户可见界面 → designer（explore/specify/accept）+ E2E + 设计走查
@@ -13,7 +17,7 @@ current_hat: define   # 英文主词（define/signals/shape/implement/verify/acc
 hats_done: []         # 英文主词；gates[] fresh-context 建议带 stage: <stage-id>（HATADVANCE 返工判定用）
 
 phase: HatReady       # 持久枚举 Intent|Discovering|LaneJudge|HatReady|Spawned|Rework|HatDone|Closed|Stopped|Refused|L0done
-                      # 瞬时步（DiskCheck/ScriptGate/Fresh）跑完即丢，禁止写入。check-sdlc.sh 不读 phase。
+                      # 瞬时步（DiskCheck/ScriptGate/Fresh）跑完即丢，禁止写入。check-sdlc.sh 在 Closed 时检查完整关闭条件。
 path: default         # 经理信号 default|short；单独不构成 skip_shape（仍须 L2-short 谓词 (a)/(b)）
 intent:
   class: new-feature  # L0|single-hat|review-only|product|eval|resume|discovery|new-feature|out-of-slice

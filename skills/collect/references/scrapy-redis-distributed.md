@@ -1,119 +1,113 @@
 # Scrapy-Redis 分布式采集架构
 
-本项目使用 scrapy-redis 实现分布式队列采集。这份文档是采集工程师的架构手册。
+适用条件：项目已采用（或经架构决定采用）scrapy-redis 做分布式队列采集。其他栈把同样的义务（共享队列、去重、持久调度、采集与存储的交接）映射到项目已接受的边界，不要为了套用本文而引入 scrapy-redis。项目自己的基类、配置入口、队列名和目录约定以项目文档为准，本文只给通用做法。
 
 ## 核心架构
 
 ```
-Backend 任务消费者 → Redis 队列（spider:<name>:start_urls）
-                          ↓ JSON 条目 {"url": "...", "task_id": 123, ...}
-                    Scrapy-Redis Scheduler（从队列取请求）
-                          ↓
-                    多个 Worker 节点并行爬取
-                          ↓
-                    Item Pipeline（quality → store → Redis item_queue）
-                          ↓
-                    Backend 消费者（从 spider:item_queue 取结果 → 落库 MySQL）
+任务生产者 → Redis 起始队列（默认键 <spider>:start_urls，或项目配置的 REDIS_START_URLS_KEY）
+                  ↓ 条目：URL 或 JSON（如 {"url": "...", "task_id": "..."}）
+            Scrapy-Redis Scheduler（从 Redis 取请求）
+                  ↓
+            多个 Worker 并行爬取
+                  ↓
+            Item Pipeline（清洗 → 校验 → 质量评分 → 交接）
+                  ↓
+            交接目标由项目架构决定（队列 / API / 直写存储）
 ```
 
-### 关键：Spider 是常驻 Worker，不是一次性运行
+### Spider 是常驻 Worker，不是一次性运行
 
-普通 Scrapy Spider 跑完就退出。Scrapy-Redis 的 `RedisSpider` 是**常驻 Worker**：
-- 启动后监听 Redis 队列 `spider:<name>:start_urls`
-- 有新 URL 就爬，队列空了就等（`IDLE_CLOSE_SECONDS` 控制是否自动退出）
+普通 Scrapy Spider 跑完就退出。scrapy-redis 的 `RedisSpider` 是**常驻 Worker**：
+
+- 启动后监听 Redis 起始队列
+- 有新条目就爬，队列空了就等（是否空闲自动退出由所用版本的相应设置决定，名称以版本文档为准）
 - 多个 Worker 可同时运行，共享同一个 Redis 队列（天然负载均衡）
 
-## settings.py 分布式配置（已实现，修改前先读）
+## 分布式配置（修改前先读项目现有 settings）
 
 ```python
-# 分布式调度器（从 Redis 取请求，不是本地内存队列）
-SCHEDULER = "scrapy_redis.scheduler.Scheduler"
-DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"  # Redis 去重
-SCHEDULER_PERSIST = True                                     # 重启不丢队列
-SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderPriorityQueue"  # 优先级队列
-REDIS_URL = project_settings.REDIS.DEFAULT.URL
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"               # 从 Redis 取请求，不用本地内存队列
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"   # 去重指纹存在 Redis，多 Worker 共享
+SCHEDULER_PERSIST = True                                     # 重启不清空已排队请求
+SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.PriorityQueue"   # 任务有优先级时；否则 FifoQueue
+REDIS_URL = ...  # 从项目的配置层读取；不要在代码里写连接串
 ```
 
-### 为什么用 SpiderPriorityQueue（而非默认 FIFO）
-任务有优先级（high/normal/low）。优先级队列确保高优先级任务先被消费。
+- **优先级队列**：任务确实分优先级（如 high / normal / low）时才用；没有优先级需求时 FIFO 更容易推理。类名随 scrapy-redis 版本变化，按已安装版本核对。
+- **`SCHEDULER_PERSIST = True`**：Worker 重启后不丢已排队请求。设为 False 等于重启清空队列，只适合一次性任务。代价是停用的爬虫会留下残余队列，需要有清理办法。
 
-### 为什么 SCHEDULER_PERSIST = True
-Worker 重启后不丢已排队的请求。如果设为 False，重启 = 队列清空 = 任务丢失。
+## Spider 基类
 
-## 基类：TaskAwareRedisSpider
+项目已有任务感知基类（负责解析队列条目、注入任务 ID、应用站点级限速）时，新 Spider 继承它，不要直接继承 `RedisSpider` 绕开这些职责。项目没有时，至少自己完成三件事：
 
-所有新 Spider **必须继承** `TaskAwareRedisSpider`（`spiders/base.py`），不要直接继承 RedisSpider。
-
-基类提供：
-1. **JSON 队列条目解析**：`{"url": "...", "task_id": 123}` → 注入 task_id 到请求 meta
-2. **站点级反爬配置**：从 sites.yml 读取 anti_crawl.download_delay 覆盖全局延迟
-3. **任务归属**：TaskAttributionSpiderMiddleware 把结果归属到正确的任务
-
-### 新 Spider 最小代码
+1. **解析队列条目**：JSON 条目取出 URL 和任务标识，放进请求 `meta`
+2. **站点级限速**：按目标站点的访问约定覆盖全局 `DOWNLOAD_DELAY` / 并发（来自项目的站点配置或本 Spider 的 `custom_settings`）
+3. **结果归属**：每个 item 带上任务标识，下游才能把结果归到正确的任务
 
 ```python
-from spiders.base import TaskAwareRedisSpider
-from scrapy import Request
+import json
 
-class MyNewSpider(TaskAwareRedisSpider):
+from scrapy import Request
+from scrapy_redis.spiders import RedisSpider
+
+
+class MyNewSpider(RedisSpider):  # 项目有任务感知基类时换成它
     name = "my_new_spider"
 
+    def make_request_from_data(self, data):
+        entry = json.loads(data)
+        return Request(entry["url"], meta={"task_id": entry.get("task_id")})
+
     def parse(self, response):
-        # response.meta['task_id'] 由基类自动注入
-        task_id = response.meta.get('task_id')
-
-        # 解析数据
-        for item in response.css('.product'):
+        task_id = response.meta.get("task_id")
+        for item in response.css(".product"):
             yield {
-                'url': response.url,
-                'title': item.css('h2::text').get(),
-                'price': item.css('.price::text').get(),
-                'task_id': task_id,  # 基类已注入
+                "url": response.url,
+                "title": item.css("h2::text").get(),
+                "price": item.css(".price::text").get(),
+                "task_id": task_id,
             }
-
-        # 翻页
-        next_page = response.css('a.next::attr(href)').get()
+        next_page = response.css("a.next::attr(href)").get()
         if next_page:
-            yield Request(next_page, callback=self.parse)
+            yield response.follow(next_page, self.parse, meta={"task_id": task_id})
 ```
 
-## Pipeline 链（数据从爬虫到数据库的路径）
+`make_request_from_data` 的签名和默认 JSON 支持随 scrapy-redis 版本变化；按已安装版本核对后再覆盖。
+
+## Pipeline 与交接
 
 ```
 Spider yield item
-  ↓ CleanPipeline (200)       清洗：去空白、编码统一
-  ↓ ValidatePipeline (300)    校验：必填字段、类型
-  ↓ QualityCheckPipeline (350) 质量评分：完整率 + 非空率 + 去重分
-  ↓ StorePipeline (400)       存储：序列化 → Redis spider:item_queue
-  ↓
-Backend 消费者 → 落库 MySQL
+  ↓ 清洗     去空白、统一编码
+  ↓ 校验     必填字段、类型
+  ↓ 质量评分 完整率、非空率、重复
+  ↓ 交接     按项目架构：序列化进队列 / 调用 API / 写存储
 ```
 
-**禁止**：Spider 直接写 MySQL。数据必须通过 Redis 队列流转（B2 边界）。
+爬虫能否直写主库由项目架构决定。项目把采集与存储分开时（常见理由：避免爬虫与在线服务争用连接池、把脏数据挡在主库外），Pipeline 最后一步只做序列化交接，由消费者落库；此时不要在 Spider 或 Pipeline 里打开主库会话。
 
 ## 多 Worker 部署
 
 ```bash
-# 机器 A
-cd scrapy && scrapy runspider spiders/generic.py
-
-# 机器 B（同一 Redis）
-cd scrapy && scrapy runspider spiders/generic.py
-
-# Backend 投递任务 → Redis 队列
-# 两个 Worker 自动负载均衡（从同一队列竞争取请求）
+# 机器 A、机器 B 连接同一个 Redis，各自启动同一个 Spider
+scrapy crawl my_new_spider
+# 生产者向起始队列投递条目后，两个 Worker 从同一队列竞争取请求
 ```
 
+项目有自己的启动脚本或进程管理时用项目的入口。
+
 ### 注意
-- Redis 是单点——Redis 挂了，所有 Worker 停止（但队列数据不丢，SCHEDULER_PERSIST=True）
-- 去重指纹（RFPDupeFilter）存在 Redis——多 Worker 不会重复爬同一 URL
-- 每个 Worker 有独立的内存（seen 集合在 Redis，非本地）
+
+- Redis 是单点：Redis 不可用时所有 Worker 停止（`SCHEDULER_PERSIST=True` 时队列数据不丢）
+- 去重指纹在 Redis：多 Worker 不会重复爬同一请求指纹；指纹集合会持续增长，需要过期或清理策略
+- 每个 Worker 有独立内存，共享的只有 Redis 里的队列和指纹
 
 ## 常见问题
 
 | 问题 | 原因 | 解决 |
 |---|---|---|
-| Worker 启动后一直等待 | Redis 队列为空（正常——等任务） | 投递任务到 `spider:<name>:start_urls` |
-| 多 Worker 重复爬同一 URL | DUPEFILTER_CLASS 配置错误 | 确认是 `scrapy_redis.dupefilter.RFPDupeFilter` |
-| 重启后队列丢失 | SCHEDULER_PERSIST = False | 改为 True |
-| 结果没有归属到任务 | start_urls 条目缺少 task_id | 确认投递的是 JSON 格式 `{"url":..., "task_id":...}` |
+| Worker 启动后一直等待 | 起始队列为空（正常——等任务） | 确认生产者投递到了正确的键 |
+| 多 Worker 重复爬同一 URL | 去重没有用 Redis | 确认 `DUPEFILTER_CLASS` 是 `scrapy_redis.dupefilter.RFPDupeFilter` |
+| 重启后队列丢失 | `SCHEDULER_PERSIST = False` | 需要保留时改为 True |
+| 结果没有归属到任务 | 条目缺少任务标识，或翻页请求没有带上 `meta` | 投递 JSON 条目；后续请求显式传递任务标识 |

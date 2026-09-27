@@ -21,7 +21,7 @@ Roles: `pm`, `researcher`, `competitor`
 | pm | cycle / apply-decisions | cycle · learn | prd-gwt | — | outputs/decisions.md | — |
 
 Product files owned: pm: feature-map.md, strategy.md.
-Required plugin reading: none.
+Required plugin reading: `skills/prd-gwt/references/spec-task.md`.
 
 ## 运营 (`operations`)
 
@@ -95,7 +95,7 @@ Roles: `architect`, `dba`, `frontend`, `backend`, `sre`, `algo`, `miner`, `data-
 | data-warehouse-engineer | cycle / tags-refresh | cycle · learn | warehouse | — | outputs/tags-refresh.md | — |
 
 Product files owned: architect: architecture.md; dba: domain-model.md, erd.dbml; data-warehouse-engineer: data/metrics.yaml, data/tags.yaml; data-collector: data/tracking-plan.yaml.
-Required plugin reading: `skills/architecture/references/lifecycle.md`, `vendor/anthropic-skills/skills/frontend-design/SKILL.md`.
+Required plugin reading: `skills/architecture/references/conformance-task.md`, `skills/architecture/references/lifecycle.md`, `skills/impl-evidence/references/api.md`, `skills/impl-evidence/references/backend-task.md`, `vendor/anthropic-skills/skills/frontend-design/SKILL.md`.
 
 ## 质量 (`quality`)
 

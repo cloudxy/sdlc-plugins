@@ -111,16 +111,27 @@ def read_list(state_text: str, key: str) -> list[dict]:
 
 
 # ----------------------------------------------------------------------------- commands
-def cmd_run(feature: Path, name: str, argv: list[str]) -> int:
+def cmd_run(feature: Path, name: str, argv: list[str], context: dict | None = None) -> int:
     if not argv:
         print("usage: evidence.py run --feature F --name N -- <command ...>", file=sys.stderr)
         return 2
     root = project_root(feature)
     out_dir = feature / "evidence" / "runs"
     out_dir.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+    from runtime_protocol import safe_id, now, file_hash, write_json, object_keys, require
+    from zoneinfo import ZoneInfo
+    safe_id(name, 'check name')
+    stamp = datetime.datetime.now(ZoneInfo('Asia/Shanghai')).strftime("%Y-%m-%d-%H%M%S%z-%f")
     log = out_dir / f"{name}-{stamp}.log"
     before = fingerprint(feature)
+    strict_before = None
+    if context is not None:
+        object_keys(context, {'check_id','scope','environment','executor','build'},
+                    {'check_id','scope','environment','executor','build'}, 'check context')
+        require(context['check_id']==name, 'check context ID must equal --name')
+        require(all(isinstance(context[k],str) and context[k].strip() for k in ('scope','environment','executor')), 'check context requires scope/environment/executor')
+        from task_runtime import source_snapshot
+        strict_before=source_snapshot(root,feature,root/product_root(root))['content_sha256']
     started = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
     with open(log, "wb") as fh:
         p = subprocess.run(argv, cwd=root, stdout=fh, stderr=subprocess.STDOUT)
@@ -129,13 +140,81 @@ def cmd_run(feature: Path, name: str, argv: list[str]) -> int:
            "started": started, "finished": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
            "fingerprint": before, "fingerprint_after": after, "changed_during_run": before != after,
            "log": log.name}
+    if context is not None:
+        strict_after=source_snapshot(root,feature,root/product_root(root))['content_sha256']
+        rec.update(evidence_version=2, context=context, source_sha256=strict_before, source_after_sha256=strict_after,
+                   log_sha256=file_hash(log), finished=now(), changed_during_run=strict_before!=strict_after)
     rj = out_dir / f"{name}-{stamp}.json"
-    rj.write_text(json.dumps(rec, ensure_ascii=False, indent=2) + "\n")
-    result = "pass" if p.returncode == 0 and before == after else "fail"
+    write_json(rj, rec)
+    result = "pass" if p.returncode == 0 and not rec["changed_during_run"] else "fail"
     rel = rj.relative_to(feature)
     print(f"{name}: exit {p.returncode}{' (source changed during the run)' if before != after else ''} → record in state.yaml gates:")
     print(f"  - {{name: {name}, kind: script, result: {result}, evidence: {rel}}}")
     return 0 if result == "pass" else 1
+
+
+def verify_bound_records(feature, paths, expectations, project, product):
+    """Validate explicit checks and reject newer failures in the same execution context.
+
+    Legacy records remain valid for legacy gates, but cannot supply absent protocol-1 facts.
+    Records describe script execution; equal-file permissions are not cryptographic attestation.
+    """
+    from runtime_protocol import load, file_hash, require, object_keys, path_inside
+    from task_runtime import source_snapshot
+    feature, project, product = Path(feature).resolve(), Path(project).resolve(), Path(product).resolve()
+    require(isinstance(expectations,list) and bool(expectations), 'nonempty required_checks needed')
+    require(isinstance(paths,list) and all(isinstance(p,str) for p in paths),'check_records must list paths')
+    current=source_snapshot(project,feature,product)['content_sha256']
+    def read(raw):
+        path=path_inside(raw,feature,True)
+        rec=load(path)
+        require(rec.get('evidence_version')==2,'legacy check lacks context/log/source binding; rerun with --context')
+        object_keys(rec,{'name','command','cwd','exit_code','started','finished','fingerprint','fingerprint_after',
+                         'changed_during_run','log','evidence_version','context','source_sha256','source_after_sha256','log_sha256'},
+                    {'name','command','cwd','exit_code','started','finished','changed_during_run','log','evidence_version',
+                     'context','source_sha256','source_after_sha256','log_sha256'},'execution record')
+        require(isinstance(rec['command'],list) and bool(rec['command']), 'execution command missing')
+        require(type(rec['exit_code']) is int,'execution exit_code must be integer')
+        require(Path(rec['cwd']).resolve()==project,'execution project mismatch')
+        require(datetime.datetime.fromisoformat(rec['finished']) >= datetime.datetime.fromisoformat(rec['started']),'invalid execution timestamps')
+        log=path_inside(path.parent/rec['log'],feature,True)
+        require(file_hash(log)==rec['log_sha256'],'missing/modified raw check log')
+        ctx=rec['context']
+        object_keys(ctx,{'check_id','scope','environment','executor','build'},{'check_id','scope','environment','executor','build'},'execution context')
+        require(ctx['check_id']==rec['name'] and all(ctx[k] for k in ('scope','environment','executor')), 'execution identity missing')
+        return path,rec,log
+    bound=[read(raw) for raw in paths]
+    result=[]; seen=set()
+    for e in expectations:
+        object_keys(e,{'id','scope','environment','build_required'},{'id','scope','environment','build_required'},'required check')
+        key=(e['id'],e['scope'],e['environment'])
+        require(key not in seen,'duplicate required check'); seen.add(key)
+        require(type(e['build_required']) is bool,'build_required must be boolean')
+        candidates=[x for x in bound if (x[1]['name'],x[1]['context']['scope'],x[1]['context']['environment'])==key]
+        require(len(candidates)==1,'bind exactly one record for '+str(key))
+        path,rec,log=candidates[0]
+        require(rec['exit_code']==0 and rec['changed_during_run'] is False,'execution failed or source changed during run')
+        require(rec['source_sha256']==rec['source_after_sha256']==current,'check source version stale')
+        if e['build_required']:
+            build=rec['context']['build']
+            object_keys(build,{'id','source_sha256','association','evidence','evidence_sha256'},
+                        {'id','source_sha256','association','evidence','evidence_sha256'},'build identity')
+            require(build['id'] and build['source_sha256']==current and build['association']=='verified','running build association unverified')
+            proof=path_inside(build['evidence'],feature,True)
+            require(file_hash(proof)==build['evidence_sha256'],'build association proof missing/modified')
+        for other in (feature/'evidence/runs').glob('*.json'):
+            newer=load(other)
+            ctx=newer.get('context',{})
+            if (newer.get('name'),ctx.get('scope'),ctx.get('environment')) != key: continue
+            if newer.get('source_sha256') != current: continue
+            if datetime.datetime.fromisoformat(newer['finished']) <= datetime.datetime.fromisoformat(rec['finished']): continue
+            if newer.get('exit_code')!=0 or newer.get('changed_during_run') is not False:
+                raise ValueError('newer failure supersedes bound pass: '+str(other))
+        result.append({'path':str(path),'sha256':file_hash(path),'log_path':str(log),'log_sha256':file_hash(log),
+                       'check_id':e['id'],'context':rec['context'],'source_sha256':current,'finished':rec['finished'],
+                       'build_association':'verified' if e['build_required'] else 'not-required'})
+    require(len(result)==len(bound),'unmatched extra check records')
+    return result
 
 
 def check_gate(feature: Path, name: str) -> tuple[bool, str]:
@@ -258,6 +337,7 @@ def main() -> int:
     ap.add_argument("--feature")
     ap.add_argument("--name", default="e2e")
     ap.add_argument("--who")
+    ap.add_argument('--context', help='JSON execution context for protocol 1 (check_id/scope/environment/executor/build)')
     ap.add_argument("--self-test", action="store_true")
     a = ap.parse_args(argv)
     if a.self_test:
@@ -267,7 +347,8 @@ def main() -> int:
         return 2
     feat = Path(a.feature)
     if a.command == "run":
-        return cmd_run(feat, a.name, cmd_args)
+        from runtime_protocol import load
+        return cmd_run(feat, a.name, cmd_args, load(a.context) if a.context else None)
     if a.command == "fingerprint":
         print(fingerprint(feat))
         return 0

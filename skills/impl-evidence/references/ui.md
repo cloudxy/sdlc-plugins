@@ -65,7 +65,7 @@ Choose the existing framework’s data model; verify cancellation, stale respons
 
 ### Component library alignment
 
-Second occurrence = extract to component library. Don't write the same Card+Table+Search pattern in three pages — extract `<PageToolbar>`, `<FilterSelect>`, `<DataTable>`.
+Extract a shared component when behavior and visual consistency are stable enough that the reuse benefit exceeds the abstraction and change cost. Repeated Card+Table+Search layouts are a signal to compare interfaces and states, not a fixed occurrence threshold. Keep variants local when their responsibilities are still diverging.
 
 ### Integration run (slice done definition)
 

@@ -71,7 +71,7 @@ Hosts inject the whole file. Order is the stack. Do not reorder.
 | `skills/<proc>/SKILL.md` | Procedure (how) — named by artifact, not hat | Plugin authors | Skill tool invoke, or fallback Read |
 | `<feature>/memory/<role>.md` | Facts this role learned on this feature (what) | The role, after a successful hat | Read at start of next spawn; **cap 2,200 chars** |
 | `<product_root>/*` | Durable product facts: value path, journeys, positioning, design system, architecture, domain model, data | The owning hat (see `product-layer.md`) | Every packet's `product_context` |
-| `spec.md` / `contract.md` / `state.yaml` | Shared team facts | The producing hat | Caller lists as Inputs |
+| `spec.md` / `contract.md` / `state.yaml` | Shared team facts | Artifact owner; state.yaml only the manager | Caller lists as Inputs |
 | Project `AGENTS.md` | Repo conventions (上下文) | Humans | `agents_md: true` |
 | Project lessons `<project>/.sdlc/_lessons.md` | Traps verified in this project (code+test / escape id / gate command + exit) | The manager, from lesson rows hats return | Packet `inputs` when a task touches the area |
 | Generic lessons in `skills/<proc>/` (Gotchas, references) | Cross-project principles only — no project names, stacks or paths | Plugin maintainers | Skill progressive load |

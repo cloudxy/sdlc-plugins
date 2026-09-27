@@ -113,6 +113,7 @@ PM may sketch to clarify business intent, but final UI decisions live in the des
 
 | Reference | Read when… |
 |---|---|
+| [spec-task.md](references/spec-task.md) | Assigned define/spec: input sufficiency, authorized short paths and task completion |
 | [product-shaping.md](references/product-shaping.md) | Before any FR: JTBD, core value path and Aha, removal test + Kano, opportunity–solution tree, MVP skeleton, 0→1 hypothesis mode |
 | [requirement-triage.md](references/requirement-triage.md) | Triaging requirements, digging for the real problem behind solution-speak, RICE |
 | [gwt-authoring.md](references/gwt-authoring.md) | Writing GWT, fixing untestable words, enumerating edge cases, one-oracle rule |

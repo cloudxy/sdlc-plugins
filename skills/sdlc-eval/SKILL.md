@@ -16,6 +16,12 @@ This window is the **manager**. You orchestrate **one human-triggered eval pass*
 | `rubric` | Is the with-skill output actually better than a capable baseline on the dimensions that matter? | `blind_eval.py prepare / aggregate` |
 | `regression` | On a real feature that went badly, is today's plugin output better than what it produced then? | `blind_eval.py regression-prepare / prepare --regression / aggregate --skill regression` |
 
+## Select the comparison before choosing a mode
+
+For new controlled comparisons, follow [references/controlled-comparisons.md](references/controlled-comparisons.md). Declare `comparison: plugin|skill|chain`, `treatment: with_without|old_new`, and `scope: role_task|workflow`; use `workflow.py eval-prepare` and independent project copies. Method comparisons use identical generated neutral role preambles and host tools. Chains vary only the upstream method; downstream settings/methods stay fixed. No budget or no usable host traces means quality acceptance remains pending.
+
+The historical with-role/without-general-purpose protocol below measures **plugin / role_task / with_without**, not an isolated method or the complete workflow. Keep it for existing iterations; do not relabel it as a skill-only experiment. The new protocol has its own schema instead of weakening production packets to create a control. Common-contract grading uses `grade_eval.py --comparison-manifest`; legacy keyword grading is method-specific hygiene, not a neutral quality score.
+
 ## Harness routing (all local skills)
 
 Delivery:
@@ -69,7 +75,7 @@ Orchestration:
 
 - **This is not a gate.** Do not add it to scheduled maintenance or `health-check.sh`. It burns real model calls and is non-deterministic.
 - **Scope = the selected skill/case manifest.** Support an explicitly requested all-skill pass in bounded batches with a model-call budget. Task routes come from workflow/registry.json; tables are an index, not a second authority.
-- **Baseline is `general-purpose`.** That is the without-skill arm, not a role spawn. Do not invert.
+- **Historical plugin baseline is `general-purpose`.** New skill/chain experiments use the same neutral role shell on both arms; do not confound method content with role instructions.
 - **Do not paste SKILL.md** into any spawn prompt. with_skill gets PLUGIN_ROOT; without_skill must not read it.
 - **Schedule independent arms in bounded batches respecting the host concurrency and agreed budget** (fresh context each), and all judges of one skill in one turn.
 - **You never judge.** Neither you nor the producing arms score outputs. Judges are fresh `general-purpose` spawns that see only one blind folder; the unblinding map (`.blind-map-*.json`) is never in a judge prompt.
@@ -78,7 +84,7 @@ Orchestration:
 - **A judge's claim is a lead, not a finding.** Before a rationale becomes a plugin change, open the cited file on the cited side and map the side to its arm. 2026-09-17: a swapped judgment was turned into a false "PM mixes spec versions" fix.
 - **A rubric delta is evidence, not proof.** Report scores with the judges' rationales and the number of cases; one case is an anecdote.
 - **Regressions run in the past.** The arm works in `snapshot/` (the project at the baseline commit), never in the live repository: at HEAD the old design is already built, reviewed and fixed, and copying it is hindsight. The leak scan decides — INVALID is never judged; REVIEW is the user's call, not yours.
-- **Judges see deliverables only.** Blind copies drop the `.sdlc/<feature>/` prefix and keep only the case's deliverables (skill mode: everything except memory/ and product-delta.md), so a side cannot be recognized by its folder layout.
+- **Judges see deliverables only.** Blind copies drop the `.sdlc/<feature>/` prefix and keep only the case's deliverables (explicit deliverables only; exclude memory/, product-delta.md, state, run records, method reports and control labels), so a side cannot be recognized by its folder layout.
 
 ## Reproducibility and result limits
 
@@ -148,7 +154,7 @@ Cases live in `PLUGIN_ROOT/skills/sdlc-eval/regressions/*.json` (fields: [templa
 
 ## Baseline discipline (5A)
 
-Before merging a change to a role profile, skill or protocol: run the affected skill in `rubric` mode (and the related regression cases) before and after; keep both iterations; the delta and the rationales are the evidence. Without a historical baseline, the without-skill arm is the baseline.
+Before merging a change to a role profile, skill or protocol: run the affected skill in `rubric` mode (and the related regression cases) before and after; keep both iterations; the delta and the rationales are the evidence. Without a frozen old method, a without comparison can measure usefulness but cannot establish that this rewrite improved quality.
 
 ## Self-check
 

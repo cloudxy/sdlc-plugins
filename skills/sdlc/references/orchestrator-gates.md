@@ -18,7 +18,7 @@ Full list for maintainers: `PLUGIN_ROOT/adapters/HOST-NOTES.md`. What the manage
 
 ## 1. Spawn recipe
 
-The first spawn is always `subagent_type: "sdlc-workflow:<role>"` with a SPAWN PACKET v2 (task + paths + PLUGIN_ROOT + product context). Never paste SKILL.md.
+The first spawn is always `subagent_type: "sdlc-workflow:<role>"` with the registry-selected packet version (sealed v3 for protocol-1 pilots, v2 for legacy tasks; see [task-protocol.md](task-protocol.md)). Never paste SKILL.md.
 
 If the host returns **unknown / unregistered type**, spawn **once** as `general-purpose` with the same packet. Its first action is to Read:
 

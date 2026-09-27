@@ -1,6 +1,6 @@
 # auto_agents 项目经验归档（插件维护者档案）
 
-这里的 12 份文件原先放在各 skill 的 `references/auto-agents-pitfalls.md`，内容是 auto_agents 这一个项目里核实过的坑（代码与测试、ESC 编号、闸门命令与退出码）。按照方案 3.7：
+这里的前 12 份文件原先放在各 skill 的 `references/auto-agents-pitfalls.md`（第一轮，2026-09-24）；`collect.md` 是第二轮（2026-09-27）从 collect 的参考文件和模板里移出的项目约定原文。内容是 auto_agents 这一个项目里核实过的坑（代码与测试、ESC 编号、闸门命令与退出码）。按照方案 3.7：
 
 - 项目里核实的坑属于项目本身，应记在该项目的 `.sdlc/_lessons.md`；插件 skill 只保留跨项目成立的原则。
 - 插件没有 auto_agents 仓库的写入条件，所以没有替它写文件；这些条目先留在这里，**任何 skill 都不再路由到它们，角色不会默认加载**。
@@ -24,6 +24,7 @@
 | `release-gate.md` | `skills/release-gate/references/auto-agents-pitfalls.md` | PIT-QC-01 … PIT-QC-04 |
 | `signals.md` | `skills/signals/references/auto-agents-pitfalls.md` | P-OPS-01 … P-OPS-03 |
 | `warehouse.md` | `skills/warehouse/references/auto-agents-pitfalls.md` | P-WH-01 |
+| `collect.md` | `skills/collect/references/scrapy-redis-distributed.md`、`templates/spider-template.py`、`templates/spider-config.py` | TaskAwareRedisSpider 基类、sites.yml、Pipeline 名称与队列键、R5/R6/B2 编号 |
 
 ## 去重分组与去向
 
@@ -64,6 +65,7 @@
 |---|---|---|
 | `skills/growth/SKILL.md` | 「Verified trap (auto_agents)」中的项目名 | 保留为不带项目名的例子 |
 | `skills/collect/SKILL.md` | 爬虫栈规则编号 B2、R5/R6 与 auto_agents 专属约束 | 「Crawlers are their own subsystem」一条通用原则 |
+| `skills/collect/references/scrapy-redis-distributed.md` 及两个爬虫模板 | 项目基类、配置入口、Pipeline 名与优先级、队列键、目录与启动命令、规则编号 | 带适用条件的 scrapy-redis 通用做法；「项目有任务感知基类时继承它」「直写主库与否由项目架构决定」 |
 | `skills/warehouse/SKILL.md` | 「在线库与数仓共用一个 MySQL 实例」的项目背景、`platform_scope` | 「分析与在线库同实例时」的通用做法；隔离用项目授权的机制 |
 | `skills/warehouse/references/layering-deep-dive.md` | `tenant_context.py`、`TENANT_EXEMPT_TABLES`、`platform_scope()` | 项目隔离机制的通用描述 |
 | `skills/impl-evidence/references/api.md` | `redis_client()` / `get_async_redis()`、R10 日志规则 | 事件循环、提交后读取、日志约定的通用写法 |

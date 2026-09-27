@@ -72,7 +72,8 @@ TEXT_EXT = {".md", ".txt", ".json", ".yaml", ".yml", ".dbml", ".sql", ".csv", ".
 CODE_EXT = TEXT_EXT | {".sh", ".toml", ".ini", ".cfg", ".xml", ".vue", ".scss", ".less", ".mjs", ".cjs", ".go", ".java", ".kt", ".rs", ".rb", ".php"}
 READ_EXT = {".md", ".txt", ".json", ".yaml", ".yml", ".dbml", ".sql", ".csv"}  # a judge must list these in its inventory
 IMAGE_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}
-SKILL_EXCLUDE = ["memory/", "product-delta.md"]
+SKILL_EXCLUDE = ["memory/", "product-delta.md", "runs/", ".task-objects/", "state.yaml", "cycle.yaml",
+                 "*-manifest.json", "*-result.json", "*-start.json", "*-packet.md", "*-return.txt", "*-observation.json"]
 FEATURE_PREFIX = re.compile(r"^\.sdlc/[^/]+/")
 QUOTE_RE = re.compile(r"「([^」]+)」")
 PATH_RE = re.compile(r"(?<![\w/.-])([AB])/([^\s,;:()（）「」“”\"'`，。；：、]+)")
@@ -206,6 +207,9 @@ def _select(src_root: str, include: list[str] | None, exclude: list[str]) -> lis
     seen: dict[str, str] = {}
     for rel in _walk_files(src_root):
         nrel = _norm_rel(rel)
+        from eval_protocol import forbidden_deliverable
+        if forbidden_deliverable(nrel):
+            continue
         if (exclude and _matches(nrel, exclude)) or (include is not None and not _matches(nrel, include)):
             continue
         if nrel in seen:

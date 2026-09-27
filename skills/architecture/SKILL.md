@@ -18,7 +18,7 @@ Task names, output paths and ownership have one source: `workflow/registry.json`
 | define / feasibility | Test a risky assumption before PM/design freezes dependent choices |
 | shape / contract | Turn approved scope and design into boundaries, contracts and executable slices |
 | shape / change-impact | Assess a discovered mismatch; route decisions and invalidate affected artifacts |
-| verify / conformance | Compare the accepted architecture obligations with actual implementation and checks |
+| verify / conformance | Use [conformance-task.md](references/conformance-task.md) to compare accepted obligations with actual implementation and checks |
 
 These are conditional tasks in existing stages, not five mandatory stages. A small change can reuse the baseline and existing contracts. Early feasibility does not require a frozen spec or final prototype; a final UI contract does consume the approved design.
 

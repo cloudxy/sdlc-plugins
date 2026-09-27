@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""check_packet.py — lint a SPAWN PACKET v2 before the manager spawns a hat. Read-only.
+"""check_packet.py — lint a registered v2 or sealed v3 packet before the manager spawns a hat. Read-only.
 
 Why it exists (2026-09-17 GLM run on a real project):
   * packets told hats "smoke run — no WebSearch/WebFetch needed", made URLs "optional", and told the designer to fall back
@@ -99,8 +99,16 @@ def extract_packet(text: str) -> str | None:
 
 
 def parse_packet(block: str) -> dict[str, Any]:
+    return parse_packet_lines(block)[0]
+
+
+def parse_packet_lines(block: str) -> tuple[dict[str, Any], list[str]]:
+    """v2 syntax is `field: value` and indented `- item` lines. Anything else is reported, never dropped:
+    a nested mapping would otherwise read as an empty list and a repeated field would silently win."""
     data: dict[str, Any] = {}
+    problems: list[str] = []
     current: str | None = None
+    ended: str | None = None
     for raw in block.splitlines():
         if not raw.strip():
             continue
@@ -110,6 +118,10 @@ def parse_packet(block: str) -> dict[str, Any]:
         m = re.match(r"^([A-Za-z_][A-Za-z0-9_]*):(.*)$", line)
         if m and not raw.startswith((" ", "\t")):
             key, val = m.group(1), m.group(2).strip()
+            if ended is not None:
+                problems.append(f"field {key} follows non-packet text {ended!r}; fence the packet or remove the text")
+            if key in data:
+                problems.append(f"duplicate field {key}")
             if val:
                 data[key] = _value(val)
                 current = None
@@ -117,10 +129,23 @@ def parse_packet(block: str) -> dict[str, Any]:
                 data[key] = []
                 current = key
             continue
+        if ended is not None:
+            continue
+        if not raw.startswith((" ", "\t")):
+            if current is not None and line.startswith("-"):
+                problems.append(f"list item for {current} must be indented: {line.strip()[:80]}")
+            else:
+                ended = line.strip()[:60]
+                current = None
+            continue
         item = re.match(r"^\s+-\s*(.*)$", line)
         if item and current is not None:
             data[current].append(_value(item.group(1)))
-    return data
+        elif item:
+            problems.append(f"list item has no list field: {line.strip()[:80]}")
+        else:
+            problems.append(f"unsupported nested line (v2 has no nested mappings): {line.strip()[:80]}")
+    return data, problems
 
 
 # ----------------------------------------------------------------------------- positive contracts
@@ -470,7 +495,10 @@ def check_source_writes(p, contract, hat, err):
 
 
 # ----------------------------------------------------------------------------- lint
-def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
+def lint(text: str, plugin_root: str | None = None, *, enforce_protocol: bool = True) -> dict[str, Any]:
+    if '## SPAWN PACKET v3' in text:
+        from task_runtime import lint_packet_v3
+        return lint_packet_v3(text)
     errors: list[dict[str, str]] = []
     warns: list[dict[str, str]] = []
 
@@ -483,7 +511,9 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
     block = extract_packet(text)
     if block is None:
         return {"errors": [{"code": "NO-PACKET", "message": "no '## SPAWN PACKET v2' block found"}], "warnings": [], "packet": {}}
-    p = parse_packet(block)
+    p, problems = parse_packet_lines(block)
+    for problem in problems:
+        err("PARSE", problem)
     hat = str(p.get("hat", "")).strip()
     stage = str(p.get("stage", "")).strip()
 
@@ -508,6 +538,8 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
     contract = {}
     try:
         contract = resolve_task(REGISTRY, hat, stage, str(p.get("task", "")))
+        if enforce_protocol and contract.get('protocol_required'):
+            err('PROTOCOL', 'this task requires prepare → seal → SPAWN PACKET v3; v2 cannot downgrade it')
         if p.get("primary_skill") != "sdlc-workflow:" + contract["skill"]:
             err("TASKSKILL", f"{hat}/{stage}/{p.get('task')} requires sdlc-workflow:{contract['skill']}"
                 + _compat_hint(str(p.get("primary_skill", "")).split(":", 1)[-1]))
@@ -532,6 +564,9 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
                        for path in declared for pattern in patterns):
                 err("DELIVERABLE", f"task requires an output matching {' or '.join(patterns)}")
         allowed = set(contract.get("companions", []))
+        if p.get('debug_protocol'):
+            # Existing rework routing can enable debug even outside normal companions.
+            allowed.add('debug')
         for c in p.get("companion_skills") or []:
             name = str(c).split(":", 1)[-1].strip()
             if name and name not in allowed:
@@ -673,6 +708,9 @@ def lint(text: str, plugin_root: str | None = None) -> dict[str, Any]:
 
 # ----------------------------------------------------------------------------- self-test
 def self_test() -> int:
+    def legacy_lint(text):
+        return lint(text, enforce_protocol=False)
+
     def fail(msg: str, *extra: Any) -> int:
         print("self-test FAILED:", msg, *extra)
         return 1
@@ -697,6 +735,11 @@ def self_test() -> int:
         brief = os.path.join(feat, "00-discover", "briefing.md")
         with open(brief, "w") as f:
             f.write("brief\n")
+        pm_reads = resolve_task(REGISTRY, 'pm', 'define', 'spec').get('reads', [])
+        for rel in pm_reads:
+            method = Path(plugin) / rel
+            method.parent.mkdir(parents=True, exist_ok=True)
+            method.write_text('Method fixture for authority validation\n')
 
         def packet(**over: str) -> str:
             fields = {
@@ -709,6 +752,7 @@ def self_test() -> int:
             lines += ["product_context:", f"  - {prod}/strategy.md", f"  - {prod}/feature-map.md",
                       "product_writes:", f"  - {prod}/strategy.md", f"  - {prod}/feature-map.md",
                       "inputs:", f"  - {{path: {brief}, required: true}}",
+                      *[f"  - {{path: {plugin}/{rel}, required: true}}" for rel in pm_reads],
                       "explore_roots:", f"  - {proj}/backend",
                       "deliverable_paths:", "  - 01-define/spec.md",
                       "forbidden:", "  - Do not spawn further subagents (host depth 1).",
@@ -717,47 +761,57 @@ def self_test() -> int:
                       "return: output paths + summary"]
             return "\n".join(lines) + "\n"
 
-        good = lint(packet())
+        good = legacy_lint(packet())
         if good["errors"]:
             return fail("a valid packet must pass", good["errors"])
+        # A nested mapping used to read as an empty list; a repeated field used to win silently (plan §1.2).
+        for extra in ("evidence_inputs:\n  build_revision: git:abc\n  verification_records: [run.json]\n",
+                      f"lane: L3\n", "memory_file: x\n  - stray\n", "inputs:\n- orphan\n"):
+            parsed = legacy_lint(packet() + extra)
+            if "PARSE" not in {e["code"] for e in parsed["errors"]}:
+                return fail("unsupported v2 syntax must be a PARSE error", extra, parsed["errors"])
+        if legacy_lint(packet() + "Notes for the manager, not packet fields.\n  - a markdown bullet\n")["errors"]:
+            return fail("trailing prose after an unfenced packet is not a packet field")
+        if "PARSE" not in {e["code"] for e in legacy_lint(packet() + "Stray text.\nlane: L3\n")["errors"]}:
+            return fail("a field after non-packet text must be a PARSE error")
         bad_text = packet().replace(f"  - {{path: {brief}, required: true}}",
                                     f"  - {{path: {brief}, required: true}}\n  - {{path: {proj}/backend/api, required: false}}")
         bad_text = bad_text.replace("  - 01-define/spec.md", "  - 01-define/spec.md\n  - 冒烟规模约定：这是 smoke run，不需要 WebSearch/WebFetch")
         bad_text = bad_text.replace(f"  - {prod}/feature-map.md\ninputs:", f"  - {prod}/feature-map.md\n  - {prod}/CHANGELOG.md\ninputs:")
         bad_text = bad_text.replace("--hat define", "--hat pm")
-        codes = {e["code"] for e in lint(bad_text)["errors"]}
+        codes = {e["code"] for e in legacy_lint(bad_text)["errors"]}
         if not {"DIRINPUT", "LOGWRITE", "HATARG"} <= codes:
             return fail("dir input, waiver, log write and role --hat must all be errors", codes)
-        codes = {e["code"] for e in lint(packet(hat="designer", subagent_type="sdlc-workflow:designer", primary_skill="sdlc-workflow:design-contract"))["errors"]}
+        codes = {e["code"] for e in legacy_lint(packet(hat="designer", subagent_type="sdlc-workflow:designer", primary_skill="sdlc-workflow:design-contract"))["errors"]}
         if "UNOWNED" not in codes:
             return fail("designer writing strategy.md must be UNOWNED", codes)
         rv = packet(hat="reviewer", subagent_type="sdlc-workflow:reviewer", primary_skill="sdlc-workflow:findings", stage="review")
-        codes = {e["code"] for e in lint(rv)["errors"]}
+        codes = {e["code"] for e in legacy_lint(rv)["errors"]}
         if "FRESHWRITE" not in codes:
             return fail("reviewer with product_writes / memory must be FRESHWRITE", codes)
         text = packet().replace(f"  - {prod}/strategy.md\n  - {prod}/feature-map.md\nproduct_writes:",
                                 f"  - {prod}/strategy.md\n  - {prod}/missing.md\nproduct_writes:")
-        if "MISSING-FILE" not in {e["code"] for e in lint(text)["errors"]}:
+        if "MISSING-FILE" not in {e["code"] for e in legacy_lint(text)["errors"]}:
             return fail("a missing product_context file must be an error")
         text = packet().replace("return: output paths + summary",
                                                       "return: output paths + summary\nnotes: 本机无运行 UI 时按 packet 约定走源码考古")
-        if "WAIVER" not in {e["code"] for e in lint(text + "\nevidence_required: [web, running_app]\n")["errors"]}:
+        if "WAIVER" not in {e["code"] for e in legacy_lint(text + "\nevidence_required: [web, running_app]\n")["errors"]}:
             return fail("'走源码考古' must be a waiver")
         with open(os.path.join(prod, "big.md"), "w") as f:
             f.write("x" * 450_000)
         text = packet().replace(f"  - {prod}/feature-map.md\nproduct_writes:", f"  - {prod}/feature-map.md\n  - {prod}/big.md\nproduct_writes:")
-        if "BUDGET" not in {e["code"] for e in lint(text)["errors"]}:
+        if "BUDGET" not in {e["code"] for e in legacy_lint(text)["errors"]}:
             return fail("an oversized product_context must be BUDGET")
         # N04: a deliverable outside the feature directory is an unauthorised write
         text = packet().replace("  - 01-define/spec.md", "  - 01-define/spec.md\n  - /etc/hosts")
-        if "DELIVERABLE-SCOPE" not in {e["code"] for e in lint(text)["errors"]}:
+        if "DELIVERABLE-SCOPE" not in {e["code"] for e in legacy_lint(text)["errors"]}:
             return fail("an absolute deliverable outside feature_dir must be DELIVERABLE-SCOPE")
         # N05: a check-task for another task, or no check-task at all
         text = packet().replace("--role pm --stage define --task spec", "--role designer --stage designer --task explore")
-        if "CHECKMISMATCH" not in {e["code"] for e in lint(text)["errors"]}:
+        if "CHECKMISMATCH" not in {e["code"] for e in legacy_lint(text)["errors"]}:
             return fail("a check-task for another task must be CHECKMISMATCH")
         text = "\n".join(l for l in packet().splitlines() if "check-task" not in l) + "\n"
-        if "MISSING-CHECK" not in {e["code"] for e in lint(text)["errors"]}:
+        if "MISSING-CHECK" not in {e["code"] for e in legacy_lint(text)["errors"]}:
             return fail("a packet without this task's check-task must be MISSING-CHECK")
         # N06: evidence the registry requires cannot be dropped, however the waiver is worded
         os.makedirs(os.path.join(plugin, "skills", "market"), exist_ok=True)
@@ -766,20 +820,20 @@ def self_test() -> int:
         rs = packet(hat="researcher", stage="market", task="survey", subagent_type="sdlc-workflow:researcher",
                     primary_skill="sdlc-workflow:market").replace("  - 01-define/spec.md", "  - 00-discover/market.md")
         rs = rs.replace(f"  - {prod}/strategy.md\n  - {prod}/feature-map.md\ninputs:", "inputs:")
-        codes = {e["code"] for e in lint(rs + "notes: 这轮 WebSearch 非必需\n")["errors"]}
+        codes = {e["code"] for e in legacy_lint(rs + "notes: 这轮 WebSearch 非必需\n")["errors"]}
         if "EVIDENCE" in codes:
             return fail("internal research must not require web evidence", codes)
-        codes = {e["code"] for e in lint(rs.replace("forbidden:", "evidence_required:\n  - web\nforbidden:"))["errors"]}
+        codes = {e["code"] for e in legacy_lint(rs.replace("forbidden:", "evidence_required:\n  - web\nforbidden:"))["errors"]}
         if "EVIDENCE" in codes:
             return fail("evidence_required listing web must satisfy the research contract", codes)
-        if lint("no packet here")["errors"][0]["code"] != "NO-PACKET":
+        if legacy_lint("no packet here")["errors"][0]["code"] != "NO-PACKET":
             return fail("text without a packet must be NO-PACKET")
     print("self-test ok")
     return 0
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Lint a SPAWN PACKET v2 (read-only).")
+    ap = argparse.ArgumentParser(description="Lint a registered v2 or sealed v3 packet (read-only).")
     ap.add_argument("packet", nargs="?")
     ap.add_argument("--plugin-root")
     ap.add_argument("--json", action="store_true")

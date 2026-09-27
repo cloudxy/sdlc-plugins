@@ -16,16 +16,18 @@ One discipline: **contracts are input, not suggestions.** If the contract has pr
 
 Check the installed stack and the project's conventions before applying a rule; these are verified lessons, not requirements for every API project. Tests and contract/concurrency regressions are within backend implementation responsibility.
 
-- **Never block the event loop.** In async code a synchronous client call (cache, DB, HTTP) on a hot path stalls every request; use the async client. A verified backend freeze came from exactly this.
+- **Never block the event loop.** In async code a synchronous client call (cache, DB, HTTP) on a hot path stalls every request; use the async client. Confirm the actual client behavior and runtime before changing it.
 - **ORM sessions that expire objects on commit bite async code.** Reading attributes after commit can trigger a synchronous refresh that crashes; capture ids or project to DTOs before commit.
-- **A missing tenant is an error, never global scope.** Reject a request or row without a tenant; treating NULL as "platform" leaks data across tenants and slips past uniqueness constraints that ignore NULL.
+- **For tenant-scoped requests, a missing tenant is an error.** Do not reinterpret NULL as global access. Explicit platform operations need their own accepted authorization boundary and isolation tests.
 - **Log at service entry when the project requires it.** Follow the project's logging convention; no log = no evidence trail.
-- **Router must not import ORM models.** ORM leaks into the API layer and serialization becomes unpredictable. Use Pydantic schemas at the boundary.
+- **When the project adopts Router/Service/Repository separation, keep ORM models behind that boundary.** Use its established transport schemas (Pydantic only where installed); verify serialization and ownership against the accepted architecture.
 - **Don't write implementation matching your preferred style — match the existing codebase's style.** Two styles in one repo is worse than one imperfect style.
 
 ## Key decisions
 
 ### Contract-to-layer mapping
+
+The following mapping applies to projects that explicitly adopt this layered Python service convention. For another stack or architecture, map the same contract obligations to its accepted boundaries; do not add Repository or Pydantic merely to match this table.
 
 | Contract element | Layer | Note |
 |---|---|---|
@@ -84,4 +86,4 @@ Check the installed stack and the project's conventions before applying a rule; 
 | [layering-and-contracts.md](api/layering-and-contracts.md) | Router/Service/Repository boundaries, ORM leak, contract mapping |
 | [templates/impl-evidence.md](../templates/impl-evidence.md) | Story evidence (command + exit code) |
 
-> Gotchas based on: `anthropics/skills@41bbe19` (pdf SKILL.md IMPORTANT-warning pattern) · verified incidents from a user project's history
+> Historical project incidents remain in the maintainer archive; this procedure states their applicability without treating one project as the default.

@@ -35,7 +35,7 @@ Job: **implement a journey slice that works end-to-end for the user, and leave r
 - **Source writes are scoped.** The packet names the project root and the authorized source/test/build paths separately from feature evidence paths. A missing source write scope is a packet defect, not permission to edit arbitrary files; implement only the assigned scope.
 - **Layering:** follow the accepted project boundaries. The bundled Python Router/ORM checker applies only to projects adopting that convention; it is not a universal stack rule.
 - **Rework respawns (debug_protocol in packet):** append a `## Debug record` to the evidence file — reproduce command, eliminated hypotheses, confirmed mechanism or explicitly unverified hypothesis, minimal fix, re-run output + exit code (procedure: `sdlc-workflow:debug`).
-- **Companion procedures:** packet `companion_skills` may add `tdd` (red before green per GWT row; evidence = both outputs) or `refactor` (maintenance tickets; characterization first, behavior preservation with justified test adaptations). They do not change lane discipline.
+- **Companion procedures:** v3 `allowed_companion_skills` permits optional choices; `required_companion_skills` names methods that must be used or reported unavailable. V2 `companion_skills` remains an allowed set. These may include `tdd` (red before green per GWT row; evidence = both outputs) or `refactor` (maintenance tickets; characterization first, behavior preservation with justified test adaptations). They do not change lane discipline.
 
 ## Shared self-check
 
@@ -51,6 +51,7 @@ Job: **implement a journey slice that works end-to-end for the user, and leave r
 
 | File | Use when |
 |---|---|
+| [references/backend-task.md](references/backend-task.md) | Backend protocol-1 ticket: pinned inputs, scope, consumer evidence and structured return |
 | [templates/impl-evidence.md](templates/impl-evidence.md) | Every implementer ticket |
 | [templates/integration.md](templates/integration.md) | Every slice: real consumer integration; UI uses the actual backend when applicable and runtime screenshots |
 | [templates/eval-set.md](templates/eval-set.md) | algo eval set |

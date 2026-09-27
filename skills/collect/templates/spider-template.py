@@ -1,23 +1,31 @@
-"""新爬虫模板——基于 TaskAwareRedisSpider（scrapy-redis 分布式）
+"""新爬虫模板——scrapy-redis 分布式（适用条件见 references/scrapy-redis-distributed.md）
 
 使用方式：
-1. 复制此文件到 scrapy/spiders/，重命名为你的爬虫名
-2. 替换 name、start_urls 队列名、parse 方法
-3. 确认 DOWNLOAD_DELAY 与目标站点速率匹配（R5 红线）
-4. Item 字段用 dataclass 定义（含 validate 方法）
+1. 复制到项目的爬虫目录，重命名为你的爬虫名
+2. 项目有任务感知基类时，把 RedisSpider 换成它，并删掉下面重复的条目解析
+3. 替换 name、起始队列键、parse 方法
+4. 确认下载延迟与并发符合目标站点的访问约定（反爬是底线）
+5. Item 字段用项目的 item 定义（含校验）
 """
+import json
+
 from scrapy import Request
-from spiders.base import TaskAwareRedisSpider
+from scrapy_redis.spiders import RedisSpider
 
 
-class MySpider(TaskAwareRedisSpider):
-    name = "my_spider"  # ← Redis 队列名 = spider:<name>:start_urls
+class MySpider(RedisSpider):
+    name = "my_spider"  # 默认起始队列键 = <name>:start_urls；项目另有约定时以项目为准
 
-    # 可选：覆盖站点级反爬配置（sites.yml 优先级更高）
+    # 可选：站点级速率；项目有站点配置时以项目配置为准
     custom_settings = {
         "DOWNLOAD_DELAY": 2,  # 根据目标站点调整
         "CONCURRENT_REQUESTS_PER_DOMAIN": 2,
     }
+
+    def make_request_from_data(self, data):
+        """JSON 条目 → 请求，并把任务标识放进 meta（签名按已安装的 scrapy-redis 版本核对）"""
+        entry = json.loads(data)
+        return Request(entry["url"], meta={"task_id": entry.get("task_id")})
 
     def parse(self, response):
         """解析列表页/详情页"""
@@ -32,10 +40,10 @@ class MySpider(TaskAwareRedisSpider):
                 "task_id": task_id,
             }
 
-        # 翻页（如有）
+        # 翻页（如有）：显式传递任务标识
         next_page = response.css("a.next::attr(href)").get()
         if next_page:
-            yield response.follow(next_page, self.parse)
+            yield response.follow(next_page, self.parse, meta={"task_id": task_id})
 
     def parse_detail(self, response):
         """详情页解析（如列表页只有链接，详情页有内容）"""

@@ -195,7 +195,7 @@ def assemble(role: dict[str, str], extra: dict[str, list[str]]) -> str:
                   "optional scoped source_writes" if t.get("writes_source") else "no project source writes")
         closure = "task check only until stage dependencies finish" if t.get("partial_stage") else "task check, then applicable stage gate"
         store = f"; writes the {t['store_writes']} store only through packet store_writes" if t.get("store_writes") else ""
-        assignment_lines.append(f"- `{t['stage']}` / `{t['task']}` → `sdlc-workflow:{t['skill']}`; companions: {companions}; {source}{store}; {closure}.")
+        assignment_lines.append(f"- `{t['stage']}` / `{t['task']}` → `sdlc-workflow:{t['skill']}`; companions allowed by contract: {companions}; {source}{store}; {closure}." + (" Protocol 1: dispatch only a sealed v3 packet." if t.get("protocol_required") else " Legacy v2 task route.") + "")
     assignments = "\n".join(assignment_lines)
     ownership = ", ".join(REGISTRY["roles"][name]["product_writes"]) or "none"
     ident += f"\n\nAssignments (generated):\n{assignments}\n\nProduct write scope (generated): {ownership}. Packet may narrow it."

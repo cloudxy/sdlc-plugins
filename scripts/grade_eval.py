@@ -381,6 +381,8 @@ def grade_arm(outdir: str, expectations: list[str]) -> dict[str, Any]:
             status = "skip"
         rows.append({"text": exp, "passed": ok is True, "status": status, "evidence": why})
     return {
+        "grading_scope": "method-specific-hygiene",
+        "quality_claim": False,
         "empty": not text.strip(),
         "chars": len(text),
         "passed": passed,
@@ -634,9 +636,24 @@ def main() -> int:
     ap.add_argument("--cases", help="comma-separated case ids to grade (default: all in evals.json; unrun cases count as fail)")
     ap.add_argument("--json-out", help="write grading JSON here (default: iteration-N/grading-<skill>.json)")
     ap.add_argument("--self-test", action="store_true")
+    ap.add_argument('--comparison-manifest', help='grade only the common declared output contract for isolated comparison arms')
     args = ap.parse_args()
     if args.self_test:
         return self_test()
+    if args.comparison_manifest:
+        from runtime_protocol import load, path_inside
+        manifest=load(args.comparison_manifest)
+        report={'grading_scope':'common-output-contract','quality_claim':False,'arms':{}}
+        for name,arm in manifest['arms'].items():
+            failures=[]
+            for rel in manifest['spec']['case']['deliverables']:
+                try:
+                    p=path_inside(rel,arm['outputs'],True)
+                    if not p.read_bytes().strip(): failures.append(rel+': empty')
+                except ValueError as e: failures.append(str(e))
+            report['arms'][name]={'failures':failures}
+        print(json.dumps(report,ensure_ascii=False,indent=2))
+        return int(any(a['failures'] for a in report['arms'].values()))
     if not args.workspace:
         print("need --workspace", file=sys.stderr)
         return 2
@@ -644,7 +661,10 @@ def main() -> int:
     report = grade_iteration(args.plugin_root, args.workspace, args.iteration, args.skill, only_ids)
     itdir = report["iteration_dir"]
     skill_slug = re.sub(r"[^A-Za-z0-9._-]+", "-", args.skill).strip("-") or "skill"
-    out = args.json_out or os.path.join(itdir, f"grading-{skill_slug}.json")
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    stamp=datetime.now(ZoneInfo('Asia/Shanghai')).strftime('%Y-%m-%d-%H%M%S%z-%f')
+    out = args.json_out or os.path.join(itdir, f"{stamp}-grading-{skill_slug}.json")
     os.makedirs(itdir, exist_ok=True)
     json.dump(report, open(out, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     print(f"wrote {out}")

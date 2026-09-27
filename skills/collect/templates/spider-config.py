@@ -1,7 +1,7 @@
-# Spider 配置模板（基于项目 Scrapy 规范）
-# R5: DOWNLOAD_DELAY 必须配置
-# R6: USER_AGENT 必须配置
-# B2: 数据通过 Redis 队列，禁止直接写 MySQL
+# Spider 配置模板（Scrapy）。项目有自己的规范编号与配置入口时以项目为准。
+# 速率：DOWNLOAD_DELAY 必须配置（反爬是底线）
+# 标识：USER_AGENT 必须配置或由中间件轮换
+# 交接：数据去向由项目架构决定；采集与存储分离时经队列交接，不直写主库
 
 import scrapy
 
@@ -9,7 +9,7 @@ import scrapy
 class SpiderConfig:
     """Spider 基础配置——每个新爬虫必须遵循的最低标准"""
 
-    # ── R5 红线：速率控制 ──
+    # ── 速率控制（必配）──
     DOWNLOAD_DELAY = 2                    # 秒，根据目标站点调整
     AUTOTHROTTLE_ENABLED = True           # 自动限速
     AUTOTHROTTLE_START_DELAY = 2
@@ -17,7 +17,7 @@ class SpiderConfig:
     CONCURRENT_REQUESTS = 4               # 并发请求数
     CONCURRENT_REQUESTS_PER_DOMAIN = 2    # 单域名并发
 
-    # ── R6 红线：UA 轮换 ──
+    # ── UA 轮换（必配，或由项目中间件完成）──
     USER_AGENT = '<从 UA 池随机选取>'
     USER_AGENTS = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -29,11 +29,10 @@ class SpiderConfig:
     RETRY_ENABLED = True
     RETRY_TIMES = 3
 
-    # ── 数据流转（B2 边界）──
-    # Item → Redis 队列（spider:<name>:items）
-    # 禁止直接写 MySQL——由 backend 消费者处理
+    # ── 数据交接（按项目架构）──
+    # 采集与存储分离时：Item → 队列（键名按项目约定），由消费者落库，Spider/Pipeline 不开主库会话
     ITEM_PIPELINE = [
-        'scrapy_pipelines.RedisQueuePipeline',
+        '<项目的队列交接 Pipeline>',
     ]
 
     # ── 反爬升级 ──

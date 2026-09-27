@@ -239,13 +239,11 @@ def _probe(url: str) -> tuple[bool, str]:
 
 # ----------------------------------------------------------------------------- checks
 def _function_ids() -> set[str]:
-    """Function ids come from workflow/registry.json (one source); an unreadable registry skips the key check."""
-    try:
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        from workflow import load_registry  # noqa: PLC0415
-        return set(load_registry().get("functions", {}))
-    except Exception:  # noqa: BLE001
-        return set()
+    """Function ids come from workflow/registry.json (one source). An unreadable or unsupported registry raises:
+    the caller reports it instead of silently skipping the key check."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from workflow import load_registry  # noqa: PLC0415
+    return set(load_registry().get("functions", {}))
 
 
 def check(root: str, probe: bool = False) -> dict[str, Any]:
@@ -337,7 +335,12 @@ def check(root: str, probe: bool = False) -> dict[str, Any]:
                  "message": "signals_path must not sit inside product_root or .sdlc: the store is ops-owned raw evidence, not a product fact or a manager file"})
     owners = cfg.get("owners")
     if owners is not None:
-        known = _function_ids()
+        try:
+            known = _function_ids()
+        except (OSError, ValueError) as e:
+            known = set()
+            add({"level": "blocker", "code": "REGISTRY",
+                 "message": f"workflow registry is unreadable or unsupported by this runner, owners keys unchecked: {e}"})
         if not isinstance(owners, dict):
             add({"level": "warn", "code": "OWNERS",
                  "message": "owners must be a block mapping of function id → person or team (this reader does not expand inline {a: b})"})
@@ -556,6 +559,17 @@ def self_test() -> int:
             return fail("owners must warn on an unknown function id and a placeholder, and accept a known one", r["findings"])
         if any(x["level"] == "blocker" and x["code"] == "OWNERS" for x in r["findings"]):
             return fail("owners never blocks: it only names who to ask")
+        global _function_ids  # an unsupported registry must be reported, not skipped as "no ids to check"
+        real_ids = _function_ids
+        def _unsupported() -> set[str]:
+            raise ValueError("unsupported workflow schema_version 99")
+        _function_ids = _unsupported
+        try:
+            r = check(td)
+        finally:
+            _function_ids = real_ids
+        if "REGISTRY" not in {x["code"] for x in r["findings"] if x["level"] == "blocker"}:
+            return fail("an unsupported registry must be a REGISTRY blocker", r["findings"])
         for value, ok in (("docs/signals", True), ("docs/product/signals", False), (".sdlc/signals", False), ("../x", False)):
             with open(os.path.join(td, "sdlc.config.yaml"), "w") as f:
                 f.write(f"product_root: docs/product\nsignals_path: {value}\n")
