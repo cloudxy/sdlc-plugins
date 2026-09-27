@@ -17,6 +17,7 @@ ZCode 插件 · v4.1.0 · MIT
 | 早期可行性 | 未决技术假设可能改变范围或体验时，先派 architect `define/feasibility` 回答问题，不要求先有完整 spec；结论回流 PM 与设计 |
 | 源码写权限 | 注册表按任务标 `writes_source` / `requires_source`，生产代码只能写进显式列出的 `source_writes` 路径；工件目录与产品层各有各的归属 |
 | 证据分级 E0–E4 | 研究与结论按证据形态分级（未证实 → 断言 → 可查工件 → 有口径的计数 → 已执行的测试），不以来源数量充数；缺来源即「未知」，不许编链接 |
+| 结构图与生成图 | 结构（流程/ER/架构）用 SVG 出图并对照权威来源做语义比对；位图素材（方向参考、空态插画、hero、图标）由 Grok 出图，按订阅授权调用，每张图留提示词与 digest。生成图不算渲染产物，也不算走查截图 |
 | 脚本闸门 G-script | `check-sdlc.sh` 以工件文件与内容判定各阶段是否可过，退出码即结论 |
 | 独立审查 G-fresh | 审查者是无记忆的新上下文子代理，只看磁盘工件、无写权限、不读生产者推理过程 |
 | 旅程切片与联调 | 实现按可演示的用户旅程切片，前端从验收过的最终原型代码移植（不是照着截图重画），UI 切片须在真实后端上走通并截图留证 |
@@ -206,10 +207,11 @@ flowchart TD
 | 走短路径（已有合同或以 spec 代合同） | `/sdlc 短路径 <需求>`，仍需满足 L2-short 谓词 |
 | 一行修复 | 直接说「改个错别字，不要走流程」，经理判 L0 |
 | 评测插件本身 | 另开窗口 `/sdlc-eval <skill> <mechanical\|rubric\|regression>`（烧真实模型调用，人工触发） |
+| 开通出图能力 | `/sdlc-grok login` 用 Grok 订阅授权 → `/sdlc-grok probe` 确认这个档位真能出图 → 在项目 `sdlc.config.yaml` 把 `imagery.enabled` 设为 true |
 
 ### 单独召唤做法技能
 
-不挂 `/sdlc` 时，26 个做法可以用 `$名称` 直接召唤，例如 `$prd-gwt` 写 spec、`$schema` 出库表设计、`$coverage-matrix` 出覆盖矩阵、`$debug` 走排障协议、`$tdd` 做测试先行。此时没有泳道与 G-fresh，产出质量由做法本身的标准保证。
+不挂 `/sdlc` 时，27 个做法可以用 `$名称` 直接召唤，例如 `$prd-gwt` 写 spec、`$schema` 出库表设计、`$coverage-matrix` 出覆盖矩阵、`$debug` 走排障协议、`$tdd` 做测试先行。此时没有泳道与 G-fresh，产出质量由做法本身的标准保证。
 
 ### 交回来的东西在哪
 
@@ -229,7 +231,7 @@ flowchart TD
 
 19 个角色（`agents/`）：pm、researcher、competitor、growth、architect、dba、designer、frontend、backend、algo、miner、qa、reviewer、qc、sre、ops、analyst、data-collector、data-warehouse-engineer。角色定义身份、责任边界与红线，由 `profiles/` 与共享行为栈编译生成。
 
-26 个做法（`skills/`）以产出物命名（prd-gwt 产出 spec、schema 产出 db-spec、coverage-matrix 产出覆盖矩阵……），承载各专业的步骤与卓越标准。角色与做法的多对多映射、任务级工件路径、阶段等级、源码与产品写权限的唯一事实源是 `workflow/registry.json`，速查视图由其生成；角色按任务而非头衔接活，同一个帽在不同任务上的授权与产出各不相同（如 architect 的 feasibility / contract / change-impact / conformance）。
+27 个做法（`skills/`）以产出物命名（prd-gwt 产出 spec、schema 产出 db-spec、coverage-matrix 产出覆盖矩阵……），承载各专业的步骤与卓越标准。角色与做法的多对多映射、任务级工件路径、阶段等级、源码与产品写权限的唯一事实源是 `workflow/registry.json`，速查视图由其生成；角色按任务而非头衔接活，同一个帽在不同任务上的授权与产出各不相同（如 architect 的 feasibility / contract / change-impact / conformance）。
 
 ## 目录结构
 
@@ -237,7 +239,7 @@ flowchart TD
 sdlc-workflow/
 ├── commands/        入口命令（生成产物）
 ├── agents/          19 个角色（生成产物；源在 profiles/ 与 _lib/）
-├── skills/          26 个做法：SKILL.md + references/ + templates/ + evals/
+├── skills/          27 个做法：SKILL.md + references/ + templates/ + evals/
 ├── workflow/        registry.json：命令路由、角色任务、工件路径、阶段合同
 ├── adapters/        宿主工具档、MCP 白名单与宿主事实
 ├── scripts/         闸门、健康检查、角色工厂、评测评分与一致性测试
@@ -265,6 +267,8 @@ sdlc-workflow/
 | `scripts/check_research_sources.py` | 只查带日期的 URL / 本地工件引用是否存在，不评判研究质量、不设来源配额 |
 | `scripts/evidence.py` | 把测试与验证的运行记录绑定到当时的代码版本（`state.yaml` 写「pass」不算证据） |
 | `scripts/diagram/` | 图示闸门：来源声明、安全检查、节点与边对照权威来源的语义比对 |
+| `scripts/image/` | 出图与它的闸门：生成位图素材并留证（提示词原文、模型、参数、digest），`check.py` 把每张图绑到提示词与声明它的工件上 |
+| `scripts/grok/auth.py` | Grok 订阅授权（OAuth device flow）：登录 / 状态 / 登出；凭据只存 `~/.sdlc/grok/`（0600），任何子命令都不打印 token |
 | `scripts/data_dictionary.py` | 由 erd.dbml + 术语表 + metrics.yaml 生成只读数据字典（`--check` 抓过期与手改） |
 | `scripts/render-role-agents.py` | 从 profiles 与 _lib 编译角色（`--check` 抓漂移） |
 | `scripts/grade_eval.py` / `blind_eval.py` | 评测机械评分（不调模型）与盲评 |

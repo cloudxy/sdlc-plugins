@@ -201,12 +201,27 @@ $refs
 EOF
   echo "${miss# }"
 }
+is_generated_image() { # 生成图（Grok 出图）的两个落点：它们是素材与探针，不是渲染产物，也不是走查截图
+  case "$1" in
+    */assets/refs/*|assets/refs/*|*/assets/generated/*|assets/generated/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+real_shot_count() { # $1 = md 文件 → 打印其中「非生成图」的图片引用数
+  local f="$1" refs ref n=0
+  refs=$(grep -oE '[A-Za-z0-9_./~-]+\.(png|jpe?g|webp)' "$f" 2>/dev/null | sort -u)
+  for ref in $refs; do
+    is_generated_image "$ref" || n=$((n+1))
+  done
+  echo "$n"
+}
 need_images() { # $1 = md 文件；$2 = 标签；$3 = 语境。截图必须真实存在：一张不引用、或引用了不存在的文件都算违规
-  local m
+  local m n
   m=$(missing_images "$1")
-  if [ "$m" = "NONE" ]; then red "$2" "$1: ${3}未引用截图"
-  elif [ -n "$m" ]; then red "$2" "$1: 引用的截图不存在: ${m}（截图要真实拍下来，不能只写路径）"
-  fi
+  if [ "$m" = "NONE" ]; then red "$2" "$1: ${3}未引用截图"; return; fi
+  if [ -n "$m" ]; then red "$2" "$1: 引用的截图不存在: ${m}（截图要真实拍下来，不能只写路径）"; return; fi
+  n=$(real_shot_count "$1")
+  [ "${n:-0}" -ge 1 ] || red "$2" "$1: ${3}只引用了生成图（assets/refs/ 与 assets/generated/ 是 AI 生成素材，不是渲染产物或走查截图）"
 }
 
 # ---------- --hat product：产品层独立检查（/sdlc-product 用；不跑泳道检查） ----------
@@ -859,6 +874,22 @@ if [ -f "$ST" ]; then
 $DOUT
 EOF
       [ "$DCODE" -eq 2 ] && ! printf '%s' "$DOUT" | grep -q '✗ \[DIAGRAM-' && red DIAGRAM "diagram check could not run: ${DOUT}"
+    fi
+  fi
+
+  # IMAGE：功能目录里的每张生成图都要绑得住（提示词 / 模型 / 声明源 digest）；没有生成图就跳过
+  if is_v4; then
+    GIMGS=$(find "$ROOT" \( -path '*/assets/refs/*' -o -path '*/assets/generated/*' \) \
+              \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) 2>/dev/null | sort)
+    if [ -n "$GIMGS" ]; then
+      IOUT=$(python3 "$SCRIPT_DIR/image/check.py" --root "$ROOT" 2>&1)
+      ICODE=$?
+      while IFS= read -r line; do
+        case "$line" in *'✗ [IMAGE-'*) red IMAGE "${line#*] }" ;; esac
+      done <<EOF
+$IOUT
+EOF
+      [ "$ICODE" -eq 2 ] && ! printf '%s' "$IOUT" | grep -q '✗ \[IMAGE-' && red IMAGE "imagery check could not run: ${IOUT}"
     fi
   fi
 

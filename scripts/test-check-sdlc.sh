@@ -944,6 +944,24 @@ assert_tag READINESS
 printf 'Prepared for version X; limitations recorded\n' >"$F/06-deliver/readiness.md"
 assert_exit 0 "release-ready QC has preparation artifact (content still reviewed)" --hat qc "$F"
 
+# 53. 生成图（Grok 出图）不能顶替渲染产物，且每张图都要绑得住提示词与声明源
+mk_v4 img1
+F="$T/img1/.sdlc/f"
+sed -i.bak 's/^current_hat: define/current_hat: shape/' "$F/state.yaml" && rm -f "$F/state.yaml.bak"
+printf '泳道：L2\n| 屏 | 空 |\n' >"$F/02-shape/edge-states.md"
+mkdir -p "$F/02-shape/assets/refs" "$F/evidence/images"
+printf '\211PNG\r\n\032\n' >"$F/02-shape/assets/refs/probe-warm.png"
+# 方向只引用生成图 → 仍然必须报红（生成图不是渲染产物）
+printf '泳道：L2\n| 参考 | https://a.example/x 2026-09-01 |\n| 参考 | https://b.example/y 2026-09-01 |\n| 参考 | https://c.example/z 2026-09-01 |\n## D1 暖中性\n![](assets/refs/probe-warm.png)\n## 缺陷检查\n| assets/refs/probe-warm.png | 看过 | 无 |\n选定：D1（picked_by: user）\n' >"$F/02-shape/design-directions.md"
+assert_exit 2 "a direction backed only by a generated image is still DIRECTIONS (+ IMAGE for the unevidenced file)" --hat designer "$F"
+assert_tag DIRECTIONS
+assert_tag IMAGE
+# 补上真实原型渲染 → 方向这一项过；但生成图没有证据 → IMAGE
+for d in d1; do printf 'png' >"$F/02-shape/prototypes/$d-1440.png"; done
+printf '泳道：L2\n| 参考 | https://a.example/x 2026-09-01 |\n| 参考 | https://b.example/y 2026-09-01 |\n| 参考 | https://c.example/z 2026-09-01 |\n## D1 暖中性\n![](prototypes/d1-1440.png)\n参考图（AI 生成）：![](assets/refs/probe-warm.png)\n## 缺陷检查\n| prototypes/d1-1440.png | 看过 | 无 |\n选定：D1（picked_by: user）\n' >"$F/02-shape/design-directions.md"
+assert_exit 1 "a generated image without evidence is IMAGE" --require "$F"
+assert_tag IMAGE
+
 if [ "$fail" -ne 0 ]; then
   echo "----------------------------------------"
   echo "test-check-sdlc: $fail failed"

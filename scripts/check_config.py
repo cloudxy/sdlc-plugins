@@ -319,6 +319,35 @@ def check(root: str, probe: bool = False) -> dict[str, Any]:
     if research.get("offline") is True:
         add({"level": "info", "code": "RESEARCH-OFFLINE",
              "message": "research.offline: true — web-source requirements are waived; only the user sets this, never a hat or the manager"})
+    imagery = cfg.get("imagery") if isinstance(cfg.get("imagery"), dict) else {}
+    if imagery.get("enabled") is True:
+        kinds = imagery.get("allowed_kinds")
+        if not isinstance(kinds, list) or not kinds:
+            add({"level": "warn", "code": "IMAGERY-KINDS",
+                 "message": "imagery.enabled: true but allowed_kinds is empty — no hat could generate anything"})
+        for section in ("defaults", "budget"):
+            if section in imagery and not isinstance(imagery[section], dict):
+                add({"level": "warn", "code": "IMAGERY-SHAPE",
+                     "message": f"imagery.{section} must be a block mapping (this reader does not expand inline "
+                                f"{{a: b}}); the tool falls back to its defaults, so the cap you wrote is not in effect"})
+        mode = str(imagery.get("auth") or "auto")
+        if mode not in ("auto", "oauth", "api-key"):
+            add({"level": "warn", "code": "IMAGERY-AUTH", "message": f"imagery.auth {mode!r} is not auto|oauth|api-key"})
+        state = "unknown"
+        try:                                   # ask auth.py; never read the credential file from here
+            sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "grok"))
+            import auth as _auth                                            # noqa: PLC0415
+            state = _auth.status_report()["state"]
+        except Exception:                                                   # noqa: BLE001
+            state = "unknown"
+        if state != "logged_in" and mode != "api-key" and not os.environ.get("XAI_API_KEY"):
+            add({"level": "warn", "code": "IMAGERY-AUTH",
+                 "message": f"imagery.enabled: true but Grok authorization is {state} — the operator runs "
+                            "/sdlc-grok login, then /sdlc-grok probe (a hat never logs in)"})
+        add({"level": "info", "code": "IMAGERY",
+             "message": f"imagery.enabled: true (model {imagery.get('model') or 'registry default'}, auth {mode}) — "
+                        "generating spends the operator's subscription quota; "
+                        f"budget.max_per_feature={(imagery.get('budget') or {}).get('max_per_feature') if isinstance(imagery.get('budget'), dict) else 'default'}"})
     if probe:
         targets: list[tuple[str, str]] = []
         if not _placeholder(app.get("base_url")):

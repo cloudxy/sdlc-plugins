@@ -353,7 +353,7 @@ def main() -> int:
     AGENT_PROC = {name: role["skill"] for name, role in registry["roles"].items()}
     ALIASES = {"pm": "prd-gwt", "dba": "schema", "qa": "coverage-matrix"}
     ORCH = {"sdlc", "sdlc-eval", "discover"}
-    NO_HAT_PROCS = {"debug", "tdd", "refactor", "cicd", "falsify", "prototype"}
+    NO_HAT_PROCS = {"debug", "tdd", "refactor", "cicd", "falsify", "prototype", "imagery"}
     SECOND_HAT_PROCS = {"enablement"}  # ops 第二做法（教/开/告），主做法仍是 signals
     skill_dirs = {
         n for n in os.listdir(skills_dir)
@@ -595,6 +595,46 @@ def main() -> int:
                 head = "\n".join(body.splitlines()[:20])
                 if "set -u" not in head:
                     warn("SCRIPT", f"{os.path.relpath(path, root)}: 前 20 行缺 set -u")
+
+    # ---------- IMAGERY：出图能力与它的授权（Grok 订阅） ----------
+    try:
+        imagery = json.load(open(os.path.join(root, "workflow/registry.json"), encoding="utf-8")).get("imagery")
+    except Exception:
+        imagery = None
+    if not isinstance(imagery, dict):
+        err("IMAGERY", "workflow/registry.json 缺 imagery 段（出图能力的唯一事实源）")
+    else:
+        for key in ("guide", "auth", "generate", "check"):
+            rel = imagery.get(key)
+            if not rel or not os.path.isfile(os.path.join(root, rel)):
+                err("IMAGERY", f"registry.imagery.{key} 指向的 {rel} 不存在")
+        if imagery.get("enforced_when"):
+            err("IMAGERY", "registry.imagery.enforced_when 非空：没有哪张生成图是必须的，不得把出图变成闸门要求")
+        chk = os.path.join(root, "scripts/check-sdlc.sh")
+        if os.path.isfile(chk):
+            cbody = open(chk, encoding="utf-8").read()
+            if "is_generated_image" not in cbody or "real_shot_count" not in cbody:
+                err("IMAGERY", "check-sdlc.sh 丢了生成图过滤（need_images 会把 AI 生成图当渲染产物/走查截图）")
+            if "image/check.py" not in cbody:
+                err("IMAGERY", "check-sdlc.sh 没有接 scripts/image/check.py（生成图可以不带证据混过阶段）")
+        auth_py = os.path.join(root, "scripts/grok/auth.py")
+        if os.path.isfile(auth_py):
+            abody = open(auth_py, encoding="utf-8").read()
+            for m in re.finditer(r"^[^#\n]*\bprint\((.*)$", abody, re.M):
+                if re.search(r"\b(access_token|refresh_token|device_code|bearer)\b", m.group(1), re.I) and "redact" not in m.group(1):
+                    err("IMAGERY", "scripts/grok/auth.py 有把 token/device_code 直接打印的代码路径（必须 redact）")
+                    break
+            if "0o600" not in abody and "S_IWUSR" not in abody:
+                err("IMAGERY", "scripts/grok/auth.py 没有把凭据文件限制到 0600")
+        for dirpath, dirs, files in os.walk(root):
+            dirs[:] = [d for d in dirs if d != ".git"]
+            for fn in files:
+                if fn == "credentials.json" or fn.endswith(".credentials.json"):
+                    err("IMAGERY", f"仓库里出现凭据文件 {os.path.relpath(os.path.join(dirpath, fn), root)}"
+                                   "（凭据只存 ~/.sdlc/grok/，不得进仓库）")
+        gi = os.path.join(root, ".gitignore")
+        if os.path.isfile(gi) and "credentials.json" not in open(gi, encoding="utf-8").read():
+            warn("IMAGERY", ".gitignore 未覆盖 credentials.json（防误提交的最后一道）")
 
     for name in sorted(os.listdir(skills_dir)):
         d = os.path.join(skills_dir, name)

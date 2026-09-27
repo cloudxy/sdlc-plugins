@@ -1,6 +1,12 @@
 {
   "schema_version": 1,
   "commands": {
+    "sdlc": {
+      "skill": "sdlc",
+      "mode": "auto",
+      "description": "Run the SDLC swimlane (v4) — product layer, discovery with growth, early feasibility, design before final architecture contract, journey slices, E2E, three-party acceptance, gates. ops=用户运营, growth=增长运营, sre=运维. Not a one-line fix.",
+      "argument_hint": "[requirement, '先调研', '短路径', or 'continue']"
+    },
     "sdlc-discover": {
       "skill": "discover",
       "mode": "full",
@@ -12,6 +18,12 @@
       "mode": "eval",
       "description": "Run the SDLC eval harness (v2 — 22 skills; mechanical grade + blind rubric judging + real-failure regressions). Human-triggered only — not a weekly gate.",
       "argument_hint": "[skill: prd-gwt|design-contract|architecture|schema|growth|collect|warehouse|coverage-matrix|findings|release-gate|impl-evidence|debug|tdd|refactor|cicd|discover|market|compete|falsify|enablement|signals|sdlc] [mechanical|rubric|regression <case-id|all>]"
+    },
+    "sdlc-grok": {
+      "skill": "imagery",
+      "mode": "auth",
+      "description": "Authorize this plugin with your Grok subscription (OAuth device login) and check whether image generation is actually available: login / status / logout / probe. Never prints a token. Not a way to generate images outside a packet.",
+      "argument_hint": "[login|status|logout|probe]"
     },
     "sdlc-product": {
       "skill": "sdlc",
@@ -30,12 +42,6 @@
       "mode": "review-only",
       "description": "Independent G-fresh review of artifacts already on disk. Spawns sdlc-workflow:reviewer only — not a full swimlane. This window stays the manager.",
       "argument_hint": "[feature dir or artifact paths]"
-    },
-    "sdlc": {
-      "skill": "sdlc",
-      "mode": "auto",
-      "description": "Run the SDLC swimlane (v4) — product layer, discovery with growth, early feasibility, design before final architecture contract, journey slices, E2E, three-party acceptance, gates. ops=用户运营, growth=增长运营, sre=运维. Not a one-line fix.",
-      "argument_hint": "[requirement, '先调研', '短路径', or 'continue']"
     }
   },
   "roles": {
@@ -484,6 +490,17 @@
         "00-discover/prototypes/report.md"
       ],
       "legacy": []
+    },
+    "generated-image": {
+      "paths": [
+        "*/assets/refs/*.png",
+        "*/assets/refs/*.jpg",
+        "*/assets/refs/*.webp",
+        "*/assets/generated/*.png",
+        "*/assets/generated/*.jpg",
+        "*/assets/generated/*.webp"
+      ],
+      "legacy": []
     }
   },
   "stages": {
@@ -819,7 +836,14 @@
       "reads": [
         "vendor/anthropic-skills/skills/frontend-design/SKILL.md"
       ],
-      "partial_stage": true
+      "partial_stage": true,
+      "imagery": [
+        {
+          "kind": "ref",
+          "when": "visual_direction"
+        }
+      ],
+      "imagery_reference": "skills/design-contract/references/generated-imagery.md"
     },
     {
       "role": "designer",
@@ -837,7 +861,26 @@
       ],
       "reads": [
         "vendor/anthropic-skills/skills/frontend-design/SKILL.md"
-      ]
+      ],
+      "imagery": [
+        {
+          "kind": "illustration",
+          "when": "empty_or_error_state"
+        },
+        {
+          "kind": "empty-state",
+          "when": "empty_or_error_state"
+        },
+        {
+          "kind": "hero",
+          "when": "marketing_surface"
+        },
+        {
+          "kind": "icon",
+          "when": "icon_set"
+        }
+      ],
+      "imagery_reference": "skills/design-contract/references/generated-imagery.md"
     },
     {
       "role": "architect",
@@ -1500,6 +1543,40 @@
     },
     "enforced_when": [
       "security"
+    ]
+  },
+  "imagery": {
+    "guide": "skills/imagery/SKILL.md",
+    "auth": "scripts/grok/auth.py",
+    "generate": "scripts/image/generate.py",
+    "check": "scripts/image/check.py",
+    "provider": "grok",
+    "model_default": "grok-imagine-image-2.0",
+    "kinds": [
+      "ref",
+      "illustration",
+      "empty-state",
+      "hero",
+      "icon"
+    ],
+    "dirs": {
+      "ref": "02-shape/assets/refs",
+      "illustration": "02-shape/assets/generated",
+      "empty-state": "02-shape/assets/generated",
+      "hero": "02-shape/assets/generated",
+      "icon": "02-shape/assets/generated"
+    },
+    "when": {
+      "visual_direction": "exploring a visual language needs one probe image; the direction itself is still prototype code",
+      "empty_or_error_state": "an empty or error state carries its meaning better with an illustration than with text alone",
+      "marketing_surface": "a brand-front surface (site, landing page) needs a hero or cover image",
+      "icon_set": "a set of icons or icon grounds has to look like one family"
+    },
+    "enforced_when": [],
+    "not_evidence": [
+      "rendered prototype",
+      "walkthrough screenshot",
+      "integration screenshot"
     ]
   }
 }

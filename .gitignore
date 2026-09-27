@@ -7,3 +7,7 @@ vendor/*
 !vendor/install.sh
 !vendor/README.md
 !vendor/*.lock.json
+
+# Grok 订阅授权凭据只存 ~/.sdlc/grok/，任何情况下不进仓库
+credentials.json
+*.credentials.json

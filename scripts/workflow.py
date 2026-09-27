@@ -76,6 +76,11 @@ def validate_registry(registry, root=ROOT):
                 errors.append(f"{key}: unknown visual {v}")
         if t.get("visuals") and not (root / t.get("diagram_reference", "")).is_file():
             errors.append(f"{key}: diagram_reference {t.get('diagram_reference')} missing")
+        for im in t.get("imagery", []):
+            if im.get("kind") not in registry.get("imagery", {}).get("kinds", []) or im.get("when") not in registry.get("imagery", {}).get("when", {}):
+                errors.append(f"{key}: unknown imagery {im}")
+        if t.get("imagery") and not (root / t.get("imagery_reference", "")).is_file():
+            errors.append(f"{key}: imagery_reference {t.get('imagery_reference')} missing")
         for rd in t.get("reads", []):
             # vendor files may not be installed yet (bash vendor/install.sh); a lock that lists them is enough
             if not (root / rd).is_file() and not _vendor_lists(root, rd):
@@ -327,6 +332,22 @@ def main():
                     "deliverable": f"{task['diagram_dir']}/<name>.svg",
                     "check": f"python3 <PLUGIN_ROOT>/{d['lint']} --root {base} {base}/{task['diagram_dir']}/<name>.svg",
                     "render": f"bash <PLUGIN_ROOT>/{d['render']} {base}/{task['diagram_dir']}/shots {base}/{task['diagram_dir']}/<name>.svg",
+                }
+            if task.get("imagery"):
+                g = r["imagery"]
+                base = "<product_root>" if task["stage"] == "product" else "<feature_dir>"
+                dirs = sorted({g["dirs"][im["kind"]] for im in task["imagery"]})
+                task["image"] = {
+                    "when": {im["kind"]: g["when"][im["when"]] for im in task["imagery"]},
+                    "kinds": [im["kind"] for im in task["imagery"]],
+                    "inputs": list(dict.fromkeys([f"<PLUGIN_ROOT>/{g['guide']}",
+                                                  f"<PLUGIN_ROOT>/{task['imagery_reference']}"])),
+                    "deliverable": [f"{d}/<name>.png" for d in dirs],
+                    "generate": (f"python3 <PLUGIN_ROOT>/{g['generate']} --root {base} --kind <kind> --name <name>"
+                                 " --purpose <one line> --declared-in <artifact> --prompt-file <file>"),
+                    "check": f"python3 <PLUGIN_ROOT>/{g['check']} --root {base}",
+                    "authorize": f"python3 <PLUGIN_ROOT>/{g['auth']} status (the human runs login, never a hat)",
+                    "not_evidence": g["not_evidence"],
                 }
             task.setdefault("evidence", [])
             print(json.dumps(task, ensure_ascii=False, indent=2)); return 0

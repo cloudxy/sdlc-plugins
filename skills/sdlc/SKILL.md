@@ -127,6 +127,9 @@ visuals: []                 # diagrams this task draws (contract `visuals`; trus
                             # Non-empty → add contract.diagram.inputs to inputs, contract.diagram.deliverable to
                             # deliverable_paths and contract.diagram.check to success_checks. A diagram is a view of its
                             # source: draw it only when it removes ambiguity for the next hat.
+imagery: []                 # generated images (contract `imagery`; never required). Non-empty → add contract.image
+                            # inputs/deliverable/check like visuals. Not a rendered direction, screenshot or UI
+                            # contract. Not authorized → ask the operator for /sdlc-grok login; a hat never logs in.
 forbidden:
   - Do not spawn further subagents (host depth 1).
   - Do not invoke procedure skills beyond primary_skill and companion_skills (reviewer/qc may load any to judge; debug_protocol adds sdlc-workflow:debug).

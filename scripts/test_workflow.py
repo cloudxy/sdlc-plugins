@@ -229,6 +229,30 @@ class WorkflowTests(unittest.TestCase):
     def test_visual_not_in_contract_is_rejected(self):
         self.assertIn("VISUALS", {e["code"] for e in lint(self.dba_packet("visuals: [lineage]\n"))["errors"]})
 
+    # ---- generated imagery: a packet that asks for an image carries the practice, the落点 and the gate
+    def designer_packet(self, extra=""):
+        return (self.packet(role="designer", stage="designer", task="explore") + extra)
+
+    def test_imagery_requires_practice_landing_dir_and_check(self):
+        codes = {e["code"] for e in lint(self.designer_packet("imagery: [ref]\n"))["errors"]}
+        self.assertIn("IMAGERY", codes)
+        good = self.designer_packet("imagery: [ref]\n").replace(
+            "deliverable_paths:\n", "deliverable_paths:\n  - 02-shape/assets/refs/probe-warm.png\n").replace(
+            "success_checks:\n", f"success_checks:\n  - python3 {ROOT}/scripts/image/check.py --root {self.root}\n")
+        good = good.replace(          # designer explore already has an inputs block (frontend-design is required reading)
+            "inputs:\n", f"inputs:\n  - {{path: {ROOT}/skills/imagery/SKILL.md, required: true}}\n"
+                          f"  - {{path: {ROOT}/skills/design-contract/references/generated-imagery.md, required: true}}\n", 1)
+        self.assertEqual({e["code"] for e in lint(good)["errors"]}, set())
+
+    def test_imagery_kind_not_in_contract_is_rejected(self):
+        self.assertIn("IMAGERY", {e["code"] for e in lint(self.designer_packet("imagery: [hero]\n"))["errors"]})
+        self.assertIn("IMAGERY", {e["code"] for e in lint(self.dba_packet("imagery: [ref]\n"))["errors"]})
+
+    def test_imagery_is_never_required(self):
+        self.assertEqual({e["code"] for e in lint(self.designer_packet())["errors"]}, set())
+        self.assertNotIn("imagery", self.registry["imagery"]["enforced_when"])
+        self.assertEqual(self.registry["imagery"]["enforced_when"], [])
+
     def test_security_feature_requires_trust_boundary(self):
         self.put("state.yaml", "feature: f\nq_security: yes\n")
         pk = self.packet(role="architect", stage="shape", task="contract", skill="architecture", outputs=["02-shape/contract.md"])
@@ -278,11 +302,12 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(check_groups(self.registry, self.root, self.registry["stages"]["market"]["required"]), [])
 
     def test_command_routes_and_generated_artifacts_are_current(self):
-        self.assertEqual(len(list(render_commands(self.registry))), 6)
+        self.assertEqual(len(list(render_commands(self.registry))), 7)
         for path, expected in generated_files(self.registry):
             self.assertEqual((ROOT / path).read_text(), expected, path)
         self.assertEqual(self.registry["commands"]["sdlc-review"]["mode"], "review-only")
         self.assertEqual(self.registry["commands"]["sdlc-product"]["mode"], "product")
+        self.assertEqual(self.registry["commands"]["sdlc-grok"]["skill"], "imagery")
 
     def test_renderer_uses_registry_and_preserves_profiles(self):
         spec = importlib.util.spec_from_file_location("render_roles", ROOT / "scripts/render-role-agents.py")

@@ -107,6 +107,7 @@ Follow [design-review.md](references/design-review.md): screenshot the build at 
 | [ia-and-flow.md](references/ia-and-flow.md) | Navigation structure, FR-to-screen mapping, flow notation |
 | [ux-writing.md](references/ux-writing.md) | Any interface copy — naming, CTAs, error and empty copy |
 | [tokens-and-a11y.md](references/tokens-and-a11y.md) | Tokens, contrast pairs, focus order |
+| [generated-imagery.md](references/generated-imagery.md) | The packet lists `imagery` — when a generated image is worth it, where its style anchors come from, how it lands in an artifact (a reference image is never the direction) |
 | [frontend-design (vendor)](../../vendor/anthropic-skills/skills/frontend-design/SKILL.md) | Deep background on visual direction (upstream original, Apache-2.0; kept current by plugin-updater, do not copy) |
 | [auto-agents-pitfalls.md](references/auto-agents-pitfalls.md) | Verified auto_agents traps (code+test / ESC / gate only) |
 
