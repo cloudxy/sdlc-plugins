@@ -187,18 +187,20 @@ flowchart TD
 
 ## 使用方法
 
-### 安装
+### 安装（只以引用方式使用）
 
-同一份 skills / commands / agents 支持四个宿主，依赖 bash 与 python3。先克隆本仓库并运行 `bash vendor/install.sh` 拉上游原件，自检 `bash scripts/health-check.sh` 应全绿。下文 `<PLUGIN_ROOT>` 指克隆后的插件目录。
+同一份 skills / commands / agents 支持四个宿主，依赖 bash 与 python3。先克隆本仓库并运行 `bash vendor/install.sh` 拉上游原件，自检 `bash scripts/health-check.sh` 应全绿。下文 `<PLUGIN_ROOT>` 指插件目录（或指向它的符号链接）。
 
-| 宿主 | 接入方式 | 命令 | 角色子代理 |
+**所有宿主只能引用这一份目录，不许复制。** 会复制插件的命令一律不用：`claude plugin install`（写缓存副本）、`grok plugin install`（留哈希副本）、`codex plugin add`（装副本且丢弃符号链接）。副本会和源头悄悄分叉。
+
+| 宿主 | 引用方式 | 命令 | 角色子代理 |
 |---|---|---|---|
-| ZCode | 克隆或链接到 `~/.zcode/local-plugins/sdlc-workflow`，在 ZCode 中启用（读 `.zcode-plugin/`） | `/sdlc` 等 7 个 | 原生 `sdlc-workflow:<角色>` |
-| Claude Code | `claude plugin marketplace add <PLUGIN_ROOT>` → `claude plugin install sdlc-workflow@sdlc-workflow`；或在项目 `.claude/settings.json` 的 `extraKnownMarketplaces` 登记 `<PLUGIN_ROOT>`（可用相对路径）并在 `enabledPlugins` 打开 `sdlc-workflow@sdlc-workflow`，目录市场原地加载 | `/sdlc` 等（重名时 `/sdlc-workflow:sdlc`） | 原生，清单显式列出 19 个 |
-| Grok | 项目 `.grok/plugins/sdlc-workflow` 链到 `<PLUGIN_ROOT>`，项目受信任并在 `.grok/config.toml` 的 `[plugins].enabled` 里列出；或 `grok plugin install <PLUGIN_ROOT> --trust`（读 `.grok-plugin/`） | `/sdlc` 等 | 原生 `sdlc-workflow:<角色>` |
-| Codex | `codex plugin marketplace add <PLUGIN_ROOT>` → `codex plugin add sdlc-workflow@sdlc-workflow`（读 `.agents/plugins/marketplace.json` 与 `.codex-plugin/`，装的是副本，源码更新后重新 add）；角色子代理另装：`python3 <PLUGIN_ROOT>/scripts/install-codex-agents.py --project <项目根>`（或 `--user`） | 无插件命令：用 `$` 或 `/skills` 选 `sdlc-workflow:sdlc`，在请求里写 `mode: product` 等，对照表见 `skills/sdlc/references/hosts.md` | 安装后为 `sdlc-workflow-<角色>`；未安装时经理回退到 `default` |
+| ZCode | 插件目录本身就是 `~/.zcode/local-plugins/sdlc-workflow`（克隆或链接），在 ZCode 中启用（读 `.zcode-plugin/`） | `/sdlc` 等 7 个 | 原生 `sdlc-workflow:<角色>` |
+| Claude Code | 只改设置：`extraKnownMarketplaces` 登记 `directory` 源 `<PLUGIN_ROOT>`（项目设置可用相对路径，用户设置用绝对路径），`enabledPlugins` 打开 `sdlc-workflow@sdlc-workflow`；原地加载，不执行 install | `/sdlc` 等（重名时 `/sdlc-workflow:sdlc`） | 原生，清单显式列出 19 个 |
+| Grok | 符号链接：受信任项目的 `.grok/plugins/sdlc-workflow`（并在 `.grok/config.toml` 的 `[plugins].enabled` 列出），或 `~/.grok/plugins/sdlc-workflow`；也可用 `[plugins].paths`（读 `.grok-plugin/`） | `/sdlc` 等 | 原生 `sdlc-workflow:<角色>` |
+| Codex | `python3 <PLUGIN_ROOT>/scripts/link-codex.py [--project <项目根>]`：`~/.codex/skills/sdlc-workflow` 链到 `skills/`，角色 TOML 链进 `<项目根>/.codex/agents/`（或 `~/.codex/agents/`）；`--check` 核对、`--remove` 撤销。Codex 没有项目级 skill 目录，skill 链接只能放用户级 | 无插件命令：用 `$` 或 `/skills` 选 `sdlc-workflow:sdlc`，在请求里写 `mode: product` 等，对照表见 `skills/sdlc/references/hosts.md` | 链接后为 `sdlc-workflow-<角色>`；未链接时经理回退到 `default` |
 
-各宿主的清单都由 `adapters/hosts.json` 生成（`python3 scripts/workflow.py render`），不要手改；宿主差异与实测依据见 `adapters/HOST-NOTES.md`。
+经符号链接调用脚本时（例如 `<仓库>/.agents/plugins/sdlc-workflow/scripts/link-codex.py`），链接会经过那条路径，便于统一由项目的插件中枢管理。各宿主的清单都由 `adapters/hosts.json` 生成（`python3 scripts/workflow.py render`），不要手改；`.codex-plugin/` 与 `.agents/plugins/marketplace.json` 只供对外分发，本机不用。宿主差异与实测依据见 `adapters/HOST-NOTES.md`。
 
 ### 接入一个项目（一次性）
 
@@ -292,7 +294,7 @@ sdlc-workflow/
 | `scripts/grok/auth.py` | Grok 订阅授权（OAuth device flow）：登录 / 状态 / 登出；凭据只存 `~/.sdlc/grok/`（0600），任何子命令都不打印 token |
 | `scripts/data_dictionary.py` | 由 erd.dbml + 术语表 + metrics.yaml 生成只读数据字典（`--check` 抓过期与手改） |
 | `scripts/render-role-agents.py` | 从 profiles 与 _lib 编译角色，同时生成 Codex 角色（`adapters/codex/agents/*.toml`）；`--check` 抓漂移 |
-| `scripts/hosts.py` / `scripts/install-codex-agents.py` | 由 `adapters/hosts.json` 生成 ZCode / Claude Code / Grok / Codex 清单与 `hosts.md`（经 `workflow.py render`）；把 Codex 角色装进项目或用户的 `.codex/agents/` |
+| `scripts/hosts.py` / `scripts/link-codex.py` | 由 `adapters/hosts.json` 生成 ZCode / Claude Code / Grok / Codex 清单与 `hosts.md`（经 `workflow.py render`）；以符号链接让 Codex 引用本插件的 skills 与角色（不复制） |
 | `scripts/grade_eval.py` / `blind_eval.py` | 评测机械评分（不调模型）与盲评 |
 | `scripts/ui-evidence.sh` | UI 截图留证 |
 | `scripts/test_workflow.py` / `test_skill_evidence.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` | 注册表、技能证据规则、闸门、vendor 安装与多宿主打包的自测 |

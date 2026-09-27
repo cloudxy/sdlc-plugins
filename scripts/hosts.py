@@ -87,16 +87,22 @@ def render_host_reference(hosts, registry):
              "Spawn the native role type once. If the host reports an unknown type, spawn **once** as that host's generic "
              "type with the same packet; its first action reads `PLUGIN_ROOT/agents/<role>.md` and the primary SKILL.md. "
              "Record `host_spawn.<role>` with the host, the type tried and the fallback used. Never dispatch both forms. "
-             "On Codex without installed role agents the fallback is the normal path; install them with "
-             "`python3 PLUGIN_ROOT/scripts/install-codex-agents.py --project <project root>` so reviewer/qc also get a "
+             "On Codex without linked role agents the fallback is the normal path; link them with "
+             "`python3 PLUGIN_ROOT/scripts/link-codex.py --project <project root>` so reviewer/qc also get a "
              "read-only sandbox. With the generic fallback the read-only rule is only the packet's, so check the record's "
              "write observation before accepting a review.", "",
+             "## Reference only", "",
+             "Every host uses this plugin by reference to one source directory. Never run a command that copies it; "
+             "a copy silently diverges from the source.", ""]
+    rows += [f"- **{h['label']}**: {h['install']}." for h in hosts["hosts"]]
+    rows += ["",
              "## PLUGIN_ROOT", "",
-             "PLUGIN_ROOT is two directories above the running `SKILL.md` (the folder with `skills/`, `agents/`, "
-             "`scripts/`). ZCode also exports `$ZCODE_PLUGIN_ROOT` to the shell; Claude Code (`CLAUDE_PLUGIN_ROOT`) and "
-             "Grok (`GROK_PLUGIN_ROOT`) set theirs only for hooks and MCP servers. Codex runs an installed copy under "
-             "`~/.codex/plugins/cache/<marketplace>/sdlc-workflow/<version>/`: resolve PLUGIN_ROOT from that copy, and "
-             "reinstall after the source changes. Pass the absolute PLUGIN_ROOT in every packet.", "",
+             "PLUGIN_ROOT is two directories above the **real path** of the running `SKILL.md` (the folder with "
+             "`skills/`, `agents/`, `scripts/`). Resolve symlinks first (`realpath <SKILL.md>`): hosts reach the plugin "
+             "through links, and Codex shows `~/.codex/skills/sdlc-workflow/<skill>/SKILL.md`, whose lexical parent is "
+             "not the plugin. ZCode also exports `$ZCODE_PLUGIN_ROOT` to the shell; Claude Code (`CLAUDE_PLUGIN_ROOT`) "
+             "and Grok (`GROK_PLUGIN_ROOT`) set theirs only for hooks and MCP servers. Pass the absolute PLUGIN_ROOT in "
+             "every packet.", "",
              "## Commands on hosts without plugin commands", "",
              "Codex plugins carry skills only. Invoke the command's skill and state the mode in the request; the skill "
              "treats an explicit `mode:` (or the command name, such as `/sdlc-product`) exactly like the command.", "",
@@ -105,7 +111,7 @@ def render_host_reference(hosts, registry):
         rows.append(f"| `/{name}` | `sdlc-workflow:{item['skill']}` | `{item['mode']}` "
                     f"| `sdlc-workflow:{item['skill']}` + `mode: {item['mode']} <arguments>` |")
     rows += ["", "## Role agents per host", "",
-             "| Role | ZCode / Claude Code / Grok | Codex (installed) | Read-only |", "|---|---|---|---|"]
+             "| Role | ZCode / Claude Code / Grok | Codex (linked) | Read-only |", "|---|---|---|---|"]
     for role, meta in registry["roles"].items():
         rows.append(f"| {role} | `sdlc-workflow:{role}` | `{codex_agent_name(hosts, role)}` | {'yes' if meta['fresh'] else 'no'} |")
     return "\n".join(rows) + "\n"

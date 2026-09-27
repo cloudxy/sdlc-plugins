@@ -8,7 +8,7 @@ The `/sdlc` window is the **manager** (agents-as-tools). Spawns are nested speci
 
 Full list for maintainers: `PLUGIN_ROOT/adapters/HOST-NOTES.md`. What the manager must know:
 
-- **ZCode, Claude Code and Grok execute plugin agents as `pluginName:bareName`** — spawn `sdlc-workflow:<role>`. Codex runs installed agents `sdlc-workflow-<role>`; packets keep the qualified name ([hosts.md](hosts.md)).
+- **ZCode, Claude Code and Grok execute plugin agents as `pluginName:bareName`** — spawn `sdlc-workflow:<role>`. Codex runs linked agents `sdlc-workflow-<role>`; packets keep the qualified name ([hosts.md](hosts.md)).
 - **Agent body is who; skills are how.** Hats load `sdlc-workflow:<proc>` with the Skill tool; pass PLUGIN_ROOT so a hat can Read `skills/<proc>/SKILL.md` if Skill fails. Agent frontmatter never carries `skills:` (a non-empty list is an allowlist that blocks companion skills and the reviewer pool).
 - **Research, product, design and architecture hats have `WebSearch` / `WebFetch`**; UI evidence is Bash + `scripts/ui-evidence.sh` (Playwright). Optional MCP tools come only from `adapters/extra-tools.json`, rendered at compile time.
 - **Default `check-sdlc.sh` skip is exit 0.** After a producing hat, run with `--require` / `--hat`. Confirm files exist first — agent said so ≠ file exists.

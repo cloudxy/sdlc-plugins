@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -103,6 +104,14 @@ class HostReference(unittest.TestCase):
         for role in REGISTRY["roles"]:
             self.assertIn(f"| {role} | `sdlc-workflow:{role}` | `{codex_agent_name(HOSTS, role)}` |", self.TEXT)
 
+    def test_reference_only_for_every_host(self):
+        self.assertIn("## Reference only", self.TEXT)
+        for h in HOSTS["hosts"]:
+            self.assertIn(f"- **{h['label']}**:", self.TEXT)
+        for command in ("claude plugin install", "grok plugin install", "codex plugin add"):
+            self.assertIn(f"Never `{command}`", self.TEXT)
+        self.assertIn("real path", self.TEXT)
+
     def test_generic_fallbacks(self):
         self.assertIn("| `general-purpose` |", self.TEXT)
         self.assertIn("| `default` |", self.TEXT)
@@ -141,27 +150,52 @@ class CodexAgents(unittest.TestCase):
             data = tomllib.loads(text)
             self.assertEqual(set(data) - {"sandbox_mode"}, {"name", "description", "developer_instructions"}, role)
 
-    def test_installer_touches_only_its_own_files(self):
-        script = ROOT / "scripts" / "install-codex-agents.py"
+    def test_link_codex_references_and_never_copies(self):
         env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
         with tempfile.TemporaryDirectory() as td:
-            agents = Path(td) / ".codex" / "agents"
+            td = Path(td)
+            home, project = td / "codex-home", td / "project"
+            (project / ".agents" / "plugins").mkdir(parents=True)
+            hub = project / ".agents" / "plugins" / "sdlc-workflow"
+            hub.symlink_to(ROOT)                       # a project plugin hub, like .agents/plugins/<name>
+            agents = project / ".codex" / "agents"
             agents.mkdir(parents=True)
             (agents / "mine.toml").write_text('name = "mine"\n')
+            script = hub / "scripts" / "link-codex.py"  # invoked through the hub: links go through it
 
             def run(*extra):
-                return subprocess.run([sys.executable, str(script), "--project", td, *extra],
-                                      capture_output=True, text=True, env=env)
+                return subprocess.run([sys.executable, str(script), "--codex-home", str(home), "--project",
+                                       str(project), *extra], capture_output=True, text=True, env=env)
 
             self.assertEqual(run("--check").returncode, 1)
-            self.assertEqual(run().returncode, 0)
+            self.assertEqual(run().returncode, 0, run().stdout)
             self.assertEqual(run("--check").returncode, 0)
-            self.assertEqual(len(list(agents.glob("sdlc-workflow-*.toml"))), len(REGISTRY["roles"]))
-            (agents / f"{codex_agent_name(HOSTS, 'pm')}.toml").write_text("stale")
-            self.assertEqual(run("--check").returncode, 1)
+            skills = home / "skills" / "sdlc-workflow"
+            self.assertTrue(skills.is_symlink())
+            self.assertEqual(os.readlink(skills), str(hub / "skills"))
+            links = sorted(agents.glob("sdlc-workflow-*.toml"))
+            self.assertEqual(len(links), len(REGISTRY["roles"]))
+            for link in links:
+                self.assertTrue(link.is_symlink())
+                self.assertFalse(os.path.isabs(os.readlink(link)), "agent links inside the project stay relative")
+                self.assertEqual(link.resolve(), (ROOT / CODEX_AGENT_DIR / link.name).resolve())
+            # A copy standing where a link belongs is reported and left alone.
+            first = links[0]
+            first.unlink()
+            first.write_text("copied")
+            result = run()
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("copy:", result.stdout)
+            self.assertEqual(first.read_text(), "copied")
+            first.unlink()
+            # A copied plugin install in Codex's cache is reported.
+            (home / "plugins" / "cache" / "any" / "sdlc-workflow").mkdir(parents=True)
+            self.assertIn("copied plugin install", run().stdout)
+            shutil.rmtree(home / "plugins")
+            self.assertEqual(run().returncode, 0)
             self.assertEqual(run("--remove").returncode, 0)
             self.assertEqual([p.name for p in agents.iterdir()], ["mine.toml"])
-
+            self.assertFalse(skills.exists() or skills.is_symlink())
 
 if __name__ == "__main__":
     unittest.main()

@@ -13,11 +13,20 @@ The same skills, commands and role agents run on ZCode, Claude Code, Grok and Co
 
 ## Spawning and fallback
 
-Spawn the native role type once. If the host reports an unknown type, spawn **once** as that host's generic type with the same packet; its first action reads `PLUGIN_ROOT/agents/<role>.md` and the primary SKILL.md. Record `host_spawn.<role>` with the host, the type tried and the fallback used. Never dispatch both forms. On Codex without installed role agents the fallback is the normal path; install them with `python3 PLUGIN_ROOT/scripts/install-codex-agents.py --project <project root>` so reviewer/qc also get a read-only sandbox. With the generic fallback the read-only rule is only the packet's, so check the record's write observation before accepting a review.
+Spawn the native role type once. If the host reports an unknown type, spawn **once** as that host's generic type with the same packet; its first action reads `PLUGIN_ROOT/agents/<role>.md` and the primary SKILL.md. Record `host_spawn.<role>` with the host, the type tried and the fallback used. Never dispatch both forms. On Codex without linked role agents the fallback is the normal path; link them with `python3 PLUGIN_ROOT/scripts/link-codex.py --project <project root>` so reviewer/qc also get a read-only sandbox. With the generic fallback the read-only rule is only the packet's, so check the record's write observation before accepting a review.
+
+## Reference only
+
+Every host uses this plugin by reference to one source directory. Never run a command that copies it; a copy silently diverges from the source.
+
+- **ZCode**: the plugin directory itself: ~/.zcode/local-plugins/sdlc-workflow (a clone, or a symlink to one).
+- **Claude Code**: settings only: a `directory` source under `extraKnownMarketplaces` (project-relative or absolute) plus `enabledPlugins`; loads in place. Never `claude plugin install` (it writes a cache copy).
+- **Grok**: a symlink in a trusted project's `.grok/plugins/` (listed in `[plugins].enabled`) or in `~/.grok/plugins/`, or a `[plugins].paths` entry. Never `grok plugin install` (it keeps a hashed copy).
+- **Codex**: `python3 PLUGIN_ROOT/scripts/link-codex.py [--project <root>]`: `$CODEX_HOME/skills/sdlc-workflow` → `skills/`, role agents → `adapters/codex/agents/`. Never `codex plugin add` (it installs a copy and drops symlinks).
 
 ## PLUGIN_ROOT
 
-PLUGIN_ROOT is two directories above the running `SKILL.md` (the folder with `skills/`, `agents/`, `scripts/`). ZCode also exports `$ZCODE_PLUGIN_ROOT` to the shell; Claude Code (`CLAUDE_PLUGIN_ROOT`) and Grok (`GROK_PLUGIN_ROOT`) set theirs only for hooks and MCP servers. Codex runs an installed copy under `~/.codex/plugins/cache/<marketplace>/sdlc-workflow/<version>/`: resolve PLUGIN_ROOT from that copy, and reinstall after the source changes. Pass the absolute PLUGIN_ROOT in every packet.
+PLUGIN_ROOT is two directories above the **real path** of the running `SKILL.md` (the folder with `skills/`, `agents/`, `scripts/`). Resolve symlinks first (`realpath <SKILL.md>`): hosts reach the plugin through links, and Codex shows `~/.codex/skills/sdlc-workflow/<skill>/SKILL.md`, whose lexical parent is not the plugin. ZCode also exports `$ZCODE_PLUGIN_ROOT` to the shell; Claude Code (`CLAUDE_PLUGIN_ROOT`) and Grok (`GROK_PLUGIN_ROOT`) set theirs only for hooks and MCP servers. Pass the absolute PLUGIN_ROOT in every packet.
 
 ## Commands on hosts without plugin commands
 
@@ -35,7 +44,7 @@ Codex plugins carry skills only. Invoke the command's skill and state the mode i
 
 ## Role agents per host
 
-| Role | ZCode / Claude Code / Grok | Codex (installed) | Read-only |
+| Role | ZCode / Claude Code / Grok | Codex (linked) | Read-only |
 |---|---|---|---|
 | pm | `sdlc-workflow:pm` | `sdlc-workflow-pm` | no |
 | growth | `sdlc-workflow:growth` | `sdlc-workflow-growth` | no |

@@ -94,7 +94,7 @@ Enumerate changed skills and their conditional branches rather than silently ret
 
 ## Plugin root and workspace
 
-This file is `<plugin>/skills/sdlc-eval/SKILL.md`; PLUGIN_ROOT is two directories up ([hosts.md](../sdlc/references/hosts.md) §PLUGIN_ROOT). On Codex every `general-purpose` arm or judge below is `default`, and `sdlc-workflow:<hat>` is the installed `sdlc-workflow-<hat>`. Workspace = sibling folder `sdlc-workflow-eval-workspace/` ([templates/run-layout.md](templates/run-layout.md)). Next iteration = max existing + 1.
+This file is `<plugin>/skills/sdlc-eval/SKILL.md`; PLUGIN_ROOT is two directories up ([hosts.md](../sdlc/references/hosts.md) §PLUGIN_ROOT). On Codex every `general-purpose` arm or judge below is `default`, and `sdlc-workflow:<hat>` is the linked `sdlc-workflow-<hat>`. Workspace = sibling folder `sdlc-workflow-eval-workspace/` ([templates/run-layout.md](templates/run-layout.md)). Next iteration = max existing + 1.
 
 ## Step 0 — refuse or init
 

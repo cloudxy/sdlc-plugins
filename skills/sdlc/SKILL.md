@@ -53,7 +53,7 @@ Commands contain no procedures. Entry routing, role/stage/task mappings, artifac
 
 ## Plugin root
 
-This file is `<plugin>/skills/sdlc/SKILL.md`; **PLUGIN_ROOT** is two directories up (the folder with `skills/`, `agents/`, `commands/`, `scripts/`). A host-exported root (`$ZCODE_PLUGIN_ROOT`) wins when set; Codex runs an installed copy ([references/hosts.md](references/hosts.md)). Pass the absolute PLUGIN_ROOT in every packet; never hardcode a home path.
+This file is `<plugin>/skills/sdlc/SKILL.md`; **PLUGIN_ROOT** is two directories up (the folder with `skills/`, `agents/`, `commands/`, `scripts/`). Resolve symlinks first — hosts reach the plugin through links ([references/hosts.md](references/hosts.md) §PLUGIN_ROOT); a host-exported root (`$ZCODE_PLUGIN_ROOT`) wins when set. Pass the absolute PLUGIN_ROOT in every packet; never hardcode a home path.
 
 ## Step 0 — init
 
