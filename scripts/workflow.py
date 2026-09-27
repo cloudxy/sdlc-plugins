@@ -511,6 +511,9 @@ def generated_files(registry):
         for i in t.get('inputs', []):
             rows.append(f"| {t['role']} / {t['stage']} / {t['task']} | {i['id']} | {i['source']}: {i.get('ref','explicit binding')} | {i['when']} | {i['access']} | {i.get('requires_acceptance',False)} |")
     yield 'skills/sdlc/references/task-inputs.md', '\n'.join(rows) + '\n'
+    # Host manifests and the host reference: adapters/hosts.json is their single source.
+    from hosts import render_hosts
+    yield from render_hosts(registry)
 
 
 def main():
@@ -561,6 +564,7 @@ def main():
                     if not p.is_file() or p.read_text() != text:
                         drift.append(path)
                 else:
+                    p.parent.mkdir(parents=True, exist_ok=True)
                     p.write_text(text)
             if drift:
                 print("generated drift: " + ", ".join(drift))

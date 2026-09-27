@@ -1,0 +1,36 @@
+{
+  "name": "sdlc-workflow",
+  "version": "4.1.0",
+  "description": "Product-quality delivery control plane: product layer every hat reads and writes back, discovery with growth positioning, design directions before architecture, journey slices with integration screenshots, E2E and three-party acceptance, script gates, 19 role agents, /sdlc manager window.",
+  "author": {
+    "name": "xuyun"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/cloudxy/sdlc-plugins",
+  "keywords": [
+    "workflow",
+    "sdlc",
+    "agents",
+    "process",
+    "quality-gates"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SDLC Workflow",
+    "shortDescription": "Gated product delivery with role specialists, product layer and script gates",
+    "longDescription": "A manager window classifies intent, keeps state and the product layer, and dispatches role specialists (pm, designer, architect, backend, qa, reviewer and more) through checked packets. Gates cover discovery, definition, shape, implementation, verification, acceptance and independent review.",
+    "developerName": "xuyun",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use SDLC Workflow to take this feature through the gated swimlane.",
+      "Use SDLC Workflow in product mode to refresh the product layer."
+    ],
+    "composerIcon": "./commands/sdlc.icon.png",
+    "logo": "./commands/sdlc.icon.png"
+  }
+}

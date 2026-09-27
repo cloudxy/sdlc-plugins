@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "_comment": "Single source for plugin identity and host adapters. Edit here, then run python3 scripts/workflow.py render (writes every host manifest and skills/sdlc/references/hosts.md). Host facts behind these choices: adapters/HOST-NOTES.md.",
+  "plugin": {
+    "name": "sdlc-workflow",
+    "version": "4.1.0",
+    "description": "Product-quality delivery control plane: product layer every hat reads and writes back, discovery with growth positioning, design directions before architecture, journey slices with integration screenshots, E2E and three-party acceptance, script gates, 19 role agents, /sdlc manager window.",
+    "description_i18n": {
+      "en": "Product-quality delivery: product layer, growth positioning, design-first shape, journey slices, E2E + three-party acceptance, 19 role agents.",
+      "zh-CN": "以产品质量为目标的交付控制面：产品层（先读后写）、增长运营定位与卖点、设计方向先于架构、旅程切片与联调截图、E2E 与三方验收、脚本闸门、19 个角色子代理。"
+    },
+    "author": {
+      "name": "xuyun"
+    },
+    "license": "MIT",
+    "repository": "https://github.com/cloudxy/sdlc-plugins",
+    "keywords": [
+      "workflow",
+      "sdlc",
+      "agents",
+      "process",
+      "quality-gates"
+    ]
+  },
+  "marketplace": {
+    "name": "sdlc-workflow",
+    "owner": {
+      "name": "xuyun"
+    },
+    "description": "Local marketplace whose only entry is this plugin directory (Claude Code and Grok; Codex reads .agents/plugins/marketplace.json).",
+    "category": "workflow"
+  },
+  "codex": {
+    "category": "Developer Tools",
+    "policy": {
+      "installation": "AVAILABLE",
+      "authentication": "ON_INSTALL"
+    },
+    "agent_prefix": "sdlc-workflow-",
+    "interface": {
+      "displayName": "SDLC Workflow",
+      "shortDescription": "Gated product delivery with role specialists, product layer and script gates",
+      "longDescription": "A manager window classifies intent, keeps state and the product layer, and dispatches role specialists (pm, designer, architect, backend, qa, reviewer and more) through checked packets. Gates cover discovery, definition, shape, implementation, verification, acceptance and independent review.",
+      "developerName": "xuyun",
+      "category": "Developer Tools",
+      "capabilities": [
+        "Interactive",
+        "Read",
+        "Write"
+      ],
+      "defaultPrompt": [
+        "Use SDLC Workflow to take this feature through the gated swimlane.",
+        "Use SDLC Workflow in product mode to refresh the product layer."
+      ],
+      "composerIcon": "./commands/sdlc.icon.png",
+      "logo": "./commands/sdlc.icon.png"
+    }
+  },
+  "hosts": [
+    {
+      "id": "zcode",
+      "label": "ZCode",
+      "manifest": ".zcode-plugin/plugin.json",
+      "install": "local plugin directory (~/.zcode/local-plugins/sdlc-workflow)",
+      "commands": "`/sdlc`, `/sdlc-product`, … from commands/",
+      "role_type": "sdlc-workflow:<role>",
+      "generic_type": "general-purpose",
+      "skill_call": "Skill tool `sdlc-workflow:<name>`; users type `$<name>`",
+      "read_only": "reviewer/qc tool allowlist + disallowedTools"
+    },
+    {
+      "id": "claude",
+      "label": "Claude Code",
+      "manifest": ".claude-plugin/plugin.json",
+      "install": "directory marketplace (.claude-plugin/marketplace.json) or a project's extraKnownMarketplaces; loads in place",
+      "commands": "`/sdlc`, `/sdlc-product`, … (qualified `/sdlc-workflow:sdlc` when names collide)",
+      "role_type": "sdlc-workflow:<role>",
+      "generic_type": "general-purpose",
+      "skill_call": "Skill tool `sdlc-workflow:<name>`; users type `/sdlc-workflow:<name>`",
+      "read_only": "reviewer/qc tool allowlist + disallowedTools"
+    },
+    {
+      "id": "grok",
+      "label": "Grok",
+      "manifest": ".grok-plugin/plugin.json",
+      "install": "project .grok/plugins/<name> (trusted, enabled in [plugins]) or grok plugin install --trust",
+      "commands": "`/sdlc`, `/sdlc-product`, … (qualified `/sdlc-workflow:sdlc` when ambiguous)",
+      "role_type": "sdlc-workflow:<role>",
+      "generic_type": "general-purpose",
+      "skill_call": "Skill tool `sdlc-workflow:<name>`; users type `/<name>`",
+      "read_only": "reviewer/qc tool allowlist + disallowedTools"
+    },
+    {
+      "id": "codex",
+      "label": "Codex",
+      "manifest": ".codex-plugin/plugin.json",
+      "install": "codex plugin marketplace add <plugin dir> (.agents/plugins/marketplace.json) → codex plugin add sdlc-workflow@sdlc-workflow; runs an installed copy",
+      "commands": "none — Codex plugins carry no commands; see the command table below",
+      "role_type": "sdlc-workflow-<role>",
+      "generic_type": "default",
+      "skill_call": "read the listed SKILL.md (Codex lists `sdlc-workflow:<name>`); users pick it with `$` or `/skills`",
+      "read_only": "reviewer/qc agents set sandbox_mode = \"read-only\"; the generic fallback only has the packet rule"
+    }
+  ]
+}

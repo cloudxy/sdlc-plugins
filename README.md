@@ -189,14 +189,21 @@ flowchart TD
 
 ### 安装
 
-- 宿主 ZCode（插件机制：skills / commands / agents），依赖 bash 与 python3。
-- 把本仓库克隆或链接到 `~/.zcode/local-plugins/sdlc-workflow`，运行 `bash vendor/install.sh` 拉上游原件，在 ZCode 中启用插件。
-- 自检：`bash scripts/health-check.sh` 应全绿。
+同一份 skills / commands / agents 支持四个宿主，依赖 bash 与 python3。先克隆本仓库并运行 `bash vendor/install.sh` 拉上游原件，自检 `bash scripts/health-check.sh` 应全绿。下文 `<PLUGIN_ROOT>` 指克隆后的插件目录。
+
+| 宿主 | 接入方式 | 命令 | 角色子代理 |
+|---|---|---|---|
+| ZCode | 克隆或链接到 `~/.zcode/local-plugins/sdlc-workflow`，在 ZCode 中启用（读 `.zcode-plugin/`） | `/sdlc` 等 7 个 | 原生 `sdlc-workflow:<角色>` |
+| Claude Code | `claude plugin marketplace add <PLUGIN_ROOT>` → `claude plugin install sdlc-workflow@sdlc-workflow`；或在项目 `.claude/settings.json` 的 `extraKnownMarketplaces` 登记 `<PLUGIN_ROOT>`（可用相对路径）并在 `enabledPlugins` 打开 `sdlc-workflow@sdlc-workflow`，目录市场原地加载 | `/sdlc` 等（重名时 `/sdlc-workflow:sdlc`） | 原生，清单显式列出 19 个 |
+| Grok | 项目 `.grok/plugins/sdlc-workflow` 链到 `<PLUGIN_ROOT>`，项目受信任并在 `.grok/config.toml` 的 `[plugins].enabled` 里列出；或 `grok plugin install <PLUGIN_ROOT> --trust`（读 `.grok-plugin/`） | `/sdlc` 等 | 原生 `sdlc-workflow:<角色>` |
+| Codex | `codex plugin marketplace add <PLUGIN_ROOT>` → `codex plugin add sdlc-workflow@sdlc-workflow`（读 `.agents/plugins/marketplace.json` 与 `.codex-plugin/`，装的是副本，源码更新后重新 add）；角色子代理另装：`python3 <PLUGIN_ROOT>/scripts/install-codex-agents.py --project <项目根>`（或 `--user`） | 无插件命令：用 `$` 或 `/skills` 选 `sdlc-workflow:sdlc`，在请求里写 `mode: product` 等，对照表见 `skills/sdlc/references/hosts.md` | 安装后为 `sdlc-workflow-<角色>`；未安装时经理回退到 `default` |
+
+各宿主的清单都由 `adapters/hosts.json` 生成（`python3 scripts/workflow.py render`），不要手改；宿主差异与实测依据见 `adapters/HOST-NOTES.md`。
 
 ### 接入一个项目（一次性）
 
 1. 复制 `skills/sdlc/templates/sdlc.config.yaml` 到项目根，填 `gates`（test / lint / build / migration / e2e）、`app.start` 与 `app.base_url`（多界面填 `app.urls`）、`product_root`、`constitution`、`lane_rules` 路径规则。有 UI 的项目 `e2e` 不允许为 null。
-2. `python3 ~/.zcode/local-plugins/sdlc-workflow/scripts/check_config.py --project-root .` 体检，按提示补齐。
+2. `python3 <PLUGIN_ROOT>/scripts/check_config.py --project-root .` 体检，按提示补齐。
 3. `/sdlc-product 全部` 建产品层——它会派 pm → （战略问题问你）→ architect ∥ designer → dba → 数据帽 → growth，把策略、功能地图、设计系统、架构、领域模型与数据写成真文件。这一步之后每个功能才有「先读的记忆」。
 
 ### 日常用法
@@ -249,14 +256,15 @@ sdlc-workflow/
 ├── agents/          19 个角色（生成产物；源在 profiles/ 与 _lib/）
 ├── skills/          27 个做法：SKILL.md + references/ + templates/ + evals/
 ├── workflow/        registry.json：命令路由、角色任务、工件路径、阶段合同
-├── adapters/        宿主工具档、MCP 白名单与宿主事实
+├── adapters/        hosts.json（插件身份与宿主设置的唯一来源）、宿主工具档、MCP 白名单、宿主事实、codex/agents（生成）
 ├── scripts/         闸门、健康检查、角色工厂、评测评分与一致性测试
 ├── vendor/          上游原件：仓库只含 install.sh 与锁文件，内容由使用者从源头下载
 ├── maintainers/     维护者档案（不被任何 skill 加载），例如待项目方接收的项目经验归档
-└── .zcode-plugin/   插件清单
+├── .zcode-plugin/ .claude-plugin/ .grok-plugin/ .codex-plugin/   各宿主插件清单（生成）
+└── .agents/plugins/ Codex 本地市场（生成）
 ```
 
-`commands/`、`agents/*.md` 与角色速查表均为生成产物，不手改；数据与源文件的唯一维护位置见 `workflow/registry.json` 与 `agents/profiles/`。
+`commands/`、`agents/*.md`、各宿主清单与角色速查表均为生成产物，不手改；数据与源文件的唯一维护位置见 `workflow/registry.json` 与 `agents/profiles/`。
 
 ## 项目侧配置与工件
 
@@ -283,10 +291,11 @@ sdlc-workflow/
 | `scripts/image/` | 出图与它的闸门：生成位图素材并留证（提示词原文、模型、参数、digest），`check.py` 把每张图绑到提示词与声明它的工件上 |
 | `scripts/grok/auth.py` | Grok 订阅授权（OAuth device flow）：登录 / 状态 / 登出；凭据只存 `~/.sdlc/grok/`（0600），任何子命令都不打印 token |
 | `scripts/data_dictionary.py` | 由 erd.dbml + 术语表 + metrics.yaml 生成只读数据字典（`--check` 抓过期与手改） |
-| `scripts/render-role-agents.py` | 从 profiles 与 _lib 编译角色（`--check` 抓漂移） |
+| `scripts/render-role-agents.py` | 从 profiles 与 _lib 编译角色，同时生成 Codex 角色（`adapters/codex/agents/*.toml`）；`--check` 抓漂移 |
+| `scripts/hosts.py` / `scripts/install-codex-agents.py` | 由 `adapters/hosts.json` 生成 ZCode / Claude Code / Grok / Codex 清单与 `hosts.md`（经 `workflow.py render`）；把 Codex 角色装进项目或用户的 `.codex/agents/` |
 | `scripts/grade_eval.py` / `blind_eval.py` | 评测机械评分（不调模型）与盲评 |
 | `scripts/ui-evidence.sh` | UI 截图留证 |
-| `scripts/test_workflow.py` / `test_skill_evidence.py` / `test-check-sdlc.sh` / `test_vendor_install.py` | 注册表、技能证据规则、闸门与 vendor 安装的自测 |
+| `scripts/test_workflow.py` / `test_skill_evidence.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` | 注册表、技能证据规则、闸门、vendor 安装与多宿主打包的自测 |
 
 ## 上游原件（vendor/）
 

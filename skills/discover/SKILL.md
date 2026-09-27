@@ -6,7 +6,7 @@ when_to_use: "Use when /sdlc-discover, or /sdlc L2+ with no briefing. Do NOT use
 
 # Discover — frame, survey, discuss, falsify, then freeze
 
-**Entry mode:** `full` (default) follows the chain below. `research` follows [references/research-mode.md](references/research-mode.md) and returns after the survey; no HITL, freeze or define. Preserve an explicit command mode.
+**Entry mode:** `full` (default) follows the chain below. `research` follows [references/research-mode.md](references/research-mode.md) and returns after the survey; no HITL, freeze or define. Preserve an explicit command mode; without commands (Codex), an explicit `mode:` or the command name in the request counts as the command.
 
 This window is the **discovery manager**. You keep the user-facing reply (grilling is HITL). Spawn `sdlc-workflow:researcher` / `sdlc-workflow:competitor` for the AFK survey, then `sdlc-workflow:growth` for positioning and highlight hypotheses. Do not handoff. Do not write `spec.md`.
 
@@ -58,7 +58,7 @@ Spawn **once each** (native `sdlc-workflow:<role>`, packet v2 with `product_cont
 - `hat: researcher`, `stage: market`, `task: survey`, `primary_skill: sdlc-workflow:market` → `00-discover/market.md`
 - `hat: competitor`, `stage: compete`, `task: survey`, `primary_skill: sdlc-workflow:compete` → `00-discover/compete.md`
 
-If host unknown type: one `general-purpose` fallback that Reads `PLUGIN_ROOT/agents/<role>.md` + the skill. Record `host_spawn`. Then `check-sdlc.sh --require --hat market` / `--hat compete`.
+If host unknown type: one fallback with the host's generic type (`general-purpose`; Codex `default`; [hosts.md](../sdlc/references/hosts.md)) that Reads `PLUGIN_ROOT/agents/<role>.md` + the skill. Record `host_spawn`. Then `check-sdlc.sh --require --hat market` / `--hat compete`.
 
 Skip a hat only with `roles_skipped` + why (pure internal tool still writes 现状 in compete).
 

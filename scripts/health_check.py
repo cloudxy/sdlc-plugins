@@ -144,6 +144,10 @@ def main() -> int:
             path = Path(root) / relative
             if not path.is_file() or path.read_text() != expected:
                 err("CONTRACT", f"{relative}: generated drift; run scripts/workflow.py render")
+        # Host manifests are generated above; these are the cross-host rules they cannot express (HOST-NOTES.md).
+        from hosts import host_problems
+        for problem in host_problems(registry, root):
+            err("HOSTS", problem)
     except (OSError, ValueError, KeyError, TypeError) as error:
         err("CONTRACT", str(error))
         registry = {"roles": {}}

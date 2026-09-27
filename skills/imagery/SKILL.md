@@ -23,6 +23,8 @@ Job: **produce the few bitmaps a design or a launch genuinely needs, and make ea
 
 ## Authorization (mode: auth — this is what /sdlc-grok runs)
 
+On hosts without plugin commands (Codex), `mode: auth` with login / status / logout / probe in the request is the same entry.
+
 ```
 python3 PLUGIN_ROOT/scripts/grok/auth.py login     # once, by the human, in their own terminal
 python3 PLUGIN_ROOT/scripts/grok/auth.py status    # logged in / expired / not logged in

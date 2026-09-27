@@ -3,13 +3,13 @@
   "owner": {
     "name": "xuyun"
   },
-  "description": "Claude Code 本地目录 marketplace（auto_agents 通过 .agents/plugins/sdlc-workflow 引用）。组件声明在同目录 plugin.json。",
+  "description": "Local marketplace whose only entry is this plugin directory (Claude Code and Grok; Codex reads .agents/plugins/marketplace.json).",
   "plugins": [
     {
       "name": "sdlc-workflow",
       "source": "./",
       "version": "4.1.0",
-      "description": "Product-quality delivery control plane: product layer, growth positioning, design-first shape, journey slices, E2E + three-party acceptance, script gates, 19 role agents, /sdlc manager window.",
+      "description": "Product-quality delivery: product layer, growth positioning, design-first shape, journey slices, E2E + three-party acceptance, 19 role agents.",
       "category": "workflow"
     }
   ]

@@ -14,7 +14,7 @@ This window is the **manager** (agents-as-tools): specialists run as nested spaw
 
 ## Entry modes — resolve before Step 0
 
-The command supplies `mode` and arguments; direct skill use defaults to `auto`.
+The command supplies `mode` and arguments. Without a command (Codex has no plugin commands; [references/hosts.md](references/hosts.md)), an explicit `mode: <m>` or the command name in the request selects that mode; otherwise `auto`.
 - `product`: execute [references/product-mode.md](references/product-mode.md), then return. Do not initialize a feature lane.
 - `review-only`: execute [references/review-mode.md](references/review-mode.md), then return. Report only; never advance feature state.
 - `auto`: classify intent below. If it resolves to product or review-only, use the same mode references and return.
@@ -53,14 +53,14 @@ Commands contain no procedures. Entry routing, role/stage/task mappings, artifac
 
 ## Plugin root
 
-This file is `<plugin>/skills/sdlc/SKILL.md`; **PLUGIN_ROOT** is two directories up (the folder with `skills/`, `agents/`, `commands/`, `scripts/`). Prefer `$ZCODE_PLUGIN_ROOT` when set. Pass the absolute PLUGIN_ROOT in every packet; never hardcode a home path.
+This file is `<plugin>/skills/sdlc/SKILL.md`; **PLUGIN_ROOT** is two directories up (the folder with `skills/`, `agents/`, `commands/`, `scripts/`). A host-exported root (`$ZCODE_PLUGIN_ROOT`) wins when set; Codex runs an installed copy ([references/hosts.md](references/hosts.md)). Pass the absolute PLUGIN_ROOT in every packet; never hardcode a home path.
 
 ## Step 0 — init
 
 1. Read `sdlc.config.yaml` (or copy the template and ask for: constitution, gate commands including `e2e`, `app.start` / `app.base_url`, `product_root`). Run `python3 <PLUGIN_ROOT>/scripts/check_config.py --project-root <root>`: blockers go to the user with the suggested block (delegate approved project-config changes to the scoped SRE ci task), and stages requiring a real UI build wait until it runs; early design may run its own prototype ([orchestrator-gates.md](references/orchestrator-gates.md) §12).
 2. **Product layer:** resolve `product_root` (default `docs/product`). Copy missing templates per [product-layer.md](references/product-layer.md) — never overwrite. A new feature's `state.yaml` gets `sdlc_version: 4` and `product_root`. If the layer is mostly unfilled and the product already exists, recommend `/sdlc-product` before the first feature.
 3. **Resume:** an unfinished `<artifact_root>/.sdlc/*/state.yaml` → class `resume`. Normalize legacy Chinese hat words once. Last fresh-context `fail` → stay on the producing hat (HATADVANCE).
-4. Note whether `sdlc-workflow:<role>` types exist in the host spawn table; if not, use the `host_spawn` fallback ([orchestrator-gates.md](references/orchestrator-gates.md) §1).
+4. Note whether this host's role types exist ([references/hosts.md](references/hosts.md): `sdlc-workflow:<role>`, Codex `sdlc-workflow-<role>`); if not, use the `host_spawn` fallback ([orchestrator-gates.md](references/orchestrator-gates.md) §1).
 
 ## Step 1 — intent (before any spawn)
 
@@ -98,7 +98,7 @@ Resolve the exact role/stage/concrete task in `workflow/registry.json`. Tasks wi
 
 Other tasks use [references/packet.md](references/packet.md), the explicit v2 route. Product and cycle retain their own commands; the new runtime rejects these scopes until evaluated. Apply task ownership, evidence, fresh-review boundaries and conditional debug rules on either route. Generated inputs are indexed in [references/task-inputs.md](references/task-inputs.md); scheduling remains in stage-procedure.
 
-Use the qualified role name. If the host cannot resolve it, make one general-purpose fallback read that role's generated agent and primary procedure; record host_spawn. Do not dispatch both forms. Reviewer/qc remain read-only and return their full report; the manager persists it. Never give them producer memory or writable paths. For qc, run `skills/coverage-matrix/scripts/check-matrix.py` and supply its output.
+Spawn the host's role type ([references/hosts.md](references/hosts.md)); packets keep `sdlc-workflow:<role>`. If the host cannot resolve it, make one fallback with the host's generic type (`general-purpose`; Codex `default`) that reads that role's generated agent and primary procedure; record host_spawn. Do not dispatch both forms. Reviewer/qc remain read-only and return their full report; the manager persists it. Never give them producer memory or writable paths. For qc, run `skills/coverage-matrix/scripts/check-matrix.py` and supply its output.
 
 After execution, save the full return and `record` it; bind the immutable result path and digest in state. Run `check-tasks` for task readiness, then existing independent reviews and acceptance, then `check-tasks --stage <gate_stage> --closure`. Stage checks do not automatically advance state. All new packet/run/return/log filenames carry the actual Beijing date and a unique suffix.
 

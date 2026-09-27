@@ -8,7 +8,7 @@ The `/sdlc` window is the **manager** (agents-as-tools). Spawns are nested speci
 
 Full list for maintainers: `PLUGIN_ROOT/adapters/HOST-NOTES.md`. What the manager must know:
 
-- **ZCode executes plugin agents as `pluginName:bareName`** — always spawn `sdlc-workflow:<role>`.
+- **ZCode, Claude Code and Grok execute plugin agents as `pluginName:bareName`** — spawn `sdlc-workflow:<role>`. Codex runs installed agents `sdlc-workflow-<role>`; packets keep the qualified name ([hosts.md](hosts.md)).
 - **Agent body is who; skills are how.** Hats load `sdlc-workflow:<proc>` with the Skill tool; pass PLUGIN_ROOT so a hat can Read `skills/<proc>/SKILL.md` if Skill fails. Agent frontmatter never carries `skills:` (a non-empty list is an allowlist that blocks companion skills and the reviewer pool).
 - **Research, product, design and architecture hats have `WebSearch` / `WebFetch`**; UI evidence is Bash + `scripts/ui-evidence.sh` (Playwright). Optional MCP tools come only from `adapters/extra-tools.json`, rendered at compile time.
 - **Default `check-sdlc.sh` skip is exit 0.** After a producing hat, run with `--require` / `--hat`. Confirm files exist first — agent said so ≠ file exists.
@@ -18,9 +18,9 @@ Full list for maintainers: `PLUGIN_ROOT/adapters/HOST-NOTES.md`. What the manage
 
 ## 1. Spawn recipe
 
-The first spawn is always `subagent_type: "sdlc-workflow:<role>"` with the registry-selected packet version (sealed v3 for protocol-1 pilots, v2 for legacy tasks; see [task-protocol.md](task-protocol.md)). Never paste SKILL.md.
+The first spawn is always the host's role type (`subagent_type: "sdlc-workflow:<role>"`; Codex `agent_type: "sdlc-workflow-<role>"`, [hosts.md](hosts.md)) with the registry-selected packet version (sealed v3 for protocol-1 pilots, v2 for legacy tasks; see [task-protocol.md](task-protocol.md)). Never paste SKILL.md.
 
-If the host returns **unknown / unregistered type**, spawn **once** as `general-purpose` with the same packet. Its first action is to Read:
+If the host returns **unknown / unregistered type**, spawn **once** as the host's generic type (`general-purpose`; Codex `default`) with the same packet. Its first action is to Read:
 
 - `PLUGIN_ROOT/agents/<role>.md`
 - `PLUGIN_ROOT/skills/<proc>/SKILL.md` (resolve the task’s primary skill from [stage-map.md](stage-map.md))
