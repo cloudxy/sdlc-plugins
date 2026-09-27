@@ -94,7 +94,7 @@
       "id": "codex",
       "label": "Codex",
       "manifest": ".codex-plugin/plugin.json",
-      "install": "`python3 PLUGIN_ROOT/scripts/link-codex.py [--project <root>]`: `$CODEX_HOME/skills/sdlc-workflow` → `skills/`, role agents → `adapters/codex/agents/`. Never `codex plugin add` (it installs a copy and drops symlinks)",
+      "install": "`python3 PLUGIN_ROOT/scripts/link-codex.py --project <root>`: `<root>/.codex/skills/sdlc-workflow` → `skills/` and role agents in `<root>/.codex/agents/`, this project only (without `--project`: `$CODEX_HOME`, every project). Never `codex plugin add` (it installs a copy and drops symlinks)",
       "commands": "none — Codex plugins carry no commands; see the command table below",
       "role_type": "sdlc-workflow-<role>",
       "generic_type": "default",

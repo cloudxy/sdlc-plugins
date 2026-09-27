@@ -170,9 +170,11 @@ class CodexAgents(unittest.TestCase):
             self.assertEqual(run("--check").returncode, 1)
             self.assertEqual(run().returncode, 0, run().stdout)
             self.assertEqual(run("--check").returncode, 0)
-            skills = home / "skills" / "sdlc-workflow"
+            skills = project / ".codex" / "skills" / "sdlc-workflow"  # project-scoped, like .claude/
             self.assertTrue(skills.is_symlink())
-            self.assertEqual(os.readlink(skills), str(hub / "skills"))
+            self.assertEqual(os.readlink(skills), "../../.agents/plugins/sdlc-workflow/skills")
+            self.assertEqual(skills.resolve(), (ROOT / "skills").resolve())
+            self.assertFalse((home / "skills").exists(), "--project must not touch the user-level Codex home")
             links = sorted(agents.glob("sdlc-workflow-*.toml"))
             self.assertEqual(len(links), len(REGISTRY["roles"]))
             for link in links:

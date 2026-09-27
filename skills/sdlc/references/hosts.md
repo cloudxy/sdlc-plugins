@@ -22,11 +22,11 @@ Every host uses this plugin by reference to one source directory. Never run a co
 - **ZCode**: the plugin directory itself: ~/.zcode/local-plugins/sdlc-workflow (a clone, or a symlink to one).
 - **Claude Code**: settings only: a `directory` source under `extraKnownMarketplaces` (project-relative or absolute) plus `enabledPlugins`; loads in place. Never `claude plugin install` (it writes a cache copy).
 - **Grok**: a symlink in a trusted project's `.grok/plugins/` (listed in `[plugins].enabled`) or in `~/.grok/plugins/`, or a `[plugins].paths` entry. Never `grok plugin install` (it keeps a hashed copy).
-- **Codex**: `python3 PLUGIN_ROOT/scripts/link-codex.py [--project <root>]`: `$CODEX_HOME/skills/sdlc-workflow` → `skills/`, role agents → `adapters/codex/agents/`. Never `codex plugin add` (it installs a copy and drops symlinks).
+- **Codex**: `python3 PLUGIN_ROOT/scripts/link-codex.py --project <root>`: `<root>/.codex/skills/sdlc-workflow` → `skills/` and role agents in `<root>/.codex/agents/`, this project only (without `--project`: `$CODEX_HOME`, every project). Never `codex plugin add` (it installs a copy and drops symlinks).
 
 ## PLUGIN_ROOT
 
-PLUGIN_ROOT is two directories above the **real path** of the running `SKILL.md` (the folder with `skills/`, `agents/`, `scripts/`). Resolve symlinks first (`realpath <SKILL.md>`): hosts reach the plugin through links, and Codex shows `~/.codex/skills/sdlc-workflow/<skill>/SKILL.md`, whose lexical parent is not the plugin. ZCode also exports `$ZCODE_PLUGIN_ROOT` to the shell; Claude Code (`CLAUDE_PLUGIN_ROOT`) and Grok (`GROK_PLUGIN_ROOT`) set theirs only for hooks and MCP servers. Pass the absolute PLUGIN_ROOT in every packet.
+PLUGIN_ROOT is two directories above the **real path** of the running `SKILL.md` (the folder with `skills/`, `agents/`, `scripts/`). Resolve symlinks first (`realpath <SKILL.md>`): hosts reach the plugin through links, and Codex shows `<project>/.codex/skills/sdlc-workflow/<skill>/SKILL.md`, whose lexical parent is not the plugin. ZCode also exports `$ZCODE_PLUGIN_ROOT` to the shell; Claude Code (`CLAUDE_PLUGIN_ROOT`) and Grok (`GROK_PLUGIN_ROOT`) set theirs only for hooks and MCP servers. Pass the absolute PLUGIN_ROOT in every packet.
 
 ## Commands on hosts without plugin commands
 

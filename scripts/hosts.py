@@ -99,7 +99,7 @@ def render_host_reference(hosts, registry):
              "## PLUGIN_ROOT", "",
              "PLUGIN_ROOT is two directories above the **real path** of the running `SKILL.md` (the folder with "
              "`skills/`, `agents/`, `scripts/`). Resolve symlinks first (`realpath <SKILL.md>`): hosts reach the plugin "
-             "through links, and Codex shows `~/.codex/skills/sdlc-workflow/<skill>/SKILL.md`, whose lexical parent is "
+             "through links, and Codex shows `<project>/.codex/skills/sdlc-workflow/<skill>/SKILL.md`, whose lexical parent is "
              "not the plugin. ZCode also exports `$ZCODE_PLUGIN_ROOT` to the shell; Claude Code (`CLAUDE_PLUGIN_ROOT`) "
              "and Grok (`GROK_PLUGIN_ROOT`) set theirs only for hooks and MCP servers. Pass the absolute PLUGIN_ROOT in "
              "every packet.", "",

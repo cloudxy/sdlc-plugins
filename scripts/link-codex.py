@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 """Use this plugin from Codex by reference: symlinks only, never copies.
 
-  python3 <PLUGIN_ROOT>/scripts/link-codex.py                    # skills + role agents under $CODEX_HOME (~/.codex)
-  python3 <PLUGIN_ROOT>/scripts/link-codex.py --project <root>   # role agents in <root>/.codex/agents/ (trusted projects)
+  python3 <PLUGIN_ROOT>/scripts/link-codex.py --project <root>   # this project only: <root>/.codex/{skills,agents}
+  python3 <PLUGIN_ROOT>/scripts/link-codex.py                    # every project: $CODEX_HOME (~/.codex)/{skills,agents}
   ... --check     exit 1 when a link is missing, points elsewhere, or a copy stands in its place
   ... --remove    delete only this plugin's links
 
 What gets linked (verified with Codex CLI 0.156.1, adapters/HOST-NOTES.md):
-  $CODEX_HOME/skills/sdlc-workflow  ->  <PLUGIN_ROOT>/skills        Codex lists them as sdlc-workflow:<skill>
-  <agents dir>/sdlc-workflow-<role>.toml -> <PLUGIN_ROOT>/adapters/codex/agents/sdlc-workflow-<role>.toml
+  <codex dir>/skills/sdlc-workflow  ->  <PLUGIN_ROOT>/skills        Codex lists them as sdlc-workflow:<skill>
+  <codex dir>/agents/sdlc-workflow-<role>.toml -> <PLUGIN_ROOT>/adapters/codex/agents/sdlc-workflow-<role>.toml
+where <codex dir> is <root>/.codex with --project, else $CODEX_HOME.
 
-Codex has no project-scoped skill directory of its own (.agents/skills is shared with Grok and Claude Code), so
-the skills link is always user-level. `codex plugin add` installs a copy (it also drops symlinks and refuses a
-symlinked cache), so it is not used. Links point at the path this script was invoked through: run it via a
-hub symlink (for example <repo>/.agents/plugins/sdlc-workflow/scripts/link-codex.py) to reference the hub.
-Existing real files or directories are never overwritten or deleted; they are reported as copies.
+Prefer --project: Codex reads a project's .codex/skills (from any subdirectory; not in the official docs) and
+.codex/agents (trusted projects), so the plugin stays isolated to that project, like .claude/. $CODEX_HOME is
+shared by every project. `codex plugin add` installs a copy (it also drops symlinks and refuses a symlinked
+cache), so it is not used. Links point at the path this script was invoked through: run it via a hub symlink
+(for example <repo>/.agents/plugins/sdlc-workflow/scripts/link-codex.py) to reference the hub; inside the
+project the links stay relative. Existing real files or directories are never overwritten or deleted; they are
+reported as copies.
 """
 from __future__ import annotations
 
@@ -45,19 +48,19 @@ def plan(args):
     hosts = load_hosts()
     name = hosts["plugin"]["name"]
     home = codex_home(args.codex_home)
-    pairs = [(home / "skills" / name, PLUGIN / "skills", False)]
     if args.project:
         project = Path(args.project).expanduser().absolute()
         if not project.is_dir():
             raise SystemExit(f"project directory not found: {project}")
-        # Inside the project (e.g. a hub symlink) the agent links stay relative, so the project stays portable.
-        agents_dir, relative = project / ".codex" / "agents", PLUGIN.is_relative_to(project)
+        # Inside the project (e.g. a hub symlink) links stay relative, so the project stays portable.
+        base, relative = project / ".codex", PLUGIN.is_relative_to(project)
     else:
-        agents_dir, relative = home / "agents", False
+        base, relative = home, False
+    pairs = [(base / "skills" / name, PLUGIN / "skills", relative)]
     for role in load_registry()["roles"]:
         file = f"{codex_agent_name(hosts, role)}.toml"
-        pairs.append((agents_dir / file, PLUGIN / CODEX_AGENT_DIR / file, relative))
-    return home, name, pairs
+        pairs.append((base / "agents" / file, PLUGIN / CODEX_AGENT_DIR / file, relative))
+    return home, name, pairs, base
 
 
 def state(link: Path, target: Path, relative: bool) -> str:
@@ -82,7 +85,7 @@ def main(argv=None) -> int:
     mode.add_argument("--remove", action="store_true", help="remove this plugin's links only")
     args = p.parse_args(argv)
 
-    home, name, pairs = plan(args)
+    home, name, pairs, base = plan(args)
     missing_src = [str(t) for _, t, _ in pairs if not t.exists()]
     if missing_src:
         print("sources missing (run python3 scripts/render-role-agents.py):\n  " + "\n  ".join(missing_src))
@@ -114,8 +117,8 @@ def main(argv=None) -> int:
     if problems:
         print("\n".join(problems))
         return 1
-    where = f"{home} and {Path(args.project).expanduser().absolute() / '.codex' / 'agents'}" if args.project else str(home)
-    print(f"{'up to date' if args.check else 'linked'}: {len(pairs)} reference(s) in {where} -> {PLUGIN}")
+    scope = "this project only" if args.project else "every project (user-level)"
+    print(f"{'up to date' if args.check else 'linked'}: {len(pairs)} reference(s) in {base} ({scope}) -> {PLUGIN}")
     if args.project and not args.check:
         print("Codex loads project .codex/ only for trusted projects.")
     return 0
