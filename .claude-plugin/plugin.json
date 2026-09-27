@@ -1,0 +1,36 @@
+{
+  "name": "sdlc-workflow",
+  "version": "4.1.0",
+  "description": "Product-quality delivery control plane: product layer every hat reads and writes back, discovery with growth positioning, design directions before architecture, journey slices with integration screenshots, E2E and three-party acceptance, script gates, 19 role agents, /sdlc manager window.",
+  "author": {
+    "name": "xuyun"
+  },
+  "keywords": [
+    "workflow",
+    "sdlc",
+    "agents",
+    "process",
+    "quality-gates"
+  ],
+  "agents": [
+    "./agents/algo.md",
+    "./agents/analyst.md",
+    "./agents/architect.md",
+    "./agents/backend.md",
+    "./agents/competitor.md",
+    "./agents/data-collector.md",
+    "./agents/data-warehouse-engineer.md",
+    "./agents/dba.md",
+    "./agents/designer.md",
+    "./agents/frontend.md",
+    "./agents/growth.md",
+    "./agents/miner.md",
+    "./agents/ops.md",
+    "./agents/pm.md",
+    "./agents/qa.md",
+    "./agents/qc.md",
+    "./agents/researcher.md",
+    "./agents/reviewer.md",
+    "./agents/sre.md"
+  ]
+}

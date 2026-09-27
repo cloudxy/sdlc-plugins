@@ -1,0 +1,16 @@
+{
+  "name": "sdlc-workflow",
+  "owner": {
+    "name": "xuyun"
+  },
+  "description": "Claude Code 本地目录 marketplace（auto_agents 通过 .agents/plugins/sdlc-workflow 引用）。组件声明在同目录 plugin.json。",
+  "plugins": [
+    {
+      "name": "sdlc-workflow",
+      "source": "./",
+      "version": "4.1.0",
+      "description": "Product-quality delivery control plane: product layer, growth positioning, design-first shape, journey slices, E2E + three-party acceptance, script gates, 19 role agents, /sdlc manager window.",
+      "category": "workflow"
+    }
+  ]
+}
