@@ -12,19 +12,32 @@ ZCode 插件 · v4.1.0 · MIT
 
 同一项目可以保留多个活动工作：旧版开发、新版需求或 UI 打磨、缺陷定位与修复，以及 schema、采集、数据建设和分析按各自依赖推进。当前提供：
 
-- 独立 `diagnose`、`analyze`、数据 `audit/backfill`、挖掘 `explore/experiment/evaluate`，探索原型也可进入严格局部完成协议。
-- 不可变工件/数据快照、带版本的跨功能依赖、项目可执行集合与影响查询。
-- 带状态摘要的 CAS 更新、结果恢复绑定、隔离 worktree 注册、原子任务/资源认领和过期令牌检查。
-- 精确集成候选及真实执行验证，长作业的幂等提交、状态观察与不确定启动恢复。
+- 独立任务：`diagnose`、`analyze`、数据 `audit/backfill`、挖掘 `explore/experiment/evaluate`；探索原型也可进入严格局部完成协议。
+- 版本：不可变的工件与数据快照。隔离 worktree 里完成的结果导入后，也可以在规范功能下做成版本。
+- 依赖与影响：带版本的跨功能依赖、项目可执行集合与影响查询。影响查询会找出读过受影响输出、却没声明依赖的已完成结果；读不到的结果单独列出，此时 `impact_complete: false`，不会报告「无影响」。
+- 并发：带状态摘要的 CAS 更新、结果恢复绑定、隔离 worktree 注册、原子任务/资源认领和过期令牌检查。
+- 集成：精确的集成候选与真实执行验证。仓库里的符号链接按链接文本钉住；指向仓库外的链接列入 `external_links`，候选只钉住链接本身。
+- 数据作业：长作业的幂等提交、状态观察与不确定启动恢复。
+- 复验范围：插件更新后，只有任务实际用到的方法变了才需要复验。这些方法包括角色文件、技能及其引用、任务 reads、注册表和全部脚本。
 
-经理通过 `python3 scripts/workflow.py continuous <operation> --request <JSON文件>` 使用这些能力；用户仍可自然表达 `/sdlc 只定位漏采，暂不修复`。详见 [持续工作协议](skills/sdlc/references/continuous-work.md)。并发能力面向本机协作进程；共享工作区的无法归属并发仍拒绝通过。新的操作需要显式能力标识，旧历史不会被自动重写。运行时测试与真实项目/模型行为验收分别记录，不能互相替代。
+经理通过 `python3 scripts/workflow.py continuous <operation> --request <JSON文件>` 使用这些能力；用户仍可自然表达 `/sdlc 只定位漏采，暂不修复`。详见 [持续工作协议](skills/sdlc/references/continuous-work.md)。
+
+几条边界：
+- 并发只在本机：租约绑定本机身份，在另一台机器上操作会被直接拒绝；共享工作区里无法归属到任务的并发写入也拒绝通过。
+- 主工作区（coordinator checkout）正在执行串行任务时，认领、心跳、导入这类协调操作放在该任务的窗口之外；长作业的协调记录放在项目目录外。否则这些记录会被该任务的写入审计判为越权。
+- 新操作需要显式能力标识，旧历史不会被自动重写。
+- 运行时测试、真实项目试点与模型行为对照分别记录，不能互相替代。
 
 ## 单独打磨与缺陷修复
 
 - “补齐订单退款的权限和异常规则，停在需求确认”：PM 主导，按需邀请 QA/架构可行性；无需先准备应用启动或发布配置。
 - “调整列表页交互，到原型确认结束”：复用已有设计，记录受影响的实现和验收；其余有效结果保留。
 - “只建设外部数据采集链路”：按数据需要选择采集、存储和验证，不自动要求 UI、埋点或完整数仓。
-- “修复 BUG-7 并验收”：引用缺陷与已确认行为，定位、修复、复验和相关回归；历史无 PRD 不要求重建全部需求。发布仍走原有授权与证据要求。
+- “只定位 BUG-7 的原因，暂不修复”：真实复现并给出机制或有界的不确定结论，源码保持不变；修复另开任务。
+- “修复 BUG-7 并验收”：引用缺陷与已确认行为，定位、修复、复验和相关回归；历史无 PRD 不要求重建全部需求。
+  - 修复会改动诊断时看过的代码，诊断因此仍标为需复验。但只要这些改动全部是下游任务已记录的写入，诊断就不阻塞复验与本次工作完成。
+  - 发布仍走原有授权与证据要求。
+- “分析已冻结的 D20 窗口，补数还在跑”：分析读的是冻结的数据快照，不读中途数据；新数据形成后续版本。
 
 需求按近期功能切片细化，探索原型可以帮助澄清需求；架构/数据可行性提前回答会影响体验的问题。最终合同消费已确认设计，接口和数据模型相互校验，应用与数据链路按依赖并行，最终在真实用户场景汇合。
 
@@ -49,7 +62,7 @@ ZCode 插件 · v4.1.0 · MIT
 | 产品周期 | `/sdlc-product cycle <id>` 在功能泳道之外跑持续运营：ops 汇总用户信号进产品级信号库、analyst 读数、growth 实验、pm 逐条决定、按需刷新标签；周期有自己的目录与 `cycle.yaml`，关闭前逐项交代去向 |
 | 职能视图 | 19 个角色按产品 / 运营 / 设计 / 研发 / 质量分组，`function-map.md` 从注册表生成；分组不带任何权限。项目可在 `owners` 里写每个职能该问谁，经理提问时点名，回答仍以会话里记录的原话为准 |
 | 项目经验 | 在项目里核实过的坑（代码与测试、逃逸编号、闸门命令与退出码）由经理记进项目自己的 `.sdlc/_lessons.md`；插件的做法只保留跨项目成立的原则 |
-| 影响查询 | `workflow.py trace <ID>` 只读地列出一个 ID 的定义、上下游、验证记录与缺口；功能内的短 ID 按功能区分，状态只取自覆盖矩阵与证据记录 |
+| 影响查询 | `workflow.py trace <ID>` 只读地列出一个 ID 的定义、上下游、验证记录与缺口；功能内的短 ID 按功能区分，状态只取自覆盖矩阵与证据记录。跨功能任务用 `workflow.py continuous project-ready`：给出可执行任务与阻塞原因，按声明的依赖和记录的读取路径算出受影响任务 |
 
 ## 流程图
 
@@ -208,7 +221,12 @@ PM spec、architect conformance、backend T-n 要求 `prepare → seal → recor
 
 ### 7. 状态、返工与恢复
 
-`state.yaml` 是进度唯一事实源：目标与画像、当前阶段、已选任务与依赖、闸门记录、验收结论、战略问答原话、失效工件、返工轮数。子代理不共享聊天记录，全靠磁盘工件接力；上游改动会把下游工件标 `stale` 并重跑对应闸门。局部工作使用任务级质量失败计数；普通需求/设计反馈属于迭代，不计技术返工。重复质量失败按 debug 协议诊断；受影响的历史通过结论也需要重新验证。会话中断后重开窗口 `/sdlc continue` 即从 `state.yaml` 续跑。
+`state.yaml` 是进度唯一事实源：目标与画像、当前阶段、已选任务与依赖、闸门记录、验收结论、战略问答原话、失效工件、返工轮数。子代理不共享聊天记录，全靠磁盘工件接力；上游改动会把下游工件标 `stale` 并重跑对应闸门。局部工作使用任务级质量失败计数；普通需求/设计反馈属于迭代，不计技术返工。同一标准的返工按轮数加严：
+- 第 2 轮起挂 debug 协议诊断。
+- 第 3 轮起，再次派单前必须有一条 `escalation` 决定，由产出角色以外的人记录，写明路线：重切、换方法、改派或停止。
+- 未决义务不会因此豁免；受影响的历史通过结论也需要重新验证。
+
+插件更新后，任务结果只在它用到的方法变了时才需要复验。会话中断后重开窗口 `/sdlc continue` 即从 `state.yaml` 续跑。
 
 ## 使用方法
 
@@ -220,7 +238,7 @@ PM spec、architect conformance、backend T-n 要求 `prepare → seal → recor
 
 | 宿主 | 引用方式 | 命令 | 角色子代理 |
 |---|---|---|---|
-| ZCode | 插件目录本身就是 `~/.zcode/local-plugins/sdlc-workflow`（克隆或链接），在 ZCode 中启用（读 `.zcode-plugin/`） | `/sdlc` 等 7 个 | 原生 `sdlc-workflow:<角色>` |
+| ZCode | 插件目录本身就是 `~/.zcode/local-plugins/sdlc-workflow`（克隆或链接），在 ZCode 中启用（读 `.zcode-plugin/`） | `/sdlc` 等 9 个 | 原生 `sdlc-workflow:<角色>` |
 | Claude Code | 只改设置：`extraKnownMarketplaces` 登记 `directory` 源 `<PLUGIN_ROOT>`（项目设置可用相对路径，用户设置用绝对路径），`enabledPlugins` 打开 `sdlc-workflow@sdlc-workflow`；原地加载，不执行 install | `/sdlc` 等（重名时 `/sdlc-workflow:sdlc`） | 原生，清单显式列出 19 个 |
 | Grok | 符号链接：受信任项目的 `.grok/plugins/sdlc-workflow`（并在 `.grok/config.toml` 的 `[plugins].enabled` 列出），或 `~/.grok/plugins/sdlc-workflow`；也可用 `[plugins].paths`（读 `.grok-plugin/`） | `/sdlc` 等 | 原生 `sdlc-workflow:<角色>` |
 | Codex | `python3 <PLUGIN_ROOT>/scripts/link-codex.py --project <项目根>`：`<项目根>/.codex/skills/sdlc-workflow` 链到 `skills/`，角色 TOML 链进 `<项目根>/.codex/agents/`，只在该项目生效（与 `.claude/` 一样）；不带 `--project` 则链进 `~/.codex/`，所有项目共用；`--check` 核对、`--remove` 撤销 | 无插件命令：用 `$` 或 `/skills` 选 `sdlc-workflow:sdlc`，在请求里写 `mode: product` 等，对照表见 `skills/sdlc/references/hosts.md` | 链接后为 `sdlc-workflow-<角色>`；未链接时经理回退到 `default` |
@@ -238,6 +256,9 @@ PM spec、architect conformance、backend T-n 要求 `prepare → seal → recor
 | 想做的事 | 怎么做 |
 |---|---|
 | 做一个功能 | `/sdlc <需求一句话>`，按提示在决策点回答 |
+| 只打磨某个环节 | `/sdlc-refine <对象> <要改什么>，停在<需求确认/原型确认/架构/数据库设计>` |
+| 修一个缺陷 | `/sdlc-fix <缺陷编号或现象>`；只想定位时说「只定位，暂不修复」 |
+| 同时推进多项工作 | 直接说明关系，例如「v1 继续实现，同时打磨 v2 需求」；经理按依赖选择任务，需要并发时用隔离 worktree |
 | 先摸清楚再决定 | `/sdlc 先调研 <方向>` 或 `/sdlc-discover <想法>` |
 | 只要调研报告，不想被追问 | `/sdlc-research <要调研的变更>` |
 | 续上被打断的功能 | 新窗口 `/sdlc continue` |
@@ -245,7 +266,7 @@ PM spec、architect conformance、backend T-n 要求 `prepare → seal → recor
 | 刷新产品层的某几块 | `/sdlc-product strategy feature-map` |
 | 走短路径（已有合同或以 spec 代合同） | `/sdlc 短路径 <需求>`，仍需满足 L2-short 谓词 |
 | 一行修复 | 直接说「改个错别字，不要走流程」，经理判 L0 |
-| 评测插件本身 | 另开窗口 `/sdlc-eval <skill> <mechanical\|rubric\|regression>`（烧真实模型调用，人工触发） |
+| 评测插件本身 | 另开窗口 `/sdlc-eval <skill> <mechanical\|rubric\|regression>`（烧真实模型调用，人工触发）；新旧插件在持续工作场景的对照用 `skills/sdlc-eval/evals/continuous-work-cases.json`，做法见 `skills/sdlc-eval/references/controlled-comparisons.md` |
 | 开通出图能力 | `/sdlc-grok login` 用 Grok 订阅授权 → `/sdlc-grok probe` 确认这个档位真能出图 → 在项目 `sdlc.config.yaml` 把 `imagery.enabled` 设为 true |
 | 跑一轮产品周期 | 先在 `sdlc.config.yaml` 设 `signals_path`（信号库目录），再 `/sdlc-product cycle 2026-10`；收尾时经理跑 `check-sdlc.sh --hat cycle` |
 | 查一个 ID 牵动了什么 | `python3 scripts/workflow.py trace FR-3 --feature .sdlc/<功能>`；产品级 ID 用 `--project-root .`（如 `metric:<id>`、`SIG-202610-4`） |
@@ -284,7 +305,7 @@ sdlc-workflow/
 ├── skills/          27 个做法：SKILL.md + references/ + templates/ + evals/
 ├── workflow/        registry.json：命令路由、角色任务、工件路径、阶段合同
 ├── adapters/        hosts.json（插件身份与宿主设置的唯一来源）、宿主工具档、MCP 白名单、宿主事实、codex/agents（生成）
-├── scripts/         闸门、健康检查、角色工厂、评测评分与一致性测试
+├── scripts/         闸门、健康检查、角色工厂、任务与持续工作协议、评测与一致性测试
 ├── vendor/          上游原件：仓库只含 install.sh 与锁文件，内容由使用者从源头下载
 ├── maintainers/     维护者档案（不被任何 skill 加载），例如待项目方接收的项目经验归档
 ├── .zcode-plugin/ .claude-plugin/ .grok-plugin/ .codex-plugin/   各宿主插件清单（生成）
@@ -297,7 +318,11 @@ sdlc-workflow/
 
 - `sdlc.config.yaml`（项目根）：闸门命令、项目红线宪法路径、MCP 提醒清单、泳道阈值
 - `<product_root>/`：产品层
-- `.sdlc/<feature>/`：功能工件树（01-define → 02-shape → 03-impl → 04-verify → 05-review → 06-deliver → 07-retro）+ `state.yaml` + `evidence/runs/`（绑定代码版本的运行记录）+ 各角色运行时记忆
+- `.sdlc/<feature>/`：
+  - 功能工件树：01-define → 02-shape → 03-impl → 04-verify → 05-review → 06-deliver → 07-retro；
+  - `state.yaml`、`evidence/runs/`（绑定代码版本的运行记录）和各角色运行时记忆；
+  - 任务协议记录：`runs/` 是派单与结果，`artifacts/` 与 `.task-objects/` 是工件和数据版本，`imports/` 是从 worktree 导入的结果，`work/` 是局部工作完成记录。
+- 项目级协调记录：`.sdlc/control/`（任务/资源认领、worktree 登记）、`.sdlc/jobs/`（长作业）、`.sdlc/candidates/`（集成候选）
 - `.sdlc/_product/`：产品模式的进度与派单包；`cycles/<id>/` 是每个产品周期（`cycle.yaml`、`outputs/`、`packets/`、`memory/`）
 - `signals_path` 指向的信号库：跨功能的用户信号，只有 ops 的周期汇总能写，每条一个稳定的 `SIG-<年月>-<n>`
 - `.sdlc/_lessons.md`：本项目核实过的坑与逃逸记录
@@ -320,10 +345,13 @@ sdlc-workflow/
 | `scripts/data_dictionary.py` | 由 erd.dbml + 术语表 + metrics.yaml 生成只读数据字典（`--check` 抓过期与手改） |
 | `scripts/render-role-agents.py` | 从 profiles 与 _lib 编译角色，同时生成 Codex 角色（`adapters/codex/agents/*.toml`）；`--check` 抓漂移 |
 | `scripts/hosts.py` / `scripts/link-codex.py` | 由 `adapters/hosts.json` 生成 ZCode / Claude Code / Grok / Codex 清单与 `hosts.md`（经 `workflow.py render`）；以符号链接让 Codex 引用本插件的 skills 与角色（不复制） |
+| `scripts/task_runtime.py` / `task_state.py` / `work_scope.py` | 任务协议：`prepare → seal → record → check-tasks`、结果有效性与复验原因、局部工作的 `check-work` / `complete-work` |
+| `scripts/continuous.py` 及其模块 | `workflow.py continuous` 的实现：`artifact_versions`（版本）、`project_graph`（跨功能依赖与影响）、`state_store`（CAS 状态写入）、`workspaces` / `coordination`（隔离 worktree、认领与租约）、`candidate`（集成候选）、`datasets` / `data_jobs`（数据快照与长作业） |
+| `scripts/eval_protocol.py` | `workflow.py eval-prepare / eval-audit / eval-blind`：受控对照的隔离准备、宿主轨迹审计与盲评目录，本身不调模型 |
 | `scripts/grade_eval.py` / `blind_eval.py` | 评测机械评分（不调模型）与盲评 |
 | `scripts/ui-evidence.sh` | UI 截图留证 |
-| `scripts/test_work_scope.py` / `test_task_runtime.py` / `test_workflow.py` / `test_skill_evidence.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` | 注册表、技能证据规则、闸门、vendor 安装与多宿主打包的自测 |
-| `scripts/test_continuous_work.py` | 持续工作协议场景：版本共存、CAS 与结果恢复、跨功能依赖、隔离认领与过期令牌、集成候选、数据快照与长作业 |
+| `scripts/test_work_scope.py` / `test_task_runtime.py` / `test_workflow.py` / `test_skill_evidence.py` / `test_eval_protocol.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` | 注册表、局部工作、技能证据规则、评测隔离、闸门、vendor 安装与多宿主打包的自测 |
+| `scripts/test_continuous_work.py` | 持续工作协议场景：<br>- 版本共存；CAS 与结果恢复；两个进程并发记录与导入<br>- 跨功能依赖、未声明消费者；方法闭包与复验范围；修复后的诊断<br>- 隔离认领与过期令牌；跨机器拒绝<br>- 集成候选与符号链接；数据快照与长作业 |
 
 ## 上游原件（vendor/）
 
