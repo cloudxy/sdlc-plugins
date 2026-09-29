@@ -6,6 +6,8 @@ ZCode 插件 · v4.1.0 · MIT
 
 完整交付、局部打磨与缺陷修复共用角色任务、版本依赖和证据协议。`/sdlc-refine`、`/sdlc-fix` 是快捷入口；Codex 用 `mode: refine` / `mode: fix` 或自然语言表达。
 
+**第一次使用？** 先读[使用指南](docs/usage.md)。它用图解释插件怎么工作、该用哪个入口、各种场景怎么说、结果在哪里看。
+
 每次运行先记录**做到哪一步**（`delivery_goal`：proposal_ready / local_verified / release_ready / deployed）与项目画像，按任务派单；范围小就如实记「已完成的任务 + 尚未进行的阶段」，不把未做的实现与发布算作完成。
 
 ## 持续工作与局部打磨
@@ -230,6 +232,8 @@ PM spec、architect conformance、backend T-n 要求 `prepare → seal → recor
 
 ## 使用方法
 
+本节是速查。完整讲解、示例与图示见[使用指南](docs/usage.md)。
+
 ### 安装（只以引用方式使用）
 
 同一份 skills / commands / agents 支持四个宿主，依赖 bash 与 python3。先克隆本仓库并运行 `bash vendor/install.sh` 拉上游原件，自检 `bash scripts/health-check.sh` 应全绿。下文 `<PLUGIN_ROOT>` 指插件目录（或指向它的符号链接）。
@@ -307,6 +311,7 @@ sdlc-workflow/
 ├── adapters/        hosts.json（插件身份与宿主设置的唯一来源）、宿主工具档、MCP 白名单、宿主事实、codex/agents（生成）
 ├── scripts/         闸门、健康检查、角色工厂、任务与持续工作协议、评测与一致性测试
 ├── vendor/          上游原件：仓库只含 install.sh 与锁文件，内容由使用者从源头下载
+├── docs/            使用指南 usage.md 与图示 assets/*.svg（给人读，不被任何 skill 加载）
 ├── maintainers/     维护者档案（不被任何 skill 加载），例如待项目方接收的项目经验归档
 ├── .zcode-plugin/ .claude-plugin/ .grok-plugin/ .codex-plugin/   各宿主插件清单（生成）
 └── .agents/plugins/ Codex 本地市场（生成）

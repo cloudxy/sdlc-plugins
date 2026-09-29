@@ -1,0 +1,112 @@
+<svg viewBox="-327 -64 664 772" width="664" xmlns="http://www.w3.org/2000/svg">
+  <metadata id="sdlc">{"type": "state", "owner": "maintainer", "sources": ["../README.md", "../workflow/registry.json"]}</metadata>
+  <style>
+    text { font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', system-ui, sans-serif; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect x="-327" y="-64" width="664" height="772" fill="#ffffff"/>
+  <text x="5" y="-30" font-size="16" fill="#1e293b" text-anchor="middle">完整交付：阶段、闸门与可以停下的位置</text>
+  <path d="M0,59 L 0,68" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,138 L 0,147" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,217 L 0,226" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,296 L 0,305" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,375 L 0,384" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,454 L 0,463" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,533 L 0,542" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,612 L 0,621" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M115,27 L 124,27" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M115,106 L 124,106" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M115,185 L 124,185" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M115,264 L 124,264" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M115,343 L 124,343" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M115,422 L 124,422" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M115,501 L 124,501" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M115,580 L 124,580" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M-115,185 L -124,185" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M-115,422 L -124,422" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M-115,580 L -124,580" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- box x=-110..110, y=0..54 -->
+  <rect x="-110" y="0" width="220" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="discover"/>
+  <text x="0" y="22.2" font-size="12" fill="#b45309" text-anchor="middle">00 发现带</text>
+  <text x="0" y="40.2" font-size="12" fill="#b45309" text-anchor="middle">市场 · 竞品 · 增长定位</text>
+  <!-- box x=-110..110, y=79..133 -->
+  <rect x="-110" y="79" width="220" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="define"/>
+  <text x="0" y="101.2" font-size="12" fill="#b45309" text-anchor="middle">01 define</text>
+  <text x="0" y="119.2" font-size="12" fill="#b45309" text-anchor="middle">pm 写需求与验收条件</text>
+  <!-- box x=-110..110, y=158..212 -->
+  <rect x="-110" y="158" width="220" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="shape"/>
+  <text x="0" y="180.2" font-size="12" fill="#b45309" text-anchor="middle">02 shape</text>
+  <text x="0" y="198.2" font-size="12" fill="#b45309" text-anchor="middle">方向 → 原型 → 架构 → 数据库</text>
+  <!-- box x=-110..110, y=237..291 -->
+  <rect x="-110" y="237" width="220" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="implement"/>
+  <text x="0" y="259.2" font-size="12" fill="#b45309" text-anchor="middle">03 implement</text>
+  <text x="0" y="277.2" font-size="12" fill="#b45309" text-anchor="middle">按用户旅程切片并联调</text>
+  <!-- box x=-110..110, y=316..370 -->
+  <rect x="-110" y="316" width="220" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="verify"/>
+  <text x="0" y="338.2" font-size="12" fill="#b45309" text-anchor="middle">04 verify</text>
+  <text x="0" y="356.2" font-size="12" fill="#b45309" text-anchor="middle">qa 风险测试与覆盖矩阵</text>
+  <!-- box x=-110..110, y=395..449 -->
+  <rect x="-110" y="395" width="220" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="accept"/>
+  <text x="0" y="417.2" font-size="12" fill="#b45309" text-anchor="middle">04 accept</text>
+  <text x="0" y="435.2" font-size="12" fill="#b45309" text-anchor="middle">pm · 设计 · 增长三方验收</text>
+  <!-- box x=-110..110, y=474..528 -->
+  <rect x="-110" y="474" width="220" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="review"/>
+  <text x="0" y="496.2" font-size="12" fill="#b45309" text-anchor="middle">05 review</text>
+  <text x="0" y="514.2" font-size="12" fill="#b45309" text-anchor="middle">reviewer 独立审查</text>
+  <!-- box x=-110..110, y=553..607 -->
+  <rect x="-110" y="553" width="220" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="deliver"/>
+  <text x="0" y="575.2" font-size="12" fill="#b45309" text-anchor="middle">06 qc · deliver</text>
+  <text x="0" y="593.2" font-size="12" fill="#b45309" text-anchor="middle">放行意见 → 授权后发布</text>
+  <!-- box x=-110..110, y=632..686 -->
+  <rect x="-110" y="632" width="220" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="retro"/>
+  <text x="0" y="654.2" font-size="12" fill="#b45309" text-anchor="middle">07 retro</text>
+  <text x="0" y="672.2" font-size="12" fill="#b45309" text-anchor="middle">analyst 按真实数据复盘</text>
+  <!-- box x=135..315, y=0..54 -->
+  <rect x="135" y="0" width="180" height="54" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="225" y="22.2" font-size="12" fill="#1e40af" text-anchor="middle">你来决定</text>
+  <text x="225" y="40.2" font-size="12" fill="#1e40af" text-anchor="middle">冻结发现结论</text>
+  <!-- box x=135..315, y=79..133 -->
+  <rect x="135" y="79" width="180" height="54" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5" data-sdlc-id="G-script"/>
+  <text x="225" y="101.2" font-size="12" fill="#9d174d" text-anchor="middle">G-script</text>
+  <text x="225" y="119.2" font-size="12" fill="#9d174d" text-anchor="middle">脚本闸门 check-sdlc.sh</text>
+  <!-- box x=135..315, y=158..212 -->
+  <rect x="135" y="158" width="180" height="54" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="225" y="180.2" font-size="12" fill="#1e40af" text-anchor="middle">你来决定</text>
+  <text x="225" y="198.2" font-size="12" fill="#1e40af" text-anchor="middle">选定设计方向</text>
+  <!-- box x=135..315, y=237..291 -->
+  <rect x="135" y="237" width="180" height="54" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5" data-sdlc-id="G-fresh"/>
+  <text x="225" y="259.2" font-size="12" fill="#9d174d" text-anchor="middle">G-fresh</text>
+  <text x="225" y="277.2" font-size="12" fill="#9d174d" text-anchor="middle">定义/设计/实现后各审一次</text>
+  <!-- box x=135..315, y=316..370 -->
+  <rect x="135" y="316" width="180" height="54" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5" data-sdlc-id="G-script"/>
+  <text x="225" y="338.2" font-size="12" fill="#9d174d" text-anchor="middle">G-script</text>
+  <text x="225" y="356.2" font-size="12" fill="#9d174d" text-anchor="middle">测试与 E2E 运行记录</text>
+  <!-- box x=135..315, y=395..449 -->
+  <rect x="135" y="395" width="180" height="54" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/>
+  <text x="225" y="417.2" font-size="12" fill="#9d174d" text-anchor="middle">任一方不通过</text>
+  <text x="225" y="435.2" font-size="12" fill="#9d174d" text-anchor="middle">回到实现返工</text>
+  <!-- box x=135..315, y=474..528 -->
+  <rect x="135" y="474" width="180" height="54" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5" data-sdlc-id="blocker"/>
+  <text x="225" y="496.2" font-size="12" fill="#9d174d" text-anchor="middle">blocker 未清</text>
+  <text x="225" y="514.2" font-size="12" fill="#9d174d" text-anchor="middle">不进入下一阶段</text>
+  <!-- box x=135..315, y=553..607 -->
+  <rect x="135" y="553" width="180" height="54" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="225" y="575.2" font-size="12" fill="#1e40af" text-anchor="middle">你来决定</text>
+  <text x="225" y="593.2" font-size="12" fill="#1e40af" text-anchor="middle">授权后才执行发布</text>
+  <!-- box x=-305..-135, y=158..212 -->
+  <rect x="-305" y="158" width="170" height="54" rx="6" fill="#d1fae5" stroke="#22c55e" stroke-width="1.5" data-sdlc-id="proposal_ready"/>
+  <text x="-220" y="180.2" font-size="12" fill="#166534" text-anchor="middle">proposal_ready</text>
+  <text x="-220" y="198.2" font-size="12" fill="#166534" text-anchor="middle">出方案即可停</text>
+  <!-- box x=-305..-135, y=395..449 -->
+  <rect x="-305" y="395" width="170" height="54" rx="6" fill="#d1fae5" stroke="#22c55e" stroke-width="1.5" data-sdlc-id="local_verified"/>
+  <text x="-220" y="417.2" font-size="12" fill="#166534" text-anchor="middle">local_verified</text>
+  <text x="-220" y="435.2" font-size="12" fill="#166534" text-anchor="middle">本地验收通过</text>
+  <!-- box x=-305..-135, y=553..607 -->
+  <rect x="-305" y="553" width="170" height="54" rx="6" fill="#d1fae5" stroke="#22c55e" stroke-width="1.5" data-sdlc-id="release_ready"/>
+  <text x="-220" y="575.2" font-size="12" fill="#166534" text-anchor="middle">release_ready</text>
+  <text x="-220" y="593.2" font-size="12" fill="#166534" text-anchor="middle">放行 · 授权后 deployed</text>
+</svg>

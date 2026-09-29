@@ -1,0 +1,48 @@
+<svg viewBox="-97 -64 719 219" width="719" xmlns="http://www.w3.org/2000/svg">
+  <metadata id="sdlc">{"type": "architecture", "owner": "maintainer", "sources": ["../README.md", "../skills/sdlc/SKILL.md"]}</metadata>
+  <style>
+    text { font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', system-ui, sans-serif; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect x="-97" y="-64" width="719" height="219" fill="#ffffff"/>
+  <text x="262.5" y="-30" font-size="16" fill="#1e293b" text-anchor="middle">sdlc-workflow 怎么工作</text>
+  <path d="M80,27 L 89,27" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M255,27 L 264,27" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M430,27 L 439,27" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M175,59 L 175,68" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M350,59 L 350,68" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M525,59 L 525,68" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M270,106 L 261,106" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- box x=-75..75, y=0..54 -->
+  <rect x="-75" y="0" width="150" height="54" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="0" y="22.2" font-size="12" fill="#1e40af" text-anchor="middle">你（操作者）</text>
+  <text x="0" y="40.2" font-size="12" fill="#1e40af" text-anchor="middle">提需求 · 做决定</text>
+  <!-- box x=100..250, y=0..54 -->
+  <rect x="100" y="0" width="150" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="manager"/>
+  <text x="175" y="22.2" font-size="12" fill="#b45309" text-anchor="middle">/sdlc 经理窗口</text>
+  <text x="175" y="40.2" font-size="12" fill="#b45309" text-anchor="middle">分类 · 派单 · 记账</text>
+  <!-- box x=275..425, y=0..54 -->
+  <rect x="275" y="0" width="150" height="54" rx="6" fill="#f3e8ff" stroke="#a855f7" stroke-width="1.5" data-sdlc-id="agents"/>
+  <text x="350" y="22.2" font-size="12" fill="#6b21a8" text-anchor="middle">19 个角色子代理</text>
+  <text x="350" y="40.2" font-size="12" fill="#6b21a8" text-anchor="middle">独立上下文完成工作</text>
+  <!-- box x=450..600, y=0..54 -->
+  <rect x="450" y="0" width="150" height="54" rx="6" fill="#d1fae5" stroke="#22c55e" stroke-width="1.5" data-sdlc-id="artifacts"/>
+  <text x="525" y="22.2" font-size="12" fill="#166534" text-anchor="middle">功能工件</text>
+  <text x="525" y="40.2" font-size="12" fill="#166534" text-anchor="middle">.sdlc/&lt;功能&gt;/</text>
+  <!-- box x=100..250, y=79..133 -->
+  <rect x="100" y="79" width="150" height="54" rx="6" fill="#d1fae5" stroke="#22c55e" stroke-width="1.5" data-sdlc-id="state.yaml"/>
+  <text x="175" y="101.2" font-size="12" fill="#166534" text-anchor="middle">state.yaml</text>
+  <text x="175" y="119.2" font-size="12" fill="#166534" text-anchor="middle">进度唯一事实源</text>
+  <!-- box x=275..425, y=79..133 -->
+  <rect x="275" y="79" width="150" height="54" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5" data-sdlc-id="G-fresh"/>
+  <text x="350" y="101.2" font-size="12" fill="#9d174d" text-anchor="middle">闸门</text>
+  <text x="350" y="119.2" font-size="12" fill="#9d174d" text-anchor="middle">脚本检查 · 独立审查</text>
+  <!-- box x=450..600, y=79..133 -->
+  <rect x="450" y="79" width="150" height="54" rx="6" fill="#d1fae5" stroke="#22c55e" stroke-width="1.5" data-sdlc-id="product_root"/>
+  <text x="525" y="101.2" font-size="12" fill="#166534" text-anchor="middle">产品层</text>
+  <text x="525" y="119.2" font-size="12" fill="#166534" text-anchor="middle">跨功能的长期记忆</text>
+</svg>
