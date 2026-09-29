@@ -1,6 +1,6 @@
 ---
 name: "prototype"
-description: "Use this skill when the spawn packet names prototype or $prototype. Do NOT use from parent /sdlc or as production evidence."
+description: "Use this skill when the spawn packet names prototype or $prototype. Do NOT load in /sdlc or as production evidence."
 when_to_use: "Packet companion_skills includes prototype, or $prototype. Do NOT use from parent /sdlc or as production evidence."
 ---
 
@@ -19,6 +19,8 @@ Use it for discovery experiments (discover Falsify cheapest-test rungs 5–6) th
 | **FAKE** | Will they want / pay? | Fake door, waitlist, or pricing page — no backend |
 
 ## Before building
+
+The protocol task consumes `question` and `constraints`, both explicit files. It can finish independently as scoped work; a negative or bounded inconclusive result completes the exploration, not product implementation. Bind actual experiment checks where needed; an output report alone is not evidence that an experiment ran.
 
 State at the top of the report: the one decision or question, the time/effort budget, the pass/fail or learning criterion, sample/input limitations, and the disposal or promotion plan.
 

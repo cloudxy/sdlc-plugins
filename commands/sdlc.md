@@ -1,6 +1,6 @@
 ---
-description: "Run the SDLC swimlane (v4) — product layer, discovery with growth, early feasibility, design before final architecture contract, journey slices, E2E, three-party acceptance, gates. ops=用户运营, growth=增长运营, sre=运维. Not a one-line fix."
-argument-hint: "[requirement, '先调研', '短路径', or 'continue']"
+description: "Goal-scoped SDLC: full delivery, local refinement or defect repair through shared role tasks, versioned dependencies and evidence. Completion of scoped work does not imply feature delivery."
+argument-hint: "[需求 | 只细化需求 | 打磨原型 | 修复 BUG | continue]"
 skills: sdlc
 ---
 

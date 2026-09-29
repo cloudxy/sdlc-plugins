@@ -23,7 +23,8 @@ from workflow import ROOT, artifact_paths, check_task, deliverable, load_registr
 BINDING_KEYS = {'task_id', 'project_root', 'product_root', 'intent_quote', 'assignment', 'inputs',
                 'deliverable_paths', 'source_writes', 'product_writes', 'memory_file', 'slice_integrator',
                 'explore_roots', 'allowed_companion_skills', 'required_companion_skills', 'decisions',
-                'required_checks', 'check_records', 'execution_mode', 'store_roots', 'supporting_inputs'}
+                'required_checks', 'check_records', 'execution_mode', 'store_roots', 'supporting_inputs', 'visuals', 'imagery',
+                'version_inputs', 'isolation', 'required_jobs'}
 BINDING_REQUIRED = {'task_id', 'project_root', 'product_root', 'intent_quote', 'assignment', 'inputs', 'deliverable_paths'}
 JUDGMENT_KEYS = {'methods_used', 'reported_reads', 'unresolved', 'proposed_changes', 'product_delta', 'lessons', 'check_records'}
 DRAFT_KEYS = {'protocol_version', 'required_capabilities', 'kind', 'created_at', 'offline', 'request',
@@ -52,6 +53,52 @@ def plugin_digest():
     return digest(files)
 
 
+CLOSURE_LINK = re.compile(r'\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)')
+CLOSURE_SKILL = re.compile(r'(?:skills/|\.\./|sdlc-workflow:|\$)([a-z0-9][a-z0-9-]*)(/[A-Za-z0-9_./-]*[A-Za-z0-9_-])?')
+CLOSURE_PATH = re.compile(r'\b((?:agents|adapters|commands|workflow|vendor)/[A-Za-z0-9_./-]*[A-Za-z0-9_-])')
+CLOSURE_TEXT = {'.md', '.txt', '.yaml', '.yml', '.json', '.toml', '.html', '.css', '.js', '.sh', '.sql', '.csv', ''}
+
+
+def method_closure(role, methods, reads=(), base=None):
+    """Plugin files one task's executor can reach: its role file, skills (whole directories) and
+    their transitive references, task reads, the registry and every script. A link that leaves the
+    plugin is a coverage gap, so validity falls back to the whole-plugin digest."""
+    base = Path(base or ROOT).resolve()
+    names = {p.name for p in (base / 'skills').iterdir() if (p / 'SKILL.md').is_file()}
+    skills = {methods['primary'], *methods.get('allowed', []), *(['debug'] if methods.get('debug') else [])}
+    queue = [base / 'agents' / (role + '.md'), base / 'workflow/registry.json', base / 'scripts',
+             *(base / 'skills' / n for n in skills), *(base / r for r in reads)]
+    seen, files, gaps, unresolved = set(), {}, set(), set()
+    while queue:
+        p = queue.pop()
+        if p in seen: continue
+        seen.add(p)
+        if p.is_dir():
+            queue += [c for c in sorted(p.rglob('*')) if c.is_file() and '__pycache__' not in c.parts and c.suffix != '.pyc']
+            continue
+        if not p.is_file():
+            unresolved.add(p.relative_to(base).as_posix()); continue  # nothing there for an executor to read
+        files[p.relative_to(base).as_posix()] = file_hash(p)
+        # Registry names every skill and scripts are hashed whole; neither expands the method closure.
+        if p.suffix not in CLOSURE_TEXT or p.is_relative_to(base / 'scripts') or p == base / 'workflow/registry.json': continue
+        text = p.read_text(errors='replace')
+        for name, sub in CLOSURE_SKILL.findall(text):
+            if name not in names: continue
+            # A named skill is loaded whole; a path inside it adds only that file.
+            target = base / 'skills' / name / sub.lstrip('/')
+            if not sub or sub == '/SKILL.md': queue.append(base / 'skills' / name)
+            elif target.exists() or target.with_suffix('.md').exists(): queue.append(target if target.exists() else target.with_suffix('.md'))
+        queue += [base / m for m in CLOSURE_PATH.findall(text) if (base / m).exists()]
+        for raw in CLOSURE_LINK.findall(text):
+            raw = raw.split('#', 1)[0].replace('<PLUGIN_ROOT>', str(base)).replace('PLUGIN_ROOT', str(base))
+            if not raw or re.match(r'^[a-z][a-z0-9+.-]*:', raw): continue
+            target = Path(raw) if raw.startswith('/') else (p.parent / raw).resolve()
+            if target.is_relative_to(base): queue.append(target)
+            else: gaps.add(p.relative_to(base).as_posix() + ' -> ' + raw)
+    return {'sha256': digest(files), 'files': len(files), 'complete': not gaps,
+            'gaps': sorted(gaps)[:20], 'unresolved_links': len(unresolved)}
+
+
 def source_snapshot(project, feature, product):
     # This is a content identity, not a build ID or the write audit (which observes .sdlc too).
     snap = snapshot([project], exclude=[feature, product, project / '.sdlc'])
@@ -78,7 +125,7 @@ def decision(path, target=None, scope=None):
     object_keys(d, {'id','kind','target','target_sha256','scope','by','authority','quote','at','status','obligations',
                     'result_sha256','supersedes_sha256'},
                 {'id','kind','target','target_sha256','scope','by','authority','quote','at','status','obligations'}, 'decision')
-    safe_id(d['id']); require(d['kind'] in ('acceptance','verification','resolution','skip','successor'), 'unknown decision kind')
+    safe_id(d['id']); require(d['kind'] in ('acceptance','verification','resolution','skip','successor','escalation'), 'unknown decision kind')
     for key in ('by','authority','quote','at','scope','target','target_sha256'):
         require(isinstance(d[key], str) and bool(d[key].strip()), f'decision missing {key}')
     require(d['status'] == 'accepted', 'decision is not accepted')
@@ -95,8 +142,28 @@ def decision(path, target=None, scope=None):
 
 def context(state, task_id):
     task = next((x for x in state.get('selected_tasks', []) if isinstance(x, dict) and x.get('id') == task_id), None)
-    selection = {k:v for k,v in (task or {}).items() if k in ('id','role','stage','task','gate_stage','depends_on','selection')}
-    return {'state': {k:state[k] for k in STATE_CONTEXT if k in state}, 'selection': selection}
+    selection = {k:v for k,v in (task or {}).items() if k in ('id','role','stage','task','gate_stage','depends_on','selection','work_id','attempt_kind','rework_rounds','external_dependencies')}
+    keys = STATE_CONTEXT
+    result = {'selection': selection}
+    if (task or {}).get('work_id'):
+        from work_scope import work_context
+        work = next((w for w in state.get('work_items', []) if w['id'] == task['work_id']), None)
+        require(work is not None, 'unknown work_id')
+        result['work'] = work_context(work, task_id)
+        # A later request does not change the authority of an earlier task instance.
+        keys = tuple(k for k in keys if k not in ('intent', 'delivery_goal', 'rework_rounds'))
+    result['state'] = {k:state[k] for k in keys if k in state}
+    return result
+
+
+def needs_escalation(selected):
+    return bool(selected.get('work_id')) and selected.get('attempt_kind', 'initial') == 'rework' and selected.get('rework_rounds', 0) >= 3
+
+
+def needs_debug(state, selected):
+    if selected.get('work_id'):
+        return selected.get('attempt_kind', 'initial') == 'rework' and selected.get('rework_rounds', 0) >= 2
+    return state.get('rework_rounds', 0) >= 2
 
 
 def authority_packet(req, bindings, task, state, inputs, methods):
@@ -116,10 +183,29 @@ def authority_packet(req, bindings, task, state, inputs, methods):
          'allowed_companion_skills':methods['allowed'], 'required_companion_skills':methods['required'],
          'success_checks':[shlex.join(command)], 'return':'summary + fenced result JSON (protocol 1)',
          'forbidden':['Do not spawn further subagents (host depth 1).', 'Do not edit state, run records or version objects.']}
+    p['evidence_required'] = [ev if isinstance(ev, str) else ev['kind'] for ev in task.get('evidence', [])
+                              if isinstance(ev, str) or enabled(ev['when'], state)]
+    for flag in ('ui', 'q_security'):
+        if flag in state:
+            p[flag] = 'yes' if enabled(flag, state) else 'no'
+    registry = load_registry()
+    for kind, metadata, reference in (('visuals', 'diagram', 'diagram_reference'), ('imagery', 'imagery', 'imagery_reference')):
+        requested = bindings.get(kind, [])
+        p[kind] = requested
+        if requested and task.get(reference):
+            rule = registry[metadata]
+            p['inputs'] += [str(ROOT / rule['guide']), str(ROOT / task[reference])]
+            if kind == 'visuals':
+                for output in bindings['deliverable_paths']:
+                    if str(output).endswith('.svg'):
+                        p['success_checks'].append(shlex.join(['python3', str(ROOT / rule['lint']), '--root', root, str(Path(root) / output)]))
+            else:
+                p['success_checks'].append(shlex.join(['python3', str(ROOT / rule['check']), '--root', root]))
+    p['inputs'] = list(dict.fromkeys(p['inputs']))
     if task.get('lane_file'):
         p['lane_file'] = task['lane_file']; p['slice_integrator'] = bindings.get('slice_integrator')
     if methods['debug']:
-        p['debug_protocol'] = str(ROOT / 'skills/sdlc/references/debug-loop')
+        p['debug_protocol'] = str(ROOT / 'skills/debug/SKILL.md')
     p['input_bindings'] = compact_inputs(inputs)
     return p
 
@@ -166,30 +252,53 @@ def prepare_value(req, bindings):
     require(all(isinstance(bindings[k],str) and Path(bindings[k]).is_absolute() for k in ('project_root','product_root')), 'project/product roots must be absolute')
     require(req['scope'] == 'feature', 'task protocol 1 currently supports feature only; product/cycle use their existing commands')
     r = load_registry(); task = resolve_task(r, req['role'], req['stage'], req['task'])
-    require(task.get('protocol_required') == 1, 'task has no protocol 1 input contract; use its explicit legacy v2 route')
+    require(task.get('protocol_required') == 1 or task.get('protocol_supported') == 1,
+            'task has no protocol 1 input contract; use its explicit legacy v2 route')
     root = Path(req['root']).resolve(); project = Path(bindings['project_root']).resolve(); product = Path(bindings['product_root']).resolve()
     require(root.is_dir() and project.is_dir() and product.is_dir(), 'root/project_root/product_root must exist')
     require(root.is_relative_to(project) and root != project, 'feature root must be inside project_root')
     require(not product.is_relative_to(root) and not root.is_relative_to(product), 'product and feature roots must be separate')
     require(all(isinstance(bindings[k], str) and bindings[k].strip() for k in ('intent_quote','assignment')), 'intent_quote and assignment required')
-    for key in ('deliverable_paths','source_writes','product_writes','explore_roots','decisions','check_records','store_roots'):
+    for key in ('deliverable_paths','source_writes','product_writes','explore_roots','decisions','check_records','store_roots','visuals','imagery'):
         string_list(bindings.get(key, []), key)
     require(isinstance(bindings.get('required_checks',[]),list), 'required_checks must be an array')
     for check in bindings.get('required_checks',[]):
         object_keys(check,{'id','scope','environment','build_required'},{'id','scope','environment','build_required'},'required check')
         require(all(isinstance(check[k],str) and check[k] for k in ('id','scope','environment')) and type(check['build_required']) is bool,
                 'check ID/scope/environment must be strings and build_required boolean')
-    require(bindings.get('execution_mode','serial') in ('serial','concurrent','group'), 'unknown execution_mode')
+    require(bindings.get('execution_mode','serial') in ('serial','concurrent','group','isolated'), 'unknown execution_mode')
     require(isinstance(bindings['inputs'],dict), 'inputs must be an object keyed by contract ID')
     contract_ids = {x['id'] for x in task['inputs']}
     require(not set(bindings['inputs']) - contract_ids, 'unknown input bindings')
+    version_inputs = bindings.get('version_inputs', {})
+    require(isinstance(version_inputs, dict) and set(version_inputs) <= contract_ids, 'unknown version input bindings')
+    require(not set(version_inputs) & set(bindings['inputs']), 'input has both live and version bindings')
     state = state_read(root / 'state.yaml')
+    jobs = []
+    if bindings.get('execution_mode') == 'isolated':
+        from workspaces import validate_isolation
+        require('isolated-execution-v1' in state.get('required_capabilities', []), 'isolated-execution-v1 required')
+        require(bindings.get('isolation'), 'isolated execution requires workspace and active claim')
+        validate_isolation(bindings['isolation'], req, bindings)
+    else:
+        require(not bindings.get('isolation'), 'isolation binding requires isolated execution mode')
+    if version_inputs:
+        require('artifact-versions-v1' in state.get('required_capabilities', []), 'artifact-versions-v1 required')
+    if bindings.get('required_jobs'):
+        from data_jobs import resolve as job_request
+        require('data-jobs-v1' in state.get('required_capabilities', []), 'data-jobs-v1 required')
+        require(isinstance(bindings['required_jobs'], list), 'required_jobs must be a list')
+        for ref in bindings['required_jobs']:
+            jobs.append({'reference': ref, 'request': job_request(ref)})
     require(state.get('task_protocol') == 1, 'explicit state task_protocol: 1 migration required')
     from task_state import validate_graph
     graph = validate_graph(state, r)
     selected = graph.get(bindings['task_id'])
     require(selected is not None and (selected['role'], selected['stage'], selected['task']) == (req['role'],req['stage'],req['task']), 'task_id not selected with matching registry key')
     require(selected['status'] in ('todo','doing','blocked'), 'prepare requires todo/doing/blocked task (new instance for repeated done task)')
+    if selected.get('work_id'):
+        work = next(w for w in state['work_items'] if w['id'] == selected['work_id'])
+        require(work['status'] == 'active', 'work is not active; start a new work item for further changes')
     cfg = project / 'sdlc.config.yaml'
     require(cfg.is_file(), 'project sdlc.config.yaml required')
     from check_config import parse_yaml
@@ -204,7 +313,7 @@ def prepare_value(req, bindings):
             require(expected in bindings.get('store_roots', []), f'configured store {key} must be observed: add store_roots {expected}')
     allowed = string_list(bindings.get('allowed_companion_skills', []), 'allowed_companion_skills')
     required = string_list(bindings.get('required_companion_skills', []), 'required_companion_skills')
-    debug = state.get('rework_rounds', 0) >= 2
+    debug = needs_debug(state, selected)
     effective = set(task.get('companions', [])) | ({'debug'} if debug else set())
     require(set(allowed) <= effective, 'companion not allowed for this task/condition')
     require(set(required) <= set(allowed), 'required companions must be allowed')
@@ -216,12 +325,22 @@ def prepare_value(req, bindings):
         missing += ['CONFIG '+x['code']+': '+x['message'] for x in config_checks if x['level']=='blocker']
     for path in bindings.get('decisions', []):
         decisions.append(decision(path, scope=root))
+    if needs_escalation(selected):
+        # A third failure of the same criterion is not retried blindly: diagnosis plus an owner's route
+        # (reslice, change approach, or stop) is recorded first. Open obligations are never waived here.
+        if not any(d['record']['kind'] == 'escalation' and d['record']['by'].strip() != req['role'] for d in decisions):
+            missing.append(f"REWORK: round {selected['rework_rounds']} of the same criterion needs an escalation decision "
+                           "(kind escalation, by the owner, targeting the diagnosis and chosen route) before another attempt")
     for entry in task['inputs']:
         key = entry['id']
         try:
             if not enabled(entry['when'], state):
                 inputs[key] = {'applicable':False, 'condition':entry['when'], 'source':'state'}; continue
             raw = bindings['inputs'].get(key)
+            if key in version_inputs:
+                from artifact_versions import input_value
+                inputs[key] = input_value(version_inputs[key], entry)
+                continue
             if entry['source'] == 'source_snapshot':
                 inputs[key] = {'access':entry['access'], 'source_snapshot':source_snapshot(project,root,product)}; continue
             if entry['source'] == 'verification_records':
@@ -257,6 +376,13 @@ def prepare_value(req, bindings):
         except (OSError, ValueError, TypeError) as e:
             missing.append(f'{key}: {e}')
     packet = authority_packet(req, bindings, task, state, inputs, methods)
+    if task.get('dataset_required'):
+        try:
+            from datasets import validate as validate_dataset
+            require('dataset' in inputs and 'path' in inputs['dataset'], 'dataset input required')
+            inputs['dataset']['dataset'] = validate_dataset(inputs['dataset']['path'])
+        except (OSError, ValueError, KeyError, TypeError) as e:
+            missing.append('dataset: ' + str(e))
     require(isinstance(bindings.get('supporting_inputs',[]),list),'supporting_inputs must be an array')
     for extra in bindings.get('supporting_inputs',[]):
         object_keys(extra,{'id','path'},{'id','path'},'supporting input'); safe_id(extra['id'])
@@ -272,16 +398,20 @@ def prepare_value(req, bindings):
         p = (root / raw).resolve()
         require(not raw.endswith('/') and not any(c in raw for c in '*?['), 'protocol 1 deliverables must be concrete files')
         require(not p.is_relative_to(root / 'runs') and not p.is_relative_to(root / '.task-objects'), 'run/object paths are manager-only')
+        require(not p.is_relative_to(root / 'work'), 'work completion paths are manager-only')
+        require(not any(p.is_relative_to(root / d) for d in ('artifacts', 'imports', '.control')), 'coordinator paths are manager-only')
         require(p.name != 'state.yaml', 'state.yaml is manager-only')
-    if req['stage']=='implement' and bindings.get('slice_integrator')==req['role']:
+    if req['stage']=='implement' and task.get('integration_required', True) and bindings.get('slice_integrator')==req['role']:
         integration=f"03-impl/{req['task']}-integration.md"
         require(str((root/integration).resolve()) in {str((root/p).resolve()) for p in bindings['deliverable_paths']},
                 'slice integrator must declare '+integration)
     require(len([x for x in inputs.values() if 'path' in x]) <= 40, 'input file count exceeds 40')
     require(sum(x.get('size',0) for x in inputs.values()) <= 400000, 'text input budget exceeds 400000 bytes')
-    return {'contract_sha256':digest(task), 'plugin_sha256':plugin_digest(), 'config':file_input(cfg), 'config_checks':config_checks,
+    return {'contract_sha256':digest(task), 'plugin_sha256':plugin_digest(),
+            'method_closure':method_closure(req['role'], methods, task.get('reads', [])),
+            'config':file_input(cfg), 'config_checks':config_checks,
             'context':context(state,bindings['task_id']), 'inputs':inputs, 'decisions':decisions,
-            'methods':methods, 'packet':packet, 'write_targets':write_targets(req,bindings)}, missing
+            'methods':methods, 'packet':packet, 'write_targets':write_targets(req,bindings), 'jobs': jobs}, missing
 
 
 def prepare(req, bindings, out, offline=False):
@@ -319,11 +449,19 @@ def input_files(prepared):
     for value in prepared['inputs'].values():
         if 'path' in value:
             paths.append(value['path'])
+        if 'artifact_version' in value:
+            paths.append(value['artifact_version']['path'])
+            paths.extend(d['path'] for d in value.get('acceptance', []))
+        if 'dataset' in value:
+            identity = value['dataset']['identity']
+            if identity['type'] == 'file': paths.append(identity['path'])
+            else: paths.extend(x['path'] for x in identity['evidence'])
         if 'source_snapshot' in value:
             paths.extend(value['source_snapshot']['files'])
         for rec in value.get('records', []):
             paths += [rec['path'], rec['log_path']]
     paths += [d['path'] for d in prepared['decisions']]
+    paths += [j['reference']['path'] for j in prepared.get('jobs', [])]
     paths += prepared['packet']['inputs']
     for method in [prepared['methods']['primary'], *prepared['methods']['allowed']]:
         paths += [str(p) for p in (ROOT/'skills'/method).rglob('*') if p.is_file()]
@@ -472,7 +610,14 @@ def record(manifest_path, return_path=None, interrupted=None, concurrent=False):
     if after['gaps'] or start['snapshot']['gaps']:
         errors.append('write observation coverage gaps')
     mode='concurrent' if concurrent else start['execution_mode']
-    if mode!='serial':
+    isolated = mode == 'isolated' and not concurrent
+    if isolated:
+        try:
+            from workspaces import validate_isolation
+            validate_isolation(m['bindings']['isolation'], m['request'], m['bindings'])
+        except (OSError, ValueError, KeyError, TypeError) as e:
+            errors.append('isolated attribution: ' + str(e))
+    elif mode!='serial':
         errors.append('write attribution uncertain; independent revalidation required')
     for key,item in m['prepared']['inputs'].items():
         if item.get('access')!='read':
@@ -480,6 +625,14 @@ def record(manifest_path, return_path=None, interrupted=None, concurrent=False):
         try:
             if 'path' in item:
                 require(file_hash(item['path'])==item['sha256'], f'read input changed: {key}')
+            if 'artifact_version' in item:
+                from artifact_versions import resolve
+                resolve(item['artifact_version'])
+                for d in item.get('acceptance', []):
+                    require(file_hash(d['path']) == d['sha256'], 'artifact acceptance changed')
+            if 'dataset' in item:
+                from datasets import validate as validate_dataset
+                require(validate_dataset(item['path']) == item['dataset'], 'dataset changed during run')
             if 'source_snapshot' in item:
                 current=source_snapshot(Path(m['bindings']['project_root']),root,Path(m['bindings']['product_root']))
                 require(current==item['source_snapshot'], f'read source snapshot changed: {key}')
@@ -499,8 +652,9 @@ def record(manifest_path, return_path=None, interrupted=None, concurrent=False):
     if any(row[0]=='error' for row in checks[0]['findings']):
         errors.append('registered task presence check failed')
     expectations=m['bindings'].get('required_checks',[])
-    if m['request']['role']=='backend' and not expectations:
-        errors.append('backend completion requires bound project checks; no required_checks declared')
+    contract = resolve_task(load_registry(), m['request']['role'], m['request']['stage'], m['request']['task'])
+    if (m['request']['role']=='backend' or contract.get('execution_required') or m['bindings'].get('source_writes')) and not expectations:
+        errors.append('task completion requires bound project checks; no required_checks declared')
     if expectations:
         try:
             from evidence import verify_bound_records
@@ -513,15 +667,21 @@ def record(manifest_path, return_path=None, interrupted=None, concurrent=False):
             errors.append('project checks: '+str(e))
     if outside:
         errors.append('observed changes outside task authority')
+    for ref in m['bindings'].get('required_jobs', []):
+        try:
+            from data_jobs import completed
+            checks.append({'id': 'external-job', 'level': 'adapter-observation', 'record': completed(ref)})
+        except (OSError, ValueError, KeyError, TypeError) as e:
+            errors.append('external job: ' + str(e))
     # Freeze only after the audit, so manager object writes are not attributed to the producer.
     objects=freeze_files(root,[p for p in outputs if Path(p).is_file()])
     result={'protocol_version':1,'required_capabilities':sorted(CAPABILITIES),'kind':'result','run_id':m['run_id'],
             'task_id':m['bindings']['task_id'],'request':m['request'],'manifest':str(Path(manifest_path).resolve()),
             'manifest_sha256':file_hash(manifest_path),'finished_at':now(),'return_sha256':__import__('hashlib').sha256(raw.encode()).hexdigest(),
             'declared_inputs':m['prepared']['inputs'],'read_observations':{'reported':(judgments or {}).get('reported_reads',[]),'host':None,'level':'unobservable'},
-            'outputs':outputs,'checks':checks,'write_scope':{'level':'task_observed' if mode=='serial' else 'group_observed',
+            'outputs':outputs,'checks':checks,'write_scope':{'level':'task_observed' if mode=='serial' or isolated else 'group_observed',
             'changed':changed,'outside_authority':outside,'before_sha256':digest(start['snapshot']),'after':after,
-            'attribution':'isolated window declared by manager' if mode=='serial' else 'uncertain'},
+            'attribution':'registered worktree and resource claim' if isolated else 'isolated window declared by manager' if mode=='serial' else 'uncertain'},
             'judgments':judgments,'errors':errors,'execution_complete':not errors,'objects':objects,
             'applicability':{'stage_accepted':False,'historical_execution':'complete' if not errors else 'incomplete',
                              'post_source':source_snapshot(Path(m['bindings']['project_root']),root,Path(m['bindings']['product_root']))

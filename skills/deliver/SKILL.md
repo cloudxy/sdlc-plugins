@@ -1,6 +1,6 @@
 ---
 name: "deliver"
-description: "Use this skill when the spawn packet names hat sre or $deliver. Do NOT use from parent /sdlc or for business code."
+description: "Use this skill when the spawn packet names sre or $deliver. Do NOT load in /sdlc or for business code."
 when_to_use: "Use this skill when the spawn packet names hat sre or the user types $deliver / names this hat. Do NOT use from parent /sdlc. Do NOT use for business feature code or OLTP schema."
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: refactor
-description: "Use this skill when the spawn packet marks the ticket as refactor or $refactor. Do NOT use from parent /sdlc or for new FRs."
+description: "Use this skill when the spawn packet marks the ticket as refactor or $refactor. Do NOT load in /sdlc or for new FRs."
 when_to_use: "Spawn packet marks the ticket maintenance/refactor, or $refactor. Do NOT use from parent /sdlc, new FRs, or migrations."
 ---
 

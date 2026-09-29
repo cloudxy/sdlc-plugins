@@ -1,6 +1,6 @@
 ---
 name: sdlc-eval
-description: "Use this skill when the user says /sdlc-eval. Do NOT use from parent /sdlc or as a substitute for check-sdlc.sh."
+description: "Use this skill when the user says /sdlc-eval. Do NOT load in /sdlc or as a substitute for check-sdlc.sh."
 when_to_use: "Use this skill when the user says /sdlc-eval or names the eval harness (including rubric judging or regression runs). Do NOT use from parent /sdlc. Do NOT use for weekly maintenance, health-check, an unbudgeted role sweep, or as a substitute for check-sdlc.sh."
 ---
 

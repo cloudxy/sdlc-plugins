@@ -31,6 +31,8 @@ Task assignments and product-file ownership are generated from `workflow/registr
 
 Assignments (generated):
 - `implement` / `T-<n>` → `sdlc-workflow:impl-evidence`; companions allowed by contract: tdd, refactor, debug; required scoped source_writes; task check, then applicable stage gate. Legacy v2 task route.
+- `implement` / `fix` → `sdlc-workflow:impl-evidence`; companions allowed by contract: tdd, refactor, debug; required scoped source_writes; task check, then applicable stage gate. Legacy v2 task route.
+- `implement` / `diagnose` → `sdlc-workflow:debug`; companions allowed by contract: none; no project source writes; task check only until stage dependencies finish. Legacy v2 task route.
 
 Product write scope (generated): none. Packet may narrow it.
 

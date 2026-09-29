@@ -1,6 +1,6 @@
 ---
 name: "schema"
-description: "Use this skill when the spawn packet names hat dba or $schema. Do NOT use from parent /sdlc or for Service/Repository code."
+description: "Use this skill when the spawn packet names dba or $schema. Do NOT load in /sdlc or for Service/Repository code."
 when_to_use: "Use this skill when the spawn packet names hat dba or the user types $schema / names this hat. Do NOT use from parent /sdlc. Do NOT use for Service/Repository code or API shapes."
 ---
 

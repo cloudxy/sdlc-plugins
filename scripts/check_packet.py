@@ -207,9 +207,11 @@ def check_evidence(p, contract, stage, err):
 
 
 def _security_feature(p):
+    if str(p.get('q_security', '')).lower() in ('yes', 'true'):
+        return True
     st = os.path.join(str(p.get("feature_dir") or ""), "state.yaml")
     try:
-        return bool(re.search(r"^q_security:\s*yes\b", Path(st).read_text(encoding="utf-8"), re.M))
+        return bool(re.search(r"^q_security:\s*[\"']?(yes|true)\b", Path(st).read_text(encoding="utf-8"), re.M))
     except OSError:
         return False
 
@@ -358,6 +360,9 @@ def check_outputs(p, contract, hat, stage, base, err):
                                          f"evidence path this task declares ({', '.join(evidence) or 'none'})")
             continue
         if target != base_real and _within(target, base_real):
+            if task_scope(contract) == 'feature' and any(_within(target, base_real / name) for name in ('work', 'runs', '.task-objects', 'artifacts', 'imports', '.control')):
+                err('DELIVERABLE-SCOPE', f'{output} is a manager-owned work/run record')
+                continue
             declared.append(target.relative_to(base_real).as_posix().rstrip("/"))
             continue
         if contract.get("manager_output") and manager_out is None and raw.endswith(contract["manager_output"]):
@@ -551,7 +556,7 @@ def lint(text: str, plugin_root: str | None = None, *, enforce_protocol: bool = 
                          f"({', '.join(contract.get('scopes') or [task_scope(contract)])})")
         if contract.get("lane_file") and p.get("lane_file") != contract["lane_file"]:
             err("TASKLANE", f"{hat} implementation requires lane_file: {contract['lane_file']}")
-        if stage == "implement":
+        if stage == "implement" and contract.get('integration_required', True):
             implementers = {t["role"] for t in REGISTRY["tasks"] if t["stage"] == "implement"}
             if p.get("slice_integrator") not in implementers:
                 err("INTEGRATOR", "implementation packets must name one implementation role as slice_integrator")

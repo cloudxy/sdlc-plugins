@@ -34,6 +34,7 @@ Assignments (generated):
 - `product` / `bootstrap` → `sdlc-workflow:collect`; companions allowed by contract: none; no project source writes; task check, then applicable stage gate. Legacy v2 task route.
 - `collect` / `implement` → `sdlc-workflow:collect`; companions allowed by contract: none; required scoped source_writes; task check only until stage dependencies finish. Legacy v2 task route.
 - `collect` / `validate` → `sdlc-workflow:collect`; companions allowed by contract: none; no project source writes; task check only until stage dependencies finish. Legacy v2 task route.
+- `collect` / `diagnose` → `sdlc-workflow:debug`; companions allowed by contract: none; no project source writes; task check only until stage dependencies finish. Legacy v2 task route.
 
 Product write scope (generated): data/tracking-plan.yaml. Packet may narrow it.
 

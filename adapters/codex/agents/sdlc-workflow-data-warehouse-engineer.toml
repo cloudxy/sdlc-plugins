@@ -37,6 +37,8 @@ Assignments (generated):
 - `warehouse` / `implement` → `sdlc-workflow:warehouse`; companions allowed by contract: none; required scoped source_writes; task check only until stage dependencies finish. Legacy v2 task route.
 - `warehouse` / `validate` → `sdlc-workflow:warehouse`; companions allowed by contract: none; no project source writes; task check only until stage dependencies finish. Legacy v2 task route.
 - `cycle` / `tags-refresh` → `sdlc-workflow:warehouse`; companions allowed by contract: none; no project source writes; task check only until stage dependencies finish. Legacy v2 task route.
+- `warehouse` / `audit` → `sdlc-workflow:warehouse`; companions allowed by contract: none; no project source writes; task check only until stage dependencies finish. Legacy v2 task route.
+- `warehouse` / `backfill` → `sdlc-workflow:warehouse`; companions allowed by contract: none; optional scoped source_writes; task check only until stage dependencies finish. Legacy v2 task route.
 
 Product write scope (generated): data/metrics.yaml, data/tags.yaml. Packet may narrow it.
 

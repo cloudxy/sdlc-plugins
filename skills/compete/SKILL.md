@@ -1,6 +1,6 @@
 ---
 name: "compete"
-description: "Use this skill when the spawn packet names hat competitor or $compete. Do NOT use from parent /sdlc or for RICE/feature design."
+description: "Use this skill when the spawn packet names competitor or $compete. Do NOT load in /sdlc or for RICE/feature design."
 when_to_use: "Spawn packet names competitor / $compete. Do NOT use from parent /sdlc, RICE ranking, or writing spec.md."
 ---
 

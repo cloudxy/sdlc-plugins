@@ -9,7 +9,8 @@ from runtime_protocol import (ProtocolError, digest, file_hash, load, object_key
 from workflow import load_registry, resolve_task
 
 TASK_KEYS = {'id','role','stage','task','gate_stage','depends_on','status','result','result_sha256',
-             'selection','reason','decision','successor','acceptance','verification','successor_versions'}
+             'selection','reason','decision','successor','acceptance','verification','successor_versions',
+             'work_id','attempt_kind','rework_rounds','external_dependencies','execution'}
 TASK_REQUIRED = {'id','role','stage','task','gate_stage','depends_on','status','selection'}
 STATUSES = {'todo','doing','done','blocked','skipped','superseded'}
 
@@ -26,9 +27,21 @@ def validate_graph(state, registry=None):
         contract=resolve_task(r,task['role'],task['stage'],task['task'])
         require(task['gate_stage'] in contract.get('gate_stages',[task['stage']]), 'invalid gate_stage for '+task['id'])
         require(task['status'] in STATUSES,'invalid task status')
+        if 'attempt_kind' in task:
+            require(task['attempt_kind'] in ('initial','iteration','rework','revalidation','fix'), 'unknown attempt_kind')
+        if 'rework_rounds' in task:
+            require(type(task['rework_rounds']) is int and task['rework_rounds'] >= 0, 'invalid task rework_rounds')
         object_keys(task['selection'],{'required','reason','source'},{'required','reason','source'},'selection')
         require(type(task['selection']['required']) is bool and bool(task['selection']['reason']) and bool(task['selection']['source']), 'selection requires boolean required and reason/source')
         require(isinstance(task['depends_on'],list),'depends_on must be a list')
+        if task.get('external_dependencies'):
+            from project_graph import validate_reference
+            require('project-graph-v1' in state.get('required_capabilities', []), 'project-graph-v1 required')
+            safe_id(state.get('project_id'), 'project id')
+            require(isinstance(task['external_dependencies'], list), 'external_dependencies must be a list')
+            for edge in task['external_dependencies']: validate_reference(edge)
+        if task.get('execution'):
+            require('isolated-execution-v1' in state.get('required_capabilities', []), 'isolated-execution-v1 required')
         seen=set()
         for edge in task['depends_on']:
             object_keys(edge,{'task','requires'},{'task','requires'},'dependency')
@@ -72,6 +85,8 @@ def validate_graph(state, registry=None):
         require(o['gate_stage'] in r['stages'],'unknown obligation gate_stage')
         require(o['status'] in ('open','resolved'),'invalid obligation status')
         if o['status']=='resolved': require(o.get('resolution'),'resolved obligation needs resolution evidence')
+    from work_scope import validate_work_items
+    validate_work_items(state, graph)
     return graph
 
 
@@ -83,34 +98,104 @@ def result_for(root, task):
     require(result['kind']=='result' and result['task_id']==task['id'],'result instance mismatch')
     req=result['request']
     require((req['role'],req['stage'],req['task'])==(task['role'],task['stage'],task['task']),'result task key mismatch')
-    require(req['scope']=='feature' and Path(req['root']).resolve()==root.resolve(),'result scope/project mismatch')
+    execution_root = root
+    if task.get('execution'):
+        from workspaces import imported_root
+        execution_root = imported_root(root, task, result)
+    require(req['scope']=='feature' and Path(req['root']).resolve()==execution_root.resolve(),'result scope/project mismatch')
     m=load_manifest(result['manifest'])
     require(file_hash(result['manifest'])==result['manifest_sha256'],'result manifest modified')
     require(m['run_id']==result['run_id'] and m['bindings']['task_id']==task['id'],'result run mismatch')
     require(file_hash(m['paths']['return'])==result['return_sha256'],'saved return modified')
     require(result['execution_complete'] is True and not result['errors'],'task execution incomplete: '+task['id'])
+    for original, obj in result['objects'].items():
+        require(file_hash(obj['object']) == obj['sha256'], 'result version object modified: ' + original)
     # Do not silently choose an old pass over a newer failed/interrupted attempt.
-    for other in (root/'runs').glob('*/*-manifest.json'):
+    for other in (execution_root/'runs').glob('*/*-manifest.json'):
         newer=load(other)
         if newer.get('bindings',{}).get('task_id')==task['id'] and newer.get('sealed_at','')>m['sealed_at']:
             raise ProtocolError('newer attempt exists for '+task['id']+'; reconcile state before reuse')
     return result,m
 
 
+SOURCE_DRIFT = ('source snapshot changed since completion', 'check source version stale')
+
+
+def source_drift_writers(key, info, results, downstream):
+    """Tasks downstream of `key` whose recorded writes explain every source change since `key` completed.
+
+    The result itself stays needs-revalidation (it describes the older source); only its own consumers may rely on it.
+    """
+    if info['validity'] != 'needs-revalidation' or key not in results or not info['reasons']: return None
+    if not all(any(r.endswith(d) for d in SOURCE_DRIFT) for r in info['reasons']): return None
+    from task_runtime import source_snapshot
+    result, manifest = results[key]; before = result['applicability'].get('post_source')
+    if not before: return None
+    b = manifest['bindings']
+    now = source_snapshot(Path(b['project_root']), Path(manifest['request']['root']), Path(b['product_root']))
+    changed = {p for p in set(before['files']) | set(now['files']) if before['files'].get(p) != now['files'].get(p)}
+    pending, seen, writers = list(downstream.get(key, ())), set(), set()
+    while pending and changed:
+        other = pending.pop()
+        if other in seen: continue
+        seen.add(other); pending += list(downstream.get(other, ()))
+        if other not in results: continue
+        outputs = results[other][0]['outputs']
+        for path in list(changed):
+            v = outputs.get(path); current = now['files'].get(path)
+            if v and ((v['type'] == 'deleted' and current is None) or
+                      (v['type'] == 'file' and current is not None and current.get('sha256') == v['sha256'])):
+                changed.discard(path); writers.add(other)
+    return writers if not changed and writers else None
+
+
+def load_registry_task(manifest):
+    from workflow import load_registry, resolve_task
+    req=manifest['request']
+    try: return resolve_task(load_registry(),req['role'],req['stage'],req['task'])
+    except (KeyError,ValueError): return {}
+
+
 def current_validity(root, task, result, manifest):
     """Historical execution stays complete; reuse checks current read inputs and post-write outputs."""
-    from task_runtime import source_snapshot, plugin_digest, decision, context
+    from task_runtime import source_snapshot, plugin_digest, decision, context, method_closure
     reasons=[]
     if plugin_digest()!=manifest['prepared']['plugin_sha256']:
-        reasons.append('plugin contract/method version changed')
+        # Narrow only when the recorded closure was complete; older runs keep the whole-plugin rule.
+        recorded=manifest['prepared'].get('method_closure')
+        if not (recorded and recorded['complete']) or method_closure(
+                manifest['request']['role'],manifest['prepared']['methods'],
+                load_registry_task(manifest).get('reads',[]))['sha256']!=recorded['sha256']:
+            reasons.append('plugin contract/method version changed')
     cfg=manifest['prepared']['config']
     if not Path(cfg['path']).is_file() or file_hash(cfg['path'])!=cfg['sha256']:
         reasons.append('project configuration changed')
     checks={item['path']:item['sha256'] for item in result['declared_inputs'].values() if 'path' in item and item['access']=='read'}
+    for item in result['declared_inputs'].values():
+        if 'dataset' in item:
+            try:
+                from datasets import validate as validate_dataset
+                require(validate_dataset(item['path']) == item['dataset'], 'dataset identity changed')
+            except (OSError, ValueError, TypeError, KeyError) as e: reasons.append(str(e))
+        if 'artifact_version' in item:
+            try:
+                from artifact_versions import resolve
+                resolve(item['artifact_version'])
+            except (OSError, ValueError, TypeError, KeyError) as e: reasons.append(str(e))
+            checks.update({d['path']:d['sha256'] for d in item.get('acceptance', [])})
     checks.update({d['path']:d['sha256'] for d in manifest['prepared']['decisions']})
+    for check in result['checks']:
+        if check['id'] == 'external-job':
+            job = check['record']
+            checks[job['observation']] = job['sha256']
     current_context=context(state_read(root/'state.yaml'),task['id'])
     recorded_context=manifest['prepared']['context']
-    if current_context['selection']!=recorded_context['selection'] or any(
+    if task.get('execution'):
+        import copy
+        recorded_context = copy.deepcopy(recorded_context)
+        current_context['state'].pop('product_root', None)
+        recorded_context['state'].pop('product_root', None)
+    if current_context.get('work') != recorded_context.get('work') or current_context['selection']!=recorded_context['selection'] or any(
             current_context['state'].get(k)!=v for k,v in recorded_context['state'].items() if k!='rework_rounds'):
         reasons.append('applicable task conditions/selection changed')
     checks.update({p:v.get('sha256') for p,v in result['outputs'].items() if v['type']=='file'})
@@ -131,18 +216,18 @@ def current_validity(root, task, result, manifest):
         if not valid_successor: reasons.append('version changed/missing: '+path)
     if result['applicability'].get('post_source'):
         b=manifest['bindings']
-        if source_snapshot(Path(b['project_root']),root,Path(b['product_root'])) != result['applicability']['post_source']:
+        if source_snapshot(Path(b['project_root']),Path(manifest['request']['root']),Path(b['product_root'])) != result['applicability']['post_source']:
             reasons.append('source snapshot changed since completion')
     if manifest['bindings'].get('required_checks'):
         try:
             from evidence import verify_bound_records
-            verify_bound_records(root,result['judgments']['check_records'],manifest['bindings']['required_checks'],
+            verify_bound_records(Path(manifest['request']['root']),result['judgments']['check_records'],manifest['bindings']['required_checks'],
                                  Path(manifest['bindings']['project_root']),Path(manifest['bindings']['product_root']))
         except (OSError,ValueError,KeyError,TypeError) as e: reasons.append(str(e))
     return ('needs-revalidation' if reasons else 'current'),reasons
 
 
-def check_tasks(root, stage=None, closure=False, task_id=None):
+def check_tasks(root, stage=None, closure=False, task_id=None, task_ids=None, external_stack=()):
     root=Path(root).resolve(); errors=[]; details={}
     raw=(root/'state.yaml').read_text()
     has_runs=any((root/'runs').glob('*/*-manifest.json'))
@@ -156,6 +241,16 @@ def check_tasks(root, stage=None, closure=False, task_id=None):
     r=load_registry(); graph=validate_graph(state,r)
     require(stage is None or stage in r['stages'],'unknown stage')
     require(task_id is None or task_id in graph,'unknown task_id')
+    scoped = task_ids is not None
+    require(not scoped or stage is None and task_id is None, 'task_ids cannot be combined with stage/task_id')
+    require(not scoped or bool(task_ids) and set(task_ids) <= graph.keys(), 'unknown/empty task_ids')
+    wanted = set(task_ids) if scoped else {key for key,t in graph.items() if (task_id==key if task_id else (t['gate_stage']==stage if stage else closure))}
+    relevant = set(wanted)
+    def ancestors(key):
+        for edge in graph[key]['depends_on']:
+            if edge['task'] not in relevant:
+                relevant.add(edge['task']); ancestors(edge['task'])
+    for key in list(relevant): ancestors(key)
     results={}
     for key,task in graph.items():
         info={'status':task['status'],'validity':'unverified','historical_execution':'unknown','reasons':[]}
@@ -169,17 +264,47 @@ def check_tasks(root, stage=None, closure=False, task_id=None):
                 d=decision(root/task['decision'],scope=root)['record']
                 require(d['kind']=='skip','skip needs a skip decision')
             elif task['status']=='superseded':
-                require(graph[task['successor']]['status']=='done','successor not complete')
+                if task.get('result'):
+                    result, manifest = result_for(root, task)
+                    results[key] = (result, manifest)  # immutable obligations survive replacement
+                    info['historical_execution'] = 'complete'
+                successor = graph[task['successor']]
+                while successor['status'] == 'superseded': successor = graph[successor['successor']]
+                if closure and (not scoped or key in relevant):
+                    require(successor['status']=='done','successor not complete')
         except (OSError,ValueError,TypeError,KeyError) as e:
-            info['validity']='invalid'; info['reasons'].append(str(e)); errors.append(f'{key}: {e}')
+            info['validity']='invalid'; info['reasons'].append(str(e))
+            if not (scoped or task_id) or key in relevant: errors.append(f'{key}: {e}')
         details[key]=info
-    wanted={key for key,t in graph.items() if (task_id==key if task_id else (t['gate_stage']==stage if stage else closure))}
+    downstream = {}
+    for key, task in graph.items():
+        for edge in task['depends_on']: downstream.setdefault(edge['task'], set()).add(key)
+    for key, info in details.items():
+        writers = source_drift_writers(key, info, results, downstream)
+        if writers: info['source_drift_from'] = sorted(writers)
+    def drift_satisfied(dep_key, consumer):
+        # The consumer wrote (or builds on the writers of) every source change since the dependency ran.
+        writers = details[dep_key].get('source_drift_from')
+        return bool(writers) and all(w == consumer or w in ancestors_of(consumer) for w in writers)
+    def ancestors_of(key, seen=None):
+        seen = set() if seen is None else seen
+        for edge in graph[key]['depends_on']:
+            if edge['task'] not in seen: seen.add(edge['task']); ancestors_of(edge['task'], seen)
+        return seen
     # Dependency failures are actionable for the selected dispatch / closing stage, not future todo tasks.
-    for key in wanted:
+    for key in relevant:
         task=graph[key]
+        for edge in task.get('external_dependencies', []):
+            try:
+                from project_graph import check_reference, node_id
+                check_reference(edge, (*external_stack, node_id(root, key)))
+            except (OSError, ValueError, KeyError, TypeError) as e:
+                errors.append(f'{key}: {e}')
+        if scoped and task['status'] == 'superseded':
+            continue  # the explicitly selected successor checks its own current prerequisites
         for edge in task['depends_on']:
             dep=graph[edge['task']]; info=details[edge['task']]
-            if dep['status']!='done' or info['validity']!='current':
+            if dep['status']!='done' or (info['validity']!='current' and not drift_satisfied(edge['task'], key)):
                 errors.append(f"{key}: dependency {dep['id']} is not currently reusable"); continue
             if edge['requires']!='produced':
                 from task_runtime import decision
@@ -190,8 +315,9 @@ def check_tasks(root, stage=None, closure=False, task_id=None):
                     require(d['kind']==field and d.get('result_sha256')==dep['result_sha256'], 'dependency decision must bind result version')
                     require(not d['obligations'],'dependency decision has unresolved obligations')
                 except (OSError,ValueError,TypeError,KeyError) as e: errors.append(f'{key}: {e}')
-        if closure and (task['status'] not in ('done','skipped','superseded') or
-                        (task['status']=='done' and details[key]['validity']!='current')):
+        drift_closed = set(details[key].get('source_drift_from', [])) <= wanted and bool(details[key].get('source_drift_from'))
+        if closure and key in wanted and (task['status'] not in ('done','skipped','superseded') or
+                        (task['status']=='done' and details[key]['validity']!='current' and not drift_closed)):
             errors.append(f'{key}: closing task is unfinished or needs revalidation')
     obligations={o['id']:o for o in state.get('obligations',[])}
     # Immutable producer blockers must be resolved by separate evidence; deleting the state row cannot hide them.
@@ -200,7 +326,7 @@ def check_tasks(root, stage=None, closure=False, task_id=None):
             if issue['severity'] not in ('blocker','major'): continue
             o=obligations.get(issue['id'])
             targets=set(issue['blocks']) or {key}
-            due=bool(targets & wanted) or (closure and (stage is None or graph[key]['gate_stage']==stage))
+            due=bool(targets & relevant) or (closure and not scoped and (stage is None or graph[key]['gate_stage']==stage))
             if not due: continue
             try:
                 require(o is not None and o['raised_by']==key and o['status']=='resolved', 'unresolved obligation '+issue['id'])
@@ -211,13 +337,17 @@ def check_tasks(root, stage=None, closure=False, task_id=None):
                 require(not d['obligations'],'resolution carries unresolved obligations')
             except (OSError,ValueError,KeyError,TypeError) as e: errors.append(str(e))
     for o in obligations.values():
-        if o['status']=='open' and (set(o['blocks']) & wanted or (closure and (stage is None or o['gate_stage']==stage))):
+        if o['status']=='open' and (set(o['blocks']) & relevant or (closure and not scoped and (stage is None or o['gate_stage']==stage))):
             errors.append('open obligation '+o['id'])
-    if closure:
+    if closure and not scoped:
         # The selected set cannot erase issued tasks or replace the mandatory definition producer.
-        if stage in (None,'define'):
+        lane_key = state.get('lane', 'L2')
+        if lane_key == 'L2': lane_key += '-short' if state.get('path') == 'short' else '-default'
+        if stage == 'define' or stage is None and 'define' in r['lanes'].get(lane_key, []):
             if not any(t['role']=='pm' and t['stage']=='define' and t['task']=='spec' for t in graph.values()):
                 errors.append('define closure requires the selected pm/spec producer (reuse needs a verified result)')
+        if stage is None and any(w['status'] == 'active' for w in state.get('work_items', [])):
+            errors.append('finish or explicitly cancel active scoped work before feature closure')
         for issued in (root/'runs').glob('*/*-manifest.json'):
             run=load(issued); version(run)
             if stage is None or run['request']['stage']==stage:
@@ -237,8 +367,8 @@ def check_tasks(root, stage=None, closure=False, task_id=None):
             fresh=[g for g in gates if g.get('kind')=='fresh-context' and g.get('stage')==gate_stage]
             if not fresh or fresh[-1].get('result')!='pass': errors.append('stage lacks passing independent review: '+gate_stage)
         # Selected graph does not replace required participation encoded in the existing lane gates.
-        # Non-pilot roles keep their legacy participation checks in check-sdlc. Never
-        # require an unsupported v3 designer result just to close a pilot-only graph.
+        # Tasks using legacy v2 keep their participation checks in check-sdlc;
+        # do not manufacture protocol results for them to close a mixed graph.
     return {'mode':'strict','task_protocol':1,'closure':closure,'tasks':details,'errors':list(dict.fromkeys(errors))}
 
 

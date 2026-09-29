@@ -1,12 +1,12 @@
 ---
 name: "collect"
-description: "Use this skill when the spawn packet names data-collector or collect, or $collect. Do NOT use from parent /sdlc or for warehouse ETL."
+description: "Use this skill when the spawn packet names data-collector or collect, or $collect. Do NOT load in /sdlc or for warehouse ETL."
 when_to_use: "Spawn packet names data-collector, companion_skills includes collect (pm writing tracking.md, qa validating events), or $collect. Do NOT use from parent /sdlc, warehouse ETL, or backend APIs."
 ---
 
 # Collect — tracking plans first, then logs and external sources
 
-Job: **capture the data the product needs correctly the first time.** For an internet product that means, in order: user behaviour events (埋点), identities, server logs / CDC, and only then external sources such as partner APIs or crawlers.
+Job: **capture the data the product needs correctly the first time.** Select the sources the product actually needs: external APIs/crawlers, business logs/CDC and/or user behaviour events. For external-data products, test source availability, fields and freshness before promising dependent product behavior. External collection does not require telemetry or a warehouse.
 
 | Who loads it | Track | Deliverable | Template |
 |---|---|---|---|
@@ -27,7 +27,7 @@ Job: **capture the data the product needs correctly the first time.** For an int
 - **Every event serves a metric.** An event with no metric id in `data/metrics.yaml` (or a named analysis) is noise — do not add it.
 - **Design completion is not collection completion.** A design document proves nothing about delivery: distinguish request emitted, accepted, persisted and queryable. A mock-only run does not prove destination delivery. Frontend/backend own their code; do not claim their changes from a design document.
 - **Transport may be at-least-once.** Validate the specified downstream deduplication boundary rather than promising exactly-once delivery. Alert thresholds depend on expected traffic and freshness, not universal event counts.
-- **Crawlers are their own subsystem.** They never import the application backend; items reach ingestion through a queue with idempotent keys rather than direct table writes; rate limits and the source's access contract are respected; repeated zero-item runs raise an alert. SQLite accepts PostgreSQL-only syntax such as `NULLS LAST` that MySQL rejects — test on the production dialect.
+- **Crawlers are their own subsystem.** They never import the application backend; choose an ingestion boundary appropriate to scale (an API, controlled batch or queue) with idempotent keys and explicit ownership; rate limits and the source's access contract are respected; repeated zero-item runs raise an alert. SQLite accepts PostgreSQL-only syntax such as `NULLS LAST` that MySQL rejects — test on the production dialect.
 
 ## Excellence bar
 

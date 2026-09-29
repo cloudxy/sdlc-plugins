@@ -1,6 +1,6 @@
 ---
 name: "architecture"
-description: "Use when assessing system feasibility, boundaries, quality/security, contracts or conformance. In architect or $architecture. Do NOT use for production code or schemas."
+description: "Use when assessing feasibility, boundaries, quality/security, contracts or conformance. In architect or $architecture. Do NOT use for production code or schemas."
 when_to_use: "Use for architecture baselines, feasibility, contracts, change impact or conformance. Do NOT run as the /sdlc manager or replace PM, DBA, implementation or release approval."
 ---
 

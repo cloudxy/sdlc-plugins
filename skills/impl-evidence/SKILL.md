@@ -1,6 +1,6 @@
 ---
 name: impl-evidence
-description: "Use this skill when the spawn packet sets lane_file=ui|api|ai|model. Do NOT use from parent /sdlc or to design schema."
+description: "Use this skill when the spawn packet sets lane_file=ui|api|ai|model. Do NOT load in /sdlc or to design schema."
 when_to_use: "Use this skill when the spawn packet sets lane_file=ui|api|ai|model. Load inside sdlc-workflow:frontend / backend / algo / miner. Do NOT use from parent /sdlc. Do NOT use to design schema or GWT."
 ---
 
@@ -23,6 +23,14 @@ Job: **implement a journey slice that works end-to-end for the user, and leave r
 | backend | `api` → [api.md](references/api.md) then [api/](references/api/) |
 | algo | `ai` → [ai.md](references/ai.md) then [ai/](references/ai/) |
 | miner | `model` → [model.md](references/model.md) then [model/](references/model/) |
+
+## Scoped repair and revalidation
+
+Miner `implement/explore|experiment|evaluate` uses lane `model` with a question, pinned dataset descriptor and evaluation plan. It is an independent experiment, not automatically a production slice. Follow model methods for labels, temporal/entity splits, leakage, baselines and uncertainty. Write `03-impl/mining-<task>-evidence.md`, including reproducible checks and a bounded conclusion; deployment/integration is a separately selected goal. Experiment/evaluate requires acceptance of the evaluation plan; explore can establish that plan. These tasks do not inherit missing UI/PRD requirements from production tickets.
+
+Registered frontend/backend `implement/fix` consumes a reproducible defect, accepted behavior and technical baselines, and implementation context. A narrow existing-behavior/owner-decision file is valid; a missing historical PRD does not require rebuilding the whole product definition. Keep baseline files read-only and ask the owner if the expected behavior is ambiguous. Use `03-impl/fix-<role>-evidence.md` and, for the assigned integrator, `03-impl/fix-integration.md`. Attach debug for diagnosis, run the reproduction and relevant regression checks, then return for independent verification/affected acceptance. Other owners repair through their existing registered tasks.
+
+A revalidation instance may inspect unchanged code and rerun affected checks against new inputs; do not rewrite code just to produce a new result. Distinguish normal iteration, failed quality rework and defects in the return.
 
 ## Gotchas
 

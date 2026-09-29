@@ -98,7 +98,7 @@ Raw user signals across features live in the store named by `signals_path` in `s
 
 ## Writeback protocol
 
-- Owners edit their product files **in place** — the files describe the product as it is now, they are not append-only logs.
+- Owners edit their product files **in place** and distinguish proposed, accepted, implemented and deployed facts. A completed design request does not change implemented/deployed reality. Keep pending deltas separate from the current baseline; files are not append-only logs.
 - Hats **return** one row per change (`file | section | change | reason`); the manager writes it to `<feature>/product-delta.md` (template `skills/sdlc/templates/product-delta.md`) and `product_root/CHANGELOG.md`. Hats never edit those two files: parallel hats appending to one file lose rows.
 - A hat that needs a change in a file it does not own (e.g. the designer needs a new domain concept) raises an open question to that owner instead of editing the file.
 - No change to the product layer → `product-delta.md` holds the line `无产品层变更：<理由>`.

@@ -13,7 +13,9 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 PROTOCOL = 1
-CAPABILITIES = frozenset({'input-contract-v1', 'result-v1', 'task-closure-v1'})
+CAPABILITIES = frozenset({'input-contract-v1', 'result-v1', 'task-closure-v1', 'work-scope-v1',
+                          'artifact-versions-v1', 'project-graph-v1', 'coordinated-state-v1',
+                          'isolated-execution-v1', 'data-jobs-v1', 'candidate-v1'})
 CONDITIONS = frozenset({'always', 'ui', 'tracking', 'q_security', 'lane_l2plus'})
 SKIP_DIRS = frozenset({'.git', '__pycache__', 'node_modules', '.venv', 'venv', '.pytest_cache', '.cache'})
 SAFE_ID = re.compile(r'^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$')
@@ -174,7 +176,8 @@ def state_read(path):
     from check_config import parse_yaml, _strip_comment
     text = Path(path).read_text(encoding='utf-8')
     # Existing legacy fields keep their syntax. Strictness applies to protocol-owned blocks.
-    owned = {'task_protocol', 'required_capabilities', 'selected_tasks', 'obligations', 'task_decisions'}
+    owned = {'task_protocol', 'required_capabilities', 'selected_tasks', 'obligations', 'task_decisions', 'work_items', 'active_work',
+             'project_id', 'state_revision'}
     top, section, blocks = set(), None, {}
     for raw in text.splitlines():
         line = _strip_comment(raw).rstrip()
@@ -216,6 +219,8 @@ def strict_yaml_block(rows):
             require(raw.endswith(']') and '[' not in raw[1:], 'invalid scalar list')
         if raw.startswith(('"', "'")):
             require(len(raw) >= 2 and raw[-1] == raw[0], 'unterminated quoted scalar')
+        if raw.startswith('"'):
+            return loads(raw)  # JSON is our emitted YAML quoted-scalar subset; preserve escapes.
         return _scalar(raw)
     def parse(items):
         require(bool(items), 'empty YAML block')
@@ -268,6 +273,10 @@ def input_contract_errors(registry):
     try:
         capabilities(registry.get('required_capabilities', []))
         for t in registry['tasks']:
+            for flag in ('protocol_required', 'protocol_supported'):
+                require(flag not in t or type(t[flag]) is int and t[flag] == 1, f'{flag} must be 1')
+            if t.get('protocol_required') or t.get('protocol_supported'):
+                require(bool(t.get('inputs')), 'protocol task requires a nonempty input contract')
             ids = set()
             for entry in t.get('inputs', []):
                 object_keys(entry, {'id','source','ref','when','access','cardinality','requires_acceptance','allow_unfilled','alternatives'},

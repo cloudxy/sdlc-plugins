@@ -1,6 +1,6 @@
 ---
 name: "findings"
-description: "Use this skill for G-fresh review findings. Load in sdlc-workflow:reviewer. Do NOT use while /sdlc is running or to write code."
+description: "Use this skill for G-fresh review findings. Load in sdlc-workflow:reviewer. Do NOT load in /sdlc or to write code."
 when_to_use: "Use this skill for the 9-dimension G-fresh findings format. Load inside sdlc-workflow:reviewer. Do NOT use while /sdlc is running in this window. Do NOT use for writing code or release approval."
 ---
 

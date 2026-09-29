@@ -9,7 +9,7 @@
       "name": "sdlc-workflow",
       "source": "./",
       "version": "4.1.0",
-      "description": "Product-quality delivery: product layer, growth positioning, design-first shape, journey slices, E2E + three-party acceptance, 19 role agents.",
+      "description": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
       "category": "workflow"
     }
   ]

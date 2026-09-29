@@ -66,6 +66,17 @@ Task presence checks do not advance state. Use `check-sdlc.sh --hat <stage>` onl
 | growth | cycle | experiments | cycle · learn | growth | outputs/experiments.md |
 | pm | cycle | apply-decisions | cycle · learn | prd-gwt | outputs/decisions.md |
 | data-warehouse-engineer | cycle | tags-refresh | cycle · learn | warehouse | outputs/tags-refresh.md |
+| frontend | implement | fix | feature · implement | impl-evidence | 03-impl/fix-frontend-evidence.md |
+| backend | implement | fix | feature · implement | impl-evidence | 03-impl/fix-backend-evidence.md |
+| backend | implement | diagnose | feature · implement | debug | 04-verify/diagnosis-backend.md |
+| frontend | implement | diagnose | feature · implement | debug | 04-verify/diagnosis-frontend.md |
+| data-collector | collect | diagnose | feature · shape | debug | 04-verify/diagnosis-data-collector.md |
+| analyst | retro | analyze | feature · learn | retro | 07-retro/analysis.md |
+| data-warehouse-engineer | warehouse | audit | feature · shape | warehouse | 04-verify/data-audit.md |
+| data-warehouse-engineer | warehouse | backfill | feature · shape | warehouse | 03-impl/backfill-evidence.md |
+| miner | implement | explore | feature · implement | impl-evidence | 03-impl/mining-explore-evidence.md |
+| miner | implement | experiment | feature · implement | impl-evidence | 03-impl/mining-experiment-evidence.md |
+| miner | implement | evaluate | feature · implement | impl-evidence | 03-impl/mining-evaluate-evidence.md |
 
 ## Progress and rank
 

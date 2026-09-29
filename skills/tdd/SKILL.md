@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: "Use this skill when the spawn packet adds tdd to an implement hat or $tdd. Do NOT use from parent /sdlc or for coverage matrices."
+description: "Use this skill when the spawn packet adds tdd to implementation or $tdd. Do NOT load in /sdlc or for coverage matrices."
 when_to_use: "Spawn packet lists tdd as an implement-hat companion, or $tdd. Do NOT use from parent /sdlc, qa matrices, or GWT edits."
 ---
 

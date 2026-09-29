@@ -1,22 +1,23 @@
 ---
 name: sdlc
-description: "Use this skill when the user says /sdlc or continue last SDLC task. Manager window. Do NOT use for $prd-gwt solo or L0. Do not handoff."
-when_to_use: "User says /sdlc, follow the process, continue last task, or wants gated swimlanes. Do NOT use for a single-role task ($prd-gwt etc.) or a one-line L0 fix. Do NOT handoff the conversation to a hat."
+description: "Use this skill when the user says /sdlc, /sdlc-refine or /sdlc-fix, or wants SDLC delivery, refinement or defect repair. Manager window, never handoff. Do NOT use for $prd-gwt solo or L0."
+when_to_use: "User asks for SDLC delivery, local refinement, defect repair or continuation. Do NOT use for a procedure skill invoked solo or a one-line L0 fix. Do NOT handoff the conversation to a hat."
 ---
 
 # SDLC orchestrator (manager only) — v4
 
-This window is the **manager** (agents-as-tools): specialists run as nested spawns and you keep the user-facing reply. Do not handoff the conversation to a hat. You classify intent, keep `state.yaml` and the product layer, fill spawn packets, run gates, and run the human decision points. You never write specs, designs, schemas or code (Iron rule 4). Hats load their procedure skills (`prd-gwt`, `design-contract`, `architecture`, `schema`, …) with the Skill tool inside their own context — this window invokes only `sdlc-workflow:discover` in Step 1b.
+This window is the **manager**: keep the user-facing conversation, classify intent, coordinate state/product context, dispatch specialists and present decisions. Do not hand off the conversation. Specialists load their assigned sdlc-workflow procedure through the Skill tool (Read fallback per host) in their own context; this window performs discovery in Step 1b and coordination, not role implementation.
 
-**What v4 optimizes for:** a product worth using, not artifacts that pass gates. Gates are the hygiene floor. Quality comes from the product layer every hat reads first, diverge-then-converge work with real evidence, early technical feasibility and experience design before final architecture contracts, and acceptance on the running build.
+Quality comes from product context, real evidence, early feasibility, explicit experience decisions and acceptance on the running build. Gates establish minimum checks; they do not replace professional judgment.
 
-**Slice:** one feature change per `state.yaml`, plus the product layer it reads and writes back (`/sdlc-product` maintains the layer on its own). Not an organizational SDLC: no portfolio intake, vendor/HR/legal process, CI platform or registry ownership, production on-call, multi-repo release trains. Refuse those by quoting this paragraph.
+**Scope:** each `state.yaml` owns its feature/change tasks and work items; a derived project graph connects their versioned dependencies. Product iteration, repair and data work may coexist. `/sdlc-product` also maintains the product layer independently. Organizational portfolio, vendor/HR/legal process, CI platform ownership and production on-call remain outside this plugin. Cross-repository dependencies do not imply an automatic multi-repository deployment platform.
 
 ## Entry modes — resolve before Step 0
 
 The command supplies `mode` and arguments. Without a command (Codex has no plugin commands; [references/hosts.md](references/hosts.md)), an explicit `mode: <m>` or the command name in the request selects that mode; otherwise `auto`.
 - `product`: execute [references/product-mode.md](references/product-mode.md), then return. Do not initialize a feature lane.
 - `review-only`: execute [references/review-mode.md](references/review-mode.md), then return. Report only; never advance feature state.
+- `refine` / `fix`: resolve the object, target and scope with [work-scope.md](references/work-scope.md), then use the same task dispatch below.
 - `auto`: classify intent below. If it resolves to product or review-only, use the same mode references and return.
 
 Commands contain no procedures. Entry routing, role/stage/task mappings, artifact paths and ownership come from `workflow/registry.json`; [references/stage-map.md](references/stage-map.md) is its generated view. Read [references/stage-procedure.md](references/stage-procedure.md) for scheduling, inputs and participation. Before composing a packet run `python3 <PLUGIN_ROOT>/scripts/workflow.py contract --role <role> --stage <stage> --task <task>`; do not guess a role’s default skill for a different task.
@@ -36,6 +37,8 @@ Commands contain no procedures. Entry routing, role/stage/task mappings, artifac
 
 | File | Read when |
 |---|---|
+| [references/work-scope.md](references/work-scope.md) | A scoped target, local refinement, defect repair or resume; work completion and change impact |
+| [references/continuous-work.md](references/continuous-work.md) | Version coexistence, cross-feature readiness, CAS state, isolated concurrent work, integration candidates or long data jobs |
 | [references/stage-map.md](references/stage-map.md) | Filling any packet: roles, stages, deliverables, inputs, order, ranks, participation |
 | [references/function-map.md](references/function-map.md) | Which roles and tasks a function covers (产品 / 运营 / 设计 / 研发 / 质量) |
 | [references/product-layer.md](references/product-layer.md) | Step 0, `product_context` / `product_writes`, `/sdlc-product`, PRODUCTCTX or WRITEBACK failures |
@@ -45,6 +48,8 @@ Commands contain no procedures. Entry routing, role/stage/task mappings, artifac
 | [references/role-agents.md](references/role-agents.md) · [references/subagent-design.md](references/subagent-design.md) | Changing how role prompts are built |
 | [templates/sdlc.config.yaml](templates/sdlc.config.yaml) | The project has no config (gates incl. e2e, app start/base_url, product_root) |
 | [templates/state.yaml](templates/state.yaml) | Starting or resuming a feature (v4 keys) |
+| [references/state-records.md](references/state-records.md) | Persisting state, gate evidence or decision provenance |
+| [templates/work-brief.md](templates/work-brief.md) | Durable intake and handoff for iteration, defects or investigation |
 | [templates/product-readme.md](templates/product-readme.md) · [templates/product-changelog.md](templates/product-changelog.md) · [templates/cycle.yaml](templates/cycle.yaml) | Bootstrapping `product_root`; a product cycle |
 | [templates/product-delta.md](templates/product-delta.md) | Every v4 feature (writeback record) |
 | [templates/spec-s.md](templates/spec-s.md) | L1 / L2-short single-file spec |
@@ -57,28 +62,32 @@ This file is `<plugin>/skills/sdlc/SKILL.md`; **PLUGIN_ROOT** is two directories
 
 ## Step 0 — init
 
-1. Read `sdlc.config.yaml` (or copy the template and ask for: constitution, gate commands including `e2e`, `app.start` / `app.base_url`, `product_root`). Run `python3 <PLUGIN_ROOT>/scripts/check_config.py --project-root <root>`: blockers go to the user with the suggested block (delegate approved project-config changes to the scoped SRE ci task), and stages requiring a real UI build wait until it runs; early design may run its own prototype ([orchestrator-gates.md](references/orchestrator-gates.md) §12).
-2. **Product layer:** resolve `product_root` (default `docs/product`). Copy missing templates per [product-layer.md](references/product-layer.md) — never overwrite. A new feature's `state.yaml` gets `sdlc_version: 4` and `product_root`. If the layer is mostly unfilled and the product already exists, recommend `/sdlc-product` before the first feature.
-3. **Resume:** an unfinished `<artifact_root>/.sdlc/*/state.yaml` → class `resume`. Normalize legacy Chinese hat words once. Last fresh-context `fail` → stay on the producing hat (HATADVANCE).
+1. Resolve the user's explicit scope/target before preflight or resume. Read `sdlc.config.yaml`; if absent, create only the known project/product-root settings. Run `check_config.py`, but gate only tasks that need each missing capability. Requirements do not need an app/E2E command, prototype design uses its own runtime, and actual build verification waits for the real app. Delegate authorized config changes to SRE ci; ask only for missing facts/authority.
+2. **Product layer:** resolve `product_root` (default `docs/product`); initialize only the files the selected tasks need, never overwrite. New feature state gets `sdlc_version: 4`. Reuse evidence from an existing product; do not force a full bootstrap for a local change or bug.
+3. **Resume:** explicit refinement, repair, review or a new scope wins over unfinished state. Bare continuation resumes `active_work`, otherwise unfinished feature tasks; a completed work item is not authorization to continue downstream. Preserve old states and normalize legacy hat words once. An unresolved failed review still blocks its affected dependents.
 4. Note whether this host's role types exist ([references/hosts.md](references/hosts.md): `sdlc-workflow:<role>`, Codex `sdlc-workflow-<role>`); if not, use the `host_spawn` fallback ([orchestrator-gates.md](references/orchestrator-gates.md) §1).
 
 ## Step 1 — intent (before any spawn)
 
-Classify the user's **last substantive message** into `state.yaml` `intent: {class, quote, at}`:
+Classify the user's **last substantive message**. Legacy lanes record `intent: {class, quote, at}`; scoped requests record their quote/kind in `work_items` without rewriting older tasks' authority:
 
 | class | matches | manager action |
 |---|---|---|
-| `resume` | unfinished feature, not "new feature" | continue at `current_hat` |
+| `resume` | explicit/bare continuation with unfinished work | resume the active work or ready feature tasks |
+| `refine` | revise/clarify a named requirement, design, schema or data artifact | select producers and checks through work-scope |
+| `fix` | reproduce/repair/verify a defect | scoped diagnosis/repair/verification, linked to its baseline |
 | `L0` | typo / one-line fix / "don't run the process" | commit trailer `lane=L0`; no state, no hats |
-| `single-hat` | "write a PRD", "only design this screen" | ONE producer spawn; no swimlane, no G-fresh |
+| `single-hat` | "write a PRD", "only design this screen" | Scoped work with the requested producer and completion proof; no whole swimlane |
 | `review-only` | "independent review" | execute review-only mode |
 | `product` | "build/refresh the product layer", "定位/核心功能/领域模型梳理" | execute product mode |
 | `eval` | "run the eval" | refuse; a fresh window with `/sdlc-eval` |
-| `out-of-slice` | org process / CI platform / on-call | refuse citing the slice paragraph |
+| `out-of-slice` | org process / CI platform / on-call | refuse citing the scope paragraph |
 | `discovery` | "先调研/先讨论", or an unresolved product decision | Step 1b |
 | `new-feature` | gated delivery and briefing `done`/`skipped` | Step 2 |
 
-Single-hat discipline: do not invoke `$prd-gwt` or any procedure skill here; do not inflate a single-hat request into a lane. "Also review it" → `/sdlc-review` after files land.
+An explicit stopping point can select one or several tasks through work-scope. Single-hat discipline: do not invoke `$prd-gwt` or any procedure skill here; do not inflate a single-hat request into a lane. "Also review it" → `/sdlc-review` after files land.
+
+For an independent diagnosis, prototype, analysis, data audit or mining experiment, select its registered task and end at its local result. Triage feedback against the accepted behavior: changed goals create iteration; broken accepted behavior creates a defect; uncertainty creates investigation. Keep durable behavior/interfaces/acceptance in the work brief; expand concrete file paths and check commands against the actual execution snapshot. Facts that can be investigated are not questions for the user. Persist the source of unresolved decisions and block only their consumers.
 
 ## Step 1b — discover (before lane, before pm)
 
@@ -90,29 +99,31 @@ Lane questions: **Q1** schema? **Q2** auth/tenant? **Q3** external contract? **Q
 
 Lane completion requirements are generated in [references/stage-map.md](references/stage-map.md). Apply participation and ordering from [references/stage-procedure.md](references/stage-procedure.md); selecting a lane does not dispatch every available agent. A skipped role needs a reason and does not remove aggregate stage requirements.
 
-**L2-short predicate (closed set) — skips only the architect:** (a) `intent.skip_shape: true` and `02-shape/contract.md` already on disk; or (b) the implement packet marks the contract `required: false` and names `spec.md` as its substitute. `path: short` or appetite < 4h alone is not enough.
+L2-short only follows the explicit eligibility predicate in [stage-procedure.md](references/stage-procedure.md); appetite or a short-path label alone cannot skip architecture.
 
 ## Step 3 — prepare and dispatch the selected task
 
-Resolve the exact role/stage/concrete task in `workflow/registry.json`. Tasks with `protocol_required: 1` use [references/task-protocol.md](references/task-protocol.md): complete explicit task selection and bindings → `workflow.py prepare` → inspect missing prerequisites → `seal` immediately before dispatch → validate the generated v3 packet. Offline drafts cannot be dispatched. Keep each pilot in an isolated execution window. Reuse recorded authorization; missing facts remain blocked, not waived.
+Resolve the exact role/stage/concrete task in `workflow/registry.json`. Tasks with `protocol_required: 1` use [references/task-protocol.md](references/task-protocol.md): complete explicit task selection and bindings → `workflow.py prepare` → inspect missing prerequisites → `seal` immediately before dispatch → validate the generated v3 packet. Offline drafts cannot be dispatched. Keep each recorded task in an isolated execution window. Reuse recorded authorization; missing facts remain blocked, not waived.
 
-Other tasks use [references/packet.md](references/packet.md), the explicit v2 route. Product and cycle retain their own commands; the new runtime rejects these scopes until evaluated. Apply task ownership, evidence, fresh-review boundaries and conditional debug rules on either route. Generated inputs are indexed in [references/task-inputs.md](references/task-inputs.md); scheduling remains in stage-procedure.
+Tasks declaring `protocol_supported: 1` also use v3 inside scoped work; their v2 path remains available for legacy lanes. Tasks without an input contract use [references/packet.md](references/packet.md), the explicit v2 route. Product and cycle retain their own commands; the new runtime rejects these scopes until evaluated. Apply task ownership, evidence, fresh-review boundaries and conditional debug rules on either route. Generated inputs are indexed in [references/task-inputs.md](references/task-inputs.md); scheduling remains in stage-procedure.
 
 Spawn the host's role type ([references/hosts.md](references/hosts.md)); packets keep `sdlc-workflow:<role>`. If the host cannot resolve it, make one fallback with the host's generic type (`general-purpose`; Codex `default`) that reads that role's generated agent and primary procedure; record host_spawn. Do not dispatch both forms. Reviewer/qc remain read-only and return their full report; the manager persists it. Never give them producer memory or writable paths. For qc, run `skills/coverage-matrix/scripts/check-matrix.py` and supply its output.
 
-After execution, save the full return and `record` it; bind the immutable result path and digest in state. Run `check-tasks` for task readiness, then existing independent reviews and acceptance, then `check-tasks --stage <gate_stage> --closure`. Stage checks do not automatically advance state. All new packet/run/return/log filenames carry the actual Beijing date and a unique suffix.
+After execution, save the full return and `record` it; bind the immutable result path and digest in state. Run `check-tasks` for task readiness, then existing independent reviews and acceptance, then `check-work` / `complete-work` for the scoped target, or `check-tasks --stage <gate_stage> --closure` when claiming a whole stage. Stage checks do not automatically advance state. All new packet/run/return/log filenames carry the actual Beijing date and a unique suffix.
+
+For `coordinated-state-v1`, bind saved results through CAS instead of rerunning completed operations. Concurrent writers require registered disjoint worktrees, live resource claims and fenced import: follow [continuous-work.md](references/continuous-work.md). Ordinary concurrent/group observations cannot prove individual writes.
 
 ## Step 4 — human decision points (you present, the human decides)
 
 - **Discovery freeze** (Step 1b).
 - **Design direction pick** (`ui: yes`): when a new direction decision is needed, after designer `explore`, show each direction in one line — signature moment, trade-off, screenshot paths — plus the designer's recommendation, and wait only if the decision is not already authorized or delegated. Record `design: {picked: D<n>, picked_by: user|delegated, at}`. The designer's `specify` spawn writes `选定：D<n>` into `design-directions.md`.
-- **Strategic decisions** (`Q-*` rows with 类别 战略, 状态 待确认): ask all of them in one round — question, options, the hat's recommendation — and **wait**. Name the decider from `owners` if configured (product-layer § Decisions). Only an explicit answer counts. Silence, a question tool that returns no answer, or a question the user never saw is not consent. "按推荐" or "你定" from the user is an answer; record it as such. Record each answer in `open_questions` (Step 5) and respawn the owner to write 已确认 with the operator's words. No answer → the dependent stage does not start: `phase: Stopped`, reason `waiting-for-operator`, and tell the user what is waiting.
+- **Strategic decisions** (`Q-*` rows with 类别 战略, 状态 待确认): ask all of them in one round — question, options, the hat's recommendation — and **wait**. Name the decider from `owners` if configured (product-layer § Decisions). Only an explicit answer counts. Silence, a question tool that returns no answer, or a question the user never saw is not consent. "按推荐" or "你定" from the user is an answer; record it as such. Record each answer in `open_questions` (Step 5) and respawn the owner to write 已确认 with the operator's words. No answer → mark the dependent tasks waiting for the decision and explain the dependency; unrelated ready work continues. Use global `phase: Stopped` only when no authorized work can proceed.
 - **Operational defaults** (状态 默认): list them in your report; the user can overturn any of them later.
 - **Acceptance** verdict `有条件通过`: the user accepts the conditions or sends the slice back. Record acceptance as `open_questions` entry `{id: Q-ACCEPT-<PM|DESIGN|GROWTH>, status: answered, by: user, quote: "<their words>"}`; the gate checks it.
 
 ## Step 5 — state.yaml
 
-Update after every hat. `current_hat` / `hats_done` use English words from the stage map. `phase` holds only the persistent enum (`Intent|Discovering|LaneJudge|HatReady|Spawned|Rework|HatDone|Closed|Stopped|Refused|L0done`). v4 keys: `sdlc_version: 4`, `product_root`, `ui`, `tracking`, `design`, `discovery.tracks.growth`. Gate kinds: `script | fresh-context | self-review`; `result: null` needs `reason`. Run E2E through `python3 <PLUGIN_ROOT>/scripts/evidence.py run --feature <feature_dir> --name e2e -- <e2e command>` and paste the gate record it prints (with `evidence:`); a pass without a current run record, or an older pass after a newer fail, does not count. A strategic answer goes into `open_questions` as `{id, class: 战略, status: answered, quote: "<the user's words>", by: user, at}` (a relayed answer adds `decided_by`, `relayed_by`, `authority`); you write `product-delta.md` and `CHANGELOG.md` rows from what hats return (hats do not edit them), and verified lesson rows to `.sdlc/_lessons.md` (orchestrator-gates §5).
+Update after each task using [state-records.md](references/state-records.md) for field enums, evidence and decision provenance. The task graph and work_items govern readiness; current_hat is a display/resume hint. Scoped completion does not add hats_done or set Closed. Record actual execution evidence, authorized decision quotes and product deltas; historical completion remains separate from current validity. Use CAS for coordinated states and never overwrite a stale revision.
 
 ## Step 6 — gates
 
@@ -120,10 +131,10 @@ After each task, run its `workflow.py check-task` presence check and the owning 
 
 - **G-script:** the config commands (test / lint / build / migration / e2e) + `bash <PLUGIN_ROOT>/scripts/check-sdlc.sh --require --hat <stage> <feature-dir>`. Agent said so ≠ file exists — `ls` first. Plain runs skip with exit 0; `--require` / `--hat` turn a missing file into a failure.
 - **G-fresh (L1+):** once per stage after all its producers return (define; shape = designer + architect + dba + invited data hats; implement), plus the final review after accept. The reviewer packet carries artifact paths and the product files named in `product-delta.md` — never your reasoning. Fail (blocker/major unwaived) → producer rework, `current_hat` stays; `review` enters `hats_done` only after the final review passes. L1: the implement G-fresh is the review. Same snapshot, criteria, scope and relevant evidence → reuse `findings.md`; `/sdlc-review` is the report-only entry to the same reviewer.
-- **Acceptance (v4):** every participating `accept-*.md` ends with `结论：通过 | 有条件通过 | 不通过`. Any `不通过` → send its gap list to the implement hats (rework on implement, `rework_rounds` +1), then re-run verify and accept.
+- **Acceptance (v4):** every participating `accept-*.md` ends with `结论：通过 | 有条件通过 | 不通过`. Any `不通过` → classify the gap and route to its owning producer; implementation defects return to implement, requirement/design problems to their owners. Re-run affected verification and acceptance, including prior passes whose inputs changed.
 - **Decisions (v4):** `DECISIONPENDING` is not rework — ask the operator (Step 4). `DEFAULTED` is rework on the producer: the strategic call goes back to 待确认 with options before you ask ([orchestrator-gates.md](references/orchestrator-gates.md) §10).
 - **G-self (L3/L4, one pass):** scope, irreversibility, cost, and launch timing vs capacity.
-- **Rework with method:** from round 2 the respawn attaches `debug_protocol` and the gate records a one-line `root_cause` ([debug-loop.md](references/debug-loop.md)). Rework ≥ 3 on define or shape is systemic — stop and report.
+- **Rework with method:** repeated failure against the same agreed criterion uses the task-local `rework_rounds` in scoped work (legacy lanes retain the global counter). From round 2 attach debug for technical rework and record the mechanism. Three consecutive failures require diagnosis/escalation; normal user-driven iteration/revalidation does not consume this budget. See work-scope and [debug-loop.md](references/debug-loop.md).
 
 ## Memory = artifacts
 

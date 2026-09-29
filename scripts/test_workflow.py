@@ -308,12 +308,15 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(check_groups(self.registry, self.root, self.registry["stages"]["market"]["required"]), [])
 
     def test_command_routes_and_generated_artifacts_are_current(self):
-        self.assertEqual(len(list(render_commands(self.registry))), 7)
+        self.assertEqual({Path(path).stem for path, _ in render_commands(self.registry)}, set(self.registry['commands']))
         for path, expected in generated_files(self.registry):
             self.assertEqual((ROOT / path).read_text(), expected, path)
         self.assertEqual(self.registry["commands"]["sdlc-review"]["mode"], "review-only")
         self.assertEqual(self.registry["commands"]["sdlc-product"]["mode"], "product")
         self.assertEqual(self.registry["commands"]["sdlc-grok"]["skill"], "imagery")
+        for mode in ('refine', 'fix'):
+            self.assertEqual(self.registry['commands']['sdlc-' + mode]['mode'], mode)
+            self.assertEqual(self.registry['commands']['sdlc-' + mode]['skill'], 'sdlc')
 
     def test_eval_entry_lists_exactly_the_routed_skills(self):
         import re

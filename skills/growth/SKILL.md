@@ -1,6 +1,6 @@
 ---
 name: "growth"
-description: "Use this skill when the spawn packet names hat growth or $growth. Do NOT use from parent /sdlc or for specs."
+description: "Use this skill when the spawn packet names growth or $growth. Do NOT load in /sdlc or for specs."
 when_to_use: "Spawn packet names growth (stage growth / accept / launch), or $growth. Do NOT use from parent /sdlc, for spec/GWT writing, UI design, support scripts (ops) or deploys (sre)."
 ---
 

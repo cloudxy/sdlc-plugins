@@ -1,7 +1,7 @@
 {
   "name": "sdlc-workflow",
   "version": "4.1.0",
-  "description": "Product-quality delivery control plane: product layer every hat reads and writes back, discovery with growth positioning, design directions before architecture, journey slices with integration screenshots, E2E and three-party acceptance, script gates, 19 role agents, /sdlc manager window.",
+  "description": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
   "author": {
     "name": "xuyun"
   },

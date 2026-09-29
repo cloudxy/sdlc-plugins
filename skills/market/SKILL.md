@@ -1,6 +1,6 @@
 ---
 name: "market"
-description: "Use this skill when the spawn packet names hat researcher or $market. Do NOT use from parent /sdlc or for RICE/spec.md."
+description: "Use this skill when the spawn packet names researcher or $market. Do NOT load in /sdlc or for RICE/spec.md."
 when_to_use: "Spawn packet names researcher / $market. Do NOT use from parent /sdlc, RICE ranking, or writing spec.md."
 ---
 

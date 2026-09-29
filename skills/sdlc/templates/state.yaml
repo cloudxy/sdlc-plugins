@@ -4,9 +4,11 @@ sdlc_version: 4       # v4 闸门（产品层 / 设计方向 / 联调 / E2E / �
 product_root: docs/product   # 产品层目录（相对项目根，或绝对路径）；来自 sdlc.config.yaml
 delivery_goal: local_verified # proposal_ready|local_verified|release_ready|deployed；不是泳道完成豁免
 project_profile: {}   # 实际surface/stack/maturity及数据、安全、发布约束
-# 新试点须由经理显式迁移，参照 references/task-protocol.md；不要直接取消注释空表。
+# 新任务须由经理显式选择，参照 references/task-protocol.md 与 work-scope.md；不要直接取消注释空表。
 # task_protocol: 1
-# required_capabilities: [input-contract-v1, result-v1, task-closure-v1]
+# required_capabilities: [input-contract-v1, result-v1, task-closure-v1, work-scope-v1]
+# active_work: <work-id> # 裸 continue 的恢复指针；局部完成后清空，不自动开始后续阶段
+# work_items: [] # 按 references/work-scope.md 填非空块式记录；完成的是本次工作，不是整个功能
 selected_tasks: []    # legacy 初始值；protocol 1 必须为非空块式任务映射，包含 selection/depends_on/gate_stage
 # obligations: []     # protocol 1 未决义务；blocker 由独立 resolution 记录解除，不能修改旧 result
 lane: L2              # L0-L4（L0 免 state.yaml，用 commit trailer lane=L0）
@@ -20,7 +22,7 @@ phase: HatReady       # 持久枚举 Intent|Discovering|LaneJudge|HatReady|Spawn
                       # 瞬时步（DiskCheck/ScriptGate/Fresh）跑完即丢，禁止写入。check-sdlc.sh 在 Closed 时检查完整关闭条件。
 path: default         # 经理信号 default|short；单独不构成 skip_shape（仍须 L2-short 谓词 (a)/(b)）
 intent:
-  class: new-feature  # L0|single-hat|review-only|product|eval|resume|discovery|new-feature|out-of-slice
+  class: new-feature  # L0|single-hat|refine|fix|review-only|product|eval|resume|discovery|new-feature|out-of-slice
   quote: ""           # 用户最近一条实质性消息（≤200 字）
   skip_shape: false   # true 仅当 (a) contract.md 已在磁盘，或 (b) 实现帽以 spec 替代合同
   skip_discover: false  # 单独不够；记录现有授权/合同/缺陷证据，以及无需进一步探索的原因
@@ -74,4 +76,4 @@ lane_changes: []      # [{from, to, reason, at}]
 #     available: [sdlc-workflow:researcher]
 #     fallback: general-purpose
 #     reason: "host has no pluginName:bareName table"
-rework_rounds: 0      # 同帽 G-fresh fail 或验收不通过次数；≥3 停下等操作者
+rework_rounds: 0      # legacy 连续质量失败计数；scoped work 使用任务级计数，普通反馈迭代不计入

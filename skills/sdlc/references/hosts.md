@@ -41,6 +41,8 @@ Codex plugins carry skills only. Invoke the command's skill and state the mode i
 | `/sdlc-product` | `sdlc-workflow:sdlc` | `product` | `sdlc-workflow:sdlc` + `mode: product <arguments>` |
 | `/sdlc-research` | `sdlc-workflow:discover` | `research` | `sdlc-workflow:discover` + `mode: research <arguments>` |
 | `/sdlc-review` | `sdlc-workflow:sdlc` | `review-only` | `sdlc-workflow:sdlc` + `mode: review-only <arguments>` |
+| `/sdlc-refine` | `sdlc-workflow:sdlc` | `refine` | `sdlc-workflow:sdlc` + `mode: refine <arguments>` |
+| `/sdlc-fix` | `sdlc-workflow:sdlc` | `fix` | `sdlc-workflow:sdlc` + `mode: fix <arguments>` |
 
 ## Role agents per host
 

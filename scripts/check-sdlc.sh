@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
+set -u
 # ============================================================================
 # check-sdlc.sh — SDLC 工件合规门禁（G-脚本，确定性判决）
 # 用法：bash check-sdlc.sh [--require] [--hat <stage-id>] [--report] <feature 目录或 S 档文件>
 #       bash check-sdlc.sh --stats [root]
+#       bash check-sdlc.sh --work <work-id> <feature-dir>  # only the selected work, never feature delivery
 # 退出码 = 违规数。默认：无工件则跳过（exit 0），不阻塞非流程改动。
 # --require：跳过视为失败（编排器在帽子应交件之后用；skip ≠ pass）
 # --hat <stage-id>：隐含 --require；按 H.1 必交路径表检查本帽工件。
@@ -17,12 +19,13 @@
 # ============================================================================
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 MATRIX_PY="$SCRIPT_DIR/../skills/coverage-matrix/scripts/check-matrix.py"
-set -u
 V=0
 REQUIRE=0
 HAT_GIVEN=0
 HATID=""
 REPORT=0
+WORK_GIVEN=0
+WORKID=""
 TMPF=$(mktemp 2>/dev/null || echo /tmp/_sdlc_$$.tmp)
 trap 'rm -f "$TMPF"' EXIT
 red() { printf "\033[0;31m✗ [SDLC-%s] %s\033[0m\n" "$1" "$2"; V=$((V+1)); }
@@ -40,11 +43,24 @@ while [ $# -gt 0 ]; do
       if [ $# -ge 2 ]; then HATID="$2"; shift; else HATID=""; fi
       ;;
     --report) REPORT=1 ;;
+    --work)
+      WORK_GIVEN=1
+      if [ $# -ge 2 ]; then WORKID="$2"; shift; fi
+      ;;
     *) FILTERED+=("$1") ;;
   esac
   shift
 done
 set -- "${FILTERED[@]+"${FILTERED[@]}"}"
+
+# Scoped completion never implies the aggregate lane/feature gates below passed.
+if [ "$WORK_GIVEN" = "1" ]; then
+  if [ -z "$WORKID" ] || [ "$HAT_GIVEN" = "1" ] || [ "$REPORT" = "1" ] || [ $# -ne 1 ]; then
+    echo 'usage: check-sdlc.sh --work <work-id> <feature-dir> (no --hat/--report)' >&2
+    exit 64
+  fi
+  exec python3 "$SCRIPT_DIR/workflow.py" check-work --root "$1" --work-id "$WORKID"
+fi
 
 # ---------- --stats：四度量汇总（泳道分布/闸门拦截/返工/耗时） ----------
 if [ "${1:-}" = "--stats" ]; then

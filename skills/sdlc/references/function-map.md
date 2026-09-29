@@ -40,6 +40,7 @@ Roles: `growth`, `ops`, `analyst`
 | ops | cycle / signals-digest | cycle · learn | signals | — | outputs/signals-digest.md | — |
 | analyst | cycle / readout | cycle · learn | retro | — | outputs/readout.md | — |
 | growth | cycle / experiments | cycle · learn | growth | — | outputs/experiments.md | — |
+| analyst | retro / analyze | feature · learn | retro | — | 07-retro/analysis.md | — |
 
 Product files owned: growth: growth.md.
 Required plugin reading: none.
@@ -93,9 +94,19 @@ Roles: `architect`, `dba`, `frontend`, `backend`, `sre`, `algo`, `miner`, `data-
 | sre | deliver / ci | feature · implement, release | cicd | — | 06-deliver/ci.md | required |
 | sre | deliver / prepare | feature · release | deliver | — | 06-deliver/readiness.md | — |
 | data-warehouse-engineer | cycle / tags-refresh | cycle · learn | warehouse | — | outputs/tags-refresh.md | — |
+| frontend | implement / fix | feature · implement | impl-evidence | tdd, refactor, debug | 03-impl/fix-frontend-evidence.md | required |
+| backend | implement / fix | feature · implement | impl-evidence | tdd, refactor, debug | 03-impl/fix-backend-evidence.md | required |
+| backend | implement / diagnose | feature · implement | debug | — | 04-verify/diagnosis-backend.md | — |
+| frontend | implement / diagnose | feature · implement | debug | — | 04-verify/diagnosis-frontend.md | — |
+| data-collector | collect / diagnose | feature · shape | debug | — | 04-verify/diagnosis-data-collector.md | — |
+| data-warehouse-engineer | warehouse / audit | feature · shape | warehouse | — | 04-verify/data-audit.md | — |
+| data-warehouse-engineer | warehouse / backfill | feature · shape | warehouse | — | 03-impl/backfill-evidence.md | optional |
+| miner | implement / explore | feature · implement | impl-evidence | — | 03-impl/mining-explore-evidence.md | — |
+| miner | implement / experiment | feature · implement | impl-evidence | — | 03-impl/mining-experiment-evidence.md | — |
+| miner | implement / evaluate | feature · implement | impl-evidence | — | 03-impl/mining-evaluate-evidence.md | — |
 
 Product files owned: architect: architecture.md; dba: domain-model.md, erd.dbml; data-warehouse-engineer: data/metrics.yaml, data/tags.yaml; data-collector: data/tracking-plan.yaml.
-Required plugin reading: `skills/architecture/references/conformance-task.md`, `skills/architecture/references/lifecycle.md`, `skills/impl-evidence/references/api.md`, `skills/impl-evidence/references/backend-task.md`, `vendor/anthropic-skills/skills/frontend-design/SKILL.md`.
+Required plugin reading: `skills/architecture/references/conformance-task.md`, `skills/architecture/references/lifecycle.md`, `skills/impl-evidence/references/api.md`, `skills/impl-evidence/references/backend-task.md`, `skills/impl-evidence/references/model.md`, `skills/impl-evidence/references/ui.md`, `vendor/anthropic-skills/skills/frontend-design/SKILL.md`.
 
 ## 质量 (`quality`)
 

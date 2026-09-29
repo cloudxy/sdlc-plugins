@@ -1,6 +1,6 @@
 ---
 name: cicd
-description: "Use this skill when the spawn packet asks to wire gates into CI or $cicd. Do NOT use from parent /sdlc or for incidents."
+description: "Use this skill when the spawn packet asks to wire gates into CI or $cicd. Do NOT load in /sdlc or for incidents."
 when_to_use: "Spawn packet asks to export gates into CI, or $cicd. Do NOT use from parent /sdlc, release checklists, or incidents."
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: "release-gate"
-description: "Use this skill when the spawn packet names hat qc or $release-gate. Do NOT use from parent /sdlc or for writing tests."
+description: "Use this skill when the spawn packet names qc or $release-gate. Do NOT load in /sdlc or for writing tests."
 when_to_use: "Use this skill when the spawn packet names hat qc or the user types $release-gate / names this hat. Do NOT use from parent /sdlc. Do NOT use for finding defects or writing tests."
 ---
 

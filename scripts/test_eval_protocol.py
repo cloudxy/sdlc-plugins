@@ -45,6 +45,17 @@ class EvalProtocolTests(unittest.TestCase):
                 'method_loads':[],'complete_trace':False} for a in m['arms']}
         result=validate_observations(m,obs)
         self.assertFalse(result['valid']); self.assertTrue(any('tools' in x for x in result['errors']))
+    def test_prompt_names_deliverables_and_arm_directory_is_inside(self):
+        m=self.prepare(); arm=m['arms']['with']; home=Path(arm['project']).parent
+        self.assertIn(str(home/'outputs'/'spec.md'),Path(arm['prompt']).read_text())
+        obs={a:{'model':'test-model','settings':{'temperature':0},'tools':['Read','Write'],'calls':1,'reads':[str(Path(s['project']).parent)],
+                'method_loads':[],'complete_trace':True} for a,s in m['arms'].items()}
+        self.assertTrue(validate_observations(m,obs)['valid'])
+        obs['with']['reads'].append(str(Path(m['arms']['without']['project']).parent/'outputs'))
+        self.assertFalse(validate_observations(m,obs)['valid'])
+        obs['with']['reads']=[str(home.parent)]  # the run root holds the manifest and later the blind folders
+        self.assertFalse(validate_observations(m,obs)['valid'])
+
     def test_control_reading_method_is_invalid(self):
         m=self.prepare()
         obs={a:{'model':'test-model','settings':{'temperature':0},'tools':['Read','Write'],'calls':1,'reads':[],

@@ -4,7 +4,29 @@ ZCode 插件 · v4.1.0 · MIT
 
 闸门化的功能交付控制面：把「一个功能从想法到交付」变成以产品质量为目标的流水线——发现带（市场 ∥ 竞品 ∥ 增长定位）先行，技术可行性在冻结范围前先问，体验设计与最终原型先于架构合同，按用户旅程纵向切片实现并联调，E2E 与三方验收把关，产出回写产品层。每一步的结论都落在磁盘工件上，由脚本闸门与独立上下文审查判定，不靠口头汇报。
 
+完整交付、局部打磨与缺陷修复共用角色任务、版本依赖和证据协议。`/sdlc-refine`、`/sdlc-fix` 是快捷入口；Codex 用 `mode: refine` / `mode: fix` 或自然语言表达。
+
 每次运行先记录**做到哪一步**（`delivery_goal`：proposal_ready / local_verified / release_ready / deployed）与项目画像，按任务派单；范围小就如实记「已完成的任务 + 尚未进行的阶段」，不把未做的实现与发布算作完成。
+
+## 持续工作与局部打磨
+
+同一项目可以保留多个活动工作：旧版开发、新版需求或 UI 打磨、缺陷定位与修复，以及 schema、采集、数据建设和分析按各自依赖推进。当前提供：
+
+- 独立 `diagnose`、`analyze`、数据 `audit/backfill`、挖掘 `explore/experiment/evaluate`，探索原型也可进入严格局部完成协议。
+- 不可变工件/数据快照、带版本的跨功能依赖、项目可执行集合与影响查询。
+- 带状态摘要的 CAS 更新、结果恢复绑定、隔离 worktree 注册、原子任务/资源认领和过期令牌检查。
+- 精确集成候选及真实执行验证，长作业的幂等提交、状态观察与不确定启动恢复。
+
+经理通过 `python3 scripts/workflow.py continuous <operation> --request <JSON文件>` 使用这些能力；用户仍可自然表达 `/sdlc 只定位漏采，暂不修复`。详见 [持续工作协议](skills/sdlc/references/continuous-work.md)。并发能力面向本机协作进程；共享工作区的无法归属并发仍拒绝通过。新的操作需要显式能力标识，旧历史不会被自动重写。运行时测试与真实项目/模型行为验收分别记录，不能互相替代。
+
+## 单独打磨与缺陷修复
+
+- “补齐订单退款的权限和异常规则，停在需求确认”：PM 主导，按需邀请 QA/架构可行性；无需先准备应用启动或发布配置。
+- “调整列表页交互，到原型确认结束”：复用已有设计，记录受影响的实现和验收；其余有效结果保留。
+- “只建设外部数据采集链路”：按数据需要选择采集、存储和验证，不自动要求 UI、埋点或完整数仓。
+- “修复 BUG-7 并验收”：引用缺陷与已确认行为，定位、修复、复验和相关回归；历史无 PRD 不要求重建全部需求。发布仍走原有授权与证据要求。
+
+需求按近期功能切片细化，探索原型可以帮助澄清需求；架构/数据可行性提前回答会影响体验的问题。最终合同消费已确认设计，接口和数据模型相互校验，应用与数据链路按依赖并行，最终在真实用户场景汇合。
 
 ## 核心机制
 
@@ -127,18 +149,19 @@ flowchart TD
 
 ### 0. 开工前（经理窗口自己做）
 
-1. 读项目根的 `sdlc.config.yaml`（没有就复制模板，让用户补齐闸门命令、`app.start` / `app.base_url`、`product_root`），跑 `check_config.py` 体检；阻断项交还用户改，经理不代改配置。
+1. 先明确本次范围，再读 `sdlc.config.yaml`；缺失时只建立已知的项目/产品根配置。`check_config.py` 按实际任务使用检查结果：需求不需要运行应用，原型使用自身环境，真实验证与发布才要求相应配置。已授权的配置修改派给 SRE，未知事实再询问。
 2. 落实产品层 `product_root`（缺文件从模板补，不覆盖）。产品层大面积空白且产品已存在 → 先建议 `/sdlc-product`。
-3. 有未完成的 `state.yaml` → 判为 `resume`，从 `current_hat` 接着走。
+3. 本次明确的范围优先；裸 continue 先恢复 `active_work`，否则恢复未完成的功能任务。局部工作完成不会自动授权继续开发。
 
 ### 1. 意图分类（派单之前）
 
-以用户最近一条实质性消息判类，写进 `state.yaml` 的 `intent`：
+以用户最近一条实质性消息判类；局部请求把原话和目标写入 `work_items`，旧泳道使用 `intent`：
 
 | 类别 | 经理动作 |
 |---|---|
 | `L0` | 一行修复：不起流程、不写 state，只加 commit trailer `lane=L0` |
-| `single-hat` | 「写个 PRD」「只设计这一屏」：派一个帽，不起泳道、不做 G-fresh |
+| `refine` / `fix` | 针对指定对象打磨或修复：选择相关任务与验证，到约定目标正常结束 |
+| `single-hat` | 「写个 PRD」「只设计这一屏」：选所需产出与完成证明，需要续跑时记录局部工作，不起完整泳道 |
 | `review-only` | 只审查、只报告，不推进进度 |
 | `product` | 建或刷新产品层 |
 | `discovery` | 「先调研 / 先讨论」，或有未决产品判断 → 走发现带 |
@@ -152,9 +175,11 @@ flowchart TD
 
 同时记 `project_profile` 与 `delivery_goal`：这一趟是出方案、跑通本地、准备放行，还是要完成发布。
 
-### 3. 派单包 v2（唯一的派单形式）
+### 3. 派单包与局部完成
 
-三个 feature 试点（PM spec、architect conformance、backend T-n）使用 `prepare → seal → record → check-tasks` 和封存的 SPAWN PACKET v3，详见 [任务协议](skills/sdlc/references/task-protocol.md)。其余任务沿用 SPAWN PACKET v2（帽子、阶段、任务、输入文件、可搜索目录、交付路径、证据要求、`product_context` / `product_writes` / `source_writes`、成功检查、禁止事项），存到 `<feature>/packets/`，派单前先跑 `check_packet.py`。它会拦掉常见偷工：把调研写成「可选」、证据清单比合同短、交付物写到功能目录外、给帽子不属于它的写权限。合同本身用 `workflow.py contract --role … --stage … --task …` 现查，不靠记忆。
+PM spec、architect conformance、backend T-n 要求 `prepare → seal → record → check-tasks` 和封存的 SPAWN PACKET v3。设计、数据库、前端、数据线、测试与验收等已补齐 `protocol_supported` 输入合同，在局部工作中同样走 v3；旧泳道可继续使用这些任务的 v2 路径。未注册输入合同的任务及 product/cycle 保留 v2。合同用 `workflow.py contract --role … --stage … --task …` 现查。见[任务协议](skills/sdlc/references/task-protocol.md)。
+
+一次局部工作在 `work_items` 中记录范围、目标、任务和完成等级（produced / accepted / verified），复用 `selected_tasks` 的同一任务图。`check-work` 校验本次结果，`complete-work` 写不可覆盖的完成记录；经理更新工作状态，不据此添加 `hats_done` 或设置整个功能 `Closed`。详见[局部工作规则与示例](skills/sdlc/references/work-scope.md)。
 
 ### 4. 阶段与产出
 
@@ -179,11 +204,11 @@ flowchart TD
 
 ### 6. 人工决策点（经理呈现，人决定）
 
-发现带冻结 · 设计方向选定（`ui: yes` 且需要新方向时）· 战略问题（`Q-*` 类别为战略）· 验收「有条件通过」的取舍。战略问题一轮问完并**等**：沉默、没送达的提问、工具没返回都不算同意；没答案就 `phase: Stopped`，依赖它的阶段不开工。帽子擅自给战略问题填默认值（`DEFAULTED`）算返工，不是通过。配置了 `owners` 时，经理在提问里点名该由谁决定；他人决定、由你转达的回答另记 `decided_by`、`relayed_by` 与授权来源——闸门只核对记录的原话，不核验身份。
+发现带冻结 · 设计方向选定（`ui: yes` 且需要新方向时）· 战略问题（`Q-*` 类别为战略）· 验收「有条件通过」的取舍。战略问题一轮问完并**等**：沉默、没送达的提问、工具没返回都不算同意；没答案时仅阻塞依赖该决定的任务；无其他可推进工作才记 `phase: Stopped`。帽子擅自给战略问题填默认值（`DEFAULTED`）算返工，不是通过。配置了 `owners` 时，经理在提问里点名该由谁决定；他人决定、由你转达的回答另记 `decided_by`、`relayed_by` 与授权来源——闸门只核对记录的原话，不核验身份。
 
 ### 7. 状态、返工与恢复
 
-`state.yaml` 是进度唯一事实源：目标与画像、当前阶段、已选任务与依赖、闸门记录、验收结论、战略问答原话、失效工件、返工轮数。子代理不共享聊天记录，全靠磁盘工件接力；上游改动会把下游工件标 `stale` 并重跑对应闸门。同一帽第 2 轮返工起附带 debug 协议并记一行根因；define 或 shape 返工 ≥3 轮判为系统性问题，停下来找人。会话中断后重开窗口 `/sdlc continue` 即从 `state.yaml` 续跑。
+`state.yaml` 是进度唯一事实源：目标与画像、当前阶段、已选任务与依赖、闸门记录、验收结论、战略问答原话、失效工件、返工轮数。子代理不共享聊天记录，全靠磁盘工件接力；上游改动会把下游工件标 `stale` 并重跑对应闸门。局部工作使用任务级质量失败计数；普通需求/设计反馈属于迭代，不计技术返工。重复质量失败按 debug 协议诊断；受影响的历史通过结论也需要重新验证。会话中断后重开窗口 `/sdlc continue` 即从 `state.yaml` 续跑。
 
 ## 使用方法
 
@@ -297,7 +322,8 @@ sdlc-workflow/
 | `scripts/hosts.py` / `scripts/link-codex.py` | 由 `adapters/hosts.json` 生成 ZCode / Claude Code / Grok / Codex 清单与 `hosts.md`（经 `workflow.py render`）；以符号链接让 Codex 引用本插件的 skills 与角色（不复制） |
 | `scripts/grade_eval.py` / `blind_eval.py` | 评测机械评分（不调模型）与盲评 |
 | `scripts/ui-evidence.sh` | UI 截图留证 |
-| `scripts/test_workflow.py` / `test_skill_evidence.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` | 注册表、技能证据规则、闸门、vendor 安装与多宿主打包的自测 |
+| `scripts/test_work_scope.py` / `test_task_runtime.py` / `test_workflow.py` / `test_skill_evidence.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` | 注册表、技能证据规则、闸门、vendor 安装与多宿主打包的自测 |
+| `scripts/test_continuous_work.py` | 持续工作协议场景：版本共存、CAS 与结果恢复、跨功能依赖、隔离认领与过期令牌、集成候选、数据快照与长作业 |
 
 ## 上游原件（vendor/）
 

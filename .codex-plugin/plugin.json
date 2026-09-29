@@ -1,7 +1,7 @@
 {
   "name": "sdlc-workflow",
   "version": "4.1.0",
-  "description": "Product-quality delivery control plane: product layer every hat reads and writes back, discovery with growth positioning, design directions before architecture, journey slices with integration screenshots, E2E and three-party acceptance, script gates, 19 role agents, /sdlc manager window.",
+  "description": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
   "author": {
     "name": "xuyun"
   },
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "SDLC Workflow",
-    "shortDescription": "Gated product delivery with role specialists, product layer and script gates",
-    "longDescription": "A manager window classifies intent, keeps state and the product layer, and dispatches role specialists (pm, designer, architect, backend, qa, reviewer and more) through checked packets. Gates cover discovery, definition, shape, implementation, verification, acceptance and independent review.",
+    "shortDescription": "Product delivery, scoped refinement and verified defect repair",
+    "longDescription": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
     "developerName": "xuyun",
     "category": "Developer Tools",
     "capabilities": [
@@ -28,7 +28,9 @@
     ],
     "defaultPrompt": [
       "Use SDLC Workflow to take this feature through the gated swimlane.",
-      "Use SDLC Workflow in product mode to refresh the product layer."
+      "Use SDLC Workflow in product mode to refresh the product layer.",
+      "Use SDLC Workflow in refine mode to improve this requirement and stop at an accepted handoff.",
+      "Use SDLC Workflow in fix mode to repair and verify this defect."
     ],
     "composerIcon": "./commands/sdlc.icon.png",
     "logo": "./commands/sdlc.icon.png"

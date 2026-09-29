@@ -1,12 +1,14 @@
 ---
 name: "warehouse"
-description: "Use this skill when the spawn packet names hat data-warehouse-engineer or $warehouse. Do NOT use from parent /sdlc or for OLTP schema."
+description: "Use this skill when the spawn packet names data-warehouse-engineer or $warehouse. Do NOT load in /sdlc or for OLTP schema."
 when_to_use: "Use this skill when the spawn packet names hat data-warehouse-engineer or the user types $warehouse / names this hat. Do NOT use from parent /sdlc. Do NOT use for OLTP schema or experiment design."
 ---
 
 # Warehouse — metric tree, user tags, layered models, ETL
 
 Job: **build the data foundation the product runs on** — one trusted definition per metric in a product-level metric tree, user tags that growth can target without a data request, and pipelines that are re-runnable and verified. Data built per feature fragments; this layer is product-level (`<product_root>/data/metrics.yaml`, `<product_root>/data/tags.yaml`).
+
+Select warehouse work only when analytical/serving needs justify it. A collection-only product does not automatically need metrics, user tags or a layered warehouse. Design consumes the actual source contracts, including external datasets, business data or events as applicable.
 
 Three values guide everything:
 
@@ -21,12 +23,16 @@ Three values guide everything:
 | **Warehouse design** (`warehouse/design`) | Source analysis (events first: tracking-plan) → grain, keys, source contracts → the layering the project uses → lineage, isolation, retention | `02-shape/warehouse/design.md` |
 | **Implement** (`warehouse/implement`) | Accepted design → transformations, orchestration/config and assertions inside the packet's scoped `source_writes` | `03-impl/warehouse-evidence.md` linking code and runs |
 | **Validate** (`warehouse/validate`) | Source reconciliation, replay, late/update/delete handling and applicable isolation checks on representative data | `04-verify/warehouse-validation.md` |
+| **Audit** (`warehouse/audit`) | Question + pinned dataset + quality rules; investigate affected partitions, lineage and discrepancy, without automatically repairing production | `04-verify/data-audit.md` |
+| **Backfill** (`warehouse/backfill`) | Accepted recovery plan and target contract + pinned dataset; isolate output, handle incremental writes, prove idempotency and reconcile counts/values | `03-impl/backfill-evidence.md` |
 | **Tags refresh** (`cycle/tags-refresh`, on demand) | Changed tag definitions or a refresh verification (row counts, spot checks, consumers told) → definition changes in product `data/tags.yaml`; pipeline changes need a scoped implement task | cycle `outputs/tags-refresh.md` |
 | **New metric definition** | Define in metrics.yaml (id + FR anchor + formula + dimensions + owner) → implement in the serving layer | metrics.yaml delta |
 | **Data quality issue** | Identify layer → check assertions → trace lineage → fix upstream | — |
 | **ETL failure** | Check partition → verify idempotent key → re-run → verify identical output | — |
 
 ## Gotchas — facts that defy reasonable assumptions
+
+Long operations use the manager's [continuous-work job protocol](../sdlc/references/continuous-work.md). Return actual job identity and checkpoints. Submission only proves launch; completion additionally needs observed terminal success and the assigned reconciliation checks. Dataset descriptors preserve snapshot/window/semantics; partial data stays explicitly partial. Schema expansion may coexist with old consumers; contraction waits for migration and verification of old-consumer exit.
 
 - **MySQL `DESC` already puts NULL last** — `NULLS LAST` is PostgreSQL syntax. SQLite accepts it; MySQL rejects it. A production incident came from exactly this; test analytical SQL on the production dialect.
 - **Analytics must not hurt production.** When analytics shares the online database instance, use a read-only account, schedule heavy jobs away from peak and keep analytical tables clearly separated. For event-heavy products the default is a separate analytical store (read replica for small scale; a columnar or cloud warehouse beyond it), decided in an ADR with a revisit trigger.

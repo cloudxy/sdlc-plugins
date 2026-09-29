@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "status": "fixtures-not-model-results",
+  "comparison": "plugin",
+  "treatment": "old_new",
+  "scope": "workflow",
+  "cases": [
+    {
+      "role": "pm",
+      "stage": "define",
+      "task": "spec",
+      "fixture_root": "fixtures/continuous-work",
+      "inputs": [
+        "context.md",
+        "collector.py",
+        "schema.sql",
+        "d20.csv",
+        "d21.csv",
+        "data-notes.md"
+      ],
+      "deliverables": [
+        "outcome.md"
+      ],
+      "rubric": [
+        {
+          "id": "scope",
+          "criterion": "Honor the local stopping point and preserve existing authorization/accepted behavior; no unrequested release or code changes",
+          "weight": 2
+        },
+        {
+          "id": "versions",
+          "criterion": "Pin consumed behavior and data versions; distinguish a proposed successor and actual downstream impact",
+          "weight": 2
+        },
+        {
+          "id": "evidence",
+          "criterion": "Claims follow real probes/checks in the supplied copy; failed or unavailable checks stay explicit",
+          "weight": 2
+        },
+        {
+          "id": "continuation",
+          "criterion": "Return actionable affected dependencies and a recoverable handoff; do not block unrelated work",
+          "weight": 1
+        }
+      ],
+      "id": "mixed-iteration-fix",
+      "prompt": "Continue the R12 work while refining the category-filter proposal. Diagnose and repair the duplicate observation replay bug, then verify that repair. Keep the currency fallback undecided and do not deploy. Write changes/checks in the project copy and outcome.md with the remaining work and references."
+    },
+    {
+      "role": "pm",
+      "stage": "define",
+      "task": "spec",
+      "fixture_root": "fixtures/continuous-work",
+      "inputs": [
+        "context.md",
+        "collector.py",
+        "schema.sql",
+        "d20.csv",
+        "d21.csv",
+        "data-notes.md"
+      ],
+      "deliverables": [
+        "outcome.md"
+      ],
+      "rubric": [
+        {
+          "id": "scope",
+          "criterion": "Honor the local stopping point and preserve existing authorization/accepted behavior; no unrequested release or code changes",
+          "weight": 2
+        },
+        {
+          "id": "versions",
+          "criterion": "Pin consumed behavior and data versions; distinguish a proposed successor and actual downstream impact",
+          "weight": 2
+        },
+        {
+          "id": "evidence",
+          "criterion": "Claims follow real probes/checks in the supplied copy; failed or unavailable checks stay explicit",
+          "weight": 2
+        },
+        {
+          "id": "continuation",
+          "criterion": "Return actionable affected dependencies and a recoverable handoff; do not block unrelated work",
+          "weight": 1
+        }
+      ],
+      "id": "diagnosis-only",
+      "prompt": "Only locate why zero-priced observations disappear in collector.py. Do not repair or modify source. Run a meaningful probe and write outcome.md with the mechanism or bounded uncertainty and next action."
+    },
+    {
+      "role": "pm",
+      "stage": "define",
+      "task": "spec",
+      "fixture_root": "fixtures/continuous-work",
+      "inputs": [
+        "context.md",
+        "collector.py",
+        "schema.sql",
+        "d20.csv",
+        "d21.csv",
+        "data-notes.md"
+      ],
+      "deliverables": [
+        "outcome.md"
+      ],
+      "rubric": [
+        {
+          "id": "scope",
+          "criterion": "Honor the local stopping point and preserve existing authorization/accepted behavior; no unrequested release or code changes",
+          "weight": 2
+        },
+        {
+          "id": "versions",
+          "criterion": "Pin consumed behavior and data versions; distinguish a proposed successor and actual downstream impact",
+          "weight": 2
+        },
+        {
+          "id": "evidence",
+          "criterion": "Claims follow real probes/checks in the supplied copy; failed or unavailable checks stay explicit",
+          "weight": 2
+        },
+        {
+          "id": "continuation",
+          "criterion": "Return actionable affected dependencies and a recoverable handoff; do not block unrelated work",
+          "weight": 1
+        }
+      ],
+      "id": "snapshot-analysis",
+      "prompt": "Analyze the original completed D20 window while a D21 backfill is ongoing. Report total, count and mean with reproducible calculations, version/window and limitations. Explain whether the data establishes that the product iteration caused a price change. Stop at analysis."
+    },
+    {
+      "role": "pm",
+      "stage": "define",
+      "task": "spec",
+      "fixture_root": "fixtures/continuous-work",
+      "inputs": [
+        "context.md",
+        "collector.py",
+        "schema.sql",
+        "d20.csv",
+        "d21.csv",
+        "data-notes.md"
+      ],
+      "deliverables": [
+        "outcome.md"
+      ],
+      "rubric": [
+        {
+          "id": "scope",
+          "criterion": "Honor the local stopping point and preserve existing authorization/accepted behavior; no unrequested release or code changes",
+          "weight": 2
+        },
+        {
+          "id": "versions",
+          "criterion": "Pin consumed behavior and data versions; distinguish a proposed successor and actual downstream impact",
+          "weight": 2
+        },
+        {
+          "id": "evidence",
+          "criterion": "Claims follow real probes/checks in the supplied copy; failed or unavailable checks stay explicit",
+          "weight": 2
+        },
+        {
+          "id": "continuation",
+          "criterion": "Return actionable affected dependencies and a recoverable handoff; do not block unrelated work",
+          "weight": 1
+        }
+      ],
+      "id": "schema-collector",
+      "prompt": "Design a compatible schema extension for explicit currency while R12 collection continues. Validate old-reader/old-writer behavior and the proposed collector path in a scratch SQLite database. Preserve the unresolved fallback for future sources. Stop at design and compatibility evidence; do not claim production migration."
+    }
+  ]
+}

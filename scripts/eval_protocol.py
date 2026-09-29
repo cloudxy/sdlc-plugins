@@ -121,7 +121,9 @@ def prepare_eval(spec, out):
                     name=resolve_task(load_registry(),step['role'],step['stage'],step['task'])['skill']
                     treatment+=f"Step {index+1}: {step['role']}/{step['stage']}/{step['task']}; consumes {step['consumes']}; produces {step['produces']}. "
                     treatment+=('Use general professional knowledge.\n' if index==0 and arm=='without' else f'Read {method_root}/step-{index+1}/skills/{name}/SKILL.md.\n')
-        prompt=preamble+'\n'+case['prompt']+'\n\n'+treatment+f'Project copy: {project}\nDeliverables: {home}/outputs/\n'
+        # Name every deliverable file: a case prompt may describe the work without naming its output.
+        targets=', '.join(str(home/'outputs'/rel) for rel in case['deliverables'])
+        prompt=preamble+'\n'+case['prompt']+'\n\n'+treatment+f'Project copy: {project}\nWrite these deliverable files: {targets}\n'
         prompt+='Do not read sibling arms, live project, baseline answers, eval manifests or judge materials.\n'
         prompt_path=home/(stamp+'-prompt.md'); prompt_path.write_text(prompt)
         arms[arm]={'project':str(project),'outputs':str(home/'outputs'),'prompt':str(prompt_path),'prompt_sha256':file_hash(prompt_path),
@@ -145,7 +147,9 @@ def validate_observations(manifest, observations):
         if obs['model']!=spec['model'] or obs['settings']!=spec['settings'] or sorted(obs['tools'])!=sorted(spec['tools']): errors.append(arm+': unequal model/settings/tools')
         require(type(obs['calls']) is int and obs['calls']>=0,'calls must be nonnegative integer'); calls+=obs['calls']
         if obs['complete_trace'] is not True: errors.append(arm+': contamination unobservable')
-        allowed=[Path(setup['project']),Path(setup['outputs']),Path(setup['prompt'])]
+        # eval-prepare creates everything an arm owns under one arm directory; siblings and the run root stay outside.
+        home=Path(setup['project']).parent
+        allowed=[home,Path(setup['project']),Path(setup['outputs']),Path(setup['prompt'])]
         if setup['method_root']: allowed.append(Path(setup['method_root']))
         for raw in obs['reads']:
             p=Path(raw).resolve()

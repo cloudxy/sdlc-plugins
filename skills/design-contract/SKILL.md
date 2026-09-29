@@ -1,6 +1,6 @@
 ---
 name: "design-contract"
-description: "Use this skill when the spawn packet names hat designer or $design-contract. Do NOT use from parent /sdlc or for frontend code."
+description: "Use this skill when the spawn packet names designer or $design-contract. Do NOT load in /sdlc or for frontend code."
 when_to_use: "Spawn packet names designer (task explore / specify / design-qa), or $design-contract. Do NOT use from parent /sdlc. Do NOT use for frontend implementation, API design or business rules."
 ---
 
@@ -15,6 +15,10 @@ Job: **design an experience people remember and can use without thinking, then s
 | `specify` | after the pick | `02-shape/flows.md` · `02-shape/edge-states.md` · tokens · `02-shape/prototypes/final/` (handoff prototype + screenshots) · `选定：D<n>` recorded in design-directions.md | [templates/flow.md](templates/flow.md) · [templates/edge-states.md](templates/edge-states.md) · [templates/design-tokens.json](templates/design-tokens.json) |
 | `design-qa` | stage accept, on the running build | `04-verify/accept-design.md` | [templates/accept-design.md](templates/accept-design.md) |
 | product layer | first time, or when principles, tokens or signature moments change | `<product_root>/design-system.md` | [templates/design-system.md](templates/design-system.md) |
+
+## Local refinement
+
+A named flow/page can be refined against its accepted requirement and design baseline. Record feedback, affected states and a concrete completion criterion; reuse settled components/directions. A changed business outcome goes to PM, a feasibility conflict to architecture. Ordinary preference iteration does not count as failed technical rework. Discovery prototypes may help clarify requirements; final handoff prototypes still need accepted behavior. Return the input/output versions and affected consumers, including prior design acceptance needing revalidation.
 
 ## Choose the scope before exploring
 

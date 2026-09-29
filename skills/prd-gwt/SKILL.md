@@ -1,6 +1,6 @@
 ---
 name: "prd-gwt"
-description: "Use when shaping product value, journeys, PRD/GWT, metrics or PM acceptance. In sdlc-workflow:pm or $prd-gwt. Do NOT use while /sdlc runs or for schema/code."
+description: "Use when shaping product value, journeys, PRD/GWT, metrics or PM acceptance. In sdlc-workflow:pm or $prd-gwt. Do NOT load in /sdlc or for schema/code."
 when_to_use: "Use when shaping core value and journeys, writing or judging a PRD, GWT, RICE, metrics blueprint, or walking PM acceptance on the build. Load inside sdlc-workflow:pm, or $prd-gwt. Do NOT use while /sdlc is running in this window. Do NOT use for architecture, schema, or implementation."
 ---
 
@@ -22,6 +22,10 @@ Job: **decide what is worth building, make its core value unmistakable, and make
 | **Stage `accept`** | Walk J-n on the build ([acceptance-walkthrough.md](references/acceptance-walkthrough.md)) → `04-verify/accept-pm.md` ([templates/accept-pm.md](templates/accept-pm.md)) |
 | **Frozen FRs change** | Re-triage + `superseded` annotation (numbering discipline) |
 | **Product cycle decisions** (`cycle/apply-decisions`) | Decide every proposal of the cycle (signals, readout, experiments) in `outputs/decisions.md` ([templates/cycle-decisions.md](templates/cycle-decisions.md)); apply accepted changes to strategy.md / feature-map.md within `product_writes`; reference `SIG-…` ids, never edit the signal store; strategic calls stay 待确认 until the operator answers |
+
+## Refinement and handoff
+
+Detail the current feature/slice, keeping future product capabilities coarse. Separate business decomposition (journeys, rules, permissions, states, boundaries, observable acceptance) from implementation tickets owned by architecture after the necessary design/technical choices. An exploratory prototype or feasibility result may expose missing requirements before handoff. Accepted means ready for the named consumers at this version, not immutable forever. On feedback, state the quality gap, revise only the affected scope, preserve stable requirement IDs and return downstream impact. A draft and an accepted handoff have different completion claims.
 
 ## Gotchas — things that go wrong without being told
 

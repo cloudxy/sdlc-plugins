@@ -1,6 +1,6 @@
 ---
 name: "falsify"
-description: "Use only when the user types $falsify, a deprecated alias of discover's method. Do NOT use from /sdlc or discover."
+description: "Use only when the user types $falsify (deprecated alias of discover). Do NOT use from /sdlc or discover."
 when_to_use: "Only the user typing $falsify. Deprecated: sunset 2026-12-31. Do NOT use from /sdlc or /sdlc-discover (discover applies the method itself), to write spec.md or to run post-launch experiments."
 ---
 

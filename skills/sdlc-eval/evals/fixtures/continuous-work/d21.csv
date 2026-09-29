@@ -1,0 +1,5 @@
+source,external_id,observed_day,amount_cents,currency
+feed-a,item-1,2026-09-01,100,USD
+feed-a,item-2,2026-09-01,250,USD
+feed-a,item-3,2026-09-01,0,USD
+feed-a,item-4,2026-09-02,50,USD

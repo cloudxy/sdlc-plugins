@@ -1,6 +1,6 @@
 ---
 name: "coverage-matrix"
-description: "Use when designing tests, journey E2E or coverage matrices. In sdlc-workflow:qa or $coverage-matrix. Do NOT use while /sdlc runs or for release decisions."
+description: "Use when designing tests, journey E2E or coverage matrices. In sdlc-workflow:qa or $coverage-matrix. Do NOT load in /sdlc or for release decisions."
 when_to_use: "Use this skill when designing cases, coverage matrices, or defect reports. Load inside sdlc-workflow:qa, or $coverage-matrix. Do NOT use while /sdlc is running in this window. Do NOT use for fixing defects or release decisions."
 ---
 
@@ -13,7 +13,7 @@ Job: **find what will hurt users before they do** — prove the key journeys wor
 | **Early test plan** (`define/test-plan`) | Before implementation, write `01-define/test-plan.md`: acceptance IDs, critical failure modes, the cheapest layer that can falsify each risk, data/fixtures, environment and pending decisions. No execution results, no finished matrix, no project source writes |
 | **New feature testing** (`verify/risk-based-tests`) | Reuse the test plan → risk map → a consumer-boundary journey check for every J-n → cases from GWT at the cheapest layer → tracking validation for every EV-n (`tracking: yes`) → exploratory charters → trace matrix → regression plan |
 | **"Is this well covered?"** | Check matrix holes → boundary review → edge-states comparison (UI) |
-| **Defect found** | Write defect ticket → verify fix → add to regression set |
+| **Defect found** | Bind reproduction + accepted expected behavior → independent fix verification → impact-based regression; missing historical GWT may use an accepted invariant/owner decision |
 | **Pre-release** | Regression selected by change impact; a full suite only where the project's release policy requires it → coverage matrix final check |
 
 ## Gotchas

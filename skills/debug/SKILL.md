@@ -1,6 +1,6 @@
 ---
 name: debug
-description: "Use this skill when the spawn packet attaches debug_protocol or $debug. Do NOT use from parent /sdlc or for new features."
+description: "Use this skill when the spawn packet selects diagnose or attaches debug_protocol, or $debug. Do NOT use to define new product behavior."
 when_to_use: "Spawn packet carries debug_protocol, or $debug. Do NOT use from parent /sdlc or for anything other than locating a defect's mechanism."
 ---
 
@@ -9,6 +9,12 @@ when_to_use: "Spawn packet carries debug_protocol, or $debug. Do NOT use from pa
 Procedure for **technical diagnosis**, including the first failure when investigation is needed and repeated rework. The producing hat keeps its identity and its primary procedure skill; this is the method it follows to stop the loop. Manager-side rules (when to attach, `root_cause` bookkeeping) live in the orchestrator's debug-loop reference (skills/sdlc/references/debug-loop) — do not read that file; your packet's `debug_protocol` field is your instruction to be here.
 
 A repeated G-fresh fail is a **hypothesis problem, not an effort problem**. Re-running the same inputs and hoping is a bare retry — forbidden.
+
+## Independent diagnosis
+
+For backend/frontend `implement/diagnose` and collector `collect/diagnose`, the stopping point is an evidence-backed diagnosis, including a bounded inconclusive outcome. Consume the symptom and accepted/current behavior baseline. Do not edit production source or perform steps 4–5 unless a separate repair task authorizes them. Save reproduction, environment/input version, ranked hypotheses, distinguishing probes, confidence, affected consumers and the next action in `04-verify/diagnosis-<role>.md`.
+
+Use a feedback command that detects the original symptom. A diagnostic harness can exit successfully when it reproduces the expected failure; label that result as **reproduction confirmed**, never **bug fixed**. Keep raw failing output and unsuccessful investigations. A repair consumes this report, then reruns the original symptom and affected regressions. New desired behavior goes to PM as an iteration.
 
 ## The loop (in order, no skipping)
 

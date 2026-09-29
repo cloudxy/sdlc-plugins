@@ -18,7 +18,7 @@ Full list for maintainers: `PLUGIN_ROOT/adapters/HOST-NOTES.md`. What the manage
 
 ## 1. Spawn recipe
 
-The first spawn is always the host's role type (`subagent_type: "sdlc-workflow:<role>"`; Codex `agent_type: "sdlc-workflow-<role>"`, [hosts.md](hosts.md)) with the registry-selected packet version (sealed v3 for protocol-1 pilots, v2 for legacy tasks; see [task-protocol.md](task-protocol.md)). Never paste SKILL.md.
+The first spawn is always the host's role type (`subagent_type: "sdlc-workflow:<role>"`; Codex `agent_type: "sdlc-workflow-<role>"`, [hosts.md](hosts.md)) with the registry-selected packet version (sealed v3 for required contracts and supported scoped tasks, v2 for legacy tasks; see [task-protocol.md](task-protocol.md)). Never paste SKILL.md.
 
 If the host returns **unknown / unregistered type**, spawn **once** as the host's generic type (`general-purpose`; Codex `default`) with the same packet. Its first action is to Read:
 
@@ -54,14 +54,14 @@ After define / shape / implement (L1+), and at the final review:
 Acceptance is not a fresh-context gate — it is a verdict by pm, designer and growth on the running build.
 
 1. Any `accept-*.md` with `结论：不通过` fails `check-sdlc.sh` (ACCEPT) for the whole tree until a new acceptance run replaces it.
-2. Merge the gap lists from all acceptance files into one rework packet per implement hat (UI gaps → frontend, API/data gaps → backend). `current_hat: implement`, `rework_rounds` +1; from round 2 attach `debug_protocol`.
-3. After the fix: re-run the implement G-fresh only if contracts or schemas changed; always re-run verify (E2E) and every acceptance hat whose verdict was not `通过`.
+2. Classify the gaps and route each to its owner: UI implementation to frontend, API implementation to backend, and schema/collection/warehouse defects to the corresponding task. For a repeated quality failure, increment that task's `rework_rounds` in scoped work (the global counter only in legacy lanes); from round 2 attach `debug_protocol`. Scope or preference changes are iterations.
+3. After the fix: re-run the implement G-fresh only if contracts or schemas changed; re-run the affected verification (including relevant E2E) and every affected acceptance, including earlier `通过` verdicts whose input/build/design versions changed. Reuse only demonstrably unaffected, current evidence.
 4. A gap that is really a spec or design problem (the build matches the spec, the spec is wrong) goes back to define or designer — record it in `lane_changes` or `stale_artifacts`, do not bend the implementation.
 5. `有条件通过` → present the conditions to the user; accepted conditions go into `open_questions` with an owner; otherwise treat as `不通过`.
 
 ## 3. Rework ≥ 3 on the same hat
 
-Three G-fresh fails (or acceptance rounds) on the same stage → **stop**, report "systemic", wait for the operator. From round 2 on, respawns attach `debug_protocol` ([debug-loop.md](debug-loop.md)) and the gate records a one-line `root_cause`.
+Three consecutive quality failures against the same agreed criterion (task-local in scoped work; global only in legacy lanes) → **stop**, report "systemic", wait for the operator. From round 2 on, respawns attach `debug_protocol` ([debug-loop.md](debug-loop.md)) and the gate records a one-line `root_cause`.
 
 ## 3b. Resume derivation (write back when `phase` is missing)
 
@@ -77,7 +77,7 @@ Normalize legacy Chinese `current_hat` / `hats_done` to English first (once). Th
 | `hats_done` covers `required_hats_done(lane)` | pass | Closed |
 | unparseable | — | HatReady (conservative) + note in open_questions |
 
-`required_hats_done(lane)` is in [stage-map.md](stage-map.md); v4 features include `accept`, legacy features do not. `check-sdlc.sh` does not read `phase`.
+`required_hats_done(lane)` is in [stage-map.md](stage-map.md); v4 features include `accept`, legacy features do not. `check-sdlc.sh` uses `phase: Closed` for full feature closure; a completed work item is checked separately and must not set Closed.
 
 ## 4. Expected paths
 
@@ -103,7 +103,7 @@ Split architecture work into waves when dependency structure or context size war
 2. Present one line per direction (signature moment · main trade-off · screenshot paths) and the designer's recommendation. Wait for the human.
 3. Record `design.picked`, `design.picked_by` (`user` or `delegated`), `design.at`. Spawn designer `specify` with the pick in the packet `task` line; the designer writes `选定：D<n>` into `design-directions.md`.
 Reuse a valid existing pick without asking again; only unresolved consequential choices require a new decision.
-4. The user rejects all directions → respawn `explore` with their feedback as an input file (`02-shape/direction-feedback.md`); this counts as design rework, not a new lane.
+4. The user rejects all directions → respawn `explore` with their feedback as an input file (`02-shape/direction-feedback.md`); this is normal iteration unless the producer failed an already agreed criterion. Preserve the feedback/version; do not increment the technical rework counter for preference changes.
 
 ## 9. Discovery survey scale
 
@@ -128,7 +128,7 @@ Record fallbacks under `host_spawn.<role>`. Never replace a non-empty mapping wi
 
 Implementation screenshots, integration runs, E2E, design QA and acceptance walkthroughs need the corresponding running product. Early design needs its runnable prototype; a nonexistent future application cannot be required before design. Nonvisual products use actual CLI/API/SDK/data execution rather than a browser. Reading source code is not a substitute (2026-09-17: a whole run finished without once starting a project that has two frontends).
 
-1. **Step 0 / `/sdlc-product` step 1:** `python3 <PLUGIN_ROOT>/scripts/check_config.py --project-root <root>`. Blockers (APP-START, APP-URL, E2E, NO-CONFIG) → show the findings and the suggested block to the user and ask them to update `sdlc.config.yaml`. You never write the user's config.
+1. **Step 0 / `/sdlc-product` step 1:** `python3 <PLUGIN_ROOT>/scripts/check_config.py --project-root <root>`. Evaluate APP-START, APP-URL, E2E and NO-CONFIG findings against the selected tasks. Establish known root settings as described in Step 0; delegate authorized runtime/configuration changes to SRE ci, and ask only for missing facts or authority. Missing runtime configuration blocks only the selected tasks needing that runtime.
 2. **Before a stage that needs the web app** — designer explore/design QA on an existing product, `/sdlc-product` designer, implement integration, verify E2E, accept: `check_config.py --project-root <root> --probe`. It probes `app.base_url` and every `app.urls` entry (products with several UIs or an API health URL); put the URLs the stage needs into the packet.
 3. **APP-DOWN** → run `app.start` in the background (keep its output in `.sdlc/<feature>/app-start.log`), wait, probe again — at most three probes over about a minute.
 4. **Still down** → stop (`phase: Stopped`, reason `app-not-running`) and tell the user the command, the URL and the last log lines. For web UI verification do not substitute prototype screenshots or source reading for the real UI. For an API task, actual API requests/responses can be valid product evidence. Scope the prerequisite to the task and record what remains unverified.

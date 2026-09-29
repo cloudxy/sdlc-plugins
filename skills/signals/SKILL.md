@@ -1,6 +1,6 @@
 ---
 name: "signals"
-description: "Use this skill when the spawn packet names hat ops for signals (listen), or $signals. Do NOT use from parent /sdlc or for release notes."
+description: "Use this skill when the spawn packet names ops signals (listen), or $signals. Do NOT load in /sdlc or for release notes."
 when_to_use: "Spawn packet hat ops with stage signals (task listen), or $signals. Do NOT use from parent /sdlc. Do NOT use for enablement or release notes (ops stage enablement), RICE ranking or feature design."
 ---
 

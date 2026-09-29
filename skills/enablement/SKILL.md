@@ -1,6 +1,6 @@
 ---
 name: "enablement"
-description: "Use this skill when the spawn packet names ops stage enablement or $enablement. Do NOT use from parent /sdlc or for deploys."
+description: "Use this skill when the spawn packet names ops enablement or $enablement. Do NOT load in /sdlc or for deploys."
 when_to_use: "Packet hat ops + stage enablement, or $enablement. Do NOT use from parent /sdlc or for deliver/rollback."
 ---
 

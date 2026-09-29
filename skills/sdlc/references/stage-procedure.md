@@ -4,6 +4,9 @@ Task contracts and ranks: [stage-map.md](stage-map.md), generated from `workflow
 
 ## Order inside a stage
 
+A stage is a view of participating tasks, not a global lock. Use [work-scope.md](work-scope.md) for explicit local targets. Requirements are detailed per imminent slice; exploratory prototypes and high-level architecture/data feasibility may inform them before approved handoff design. API and schema owners reconcile their contracts before dependent implementation. Select external-source, OLTP, telemetry and warehouse work independently. An external-data product should establish source availability and freshness before promising dependent behavior.
+
+
 - **Discovery:** select research from unresolved questions per discover; reuse accepted evidence and decisions → assumption checks → freeze.
 - **Define / early feasibility (conditional):** if an unresolved technical assumption can change scope or experience, dispatch architect `define/feasibility` before PM freezes that choice. Pass the question and available evidence, not a fictional completed spec. Route results to PM/designer; inconclusive results keep dependent choices open. It may also inform design exploration.
 - **Shape (v4):** designer chooses reuse/local-exploration/new-direction scope per design-contract → resolve only pending direction choices → designer `specify` → architect `shape/contract` → dba; invited data-collector follows its domain/event inputs, and data-warehouse-engineer follows the event/source contracts it consumes. Parallelize only tasks with disjoint writes and no output dependency. One G-fresh after all of them return.
@@ -11,7 +14,7 @@ Task contracts and ranks: [stage-map.md](stage-map.md), generated from `workflow
 - **Architecture change backflow (conditional):** when any producer reports an architecture mismatch, dispatch `shape/change-impact` with the current contracts and evidence. Use its task check, not the aggregate shape gate. Follow [architecture lifecycle](../../architecture/references/lifecycle.md) for authority, invalidation and revalidation. The manager owns state updates and schedules affected owners; a pending impact report does not authorize changing GWT or resuming dependent work.
 - **Impact of a change (read-only):** before marking downstream work stale or scoping a change-impact, run `python3 <PLUGIN_ROOT>/scripts/workflow.py trace <id> --feature <feature_dir>` (or `--project-root <root>` for `metric:`/`tag:`/`event:`/`SIG-` ids) to list the id's definitions, consumers, verification records and gaps. It rebuilds its index from the artifacts and changes nothing; artifact-level stale marking stays the rule where references are incomplete, and each owner re-verifies through its own task.
 - **Verify:** QA runs its assigned tests. When the contract introduces consequential architecture/security obligations or evidence indicates drift, also dispatch architect `verify/conformance`, consuming the actual build and check records. Schedule it after the evidence it needs. Required deviations/unverified obligations go to rework or authorized exception plus independent review before declaring verify complete; a report file alone is insufficient. Include the report and unresolved obligations in reviewer/QC inputs.
-- **Accept:** pm ∥ designer (ui: yes) ∥ growth (unless skipped). No G-fresh here; the final review reads the acceptance files.
+- **Accept:** revalidate every impacted prior pass as well as failures; pin the current build/design/behavior evidence. pm ∥ designer (ui: yes) ∥ growth (unless skipped). No G-fresh here; the final review reads the acceptance files.
 - **Release readiness:** SRE `deliver/prepare` precedes QC for release-ready/deployed targets. After QC, authorized SRE execution may proceed; ops/growth can draft documents earlier but publication and campaigns follow actual availability and authorization. G-fresh on the sre checklist only; enablement and launch are G-script.
 
 ## Required inputs per stage
@@ -27,7 +30,9 @@ Task contracts and ranks: [stage-map.md](stage-map.md), generated from `workflow
 | shape (architect change-impact) | Current accepted spec/contract versions, observed mismatch and reproduction evidence, affected consumer list |
 | verify (architect conformance) | Accepted architecture/security obligations, actual code/build revision and raw verification records |
 | dba | spec, `02-shape/contract.md` |
-| collect | `01-define/tracking.md`, contract |
+| collect/tracking | event requirements (`tracking.md` when defined there), collection contract |
+| collect/source | product data need, source constraints/access and freshness questions; no telemetry requirement |
+| warehouse/design | accepted data need and source contracts; no mandatory tag/metric subsystem |
 | implement | ticket, contract, spec (journeys J-n), briefing (the why); on ui: yes the final prototype `02-shape/prototypes/final/` (code, not screenshots), `flows.md`, `edge-states.md`; on tracking: yes `tracking.md` |
 | verify | spec, contract/verification plan, all `03-impl/*` evidence and integration files; tracking/state files only when applicable |
 | accept (walkthrough) | briefing, spec, `coverage.md`, consumer integration and journey execution evidence (screenshots when UI) |
@@ -60,10 +65,15 @@ Optional architecture tasks do not add a new mandatory lane stage. They must sti
 - During define, invite QA `test-plan` for material acceptance/testability risks, and analyst `measurement-plan` when an outcome/experiment requires measurement. These partial tasks must not demand finished execution evidence.
 - After collector design/source acceptance, schedule `collect/implement` then `collect/validate` when collection code changes. After warehouse definitions/design acceptance, schedule `warehouse/implement` then `warehouse/validate` when pipelines change. Include results in verify; design-only tasks cannot establish data delivery.
 - Use DBA `migration` for changed database evolution and `optimize` for query work; primary schema skill decides applicable proof. Use SRE `ci` when project pipeline wiring changes. Their partial task checks do not force all deliver/shape artifacts prematurely.
-- Use designer `market/prototype` only for a question-driven scratch experiment. Final product design prototypes stay under design-contract and do not satisfy production implementation evidence.
+- Use designer `market/prototype` for a question-driven scratch experiment, including unresolved requirements before specification approval. Final product design prototypes stay under design-contract and do not satisfy production implementation evidence.
 - Cycle tasks (`stage: cycle`) run only inside a product cycle (`/sdlc-product cycle <id>`, [product-mode.md](product-mode.md) § Cycle mode); a feature lane never dispatches them. A feature's define reads the cycle's decisions and cites signal ids as inputs.
 - Record selected tasks, prerequisites, outputs, status and unresolved obligations in manager state. Ranks are stage vocabulary, not a prohibition on early partial tasks. A report's existence never closes another task's dependency.
 
 ## Protocol-1 pilot inputs
 
 For pm/define/spec, architect/verify/conformance and backend/implement/T-n, use the generated [task-inputs.md](task-inputs.md) and [task-protocol.md](task-protocol.md). These override prose shortcuts for those exact tasks. Early feasibility, test-plan and explore keep their own contracts; this table remains the scheduling authority for unencoded participation choices.
+
+
+## Short-path eligibility
+
+**L2-short predicate (closed set) — skips only the architect:** (a) `intent.skip_shape: true` and `02-shape/contract.md` already on disk; or (b) the implement packet marks the contract `required: false` and names `spec.md` as its substitute. `path: short` or appetite < 4h alone is not enough.
