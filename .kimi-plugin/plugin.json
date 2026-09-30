@@ -1,0 +1,20 @@
+{
+  "name": "sdlc-workflow",
+  "version": "4.2.0",
+  "description": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
+  "author": {
+    "name": "xuyun"
+  },
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "sdlc",
+    "agents",
+    "process",
+    "quality-gates"
+  ],
+  "skills": "./skills/",
+  "commands": "./commands/",
+  "agents": "./adapters/kimi/agents/",
+  "systemPrompt": "SDLC commands and packets use logical sdlc-workflow:<skill> names. Invoke the discovered bare <skill> name with Skill, or Read its SKILL.md. Use skills/sdlc/references/hosts.md for role dispatch and permission mapping."
+}

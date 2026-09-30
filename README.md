@@ -1,14 +1,32 @@
 # sdlc-workflow
 
-ZCode 插件 · v4.1.0 · MIT
+多宿主工作流插件 · v4.2.0 · MIT
 
 闸门化的功能交付控制面：把「一个功能从想法到交付」变成以产品质量为目标的流水线——发现带（市场 ∥ 竞品 ∥ 增长定位）先行，技术可行性在冻结范围前先问，体验设计与最终原型先于架构合同，按用户旅程纵向切片实现并联调，E2E 与三方验收把关，产出回写产品层。每一步的结论都落在磁盘工件上，由脚本闸门与独立上下文审查判定，不靠口头汇报。
 
-完整交付、局部打磨与缺陷修复共用角色任务、版本依赖和证据协议。`/sdlc-refine`、`/sdlc-fix` 是快捷入口；Codex 用 `mode: refine` / `mode: fix` 或自然语言表达。
+完整交付、局部打磨与缺陷修复共用角色任务、版本依赖和证据协议。`/sdlc-refine`、`/sdlc-fix` 是快捷入口；Codex / Kimi 用 `mode: refine` / `mode: fix` 或自然语言表达。
 
 **第一次使用？** 先读[使用指南](docs/usage.md)。它用图解释插件怎么工作、该用哪个入口、各种场景怎么说、结果在哪里看。
 
 每次运行先记录**做到哪一步**（`delivery_goal`：proposal_ready / local_verified / release_ready / deployed）与项目画像，按任务派单；范围小就如实记「已完成的任务 + 尚未进行的阶段」，不把未做的实现与发布算作完成。
+
+## 五端接入与验证状态
+
+一套工作流覆盖 **Claude Code、Codex、Grok、ZCode 和 Kimi Code**，共用 27 个技能、19 个角色和 67 个任务合同。各宿主的入口、角色名称与权限机制不同，按[安装表](#安装只以引用方式使用)接入；派单与 9 个入口的对应关系见[宿主路由](skills/sdlc/references/hosts.md)。
+
+v4.2.0 新增 Kimi 项目接入，修复 Claude 递归扫描角色源文件的问题，加固 Codex/Kimi 链接的冲突检查与归属撤销，并把宿主角色变体纳入任务复验摘要。
+
+以下是 **2026-09-30 的本地验证结果**。加载检查、角色往返和完整业务流程分别验收；账号或模型配置的阻塞属于本次测试环境，不代表平台不支持。
+
+| 宿主 / 实测版本 | 实际加载 | 角色运行与权限验证 |
+|---|---|---|
+| Claude Code 2.1.285 | 27 技能、9 入口、19 角色；插件与市场清单严格校验通过 | 原生 reviewer 单次派单成功；只读角色工具清单及读取测试通过 |
+| Codex CLI 0.157.1 | 项目根/子目录发现 27 技能，项目外不泄漏；19 个角色 TOML 与链接检查通过 | 本次运行时没有 `agent_type`；只读父环境中的角色提示词回退返回成功。回退的子权限/派单细节来自模型报告，完整宿主轨迹仍待补充 |
+| Grok 1.0.44 | 项目插件库存识别 27 技能、19 角色 | 实跑受测试账号额度不足阻塞，角色与权限验收待完成 |
+| ZCode CLI 0.16.9 | 27 技能、9 命令；插件清单校验通过 | CLI 未选择模型，原生角色运行验收待完成 |
+| Kimi Code 2.1.1 | 项目根/子目录发现 27 技能、19 角色，项目外不泄漏 | 模型认证未通过，角色与权限验收待完成 |
+
+公共验证已通过 220 项单元测试、SDLC 闸门测试、配置/派单包自测和生成一致性检查。**五端完整业务闭环与新会话恢复试点尚未全部验收**，不能从加载成功推断业务流程通过。维护依据见[宿主说明](adapters/HOST-NOTES.md)。
 
 ## 持续工作与局部打磨
 
@@ -236,18 +254,32 @@ PM spec、architect conformance、backend T-n 要求 `prepare → seal → recor
 
 ### 安装（只以引用方式使用）
 
-同一份 skills / commands / agents 支持四个宿主，依赖 bash 与 python3。先克隆本仓库并运行 `bash vendor/install.sh` 拉上游原件，自检 `bash scripts/health-check.sh` 应全绿。下文 `<PLUGIN_ROOT>` 指插件目录（或指向它的符号链接）。
+同一份技能和角色源适配五个宿主，依赖 bash 与 python3。先克隆本仓库并运行 `bash vendor/install.sh` 拉上游原件，自检 `bash scripts/health-check.sh` 应通过。下文 `<PLUGIN_ROOT>` 指插件目录（或指向它的符号链接）。Claude、Grok、Codex、Kimi 优先使用项目级引用，用户级没有 SDLC 链接属于正常的项目隔离。
 
-**所有宿主只能引用这一份目录，不许复制。** 会复制插件的命令一律不用：`claude plugin install`（写缓存副本）、`grok plugin install`（留哈希副本）、`codex plugin add`（装副本且丢弃符号链接）。副本会和源头悄悄分叉。
+**所有宿主只能引用这一份目录，不许复制。** 会复制插件的命令一律不用：`claude plugin install`（写缓存副本）、`grok plugin install`（留哈希副本）、`codex plugin add`（装副本且丢弃符号链接）、Kimi `/plugins install`（用户级 managed 副本）。副本会和源头悄悄分叉。
 
 | 宿主 | 引用方式 | 命令 | 角色子代理 |
 |---|---|---|---|
 | ZCode | 插件目录本身就是 `~/.zcode/local-plugins/sdlc-workflow`（克隆或链接），在 ZCode 中启用（读 `.zcode-plugin/`） | `/sdlc` 等 9 个 | 原生 `sdlc-workflow:<角色>` |
 | Claude Code | 只改设置：`extraKnownMarketplaces` 登记 `directory` 源 `<PLUGIN_ROOT>`（项目设置可用相对路径，用户设置用绝对路径），`enabledPlugins` 打开 `sdlc-workflow@sdlc-workflow`；原地加载，不执行 install | `/sdlc` 等（重名时 `/sdlc-workflow:sdlc`） | 原生，清单显式列出 19 个 |
 | Grok | 符号链接：受信任项目的 `.grok/plugins/sdlc-workflow`（并在 `.grok/config.toml` 的 `[plugins].enabled` 列出），或 `~/.grok/plugins/sdlc-workflow`；也可用 `[plugins].paths`（读 `.grok-plugin/`） | `/sdlc` 等 | 原生 `sdlc-workflow:<角色>` |
-| Codex | `python3 <PLUGIN_ROOT>/scripts/link-codex.py --project <项目根>`：`<项目根>/.codex/skills/sdlc-workflow` 链到 `skills/`，角色 TOML 链进 `<项目根>/.codex/agents/`，只在该项目生效（与 `.claude/` 一样）；不带 `--project` 则链进 `~/.codex/`，所有项目共用；`--check` 核对、`--remove` 撤销 | 无插件命令：用 `$` 或 `/skills` 选 `sdlc-workflow:sdlc`，在请求里写 `mode: product` 等，对照表见 `skills/sdlc/references/hosts.md` | 链接后为 `sdlc-workflow-<角色>`；未链接时经理回退到 `default` |
+| Codex | `python3 <PLUGIN_ROOT>/scripts/link-codex.py --project <项目根>`：`<项目根>/.codex/skills/sdlc-workflow` 链到 `skills/`，角色 TOML 链进 `<项目根>/.codex/agents/`，只在该项目生效（与 `.claude/` 一样）；不带 `--project` 则使用 `$CODEX_HOME`（默认 `~/.codex/`），所有项目共用；`--check` 核对、`--remove` 撤销 | 无插件命令：用 `$` 或 `/skills` 选 `sdlc-workflow:sdlc`，在请求里写 `mode: product` 等，对照表见 [hosts.md](skills/sdlc/references/hosts.md) | 支持 `agent_type` 的运行时可选 `sdlc-workflow-<角色>`；仅有 `task_name/message` 的运行时走角色提示词回退，审查须先确认有效只读父会话 |
+| Kimi Code | `python3 <PLUGIN_ROOT>/scripts/link-kimi.py --project <Git项目根>`：27 个技能目录和 19 个角色文件分别链接到 `.kimi-code/skills/`、`.kimi-code/agents/`；`--check` 核对、`--remove` 仅撤销归属链接 | 项目模式用 `/skill:sdlc mode: product …`；9 个入口的 skill + mode 对照见 `hosts.md` | 链接后为 `sdlc-workflow-<角色>`；reviewer/qc 只读工具，所有角色禁止嵌套派单 |
 
-经符号链接调用脚本时（例如 `<仓库>/.agents/plugins/sdlc-workflow/scripts/link-codex.py`），链接会经过那条路径，便于统一由项目的插件中枢管理。各宿主的清单都由 `adapters/hosts.json` 生成（`python3 scripts/workflow.py render`），不要手改；`.codex-plugin/` 与 `.agents/plugins/marketplace.json` 只供对外分发，本机不用。宿主差异与实测依据见 `adapters/HOST-NOTES.md`。
+经符号链接调用脚本时（例如 `<仓库>/.agents/plugins/sdlc-workflow/scripts/link-codex.py`），链接会经过那条路径，便于统一由项目的插件中枢管理。各宿主的清单都由 `adapters/hosts.json` 生成（`python3 scripts/workflow.py render`），不要手改；`.kimi-plugin/`、`.codex-plugin/` 与 `.agents/plugins/marketplace.json` 只供对外分发，本机不用。宿主差异与实测依据见 `adapters/HOST-NOTES.md`。
+
+Codex / Kimi 的项目接入示例，按宿主选择对应命令并替换路径：
+
+```bash
+python3 /path/to/sdlc-workflow/scripts/link-codex.py --project /path/to/project
+python3 /path/to/sdlc-workflow/scripts/link-kimi.py --project /path/to/project
+```
+
+在同一条命令末尾加 `--check` 只读核对，加 `--remove` 撤销仍归属本插件的链接。Kimi 项目必须是 Git 根；通过插件中枢安装时，检查和撤销也优先经同一中枢调用。
+
+接入脚本会预检全部源与目标；存在外来文件或链接时保持原样并失败。已指向同一源的等价链接不会重写。Kimi 从最近的 `.git` 发现项目，需传入 Git 根；从子目录启动仍可发现。项目技能名是裸名，角色/任务包仍保留逻辑命名。
+
+reviewer/qc 的通用回退必须有实际只读工具或沙箱；提示词禁止写入不构成等价隔离。无法满足时保留审查待完成。新生成的角色需要新会话重新发现。
 
 ### 接入一个项目（一次性）
 
@@ -296,7 +328,7 @@ PM spec、architect conformance、backend T-n 要求 `prepare → seal → recor
 
 ## 角色与做法
 
-19 个角色（`agents/`）：pm、researcher、competitor、growth、architect、dba、designer、frontend、backend、algo、miner、qa、reviewer、qc、sre、ops、analyst、data-collector、data-warehouse-engineer。角色定义身份、责任边界与红线，由 `profiles/` 与共享行为栈编译生成。
+19 个角色（`agents/`）：pm、researcher、competitor、growth、architect、dba、designer、frontend、backend、algo、miner、qa、reviewer、qc、sre、ops、analyst、data-collector、data-warehouse-engineer。角色定义身份、责任边界与红线，由 `agent-sources/profiles/` 与共享行为栈编译生成。
 
 27 个做法（`skills/`）以产出物命名（prd-gwt 产出 spec、schema 产出 db-spec、coverage-matrix 产出覆盖矩阵……），承载各专业的步骤与卓越标准。每个做法在注册表里登记类型（经理用 manager、角色主方法 role、实践方法 practice、兼容入口 compat）。角色与做法的多对多映射、任务的运行范围（功能 / 产品 / 周期）与生命周期阶段、任务级工件路径、阶段等级、源码与产品写权限的唯一事实源是 `workflow/registry.json`，速查视图由其生成；角色按任务而非头衔接活，同一个帽在不同任务上的授权与产出各不相同（如 architect 的 feasibility / contract / change-impact / conformance）。
 
@@ -305,19 +337,20 @@ PM spec、architect conformance、backend T-n 要求 `prepare → seal → recor
 ```
 sdlc-workflow/
 ├── commands/        入口命令（生成产物）
-├── agents/          19 个角色（生成产物；源在 profiles/ 与 _lib/）
+├── agents/          19 个生成角色（宿主扫描目录）
+├── agent-sources/   profiles/ 与 _lib/，角色与共享行为源文件（宿主不扫描）
 ├── skills/          27 个做法：SKILL.md + references/ + templates/ + evals/
 ├── workflow/        registry.json：命令路由、角色任务、工件路径、阶段合同
-├── adapters/        hosts.json（插件身份与宿主设置的唯一来源）、宿主工具档、MCP 白名单、宿主事实、codex/agents（生成）
+├── adapters/        hosts.json（插件身份与宿主设置的唯一来源）、宿主工具档、MCP 白名单、宿主事实、codex/agents 与 kimi/agents（生成）
 ├── scripts/         闸门、健康检查、角色工厂、任务与持续工作协议、评测与一致性测试
 ├── vendor/          上游原件：仓库只含 install.sh 与锁文件，内容由使用者从源头下载
 ├── docs/            使用指南 usage.md 与图示 assets/*.svg（给人读，不被任何 skill 加载）
 ├── maintainers/     维护者档案（不被任何 skill 加载），例如待项目方接收的项目经验归档
-├── .zcode-plugin/ .claude-plugin/ .grok-plugin/ .codex-plugin/   各宿主插件清单（生成）
+├── .zcode-plugin/ .claude-plugin/ .grok-plugin/ .codex-plugin/ .kimi-plugin/   各宿主插件清单（生成）
 └── .agents/plugins/ Codex 本地市场（生成）
 ```
 
-`commands/`、`agents/*.md`、各宿主清单与角色速查表均为生成产物，不手改；数据与源文件的唯一维护位置见 `workflow/registry.json` 与 `agents/profiles/`。
+`commands/`、`agents/*.md`、各宿主清单与角色速查表均为生成产物，不手改；数据与源文件的唯一维护位置见 `workflow/registry.json` 与 `agent-sources/profiles/`。
 
 ## 项目侧配置与工件
 
@@ -348,14 +381,14 @@ sdlc-workflow/
 | `scripts/image/` | 出图与它的闸门：生成位图素材并留证（提示词原文、模型、参数、digest），`check.py` 把每张图绑到提示词与声明它的工件上 |
 | `scripts/grok/auth.py` | Grok 订阅授权（OAuth device flow）：登录 / 状态 / 登出；凭据只存 `~/.sdlc/grok/`（0600），任何子命令都不打印 token |
 | `scripts/data_dictionary.py` | 由 erd.dbml + 术语表 + metrics.yaml 生成只读数据字典（`--check` 抓过期与手改） |
-| `scripts/render-role-agents.py` | 从 profiles 与 _lib 编译角色，同时生成 Codex 角色（`adapters/codex/agents/*.toml`）；`--check` 抓漂移 |
-| `scripts/hosts.py` / `scripts/link-codex.py` | 由 `adapters/hosts.json` 生成 ZCode / Claude Code / Grok / Codex 清单与 `hosts.md`（经 `workflow.py render`）；以符号链接让 Codex 引用本插件的 skills 与角色（不复制） |
+| `scripts/render-role-agents.py` | 从 profiles 与 _lib 编译角色，同时生成 Codex TOML 和 Kimi Markdown 角色；`--check` 抓漂移 |
+| `scripts/hosts.py` / `scripts/link-codex.py` / `scripts/link-kimi.py` | 由 `adapters/hosts.json` 生成 ZCode / Claude Code / Grok / Codex / Kimi 清单与 `hosts.md`（经 `workflow.py render`）；以符号链接让 Codex / Kimi 引用本插件的 skills 与角色（不复制） |
 | `scripts/task_runtime.py` / `task_state.py` / `work_scope.py` | 任务协议：`prepare → seal → record → check-tasks`、结果有效性与复验原因、局部工作的 `check-work` / `complete-work` |
 | `scripts/continuous.py` 及其模块 | `workflow.py continuous` 的实现：`artifact_versions`（版本）、`project_graph`（跨功能依赖与影响）、`state_store`（CAS 状态写入）、`workspaces` / `coordination`（隔离 worktree、认领与租约）、`candidate`（集成候选）、`datasets` / `data_jobs`（数据快照与长作业） |
 | `scripts/eval_protocol.py` | `workflow.py eval-prepare / eval-audit / eval-blind`：受控对照的隔离准备、宿主轨迹审计与盲评目录，本身不调模型 |
 | `scripts/grade_eval.py` / `blind_eval.py` | 评测机械评分（不调模型）与盲评 |
 | `scripts/ui-evidence.sh` | UI 截图留证 |
-| `scripts/test_work_scope.py` / `test_task_runtime.py` / `test_workflow.py` / `test_skill_evidence.py` / `test_eval_protocol.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` | 注册表、局部工作、技能证据规则、评测隔离、闸门、vendor 安装与多宿主打包的自测 |
+| `scripts/test_work_scope.py` / `test_task_runtime.py` / `test_workflow.py` / `test_skill_evidence.py` / `test_eval_protocol.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` / `test_reference_links.py` | 注册表、局部工作、技能证据规则、评测隔离、闸门、vendor 安装、多宿主打包与项目链接安全的自测 |
 | `scripts/test_continuous_work.py` | 持续工作协议场景：<br>- 版本共存；CAS 与结果恢复；两个进程并发记录与导入<br>- 跨功能依赖、未声明消费者；方法闭包与复验范围；修复后的诊断<br>- 隔离认领与过期令牌；跨机器拒绝<br>- 集成候选与符号链接；数据快照与长作业 |
 
 ## 上游原件（vendor/）

@@ -496,7 +496,7 @@ print(json.dumps({"job_id":"job-1","status":"submitted" if mode=="start" else "s
         from task_runtime import method_closure, ROOT
         from task_state import result_for, current_validity
         f = self.fixture(); base = f.home / 'plugin-copy'
-        for folder in ('agents', 'skills', 'scripts', 'workflow', 'vendor'):  # vendor/ is installed, not tracked
+        for folder in ('agents', 'adapters', 'skills', 'scripts', 'workflow', 'vendor'):  # vendor/ is installed, not tracked
             if (ROOT / folder).is_dir():
                 shutil.copytree(ROOT / folder, base / folder, ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
         methods = {'primary': 'prd-gwt', 'allowed': [], 'debug': False}

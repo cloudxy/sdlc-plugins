@@ -46,7 +46,7 @@ def string_list(value, label):
 
 def plugin_digest():
     files = {}
-    for folder in ('scripts', 'workflow', 'agents', 'skills', 'adapters', 'commands'):
+    for folder in ('scripts', 'workflow', 'agents', 'agent-sources', 'skills', 'adapters', 'commands'):
         for p in sorted((ROOT / folder).rglob('*')):
             if p.is_file() and '__pycache__' not in p.parts and p.suffix != '.pyc':
                 files[p.relative_to(ROOT).as_posix()] = file_hash(p)
@@ -68,6 +68,16 @@ def method_closure(role, methods, reads=(), base=None):
     skills = {methods['primary'], *methods.get('allowed', []), *(['debug'] if methods.get('debug') else [])}
     queue = [base / 'agents' / (role + '.md'), base / 'workflow/registry.json', base / 'scripts',
              *(base / 'skills' / n for n in skills), *(base / r for r in reads)]
+    # Host-specific prompts/tool boundaries are part of this role's method too.
+    # Packets carry a logical role rather than a host, so conservatively cover every
+    # generated variant of that role; changes to another role do not invalidate it.
+    hosts_path = base / 'adapters/hosts.json'
+    if hosts_path.is_file():
+        hosts = json.loads(hosts_path.read_text())
+        for host, suffix in (('codex', '.toml'), ('kimi', '.md')):
+            if host in hosts:
+                queue.append(base / 'adapters' / host / 'agents' /
+                             (hosts[host]['agent_prefix'] + role + suffix))
     seen, files, gaps, unresolved = set(), {}, set(), set()
     while queue:
         p = queue.pop()

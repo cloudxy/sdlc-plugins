@@ -17,7 +17,7 @@ shared by every project. `codex plugin add` installs a copy (it also drops symli
 cache), so it is not used. Links point at the path this script was invoked through: run it via a hub symlink
 (for example <repo>/.agents/plugins/sdlc-workflow/scripts/link-codex.py) to reference the hub; inside the
 project the links stay relative. Existing real files or directories are never overwritten or deleted; they are
-reported as copies.
+reported as copies. Foreign links are preserved; all conflicts are checked before creating links.
 """
 from __future__ import annotations
 
@@ -29,6 +29,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from hosts import CODEX_AGENT_DIR, codex_agent_name, load_hosts  # noqa: E402
 from workflow import load_registry  # noqa: E402
+from reference_links import execute, link_value, state  # noqa: E402
 
 PLUGIN = Path(os.path.abspath(__file__)).parent.parent  # the invoked path, not its realpath
 
@@ -38,10 +39,6 @@ def codex_home(value) -> Path:
         return Path(value).expanduser().absolute()
     env = os.environ.get("CODEX_HOME")
     return Path(env).expanduser().absolute() if env else Path.home() / ".codex"
-
-
-def link_value(link: Path, target: Path, relative: bool) -> str:
-    return os.path.relpath(target, link.parent) if relative else str(target)
 
 
 def plan(args):
@@ -63,14 +60,6 @@ def plan(args):
     return home, name, pairs, base
 
 
-def state(link: Path, target: Path, relative: bool) -> str:
-    if link.is_symlink():
-        return "ok" if os.readlink(link) == link_value(link, target, relative) else "elsewhere"
-    if link.exists():
-        return "copy"
-    return "missing"
-
-
 def copied_installs(home: Path, name: str):
     cache = home / "plugins" / "cache"
     return sorted(str(p) for p in cache.glob(f"*/{name}") if p.is_dir()) if cache.is_dir() else []
@@ -86,37 +75,19 @@ def main(argv=None) -> int:
     args = p.parse_args(argv)
 
     home, name, pairs, base = plan(args)
-    missing_src = [str(t) for _, t, _ in pairs if not t.exists()]
-    if missing_src:
-        print("sources missing (run python3 scripts/render-role-agents.py):\n  " + "\n  ".join(missing_src))
-        return 1
-
+    problems = [] if args.remove else [
+        f"copied plugin install: {path} (codex plugin remove {name}@<marketplace>)"
+        for path in copied_installs(home, name)]
+    scope_root = Path(args.project).expanduser().absolute() if args.project else base.parent
+    problems, changed = execute(pairs, scope=scope_root, check=args.check,
+                                remove=args.remove, problems=problems)
     if args.remove:
-        removed = 0
-        for link, target, relative in pairs:
-            if link.is_symlink():
-                link.unlink()
-                removed += 1
-        print(f"removed {removed} link(s)")
-        return 0
-
-    problems = []
-    for link, target, relative in pairs:
-        s = state(link, target, relative)
-        if s == "ok":
-            continue
-        if args.check or s == "copy":
-            problems.append(f"{s}: {link}" + (" (a real file or directory: reference only — remove it, then re-run)" if s == "copy" else ""))
-            continue
-        if link.is_symlink():
-            link.unlink()
-        link.parent.mkdir(parents=True, exist_ok=True)
-        link.symlink_to(link_value(link, target, relative))
-    for path in copied_installs(home, name):
-        problems.append(f"copied plugin install: {path} (codex plugin remove {name}@<marketplace>)")
+        print(f"removed {changed} owned link(s)")
     if problems:
         print("\n".join(problems))
         return 1
+    if args.remove:
+        return 0
     scope = "this project only" if args.project else "every project (user-level)"
     print(f"{'up to date' if args.check else 'linked'}: {len(pairs)} reference(s) in {base} ({scope}) -> {PLUGIN}")
     if args.project and not args.check:

@@ -3,7 +3,7 @@
   "_comment": "Single source for plugin identity and host adapters. Edit here, then run python3 scripts/workflow.py render (writes every host manifest and skills/sdlc/references/hosts.md). Every host uses the plugin by reference (hosts[].install); host facts behind these choices: adapters/HOST-NOTES.md.",
   "plugin": {
     "name": "sdlc-workflow",
-    "version": "4.1.0",
+    "version": "4.2.0",
     "description": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
     "description_i18n": {
       "en": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
@@ -101,7 +101,53 @@
       "role_type": "sdlc-workflow-<role>",
       "generic_type": "default",
       "skill_call": "read the listed SKILL.md (Codex lists `sdlc-workflow:<name>`); users pick it with `$` or `/skills`",
-      "read_only": "reviewer/qc agents set sandbox_mode = \"read-only\"; the generic fallback only has the packet rule"
+      "read_only": "typed agents: sandbox_mode = \"read-only\" (verify effective settings); untyped collaboration fallback needs a verified read-only parent/session"
+    },
+    {
+      "id": "kimi",
+      "label": "Kimi Code",
+      "manifest": ".kimi-plugin/plugin.json",
+      "install": "`python3 PLUGIN_ROOT/scripts/link-kimi.py --project <git root>`: individual skill and role symlinks in `.kimi-code/skills/` and `.kimi-code/agents/`, project only. Never `/plugins install` (user-level managed copy)",
+      "commands": "project links: `/skill:<name>` + `mode:`; distribution manifest also declares `/sdlc-workflow:<command>`",
+      "role_type": "sdlc-workflow-<role>",
+      "generic_type": "coder",
+      "skill_call": "Skill tool `<name>` (drop the logical `sdlc-workflow:` prefix); users type `/skill:<name>`",
+      "read_only": "reviewer/qc tool allowlist + disallowedTools; all roles set subagents: []"
     }
-  ]
+  ],
+  "kimi": {
+    "agent_prefix": "sdlc-workflow-",
+    "tools": {
+      "BASE_TOOLS": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Bash",
+        "Skill"
+      ],
+      "WEB_TOOLS": [
+        "WebSearch",
+        "WebFetch"
+      ],
+      "REVIEW_TOOLS": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Skill"
+      ],
+      "DISALLOW": [
+        "Agent",
+        "AgentSwarm"
+      ],
+      "REVIEW_DISALLOW": [
+        "Write",
+        "Edit",
+        "Bash",
+        "Agent",
+        "AgentSwarm"
+      ]
+    }
+  }
 }

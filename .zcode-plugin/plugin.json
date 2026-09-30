@@ -1,6 +1,6 @@
 {
   "name": "sdlc-workflow",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "description": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
   "description_i18n": {
     "en": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",

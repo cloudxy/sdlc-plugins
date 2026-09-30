@@ -6,7 +6,7 @@ Hermes / OpenClaw / this repo's `.claude/` all split **who / how it talks / what
 |---|---|---|---|
 | `IDENTITY.md` | 分身：帽子、职责、拒绝清单、红线 | 人 | 角色契约（Hermes 把这块塞进 SOUL；本仓库 `.claude/IDENTITY.md` 单独抽） |
 | `SOUL.md` | 性格：语气、软偏好 | 人 | `SOUL.md` |
-| `../../<role>.md` | 宿主分身：frontmatter + 组装后的 system prompt | **只由** `render-role-agents.py` 生成 | Hermes `prompt_builder` 的产出，不是手写源 |
+| `../../../agents/<role>.md` | 宿主分身：frontmatter + 组装后的 system prompt | **只由** `render-role-agents.py` 生成 | Hermes `prompt_builder` 的产出，不是手写源 |
 | `skills/<proc>/SKILL.md` | 做法（how），按工件命名 | 人 | 与 IDENTITY 分开；solo 入口是 `$<proc>`（`$pm` 等别名已删） |
 | `<feature>/memory/<role>.md` | 记忆：facts，≤2200 字 | 该角色在交卷时写 | `MEMORY.md` |
 | 仓库 `AGENTS.md` | 上下文：项目约定 | 人 | `AGENTS.md`（`agents_md: true` 注入，不进 SOUL） |

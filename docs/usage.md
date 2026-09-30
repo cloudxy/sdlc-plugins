@@ -39,7 +39,7 @@ bash scripts/health-check.sh    # 应该全部通过
 ```
 
 - ZCode：插件目录就在 `~/.zcode/local-plugins/`，在 ZCode 里启用即可。
-- Claude Code、Grok、Codex：按 [README 的安装表](../README.md#安装只以引用方式使用)登记，不要用 `plugin install` 之类会复制插件的命令。
+- Claude Code、Grok、Codex、Kimi：按 [README 的安装表](../README.md#安装只以引用方式使用)登记，不要用 `plugin install` 之类会复制插件的命令。
 
 **第二步，给项目写配置。**
 
@@ -86,6 +86,8 @@ python3 <插件目录>/scripts/check_config.py --project-root .
 | 已有东西想让人挑错 | `/sdlc-review .sdlc/export/` | 独立审查，只报告，不推进进度 |
 | 维护产品层 | `/sdlc-product strategy feature-map` | 只刷新指定部分 |
 | 一行小修改 | 「改个错别字，不要走流程」 | 经理判为 L0，不起流程 |
+
+Kimi 项目接入用 `/skill:sdlc mode: refine …`、`/skill:sdlc mode: fix …` 等；从 Git 根或其子目录启动。
 
 在 Codex 里没有插件命令：用 `$` 选 `sdlc-workflow:sdlc`，在请求里写 `mode: refine`、`mode: fix` 等，效果相同。不经过 `/sdlc`，也可以用 `$prd-gwt`、`$schema`、`$debug` 等单独召唤某个做法；这种方式没有流程和独立审查。
 

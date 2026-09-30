@@ -15,7 +15,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from hosts import CODEX_AGENT_DIR, ROOT, codex_agent_name, host_problems, load_hosts, render_hosts  # noqa: E402
+from hosts import CODEX_AGENT_DIR, KIMI_AGENT_DIR, ROOT, codex_agent_name, kimi_agent_name, host_problems, load_hosts, render_hosts  # noqa: E402
 from workflow import generated_files, load_registry  # noqa: E402
 
 REGISTRY = load_registry()
@@ -31,7 +31,7 @@ class Manifests(unittest.TestCase):
     def test_every_manifest_is_generated_and_current(self):
         rendered = dict(generated_files(REGISTRY))
         for rel in (".zcode-plugin/plugin.json", ".claude-plugin/plugin.json", ".claude-plugin/marketplace.json",
-                    ".grok-plugin/plugin.json", ".codex-plugin/plugin.json", ".agents/plugins/marketplace.json",
+                    ".grok-plugin/plugin.json", ".codex-plugin/plugin.json", ".kimi-plugin/plugin.json", ".agents/plugins/marketplace.json",
                     "skills/sdlc/references/hosts.md"):
             self.assertIn(rel, rendered)
             self.assertEqual((ROOT / rel).read_text(encoding="utf-8"), rendered[rel], f"{rel}: run workflow.py render")
@@ -39,7 +39,7 @@ class Manifests(unittest.TestCase):
     def test_identity_is_the_same_everywhere(self):
         plugin = HOSTS["plugin"]
         for rel in (".zcode-plugin/plugin.json", ".claude-plugin/plugin.json", ".grok-plugin/plugin.json",
-                    ".codex-plugin/plugin.json"):
+                    ".codex-plugin/plugin.json", ".kimi-plugin/plugin.json"):
             m = manifest(rel)
             self.assertEqual((m["name"], m["version"], m["description"]),
                              (plugin["name"], plugin["version"], plugin["description"]), rel)
@@ -53,6 +53,18 @@ class Manifests(unittest.TestCase):
     def test_zcode_keeps_directory_components(self):
         m = manifest(".zcode-plugin/plugin.json")
         self.assertEqual((m["skills"], m["commands"], m["agents"]), ("skills", "commands", "agents"))
+
+    def test_recursive_agent_scan_contains_no_source_fragments(self):
+        self.assertEqual({p.relative_to(ROOT / "agents").as_posix() for p in (ROOT / "agents").rglob("*.md")},
+                         {f"{role}.md" for role in REGISTRY["roles"]})
+
+    def test_kimi_components_exist_inside_plugin(self):
+        m = manifest(".kimi-plugin/plugin.json")
+        self.assertEqual(m["agents"], "./adapters/kimi/agents/")
+        for key in ("skills", "commands", "agents"):
+            target = (ROOT / m[key]).resolve()
+            self.assertTrue(target.is_dir())
+            self.assertTrue(target.is_relative_to(ROOT))
 
     def test_codex_manifest_and_marketplace(self):
         m = manifest(".codex-plugin/plugin.json")
@@ -99,6 +111,7 @@ class HostReference(unittest.TestCase):
     def test_every_command_has_a_codex_route(self):
         for name, item in REGISTRY["commands"].items():
             self.assertIn(f"| `/{name}` | `sdlc-workflow:{item['skill']}` | `{item['mode']}` |", self.TEXT)
+            self.assertIn(f"`/skill:{item['skill']} mode: {item['mode']} <arguments>`", self.TEXT)
 
     def test_every_role_has_both_names(self):
         for role in REGISTRY["roles"]:
@@ -198,6 +211,24 @@ class CodexAgents(unittest.TestCase):
             self.assertEqual(run("--remove").returncode, 0)
             self.assertEqual([p.name for p in agents.iterdir()], ["mine.toml"])
             self.assertFalse(skills.exists() or skills.is_symlink())
+
+class KimiAgents(unittest.TestCase):
+    def test_role_names_tool_boundaries_and_no_nested_agents(self):
+        for role, meta in REGISTRY["roles"].items():
+            text = (ROOT / KIMI_AGENT_DIR / f"{kimi_agent_name(HOSTS, role)}.md").read_text()
+            header = dict(line.split(":", 1) for line in text.split("---", 2)[1].strip().splitlines())
+            tools = {t.strip() for t in header["tools"].split(",")}
+            denied = {t.strip() for t in header["disallowedTools"].split(",")}
+            self.assertEqual(header["name"].strip(), f"sdlc-workflow-{role}")
+            self.assertEqual(header["subagents"].strip(), "[]")
+            self.assertFalse(tools & {"Agent", "AgentSwarm", "*"})
+            self.assertTrue({"Agent", "AgentSwarm"} <= denied)
+            if meta["fresh"]:
+                self.assertEqual(tools, {"Read", "Glob", "Grep", "Skill"})
+                self.assertTrue({"Bash", "Edit", "Write"} <= denied)
+            else:
+                self.assertTrue({"Read", "Edit", "Write", "Bash"} <= tools)
+
 
 if __name__ == "__main__":
     unittest.main()

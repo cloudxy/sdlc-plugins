@@ -6,9 +6,9 @@ Sources:
 
 | What | File |
 |---|---|
-| 分身（mission, refuse, red lines） | `agents/profiles/<role>/IDENTITY.md` |
-| 性格 | `agents/profiles/<role>/SOUL.md` |
-| 共享栈（behaviour, not host plumbing） | `agents/_lib/{LOOP,TOOLS,SKILLS,SKILLS-reviewer,MEMORY-writer,MEMORY-reviewer,CONTRACT}.md` |
+| 分身（mission, refuse, red lines） | `agent-sources/profiles/<role>/IDENTITY.md` |
+| 性格 | `agent-sources/profiles/<role>/SOUL.md` |
+| 共享栈（behaviour, not host plumbing） | `agent-sources/_lib/{LOOP,TOOLS,SKILLS,SKILLS-reviewer,MEMORY-writer,MEMORY-reviewer,CONTRACT}.md` |
 | 编译期 MCP 白名单 | `adapters/extra-tools.json` |
 | 宿主事实（维护者读，不进 prompt） | `adapters/HOST-NOTES.md` |
 | 运行时记忆 | `<feature>/memory/<role>.md`（reviewer/qc 无） |
@@ -25,6 +25,6 @@ Sources:
 | 6 | Memory | per-feature facts protocol (reviewer/qc: none) |
 | 7 | Contract | deliverable + return shape |
 
-Tool profiles are maintained only in `adapters/zcode.json`; the renderer materializes them in agent frontmatter. Spawn type is always `sdlc-workflow:<role>`. Design rationale: [subagent-design.md](subagent-design.md). Profiles overview: `agents/profiles/README.md`.
+Tool profiles are maintained only in `adapters/zcode.json`; the renderer materializes them in agent frontmatter. Spawn type is always `sdlc-workflow:<role>`. Design rationale: [subagent-design.md](subagent-design.md). Profiles overview: `agent-sources/profiles/README.md`.
 
 Task/skill/ownership metadata lives in `workflow/registry.json`; tool profiles live in `adapters/zcode.json`. Professional quality criteria live only under the owning skill, shared by author and reviewer.

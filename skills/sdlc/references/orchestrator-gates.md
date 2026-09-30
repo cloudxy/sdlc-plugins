@@ -8,7 +8,7 @@ The `/sdlc` window is the **manager** (agents-as-tools). Spawns are nested speci
 
 Full list for maintainers: `PLUGIN_ROOT/adapters/HOST-NOTES.md`. What the manager must know:
 
-- **ZCode, Claude Code and Grok execute plugin agents as `pluginName:bareName`** — spawn `sdlc-workflow:<role>`. Codex runs linked agents `sdlc-workflow-<role>`; packets keep the qualified name ([hosts.md](hosts.md)).
+- **ZCode, Claude Code and Grok execute plugin agents as `pluginName:bareName`** — spawn `sdlc-workflow:<role>`. Codex and Kimi run linked agents `sdlc-workflow-<role>`; packets keep the qualified name ([hosts.md](hosts.md)).
 - **Agent body is who; skills are how.** Hats load `sdlc-workflow:<proc>` with the Skill tool; pass PLUGIN_ROOT so a hat can Read `skills/<proc>/SKILL.md` if Skill fails. Agent frontmatter never carries `skills:` (a non-empty list is an allowlist that blocks companion skills and the reviewer pool).
 - **Research, product, design and architecture hats have `WebSearch` / `WebFetch`**; UI evidence is Bash + `scripts/ui-evidence.sh` (Playwright). Optional MCP tools come only from `adapters/extra-tools.json`, rendered at compile time.
 - **Default `check-sdlc.sh` skip is exit 0.** After a producing hat, run with `--require` / `--hat`. Confirm files exist first — agent said so ≠ file exists.
@@ -18,12 +18,14 @@ Full list for maintainers: `PLUGIN_ROOT/adapters/HOST-NOTES.md`. What the manage
 
 ## 1. Spawn recipe
 
-The first spawn is always the host's role type (`subagent_type: "sdlc-workflow:<role>"`; Codex `agent_type: "sdlc-workflow-<role>"`, [hosts.md](hosts.md)) with the registry-selected packet version (sealed v3 for required contracts and supported scoped tasks, v2 for legacy tasks; see [task-protocol.md](task-protocol.md)). Never paste SKILL.md.
+First inspect the host dispatcher schema ([hosts.md](hosts.md), including Codex variants). When it supports a type selector, the first spawn is the host's role type (`subagent_type: "sdlc-workflow:<role>"`; Codex `agent_type: "sdlc-workflow-<role>"`; Kimi `sdlc-workflow-<role>`, [hosts.md](hosts.md)) with the registry-selected packet version (sealed v3 for required contracts and supported scoped tasks, v2 for legacy tasks; see [task-protocol.md](task-protocol.md)). Never paste SKILL.md.
 
-If the host returns **unknown / unregistered type**, spawn **once** as the host's generic type (`general-purpose`; Codex `default`) with the same packet. Its first action is to Read:
+If the host returns **unknown / unregistered type**, spawn **once** as the host's generic type (`general-purpose`; Codex `default`; Kimi `coder`) with the same packet. Its first action is to Read:
 
 - `PLUGIN_ROOT/agents/<role>.md`
 - `PLUGIN_ROOT/skills/<proc>/SKILL.md` (resolve the task’s primary skill from [stage-map.md](stage-map.md))
+
+**Reviewer/qc exception:** verify that the fresh review context has effective read-only tools/sandbox before dispatch. A writable generic fallback is not acceptable for G-fresh, even with a prompt prohibition. If native roles are unavailable, repair project links and restart, use a verified read-only host type, or keep the review blocked. Record actual isolation/permissions separately from the requested type; Codex runtime overrides can change declared sandbox settings. On Kimi, call project-linked skills by bare name (`Skill: <proc>` or `/skill:<proc>`); packets retain logical qualified names.
 
 Record in `state.yaml` (merge under the role key; never write an empty `host_spawn: {}`):
 

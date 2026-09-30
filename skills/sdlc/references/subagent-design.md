@@ -16,17 +16,17 @@ Grok / ZCode inject **one** `agents/<role>.md` as the child system prompt. That 
 
 | Layer | Source (edit these) | Assembled / runtime | Hermes / OpenClaw analogue |
 |---|---|---|---|
-| **SOUL** 性格 | `agents/profiles/<role>/SOUL.md` | `## SOUL` in `agents/<role>.md` | Hermes `~/.hermes/SOUL.md` (slot #1). OpenClaw `SOUL.md`. This repo `.claude/SOUL.md` |
-| **分身** IDENTITY | `agents/profiles/<role>/IDENTITY.md` + spawn frontmatter | `## IDENTITY` + YAML (`name`, `tools`, `permission_mode`) | OpenClaw `IDENTITY.md` (structured badge). This repo `.claude/IDENTITY.md`. Hermes folds this into SOUL; we split hard vs soft like OpenClaw |
-| **Loop / Tools / Skills / Contract** | `agents/_lib/{LOOP,TOOLS,SKILLS,CONTRACT}.md` (+ `adapters/extra-tools.json` compile-time MCP allowlist) | matching `##` sections; tools in frontmatter | Hermes stable tier (tools + skills index) |
+| **SOUL** 性格 | `agent-sources/profiles/<role>/SOUL.md` | `## SOUL` in `agents/<role>.md` | Hermes `~/.hermes/SOUL.md` (slot #1). OpenClaw `SOUL.md`. This repo `.claude/SOUL.md` |
+| **分身** IDENTITY | `agent-sources/profiles/<role>/IDENTITY.md` + spawn frontmatter | `## IDENTITY` + YAML (`name`, `tools`, `permission_mode`) | OpenClaw `IDENTITY.md` (structured badge). This repo `.claude/IDENTITY.md`. Hermes folds this into SOUL; we split hard vs soft like OpenClaw |
+| **Loop / Tools / Skills / Contract** | `agent-sources/_lib/{LOOP,TOOLS,SKILLS,CONTRACT}.md` (+ `adapters/extra-tools.json` compile-time MCP allowlist) | matching `##` sections; tools in frontmatter | Hermes stable tier (tools + skills index) |
 | **宿主事实** | `adapters/HOST-NOTES.md` | **not assembled** — maintainers only | — |
 | **产品层** | `<product_root>/…` (project repo) | packet `product_context` / `product_writes` | Hermes context tier, product-scoped |
-| **记忆 protocol** | `agents/_lib/MEMORY-writer.md` or `MEMORY-reviewer.md` | `## Memory` | Hermes memory *tool protocol*; not the facts |
+| **记忆 protocol** | `agent-sources/_lib/MEMORY-writer.md` or `MEMORY-reviewer.md` | `## Memory` | Hermes memory *tool protocol*; not the facts |
 | **记忆 facts** | — (role writes at hat end) | `<feature>/memory/<role>.md` (cap 2200). Reviewer/qc: **no file** | Hermes `MEMORY.md` (volatile snapshot). Grok `~/.grok/memory/` is host-level; SDLC memory is per-role artifacts |
 | **上下文** | 仓库 `AGENTS.md` / `CLAUDE.md` | `agents_md: true` (host injects). **No** per-role `CONTEXT.md` | Hermes context tier. Do not paste into SOUL |
 | **USER** | 不按角色建 | 不注入 specialist | Hermes `USER.md` is the operator. Specialists do not own it |
 
-Edit identity or voice in `agents/profiles/<role>/`. Re-run `python3 scripts/render-role-agents.py`. Existing `IDENTITY.md` / `SOUL.md` are never overwritten by the renderer.
+Edit identity or voice in `agent-sources/profiles/<role>/`. Re-run `python3 scripts/render-role-agents.py`. Existing `IDENTITY.md` / `SOUL.md` are never overwritten by the renderer.
 
 Do **not** hand-edit `agents/<role>.md`.
 
@@ -39,7 +39,8 @@ Do **not** hand-edit `agents/<role>.md`.
 | **BigModel Coding Plan** | Subagent = 独立执行单元、上下文隔离、只向主会话返回摘要。Skills = 可复用知识/流程（Reference vs Action），可预载进 Subagent。Agent 循环：获取上下文 → 执行操作 → 验证结果。角色级记忆隔离。description 启用自动委派；工具只给实际需要的。 | Loop 五步对齐该循环。Return 只摘要。写作者/审查者记忆隔离。 |
 | **Grok Build** | `agents/*.md` = session: model, tools, prompt. Spawn = independent context. `resume_from` same type only. Personas overlay tone. Plugin type = `plugin-name:agent-name`. | Frontmatter (`name`, `description`, `color`, `tools`, `permissionMode`). **Omit `skills:`** (ZCode allowlist). Unknown keys (`agents_md`, `prompt_mode`, `permission_mode`) **skip the agent**. Spawn type `sdlc-workflow:<role>`. Isolation `none`. |
 | **OpenAI Agents** | Agent = name + instructions + tools + handoffs + output contract. | Named handoff (refuse list). Structured return: paths + summary + open_questions. |
-| **Claude Code plugin** | Plugin agents `plugin:agent` from the manifest's agent list; tools allowlist + `disallowedTools`; Skill tool; `permissionMode` ignored for plugin agents. | Same `agents/<role>.md`; manifest lists the 19 files (recursive scan would load `_lib`/`profiles`). |
+| **Claude Code plugin** | Plugin agents `plugin:agent` from the manifest's agent list; tools allowlist + `disallowedTools`; Skill tool; `permissionMode` ignored for plugin agents. | Same `agents/<role>.md`; manifest lists the 19 files; sources live outside the recursive scan in `agent-sources/`. |
+| **Kimi Code** | Project `.kimi-code/agents/` discovers Markdown agents from the Git root; prefixed names; exact tool allowlists and explicit `subagents: []`. | Generated Kimi roles share the professional source; project skill links use bare names. Reviewer/qc keep only read tools and Skill; no optional MCP additions. |
 | **Codex** | Plugins carry skills only; custom agents are TOML (`developer_instructions`, `sandbox_mode`) in `.codex/agents/`; no Skill tool; generic type `default`. | Same assembled prompt rendered to `adapters/codex/agents/sdlc-workflow-<role>.toml` with a Codex host note; reviewer/qc read-only sandbox. Runtime mapping: [hosts.md](hosts.md). |
 
 Hermes' global `SOUL.md` is one personality for one home. **Our specialists each have a SOUL.** A delegated `sdlc-workflow:dba` must not inherit the orchestrator's voice. That is the opposite of Hermes' `skip_soul` on generic workers — and it is correct here, because the child *is* the specialist.
@@ -58,7 +59,7 @@ Hosts inject the whole file. Order is the stack. Do not reorder.
 | 6 | **Memory** | `_lib/MEMORY-*.md` | MEMORY.md *protocol* | Protocol no; facts file yes |
 | 7 | **Contract** | `_lib/CONTRACT.md` | output schema | No |
 
-**Project context** is not a section in the agent file. `agents_md: true` already injects `AGENTS.md` / `CLAUDE.md` (Hermes "context" tier). Do not paste the constitution into SOUL. Do not create `agents/profiles/<role>/CONTEXT.md`.
+**Project context** is not a section in the agent file. `agents_md: true` already injects `AGENTS.md` / `CLAUDE.md` (Hermes "context" tier). Do not paste the constitution into SOUL. Do not create `agent-sources/profiles/<role>/CONTEXT.md`.
 
 **USER.md** is the operator profile. Specialists do not own it. Do not write "the operator prefers …" into role memory.
 
@@ -66,9 +67,9 @@ Hosts inject the whole file. Order is the stack. Do not reorder.
 
 | File | Holds | Who writes | When seen |
 |---|---|---|---|
-| `agents/profiles/<role>/IDENTITY.md` | 分身：帽子、职责、拒绝、红线 | Plugin authors | Assembled into slot 2 |
-| `agents/profiles/<role>/SOUL.md` | 性格 | Plugin authors | Assembled into slot 1 |
-| `agents/_lib/*.md` | Shared loop / tools / skills / memory protocol / contract | Plugin authors | Assembled into slots 3–7 |
+| `agent-sources/profiles/<role>/IDENTITY.md` | 分身：帽子、职责、拒绝、红线 | Plugin authors | Assembled into slot 2 |
+| `agent-sources/profiles/<role>/SOUL.md` | 性格 | Plugin authors | Assembled into slot 1 |
+| `agent-sources/_lib/*.md` | Shared loop / tools / skills / memory protocol / contract | Plugin authors | Assembled into slots 3–7 |
 | `agents/<role>.md` | Host adapter = frontmatter + stack | **Factory only** (`render-role-agents.py`) | Child system prompt |
 | `skills/<proc>/SKILL.md` | Procedure (how) — named by artifact, not hat | Plugin authors | Skill tool invoke, or fallback Read |
 | `<feature>/memory/<role>.md` | Facts this role learned on this feature (what) | The role, after a successful hat | Read at start of next spawn; **cap 2,200 chars** |
@@ -106,4 +107,4 @@ Hermes: memory is "what", skills are "how". Same split. Do not copy AGENTS.md se
 
 ## Renderer
 
-`python3 scripts/render-role-agents.py` assembles role prompts. Metadata comes from `workflow/registry.json`, tool profiles from `adapters/zcode.json`, identities and voices from `agents/profiles/<role>/`, and shared behavior from `_lib/`. The renderer has no seed copies and never overwrites source profiles. Do not hand-fork `agents/*.md`.
+`python3 scripts/render-role-agents.py` assembles role prompts. Metadata comes from `workflow/registry.json`, tool profiles from `adapters/zcode.json`, identities and voices from `agent-sources/profiles/<role>/`, and shared behavior from `_lib/`. The renderer has no seed copies and never overwrites source profiles. Do not hand-fork `agents/*.md`.

@@ -339,7 +339,7 @@ def main() -> int:
                     err("AGENT", line.strip())
         else:
             ok("agents/*.md 与 profiles/_lib 一致（编译期引入）")
-    lib = os.path.join(ad, "_lib")
+    lib = os.path.join(root, "agent-sources", "_lib")
     for lib_name in (
         "LOOP.md",
         "TOOLS.md",
@@ -350,7 +350,7 @@ def main() -> int:
         "CONTRACT.md",
     ):
         if not os.path.isfile(os.path.join(lib, lib_name)):
-            err("AGENT", f"agents/_lib/{lib_name} 缺失（共享 prompt 源）")
+            err("AGENT", f"agent-sources/_lib/{lib_name} 缺失（共享 prompt 源）")
     AGENT_PROC = {name: role["skill"] for name, role in registry["roles"].items()}
     ALIASES = {"pm": "prd-gwt", "dba": "schema", "qa": "coverage-matrix"}  # legacy $role aliases, already deleted
     SKILL_META = registry.get("skills", {})
@@ -479,12 +479,12 @@ def main() -> int:
         for sec in ("## SOUL", "## IDENTITY", "## Loop", "## Tools", "## Skills", "## Memory", "## Contract"):
             if sec not in text:
                 err("AGENT", f"agents/{f}.md 缺 {sec}（Hermes 式 prompt stack；源文件在 profiles/_lib）")
-        ident_src = os.path.join(ad, "profiles", f, "IDENTITY.md")
-        soul_src = os.path.join(ad, "profiles", f, "SOUL.md")
+        ident_src = os.path.join(root, "agent-sources", "profiles", f, "IDENTITY.md")
+        soul_src = os.path.join(root, "agent-sources", "profiles", f, "SOUL.md")
         if not os.path.isfile(ident_src):
-            err("AGENT", f"agents/profiles/{f}/IDENTITY.md 缺失（分身源文件）")
+            err("AGENT", f"agent-sources/profiles/{f}/IDENTITY.md 缺失（分身源文件）")
         if not os.path.isfile(soul_src):
-            err("AGENT", f"agents/profiles/{f}/SOUL.md 缺失（SOUL 源文件）")
+            err("AGENT", f"agent-sources/profiles/{f}/SOUL.md 缺失（SOUL 源文件）")
         if f"sdlc-workflow:{f}" not in text:
             err("AGENT", f"agents/{f}.md 正文未声明 spawn type sdlc-workflow:{f}")
         if f in ("reviewer", "qc"):
@@ -501,14 +501,14 @@ def main() -> int:
     def _read_if(p: str) -> str:
         return open(p, encoding="utf-8").read() if os.path.isfile(p) else ""
 
-    ops_id = _read_if(os.path.join(ad, "profiles", "ops", "IDENTITY.md"))
-    sre_id = _read_if(os.path.join(ad, "profiles", "sre", "IDENTITY.md"))
+    ops_id = _read_if(os.path.join(root, "agent-sources", "profiles", "ops", "IDENTITY.md"))
+    sre_id = _read_if(os.path.join(root, "agent-sources", "profiles", "sre", "IDENTITY.md"))
     ops_ag = _read_if(os.path.join(ad, "ops.md"))
     sre_ag = _read_if(os.path.join(ad, "sre.md"))
     ops_desc = fm_field(fm(ops_ag), "description")
     sre_desc = fm_field(fm(sre_ag), "description")
     if not re.search(r"产品运营|product operations", ops_id, re.I):
-        err("OPSRE", "agents/profiles/ops/IDENTITY.md 必须标明 产品运营 / product operations（ops ≠ 运维）")
+        err("OPSRE", "agent-sources/profiles/ops/IDENTITY.md 必须标明 产品运营 / product operations（ops ≠ 运维）")
     if re.search(r"^Title: operations specialist\s*$", ops_id, re.M):
         err("OPSRE", "ops IDENTITY Title 不得只写 operations specialist（英文会读成运维）")
     if not re.search(r"deploy|rollback|incident|SRE|运维", ops_id, re.I):
@@ -518,7 +518,7 @@ def main() -> int:
     if not re.search(r"产品运营|product operations", ops_desc, re.I):
         err("OPSRE", "agents/ops.md description 必须含 product operations / 产品运营")
     if not re.search(r"运维", sre_id):
-        err("OPSRE", "agents/profiles/sre/IDENTITY.md 必须标明 运维")
+        err("OPSRE", "agent-sources/profiles/sre/IDENTITY.md 必须标明 运维")
     if not re.search(r"ops|产品运营|user-facing|release notes|signal", sre_id, re.I):
         err("OPSRE", "sre IDENTITY Refuse 必须把用户公告/信号归纳排除给产品运营 ops")
     if not re.search(r"Do NOT use for.*(user-facing|support|signal|产品运营)", sre_desc, re.I):
@@ -534,9 +534,9 @@ def main() -> int:
         leaked = [w for w in HOST_PLUMBING if w in body]
         if leaked:
             err("PLUMBING", f"agents/{f}.md 含宿主管道说明（{', '.join(leaked)}）；移到 adapters/HOST-NOTES.md")
-        ident = _read_if(os.path.join(ad, "profiles", f, "IDENTITY.md"))
+        ident = _read_if(os.path.join(root, "agent-sources", "profiles", f, "IDENTITY.md"))
         if "Excellent looks like" in ident or re.search(r"^Method:", ident, re.M):
-            err("LAYER", f"agents/profiles/{f}/IDENTITY.md embeds procedure; move it to its skill")
+            err("LAYER", f"agent-sources/profiles/{f}/IDENTITY.md embeds procedure; move it to its skill")
         proc = AGENT_PROC.get(f)
         if proc and not os.path.isfile(os.path.join(skills_dir, proc, "references", "role-quality.md")):
             err("EXCELLENCE", f"{proc}: missing shared professional criteria")

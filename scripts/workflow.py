@@ -122,7 +122,7 @@ def validate_registry(registry, root=ROOT):
         if not (root / "skills" / item["skill"] / "SKILL.md").is_file():
             errors.append(f"{role}: missing skill {item['skill']}")
         for name in ("IDENTITY.md", "SOUL.md"):
-            if not (root / "agents/profiles" / role / name).is_file():
+            if not (root / "agent-sources/profiles" / role / name).is_file():
                 errors.append(f"{role}: missing {name}")
         if item["fresh"] and item["product_writes"]:
             errors.append(f"{role}: fresh reviewer cannot own product writes")

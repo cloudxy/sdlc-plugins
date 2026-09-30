@@ -32,7 +32,8 @@
     ],
     "FORBIDDEN_EXTRA": [
       "*",
-      "Agent"
+      "Agent",
+      "AgentSwarm"
     ],
     "REVIEWER_FORBIDDEN_EXTRA": [
       "Bash",
