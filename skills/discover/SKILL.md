@@ -1,28 +1,29 @@
 ---
 name: "discover"
-description: "Use this skill when the user says /sdlc-discover or /sdlc on a vague L2+ idea with no briefing. Do NOT use for spec.md or code."
-when_to_use: "Use when /sdlc-discover, or /sdlc L2+ with no briefing. Do NOT use to write spec.md, schema, or code."
+description: "Use this skill when the user says /sdlc-discover or needs help shaping unclear needs. Do NOT use for spec.md or production code."
+when_to_use: "Use for unclear needs or unresolved product choices at any delivery size. Reuse accepted decisions. Do NOT write spec.md or production code."
 ---
 
-# Discover — frame, survey, discuss, falsify, then freeze
+# Discover — co-create needs and prepare the next decision
 
-**Entry mode:** `full` (default) follows the chain below. `research` follows [references/research-mode.md](references/research-mode.md) and returns after the survey; no HITL, freeze or define. Preserve an explicit command mode; without commands (Codex), an explicit `mode:` or the command name in the request counts as the command.
+**Entry mode:** `full` (default) selects relevant steps below. `research` follows [references/research-mode.md](references/research-mode.md) and returns after the survey; no HITL, freeze or define. Preserve an explicit command mode; without commands (Codex), an explicit `mode:` or the command name in the request counts as the command.
 
-This window is the **discovery manager**. You keep the user-facing reply (grilling is HITL). Spawn `sdlc-workflow:researcher` / `sdlc-workflow:competitor` for the AFK survey, then `sdlc-workflow:growth` for positioning and highlight hypotheses. Do not handoff. Do not write `spec.md`.
+This window is the **discovery manager**. Keep the user-facing conversation. When research is needed, select `sdlc-workflow:researcher` / `sdlc-workflow:competitor`, then growth if positioning is unresolved. Do not handoff the conversation or write `spec.md`.
 
 Discovery exists to find **what is worth building and why it would win** — not only to kill bad ideas. Falsify guards against self-deception; the survey and growth tracks supply the insight.
 
-Borrowed: mattpocock **grilling** (design tree, whole frontier per round, recommended answers) and superpowers **brainstorming** (classify, present, resolve consequential choices with the human when existing authority does not already settle them).
+Borrowed: mattpocock **grilling** (decision dependencies) and superpowers **brainstorming** (resolve consequential choices not already settled by authority). The shared [discussion method](references/discuss-protocol.md) adds progressive elicitation, examples and revisable understanding.
 
 <!-- 来源（派生技能，只作追溯）：借鉴 mattpocock/skills skills/productivity/grilling 与 obra/superpowers skills/brainstorming；借鉴时的上游版本未记录，登记时上游为 mattpocock/skills@74ca5fe07745、obra/superpowers@b36e0829c6d0。已按本插件合同改写，上游变更不自动同步，也不放进 vendor/。 -->
 
-**Default order for a new uncertain product direction:** Frame → relevant research → decision discussion → assumption checks → freeze. Select research by unresolved questions; reuse accepted evidence and authorized decisions. Market/compete/growth are conditional tasks, not mandatory ceremony. Do not write FR/GWT here.
+**For a new uncertain direction:** form a provisional frame, discuss and research what is unclear, check load-bearing assumptions, then accept the current slice. Move back when new information changes the problem or solution. Select research by unresolved questions; reuse accepted evidence and authorized decisions. Market/compete/growth are conditional tasks. Do not write FR/GWT here.
 
 | Task | Approach |
 |---|---|
-| **Vague idea / new product change** | Full chain below |
+| **Vague idea / new product change** | Use the discussion method and select relevant steps below |
+| **Bounded ambiguity / later refinement** | Clarify the consequential gap in the existing work brief; no full survey or new state just for a short exchange |
 | **Survey only** | Execute `research` mode via its reference |
-| **Briefing exists, user says continue** | Return to the sdlc manager with the accepted briefing; do not redo discovery or request the same authorization |
+| **Briefing exists, user says continue** | Resume its decisions, hypotheses and open questions; return the accepted scope to the manager without repeating settled questions |
 | **Kill verdict** | `discovery.status: killed`. Do not spawn pm |
 
 ## Gotchas
@@ -45,22 +46,22 @@ Record the unresolved decision, existing evidence/authorization, selected resear
 
 ## Steps
 
-### 1. Frame (HITL, one round)
+### 1. Frame progressively (HITL)
 
-Say the classification out loud: spike / bounded-L1 (skip this skill; L0/L1 do not discover) / **product-change** (default).
+Read [discuss-protocol.md](references/discuss-protocol.md) when needs or choices are unclear. Identify the uncertainty before assigning a delivery lane. A small change may need clarification; a large accepted change may not need rediscovery.
 
-Ask only what you need for a frame: who we serve, ToB/ToC/both, problem *type* (not the button). Write `00-discover/briefing.md` with Claim stub. `discovery.status: pending`, `phase: Discovering`.
+Build a provisional understanding of who/context/outcome. If the user cannot answer, offer tentative scenarios or examples to react to. Do not assume a hidden complete brief or force a choice. With an established feature workspace, keep Claim and unknowns in `00-discover/briefing.md`; full discovery uses `discovery.status: pending`, `phase: Discovering`. A bounded exchange uses its existing work brief; conversation-only exploration can retain a compact summary until an artifact location is established.
 
 ### 2. Survey (AFK, parallel)
 
-Spawn **once each** (native `sdlc-workflow:<role>`, packet v2 with `product_context` = product `strategy.md` + `feature-map.md`, no SKILL.md paste):
+For each selected track, spawn **once** (native `sdlc-workflow:<role>`, packet v2 with `product_context` = product `strategy.md` + `feature-map.md`, no SKILL.md paste):
 
 - `hat: researcher`, `stage: market`, `task: survey`, `primary_skill: sdlc-workflow:market` → `00-discover/market.md`
 - `hat: competitor`, `stage: compete`, `task: survey`, `primary_skill: sdlc-workflow:compete` → `00-discover/compete.md`
 
 If host unknown type: one fallback with the host's generic type (`general-purpose`; Codex `default`; [hosts.md](../sdlc/references/hosts.md)) that Reads `PLUGIN_ROOT/agents/<role>.md` + the skill. Record `host_spawn`. Then `check-sdlc.sh --require --hat market` / `--hat compete`.
 
-Skip a hat only with `roles_skipped` + why (pure internal tool still writes 现状 in compete).
+For a full discovery record, document omitted tracks with `roles_skipped` + why. A bounded exchange need not manufacture survey files; if compete is selected, include 现状 even for an internal tool.
 
 Load `sdlc-workflow:market` / `compete` only inside those hats, not here.
 
@@ -70,26 +71,28 @@ Spawn **once**: `hat: growth`, `stage: growth`, `task: positioning`, `primary_sk
 
 ### 3. Discuss (HITL)
 
-Load nothing else yet. Work a **design tree**. Each round: ask the consequential unresolved questions whose prerequisites are settled; number them, recommend answers, and wait only for decisions not covered by existing authority.
+Follow [discuss-protocol.md](references/discuss-protocol.md). Choose the next helpful move from the current uncertainty. Separate eliciting needs from recommending a decision. Preserve facts, hypotheses, decisions and corrections in the current brief; revisit only the affected scope when understanding changes.
 
-- **Discuss-P:** three-question probe (how do they do it today / where it breaks / what they do next). Applicable role surfaces (for example buyer / user / tenant admin / platform admin). Conflicts as their own heading. No solution pick.
-- **Discuss-S:** after evidence relevant to the decision is available or its absence is explicit. Credible alternatives when unresolved, appetite, ToB/ToC probe card ([product-surfaces.md](references/product-surfaces.md)). Each option states which highlight hypothesis it makes true. Do not adopt a competitor feature as the chosen solution.
+- **Discuss-P:** use relevant parts of the three-question probe or scaffolding to understand context, difficulties and intended progress. Consider applicable roles and conflicts; reuse known answers. Do not prematurely choose a solution.
+- **Discuss-S:** after relevant evidence is available or its absence explicit. Compare credible alternatives for unresolved choices, appetite and relevant [product surfaces](references/product-surfaces.md). If growth hypotheses exist, explain their relation to each option. A competitor feature alone does not decide the solution.
 
 Facts (repo, docs, survey files) are your job — spawn no extra hats for grep. Decisions are the user's.
 
-Interview script / questionnaire: [discuss-protocol.md](references/discuss-protocol.md). External answers stay E1 until they come back.
+Interview scripts and questionnaires use the same reference. Proposed interviews are not observations; grade actual returns using evidence.md.
 
 ### 4. Falsify (HITL)
 
 Apply [assumption-testing.md](references/assumption-testing.md); `$falsify` is only a deprecated compatibility entry to that same method (sunset 2026-12-31). Problem-layer uses survey evidence (triage tree). Solution-layer uses Discuss-S. Verdict: kill | narrow | bet | pass. Bet requires a named metric that later becomes the spec north-star or driver.
 
-Optional: use registered `designer/market/prototype` task for a scoped experiment. Prototype code is not implement evidence.
+Optional: use registered `designer/market/prototype` for a scoped learning material or experiment. An inline sketch can clarify a question without delegation; neither sketches nor prototype code establish implementation or market success.
 
 ### 5. Freeze
 
-Complete [templates/briefing.md](templates/briefing.md). Five track headings present (Discuss, Compete, Market, Growth, Falsify). `discovery.status: done` (or `killed`). Open questions as `{id, status, owner, recommended}`.
+Apply the discussion method's readiness criteria to the current slice. Complete [templates/briefing.md](templates/briefing.md) for full discovery; preserve its five track headings and explain skipped research. Mark `discovery.status: done` only for the accepted slice (or `killed`). Open questions include owner, recommendation, decision source/status and blocked scope; future questions do not require all-unknowns closure. Partial readiness stays explicit and uses scoped-work routing, not a false full-completion claim.
 
-If continuation is already authorized, return the frozen briefing to the sdlc manager for define. Otherwise present the concrete decision and await only the missing authorization. A survey-only request ends here.
+Freeze means the scope is ready for its next action, not that the hypothesis verdict is `pass`: an authorized bounded `bet` or accepted `narrow` can proceed. Missing evidence alone does not block authorized exploration or select a bet verdict. If scenario, investment boundary or metric is unknown, keep the verdict pending; obtain the missing context before prescribing test counts/thresholds. Do not re-ask approval of the same direction.
+
+Return the accepted briefing to the sdlc manager for define when continuation is authorized. `define` is a stage, not a `/sdlc-define` command; use registered routing, and never claim a handoff ran if tools were unavailable. Otherwise present the concrete decision and await only missing authority. Survey-only stops after its result.
 
 ## Self-check
 
@@ -99,13 +102,15 @@ If continuation is already authorized, return the frozen briefing to the sdlc ma
 - [ ] Discuss-P before Discuss-S? No FR/GWT in briefing?
 - [ ] Falsify has kill criteria and a verdict? Unquantified market did not "pass"?
 - [ ] Consequential decisions have an explicit current or prior authority reference?
+- [ ] Uncertainty selected the dialogue depth; an unanswered prompt got helpful scaffolding; rejected options and corrected goals were respected?
+- [ ] Current-slice readiness, residual hypotheses and blocked consumers recorded without re-asking settled decisions?
 - [ ] Briefing Market/Compete are summaries + links, not a paste? No E3 without a counted snapshot?
 
 ## Deep references — when to read them
 
 | Reference | Read when... |
 |---|---|
-| [discuss-protocol.md](references/discuss-protocol.md) | Grilling rounds, Mom Test script, questionnaire |
+| [discuss-protocol.md](references/discuss-protocol.md) | Unclear needs, conversation starters, corrections, readiness, interview scripts and resume |
 | [product-surfaces.md](references/product-surfaces.md) | ToB/ToC probe card in Discuss-S |
 | [templates/briefing.md](templates/briefing.md) | Writing the freeze artifact |
 | [templates/assumptions.md](templates/assumptions.md) | A standalone assumption table, linked from briefing § Falsify |

@@ -27,9 +27,11 @@ Job: **decide what is worth building, make its core value unmistakable, and make
 
 Detail the current feature/slice, keeping future product capabilities coarse. Separate business decomposition (journeys, rules, permissions, states, boundaries, observable acceptance) from implementation tickets owned by architecture after the necessary design/technical choices. An exploratory prototype or feasibility result may expose missing requirements before handoff. Accepted means ready for the named consumers at this version, not immutable forever. On feedback, state the quality gap, revise only the affected scope, preserve stable requirement IDs and return downstream impact. A draft and an accepted handoff have different completion claims.
 
+When the user cannot express a need or revises it during discussion, use the shared [discussion protocol](../discover/references/discuss-protocol.md). In a delegated task, return consequential questions, credible options and blocked consumers to the manager; solo entry can discuss directly. Reuse known answers. Examples can help a preference form; record it as a decision with authority, separately from evidence of effectiveness.
+
 ## Gotchas — things that go wrong without being told
 
-- **Users describe solutions, not problems.** "Add an export button" → three-question probe: how do you do it today, where does it break, what do you do next? The real job is often a collaboration loop, not a button.
+- **A feature request may hide an unclear goal.** When purpose is unresolved, explore context/current behavior/desired progress. When the request is already understood and authorized, preserve it rather than repeating the probe.
 - **A requirement list is not a product.** Without the core value path, every FR looks equally important and the team polishes the periphery. Rank by contribution to the path; label peripheral work as peripheral.
 - **Do not reopen settled choices.** Compare credible concepts for unresolved decisions; cite existing authorization when scope is already clear. Never invent alternatives to meet a quota.
 - **Journeys make value testable.** A spec without walkable journeys J-n leaves qa with unit-level mappings and acceptance with nothing to walk; the build passes tests and is still unusable.
@@ -41,7 +43,7 @@ Detail the current feature/slice, keeping future product capabilities coarse. Se
 - **Never commit to a delivery date.** Appetite is a budget, not a schedule.
 - **Safety, permissions and data consistency are never cut for appetite.**
 - **Same preconditions and action must have compatible outcomes.** Two FRs about the same screen must not disagree; NFR one-liners must match the permission matrix and metrics blueprint.
-- **Strategic questions are the operator's; operational ones are yours.** Who to serve, positioning, core value and Aha, pricing and paywalls, launch timing, the north star and scope cuts → a `Q-*` row with 类别 战略, options, your recommendation, 状态 待确认, and the dependent FRs marked as waiting. Reversible details inside decided strategy → apply your default (状态 默认, with the reason). Silence is not consent: 2026-09-17, five unanswered strategic calls were written in as 「默认已定」 and spread through four product files.
+- **Consequential choices need authority.** Audience, positioning, value, pricing, launch, north star and scope cuts need the operator's decision. Business details can also be consequential: duplicate/overwrite semantics, access or ownership rules must not become defaults merely because they are called operational. Reuse accepted rules; otherwise return Q-* with options, recommendation, decision owner and blocked FRs. Apply defaults only to reversible details within existing authority that do not settle an unresolved business outcome; label them 默认 with reasons. Silence is not consent.
 
 ## Key decisions
 
@@ -55,11 +57,11 @@ A feature is **core** if removing it stops users reaching Aha. Everything else i
 
 ### Working backwards — the problem in user terms
 
-Four sentences, all required: ① who (specific role) ② current situation + workaround cost ③ desired outcome in the user's words ④ how we'll know (observable change).
+Capture who, current situation, desired outcome and how improvement can be observed. Investigate available facts; keep unknown costs/baselines explicit. Use concrete examples or a walkthrough when the user cannot express the outcome; sentence counts are not a completion criterion.
 
 ### Unresolved solution choices and consumer journeys
 
-Compare concepts on: job coverage, contribution to the value path, whether a highlight moment is possible, difference from alternatives, rough cost (ask architect), risk. Pick one and record why the others lost. Then write key journeys J-n as step tables (user action → what they see → FR) with a success standard (steps / seconds to Aha, completion rate). Every FR anchors to a journey step.
+For unresolved choices, compare concepts on job coverage, value-path contribution, observable value, alternatives, rough cost (architect input) and risk. Record the authorized choice and reasons; otherwise retain the decision as pending. Map activities from trigger to outcome, including relevant role handoffs, then slice a usable path. Write key journeys J-n (action → observable result → FR) with an appropriate success standard. Every FR anchors to a journey step; headless work need not invent screens.
 
 ### RICE scoring
 
@@ -120,6 +122,7 @@ PM may sketch to clarify business intent, but final UI decisions live in the des
 | [spec-task.md](references/spec-task.md) | Assigned define/spec: input sufficiency, authorized short paths and task completion |
 | [product-shaping.md](references/product-shaping.md) | Before any FR: JTBD, core value path and Aha, removal test + Kano, opportunity–solution tree, MVP skeleton, 0→1 hypothesis mode |
 | [requirement-triage.md](references/requirement-triage.md) | Triaging requirements, digging for the real problem behind solution-speak, RICE |
+| [discussion protocol](../discover/references/discuss-protocol.md) | Unclear needs, inability to answer, rejected options, goal changes and scoped readiness |
 | [gwt-authoring.md](references/gwt-authoring.md) | Writing GWT, fixing untestable words, enumerating edge cases, one-oracle rule |
 | [flow-diagram.md](references/flow-diagram.md) | Packet visuals flow/state: drawing a checked business flow or state diagram from the spec |
 | [metrics-blueprint.md](references/metrics-blueprint.md) | Designing metrics and instrumentation gaps |

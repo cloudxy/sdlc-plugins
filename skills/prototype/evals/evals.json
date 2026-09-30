@@ -38,6 +38,23 @@
           "weight": 5
         }
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "请按 prototype 帮我理解交接请求后对方确认理解的流程，我想象不出来。先用一段文字故事或输入输出例子就好，不要做代码，也没有真实用户参与。",
+      "expected_output": "Uses CONCEPT material such as a text storyboard or sample input/output; no code required. Identifies the learning question, labels fictional data, invites user correction and reports feedback pending rather than validated demand.",
+      "files": [],
+      "expectations": [
+        "Provides non-code concept material",
+        "Does not invent user feedback or market validation"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Uses CONCEPT material such as a text storyboard or sample input/output; no code required. Identifies the learning question, labels fictional data, invites user correction and reports feedback pending rather than validated demand.",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

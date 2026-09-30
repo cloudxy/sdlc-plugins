@@ -6,7 +6,7 @@ when_to_use: "User asks for SDLC delivery, local refinement, defect repair or co
 
 # SDLC orchestrator (manager only) — v4
 
-This window is the **manager**: keep the user-facing conversation, classify intent, coordinate state/product context, dispatch specialists and present decisions. Do not hand off the conversation. Specialists load their assigned sdlc-workflow procedure through the Skill tool (Read fallback per host) in their own context; this window performs discovery in Step 1b and coordination, not role implementation.
+This **manager** keeps the conversation, classifies intent, coordinates state/context and dispatches specialists. Specialists load their assigned procedure with Skill (host Read fallback) in their own context. This window handles discovery and decisions, not role implementation.
 
 Quality comes from product context, real evidence, early feasibility, explicit experience decisions and acceptance on the running build. Gates establish minimum checks; they do not replace professional judgment.
 
@@ -31,7 +31,7 @@ Commands contain no procedures. Entry routing, role/stage/task mappings, artifac
 5. Every hat reads the product layer first; every producing hat keeps its product files true and returns delta rows, which only you record (`product-delta.md`, `CHANGELOG.md`).
 6. On a UI change, final architecture contracts consume the approved final design. Risky technical assumptions can be checked earlier with architect `define/feasibility`; that task does not choose the product experience or require a frozen spec.
 7. Acceptance on the build before the final review: pm walks the journeys, the designer runs design QA, growth checks claims.
-8. Strategic decisions belong to the operator. No explicit answer, no decision: stop and wait — never adopt a hat's recommendation as a default.
+8. Strategic decisions belong to the operator. Reuse explicit authority; pending choices block their consumers, never become a hat's default.
 
 ## References and templates — read when
 
@@ -91,7 +91,9 @@ For an independent diagnosis, prototype, analysis, data audit or mining experime
 
 ## Step 1b — discover (before lane, before pm)
 
-When class is `discovery`, or `new-feature` at L2+ without `discovery.status: done|skipped|killed`: invoke `sdlc-workflow:discover` in this window and follow it — select the unresolved decisions and relevant evidence tracks using discover → freeze `00-discover/briefing.md`. No pm, architect or implement spawns in this step; no `spec.md`. Reuse accepted briefings, defect reports, contracts and explicit scope decisions; record the reference and why further discovery is unnecessary. Verdict `killed` → stop. After freeze and a current or prior authorization to continue → Step 2.
+Separate uncertainty from size. Clarify bounded gaps and specialist-returned questions via the [discussion protocol](../discover/references/discuss-protocol.md), using the existing brief without new discovery state.
+
+For substantial product uncertainty (check L2+ without a discovery result), invoke `sdlc-workflow:discover` → accept the slice in `00-discover/briefing.md`. Reuse accepted briefs/defects/decisions; select research as needed. No pm/architect/implement spawns or `spec.md` here. Partial readiness uses work-scope for independent authorized work, not full discovery completion. `killed` → stop; accepted slice + continuation authority → Step 2.
 
 ## Step 2 — lane and participation
 
@@ -117,7 +119,7 @@ For `coordinated-state-v1`, bind saved results through CAS instead of rerunning 
 
 - **Discovery freeze** (Step 1b).
 - **Design direction pick** (`ui: yes`): when a new direction decision is needed, after designer `explore`, show each direction in one line — signature moment, trade-off, screenshot paths — plus the designer's recommendation, and wait only if the decision is not already authorized or delegated. Record `design: {picked: D<n>, picked_by: user|delegated, at}`. The designer's `specify` spawn writes `选定：D<n>` into `design-directions.md`.
-- **Strategic decisions** (`Q-*` rows with 类别 战略, 状态 待确认): ask all of them in one round — question, options, the hat's recommendation — and **wait**. Name the decider from `owners` if configured (product-layer § Decisions). Only an explicit answer counts. Silence, a question tool that returns no answer, or a question the user never saw is not consent. "按推荐" or "你定" from the user is an answer; record it as such. Record each answer in `open_questions` (Step 5) and respawn the owner to write 已确认 with the operator's words. No answer → mark the dependent tasks waiting for the decision and explain the dependency; unrelated ready work continues. Use global `phase: Stopped` only when no authorized work can proceed.
+- **Strategic decisions** (`Q-*`, 类别 战略, 状态 待确认): use the discussion protocol to present manageable, dependency-ready choices with options and recommendations. Name the decider from `owners` if configured. Reuse explicit authority; silence or an unanswered tool is not consent. "按推荐" or "你定" is an answer; record its scope in `open_questions` (Step 5) and respawn the owner to write 已确认 with the operator's words. Pending choices block their consumers; unrelated ready work continues. Use `phase: Stopped` only when no authorized work can proceed.
 - **Operational defaults** (状态 默认): list them in your report; the user can overturn any of them later.
 - **Acceptance** verdict `有条件通过`: the user accepts the conditions or sends the slice back. Record acceptance as `open_questions` entry `{id: Q-ACCEPT-<PM|DESIGN|GROWTH>, status: answered, by: user, quote: "<their words>"}`; the gate checks it.
 

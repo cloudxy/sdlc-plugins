@@ -2,7 +2,7 @@
 
 Job: **write load-bearing assumptions that can be false**, the cheapest test, and a verdict. Confirmation is not the goal. Launch A/B belongs to `retro` / analyst — not here.
 
-Invoke from the discover window after survey + discuss. Do not invent evidence; cite market.md / compete.md / interview returns.
+Invoke when the current discussion exposes load-bearing uncertainty. Use relevant research, existing artifacts or interview returns; a survey is not required for every bounded question. No existing evidence means an explicit hypothesis and learning step, not fabricated findings or automatic rejection.
 
 | Task | Approach |
 |---|---|
@@ -34,6 +34,8 @@ See [evidence.md](evidence.md), the sole definition of evidence labels. Grades d
 7. Launch experiment — **forbidden here**; bets only reserve the metric
 
 ## Verdict
+
+Do not choose a verdict from missing evidence alone. When the scenario, load-bearing assumptions, investment boundary or bet metric is still unknown, leave the verdict pending and resolve the relevant gap. Direction approval can authorize continued exploration without authorizing a larger implementation bet. Define tests from the actual claim; do not prescribe generic interview counts or numerical kill thresholds before that context exists. Proposed criteria are not executed results or accepted decisions.
 
 - **Kill** → `discovery.status: killed`. No pm.  
 - **Narrow** → rewrite Claim, allow define on the smaller claim.  

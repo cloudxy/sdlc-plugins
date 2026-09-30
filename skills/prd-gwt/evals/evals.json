@@ -127,6 +127,23 @@
           "weight": 5
         }
       ]
+    },
+    {
+      "id": 7,
+      "prompt": "用 prd-gwt 细化已批准的批量导入：成功数据应保留，失败数据允许重试。用户只说重试要合理，没有决定重复提交怎么处理，也回答不出精确定义。怎样继续？",
+      "expected_output": "Separates rules, examples and unresolved questions. Offers concrete retry outcomes with tradeoffs, returns the consequential decision to the manager and marks only its consumers pending; does not invent an accepted Then or blanket-block settled scope.",
+      "files": [],
+      "expectations": [
+        "Uses concrete examples to expose the retry rule",
+        "Does not fabricate acceptance or reopen settled partial-success behavior"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Separates rules, examples and unresolved questions. Offers concrete retry outcomes with tradeoffs, returns the consequential decision to the manager and marks only its consumers pending; does not invent an accepted Then or blanket-block settled scope.",
+          "weight": 5
+        }
+      ]
     }
   ]
 }

@@ -1,5 +1,5 @@
 ---
-description: "HITL product discovery — frame, market∥compete survey, growth positioning, discuss, falsify, freeze briefing. Does not write spec.md. This window stays the manager."
+description: "Co-create unclear needs through conversation, examples and scoped research; check assumptions and accept the current slice. Reuse settled decisions. No spec.md; this window stays the manager."
 argument-hint: "[idea or 'continue']"
 skills: discover
 ---

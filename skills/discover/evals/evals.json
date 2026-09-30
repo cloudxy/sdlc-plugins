@@ -4,13 +4,12 @@
     {
       "id": 1,
       "prompt": "User says /sdlc-discover: 给报表页加个导出按钮，能下载 Excel.",
-      "expected_output": "Does not write spec.md. Does not spawn pm. Frames who/surface first, then surveys market and compete (spawn researcher + competitor, or asks for survey inputs). Discuss-P uses the three-question probe and does not pick the export button as the solution in the first round. Stops for human answers. Live HITL — do not invent a product grilling session.",
+      "expected_output": "Preserves the export proposal, identifies missing purpose or constraints and chooses a manageable next conversation move. Selects research only if relevant. Does not write spec.md, invent answers or require a market survey before understanding a bounded request.",
       "files": [],
       "expectations": [
-        "Does not spawn 'sdlc-workflow:pm' as the first action",
-        "Does not write '01-define/spec.md'",
-        "Asks how the user does this today / where it breaks / what they do next, or frames then surveys first",
-        "Does not treat 'export button' as the chosen solution before survey"
+        "No spec.md or pm dispatch before unresolved scope is ready",
+        "Retains the user proposal while exploring consequential uncertainty",
+        "No mandatory research or question-count quota"
       ]
     },
     {
@@ -28,12 +27,12 @@
     {
       "id": 3,
       "prompt": "00-discover/briefing.md already exists and is frozen. User says continue to spec.",
-      "expected_output": "Does not re-grill. Tells the user to run /sdlc so pm writes spec.md from the briefing. Does not author spec.md in this window.",
+      "expected_output": "Reuses the accepted briefing and continuation authority, returns the ready scope to the sdlc manager for define without making the user restart the workflow or repeat approval. Does not author spec.md in the discover window.",
       "files": [],
       "expectations": [
-        "Does not write 'spec.md'",
-        "Points to /sdlc / pm / define",
-        "Does not restart Discuss-P from scratch"
+        "Reuses accepted decisions and continuation authority",
+        "No restarted interview or repeated approval",
+        "Preserves discover/define ownership"
       ]
     },
     {
@@ -50,7 +49,7 @@
     },
     {
       "id": 5,
-      "prompt": "/sdlc-discover: 我们想做一个面向独立开发者的 API 监控产品。researcher 与 competitor 的调研文件都已写好。下一步做什么？",
+      "prompt": "/sdlc-discover: 我们想做一个面向独立开发者的 API 监控产品。researcher 与 competitor 的调研文件都已写好，定位和亮点仍未定。下一步做什么？",
       "expected_output": "Spawns growth (stage growth) after compete.md exists to produce positioning options, highlight hypotheses as demonstrable moments and behaviour-defined segments, before Discuss-S; the briefing later gets a compressed ## Growth section. Does not jump to spec or solution picking.",
       "files": [],
       "expectations": [
@@ -83,6 +82,142 @@
         {
           "id": "professional_result",
           "criterion": "引用现有证据和授权，记录不适用研究范围；只解决剩余风险，不重复确认；将接受的输入交sdlc进入define/后续任务。",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "/sdlc-discover 我想做个让工作省心的系统，但说不清具体是什么。你刚问我最近一次哪里麻烦，我也想不出具体例子。先聊聊，不要创建文件。",
+      "expected_output": "Offers disposable concrete scenarios/examples to react to, allows rejection and keeps interpretation tentative. Does not repeat the same abstract question or produce a feature list.",
+      "files": [],
+      "expectations": [
+        "Provides helpful scaffolding when recall fails",
+        "Does not force a closed choice or invent user history"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Offers disposable concrete scenarios/examples to react to, allows rejection and keeps interpretation tentative. Does not repeat the same abstract question or produce a feature list.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "/sdlc-discover 上一轮你提了自动提醒、客户评分、自动分派。我说这几个都不对。我希望的是交接给同事后，能知道对方理解的跟我一样。不要再推荐原来的三个方向，继续聊。",
+      "expected_output": "Accepts the correction, reframes around shared understanding during handoff, and asks or illustrates a relevant concrete situation. Keeps automation options rejected unless new information justifies reopening.",
+      "files": [],
+      "expectations": [
+        "Uses the corrected handoff goal",
+        "Does not repackage rejected options"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Accepts the correction, reframes around shared understanding during handoff, and asks or illustrates a relevant concrete situation. Keeps automation options rejected unless new information justifies reopening.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "/sdlc-discover 已有决定：主管只能导出自己租户的未结工单，CSV、现有字段、无新权限；客户已确认场景和空结果提示。需求负责人上一轮明确批准，现要求继续写 spec。没有新的产品选择。",
+      "expected_output": "Reuses scope and authority, hands the accepted context to manager/define without another approval, market exercise or three alternatives. Does not author spec from discover.",
+      "files": [],
+      "expectations": [
+        "Continues authorized handoff",
+        "No redundant elicitation or invented alternatives"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Reuses scope and authority, hands the accepted context to manager/define without another approval, market exercise or three alternatives. Does not author spec from discover.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "/sdlc-discover 原 briefing 选择自动分派给客服，后来实际讨论发现我们要的是大家自愿认领，不能强制分派。请求采集来源和租户隔离已经确认且不变。先更新当前理解，后续开发还没开始。",
+      "expected_output": "Revises the solution and affected assignment rules while preserving intake and tenant decisions. Records source and downstream impact; raises only remaining claim/ownership ambiguities.",
+      "files": [],
+      "expectations": [
+        "Localizes correction and preserves valid context",
+        "Does not silently retain forced assignment or restart all discovery"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Revises the solution and affected assignment rules while preserving intake and tenant decisions. Records source and downstream impact; raises only remaining claim/ownership ambiguities.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "/sdlc-discover 我想探索给独居老人一个报平安的方法，现在没有访谈、日志或客户。先用一个假想情景看看方向，不要假装已经做过调研。",
+      "expected_output": "Labels hypothetical scenario and assumptions, offers bounded exploration/learning step, and does not reject all discovery for lack of existing evidence or claim validation.",
+      "files": [],
+      "expectations": [
+        "No fabricated evidence or blanket rejection",
+        "A bounded hypothetical scenario supports discussion"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Labels hypothetical scenario and assumptions, offers bounded exploration/learning step, and does not reject all discovery for lack of existing evidence or claim validation.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "/sdlc-discover 新会话继续。briefing 摘要：对象是客服；目标是群聊请求有人负责；自动分派已被否定，已批准待领取队列；未知 Q-2：两人同时认领的处理；已知任何客服可认领，租户隔离不变。先讨论 Q-2，不要开发。",
+      "expected_output": "Resumes the unresolved concurrent claim rule, uses a concrete example and possible consequences. Does not re-ask audience or propose rejected automatic assignment; decision stays pending.",
+      "files": [],
+      "expectations": [
+        "Uses recorded answers and rejected choices",
+        "Illustrates only the unresolved rule without deciding for user"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Resumes the unresolved concurrent claim rule, uses a concrete example and possible consequences. Does not re-ask audience or propose rejected automatic assignment; decision stays pending.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "/sdlc-discover 小改动：把错误提示做得友好一点。我也不知道友好是什么意思。已有报错内容太像程序日志；暂时不改错误处理逻辑。",
+      "expected_output": "Uses concrete sample copy or asks for existing readable error context, distinguishes illustration from accepted copy. Keeps a bounded wording discussion without full discovery state or surveys.",
+      "files": [],
+      "expectations": [
+        "Lightweight scaffolding despite small task size",
+        "Preserves error-handling logic and avoids workflow inflation"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Uses concrete sample copy or asks for existing readable error context, distinguishes illustration from accepted copy. Keeps a bounded wording discussion without full discovery state or surveys.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "/sdlc-discover 用户说草图看起来不错，让我们按这个方向继续。但还没有任何人操作过原型，也没有需求数据。请记录当前理解和下一步。",
+      "expected_output": "Separates direction authorization from evidence of effectiveness; continues authorized scope with explicit assumptions/appropriate learning rather than claiming usability or demand validation.",
+      "files": [],
+      "expectations": [
+        "Direction acceptance is not demand evidence",
+        "Does not re-request already granted direction approval"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Separates direction authorization from evidence of effectiveness; continues authorized scope with explicit assumptions/appropriate learning rather than claiming usability or demand validation.",
           "weight": 5
         }
       ]
