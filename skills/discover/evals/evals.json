@@ -28,7 +28,12 @@
       "id": 3,
       "prompt": "00-discover/briefing.md already exists and is frozen. User says continue to spec.",
       "expected_output": "Reuses the accepted briefing and continuation authority, returns the ready scope to the sdlc manager for define without making the user restart the workflow or repeat approval. Does not author spec.md in the discover window.",
-      "files": [],
+      "files": [
+        "evals/files/case-3/state.yaml",
+        "evals/files/case-3/00-discover/briefing.md",
+        "evals/files/case-3/00-discover/market.md",
+        "evals/files/case-3/00-discover/compete.md"
+      ],
       "expectations": [
         "Reuses accepted decisions and continuation authority",
         "No restarted interview or repeated approval",
@@ -51,7 +56,12 @@
       "id": 5,
       "prompt": "/sdlc-discover: 我们想做一个面向独立开发者的 API 监控产品。researcher 与 competitor 的调研文件都已写好，定位和亮点仍未定。下一步做什么？",
       "expected_output": "Spawns growth (stage growth) after compete.md exists to produce positioning options, highlight hypotheses as demonstrable moments and behaviour-defined segments, before Discuss-S; the briefing later gets a compressed ## Growth section. Does not jump to spec or solution picking.",
-      "files": [],
+      "files": [
+        "evals/files/case-5/state.yaml",
+        "evals/files/case-5/00-discover/briefing.md",
+        "evals/files/case-5/00-discover/market.md",
+        "evals/files/case-5/00-discover/compete.md"
+      ],
       "expectations": [
         "Spawns or plans 'sdlc-workflow:growth' before Discuss-S",
         "Does not write 'spec.md'",

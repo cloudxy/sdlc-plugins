@@ -259,6 +259,11 @@ def main() -> int:
                     err("EVALS", f"{name}: evals[{i}] 缺 prompt")
                 if not (case.get("expected_output") or case.get("expectations")):
                     err("EVALS", f"{name}: evals[{i}] 缺 expected_output/expectations（质量证明文档，不是 runner）")
+                for f in case.get("files") or []:
+                    # skill-creator 约定：files 相对技能根目录；夹具缺失时场景会在空目录里静默退化
+                    if not isinstance(f, str) or os.path.isabs(f) or ".." in f.split("/") \
+                            or not os.path.isfile(os.path.join(d, f)):
+                        err("EVALS", f"{name}: evals[{i}] files 引用的夹具不存在或越出技能目录：{f}")
                 rub = case.get("rubric")
                 if rub is not None:
                     if not isinstance(rub, list) or not rub:

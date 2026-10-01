@@ -29,7 +29,7 @@ Start with an open opportunity to describe the situation. When that is difficult
 - Conversation starter: “省心可能是少录入、少漏跟进、少追人。哪一种接近你的经历？也可能都不是。”
 - Concrete walkthrough: show one short example or sketch and invite corrections to the part that does not fit.
 
-These are possible moves, not a mandatory sequence. Start with a small contrast the user can react to; do not turn starters into a catalogue or stack an additional fallback question before hearing the reaction. Expand when that reaction calls for it. Keep unfamiliar framework terminology out of the user's way. For a new idea without past examples, label imagined scenarios as hypothetical; do not fabricate history or interview answers.
+These are possible moves, not a mandatory sequence. **Make one move per turn**: an open question, or a small contrast to react to. Prefer the open question first; switch to a contrast when the user could not answer it or recognizing is clearly easier than recalling. Never pair an open question with a conditional fallback list (“想不起来的话，看看下面哪种”); hold the contrast for the next turn. Do not turn starters into a catalogue; expand when the reaction calls for it. Keep unfamiliar framework terminology out of the user's way. For a new idea without past examples, label imagined scenarios as hypothetical; do not fabricate history or interview answers.
 
 The existing three-question probe remains useful where answers are missing: how it is done today, where it breaks, and what becomes possible afterwards. Current workaround cost is one value signal, not a universal value ceiling. JTBD/value-path concepts live in [product-shaping.md](../../prd-gwt/references/product-shaping.md); consult them when the purpose needs unpacking, not for every clear request.
 

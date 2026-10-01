@@ -1,0 +1,23 @@
+feature: indie-api-monitor
+sdlc_version: 4
+product_root: docs/product
+current_hat: define
+hats_done: []
+phase: Discovering
+intent:
+  class: discovery
+  quote: "我们想做一个面向独立开发者的 API 监控产品"
+  at: "2026-09-20T09:30:00+08:00"
+discovery:
+  status: pending
+  skip_why: ""
+  briefing: 00-discover/briefing.md
+  tracks:
+    discuss: pending
+    compete: done
+    market: done
+    growth: pending
+    falsify: pending
+  at: ""
+roles_skipped: []
+open_questions: []

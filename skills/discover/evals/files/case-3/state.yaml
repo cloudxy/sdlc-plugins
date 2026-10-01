@@ -1,0 +1,28 @@
+feature: supervisor-export
+sdlc_version: 4
+product_root: docs/product
+lane: L2
+appetite: 3d
+ui: yes
+tracking: yes
+current_hat: define
+hats_done: []
+phase: LaneJudge
+intent:
+  class: new-feature
+  quote: "主管要能导出本租户的未结工单"
+  at: "2026-09-24T10:05:00+08:00"
+discovery:
+  status: done
+  skip_why: ""
+  briefing: 00-discover/briefing.md
+  tracks:
+    discuss: done
+    compete: done
+    market: done
+    growth: skipped
+    falsify: done
+  at: "2026-09-28T16:20:00+08:00"
+roles_skipped: [growth]
+roles_skipped_why: {growth: "内部效率改动，不涉及定位"}
+open_questions: []

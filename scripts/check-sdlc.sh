@@ -163,6 +163,31 @@ EOF
 is_unfilled() { # $1 = 文件：模板标记只认行首注释（<!-- / # / //），正文里提到这个词不算
   grep -qE '^[[:space:]]*(<!--|#|//)[[:space:]]*sdlc:unfilled' "$1" 2>/dev/null
 }
+section_filled() { # $1 = briefing，$2 = 节名：打印该节里与模板原句不同的非空行（照抄模板不算填写）
+  awk -v sec="$2" -v tpl="$SCRIPT_DIR/../skills/discover/templates/briefing.md" '
+    BEGIN { while ((getline line < tpl) > 0) tl[line] = 1; close(tpl) }
+    /^##[[:space:]]+/ { insec = ($0 ~ ("^##[[:space:]]+" sec "([[:space:]]|$)")); next }
+    insec && NF && !($0 in tl) { print }
+  ' "$1"
+}
+kill_written() { # $1 = briefing：Falsify 节里「杀死条件」后要有内容（同一行冒号后，或紧随其后的非空列表项）
+  awk '
+    /^##[[:space:]]+/ { insec = ($0 ~ /^##[[:space:]]+Falsify([[:space:]]|$)/); k = 0; next }
+    !insec { next }
+    k && /^[[:space:]]*[-*][[:space:]]*$/ { next }
+    k && /^[[:space:]]*[-*][[:space:]]+[^[:space:]]/ { found = 1; exit }
+    k && NF { k = 0 }
+    index($0, "杀死条件") {
+      rest = substr($0, index($0, "杀死条件") + length("杀死条件"))
+      c = index(rest, "："); w = length("：")
+      if (c == 0) { c = index(rest, ":"); w = 1 }
+      after = c ? substr(rest, c + w) : rest
+      if (after ~ /[^[:space:]]/) { found = 1; exit }
+      k = 1
+    }
+    END { exit found ? 0 : 1 }
+  ' "$1"
+}
 research_offline() { # $1 = 起点目录：上溯找 sdlc.config.yaml；research.offline: true（只有用户能设）→ 0
   local d="$1" nd j=0
   while [ $j -lt 8 ]; do
@@ -892,12 +917,15 @@ if [ -f "$ST" ]; then
             [ -n "$BR" ] || BR="$ROOT/00-discover/briefing.md"
             if [ ! -f "$BR" ]; then
               red NODISCOVER "$ST: discovery.status=done 但无 00-discover/briefing.md"
+            elif is_unfilled "$BR"; then
+              red NODISCOVER "$BR: 仍是模板（含 sdlc:unfilled）——写入本次内容后删除标记行"
             else
               grep -qE '^##[[:space:]]+Compete' "$BR" || red NOCOMPETE "$BR: 缺 ## Compete"
               grep -qE '^##[[:space:]]+Market' "$BR" || red NOMARKET "$BR: 缺 ## Market"
               grep -qE '^##[[:space:]]+Falsify' "$BR" || red NOFALSIFY "$BR: 缺 ## Falsify"
-              grep -qE '现状|status quo|Status quo' "$BR" || red NOCOMPETE "$BR: Compete 未写现状"
-              grep -qE '杀死' "$BR" || red NOFALSIFY "$BR: Falsify 未写杀死条件"
+              section_filled "$BR" Compete | grep -qE '现状|status quo|Status quo' \
+                || red NOCOMPETE "$BR: Compete 未写现状（与模板逐字相同的句子不算）"
+              kill_written "$BR" || red NOFALSIFY "$BR: Falsify 未写杀死条件（「杀死条件」后要有实际内容）"
               if is_v4 && ! role_skipped growth; then
                 grep -qE '^##[[:space:]]+Growth' "$BR" || red NOGROWTH "$BR: 缺 ## Growth（定位与亮点假设；roles_skipped 含 growth 可跳）"
               fi

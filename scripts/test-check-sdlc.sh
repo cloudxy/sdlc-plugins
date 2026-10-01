@@ -297,6 +297,47 @@ printf '泳道：L2\n' >"$T/nd/01-define/spec.md"
 assert_exit 1 "done without briefing is NODISCOVER" --require "$T/nd"
 assert_tag NODISCOVER
 
+# 13b–13e. discovery.status=done 时 briefing 要真的写过：照抄模板不算
+mk_brief() { # $1 = 用例目录名
+  mkdir -p "$T/$1/01-define" "$T/$1/00-discover"
+  cp "$T/nd/state.yaml" "$T/$1/state.yaml"
+  printf '泳道：L2\n' >"$T/$1/01-define/spec.md"
+}
+BTPL="$ROOT/skills/discover/templates/briefing.md"
+mk_brief bfraw
+cp "$BTPL" "$T/bfraw/00-discover/briefing.md"
+assert_exit 1 "done with a verbatim briefing template (marker kept) is NODISCOVER" --require "$T/bfraw"
+assert_tag NODISCOVER
+mk_brief bfnomark
+sed 1d "$BTPL" >"$T/bfnomark/00-discover/briefing.md"
+assert_exit 2 "template text alone does not count as 现状 or kill criteria" --require "$T/bfnomark"
+assert_tag NOCOMPETE
+assert_tag NOFALSIFY
+mk_brief bffilled
+cat >"$T/bffilled/00-discover/briefing.md" <<'B'
+# Briefing · 导出
+## Compete
+集合：直接 / 间接 / 替代行为 / 标杆 / **现状（必填）**
+现状：主管每周手工复制工单到 Excel，约 40 分钟。
+## Market
+未量化
+## Falsify
+杀死条件（预先写死）：
+- 上线 30 天内少于 2 个租户使用导出
+B
+assert_exit 0 "a filled briefing passes (template lines kept, real 现状 and kill list)" --require "$T/bffilled"
+mk_brief bfinline
+cat >"$T/bfinline/00-discover/briefing.md" <<'B'
+# Briefing · 认领
+## Compete
+替代行为：status quo 是群里人工转发。
+## Market
+未量化
+## Falsify
+杀死条件：两周内认领率低于 50% 即停止
+B
+assert_exit 0 "inline kill criteria after the colon pass" --require "$T/bfinline"
+
 # 14. OPENQOPEN: 待确认 Q 在 state 但未 answered，current_hat=shape
 mkdir -p "$T/oq2/01-define" "$T/oq2/02-shape"
 cat >"$T/oq2/state.yaml" <<'Y'
