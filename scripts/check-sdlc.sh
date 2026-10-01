@@ -153,7 +153,7 @@ check_pending() { # $1 = 说明；其余 = 文件：战略决策仍待确认
   while IFS="$(printf '\t')" read -r df did dcls dstat dq; do
     [ -n "$did" ] || continue
     if [ "$dcls" = "战略" ] && [ "$dstat" = "待确认" ]; then
-      red DECISIONPENDING "$df: 战略决策 $did 仍待确认 —— ${why}（把选项与推荐交给操作者并等待明确回答；这不是返工）"
+      red DECISIONPENDING "$df: 战略决策 $did 仍待确认 —— ${why}（把选项与推荐交给操作者，明确回答前整个阶段等待；不依赖它的工作拆成局部工作 --work 推进；这不是返工）"
     fi
   done <<EOF
 $(decision_rows "$@")
@@ -836,7 +836,7 @@ if [ -f "$ST" ]; then
         if grep -qE "${q}.*answered" "$ST"; then
           :
         else
-          red OPENQOPEN "$ST: spec 待确认 $q 未 answered，禁止进入 ${HAT}"
+          red OPENQOPEN "$ST: spec 待确认 ${q} 未 answered，禁止进入 ${HAT}（整个阶段等决定人答复；不依赖它的工作拆成局部工作 --work 推进；这不是返工）"
         fi
       done
     fi

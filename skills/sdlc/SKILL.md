@@ -31,7 +31,7 @@ Commands contain no procedures. Entry routing, role/stage/task mappings, artifac
 5. Every hat reads the product layer first; every producing hat keeps its product files true and returns delta rows, which only you record (`product-delta.md`, `CHANGELOG.md`).
 6. On a UI change, final architecture contracts consume the approved final design. Risky technical assumptions can be checked earlier with architect `define/feasibility`; that task does not choose the product experience or require a frozen spec.
 7. Acceptance on the build before the final review: pm walks the journeys, the designer runs design QA, growth checks claims.
-8. Strategic decisions belong to the operator. Reuse explicit authority; pending choices block their consumers, never become a hat's default.
+8. Strategic decisions belong to the operator. Reuse explicit authority; pending rows hold the next lane stage, never become a hat's default.
 
 ## References and templates — read when
 
@@ -87,7 +87,7 @@ Classify the user's **last substantive message**. Legacy lanes record `intent: {
 
 An explicit stopping point can select one or several tasks through work-scope. Single-hat discipline: do not invoke `$prd-gwt` or any procedure skill here; do not inflate a single-hat request into a lane. "Also review it" → `/sdlc-review` after files land.
 
-For an independent diagnosis, prototype, analysis, data audit or mining experiment, select its registered task and end at its local result. Triage feedback against the accepted behavior: changed goals create iteration; broken accepted behavior creates a defect; uncertainty creates investigation. Keep durable behavior/interfaces/acceptance in the work brief; expand concrete file paths and check commands against the actual execution snapshot. Facts that can be investigated are not questions for the user. Persist the source of unresolved decisions and block only their consumers.
+For an independent diagnosis, prototype, analysis, data audit or mining experiment, select its registered task and end at its local result. Triage feedback against the accepted behavior: changed goals create iteration; broken accepted behavior creates a defect; uncertainty creates investigation. Keep durable behavior/interfaces/acceptance in the work brief; expand concrete file paths and check commands against the actual execution snapshot. Facts that can be investigated are not questions for the user. Persist the source of unresolved decisions; they hold their consumers.
 
 ## Step 1b — discover (before lane, before pm)
 
@@ -119,7 +119,7 @@ For `coordinated-state-v1`, bind saved results through CAS instead of rerunning 
 
 - **Discovery freeze** (Step 1b).
 - **Design direction pick** (`ui: yes`): when a new direction decision is needed, after designer `explore`, show each direction in one line — signature moment, trade-off, screenshot paths — plus the designer's recommendation, and wait only if the decision is not already authorized or delegated. Record `design: {picked: D<n>, picked_by: user|delegated, at}`. The designer's `specify` spawn writes `选定：D<n>` into `design-directions.md`.
-- **Strategic decisions** (`Q-*`, 类别 战略, 状态 待确认): use the discussion protocol to present manageable, dependency-ready choices with options and recommendations. Name the decider from `owners` if configured. Reuse explicit authority; silence or an unanswered tool is not consent. "按推荐" or "你定" is an answer; record its scope in `open_questions` (Step 5) and respawn the owner to write 已确认 with the operator's words. Pending choices block their consumers; unrelated ready work continues. Use `phase: Stopped` only when no authorized work can proceed.
+- **Strategic decisions** (`Q-*`, 类别 战略, 状态 待确认): use the discussion protocol to present manageable, dependency-ready choices with options and recommendations. Name the decider from `owners` if configured. Reuse explicit authority; silence or an unanswered tool is not consent. "按推荐" or "你定" is an answer; record its scope in `open_questions` (Step 5) and respawn the owner to write 已确认 with the operator's words. Pending rows hold the whole next lane stage (gate); independent work proceeds only as scoped work items. `phase: Stopped` only when nothing authorized can proceed.
 - **Operational defaults** (状态 默认): list them in your report; the user can overturn any of them later.
 - **Acceptance** verdict `有条件通过`: the user accepts the conditions or sends the slice back. Record acceptance as `open_questions` entry `{id: Q-ACCEPT-<PM|DESIGN|GROWTH>, status: answered, by: user, quote: "<their words>"}`; the gate checks it.
 
@@ -134,7 +134,7 @@ After each task, run its `workflow.py check-task` presence check and the owning 
 - **G-script:** the config commands (test / lint / build / migration / e2e) + `bash <PLUGIN_ROOT>/scripts/check-sdlc.sh --require --hat <stage> <feature-dir>`. Agent said so ≠ file exists — `ls` first. Plain runs skip with exit 0; `--require` / `--hat` turn a missing file into a failure.
 - **G-fresh (L1+):** once per stage after all its producers return (define; shape = designer + architect + dba + invited data hats; implement), plus the final review after accept. The reviewer packet carries artifact paths and the product files named in `product-delta.md` — never your reasoning. Fail (blocker/major unwaived) → producer rework, `current_hat` stays; `review` enters `hats_done` only after the final review passes. L1: the implement G-fresh is the review. Same snapshot, criteria, scope and relevant evidence → reuse `findings.md`; `/sdlc-review` is the report-only entry to the same reviewer.
 - **Acceptance (v4):** every participating `accept-*.md` ends with `结论：通过 | 有条件通过 | 不通过`. Any `不通过` → classify the gap and route to its owning producer; implementation defects return to implement, requirement/design problems to their owners. Re-run affected verification and acceptance, including prior passes whose inputs changed.
-- **Decisions (v4):** `DECISIONPENDING` is not rework — ask the operator (Step 4). `DEFAULTED` is rework on the producer: the strategic call goes back to 待确认 with options before you ask ([orchestrator-gates.md](references/orchestrator-gates.md) §10).
+- **Decisions (v4):** `DECISIONPENDING`/`OPENQOPEN` are not rework — get the decision (Step 4). `DEFAULTED` is rework on the producer: the strategic call goes back to 待确认 with options before you ask ([orchestrator-gates.md](references/orchestrator-gates.md) §10).
 - **G-self (L3/L4, one pass):** scope, irreversibility, cost, and launch timing vs capacity.
 - **Rework with method:** repeated failure against the same agreed criterion uses the task-local `rework_rounds` in scoped work (legacy lanes retain the global counter). From round 2 attach debug for technical rework and record the mechanism. Three consecutive failures require diagnosis/escalation; normal user-driven iteration/revalidation does not consume this budget. See work-scope and [debug-loop.md](references/debug-loop.md).
 

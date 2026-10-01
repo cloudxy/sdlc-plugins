@@ -873,7 +873,8 @@ assert_tag DEFAULTED
 mk_v4 c03
 F="$T/c03/.sdlc/f"
 cp "$ROOT/skills/prd-gwt/templates/spec.md" "$F/01-define/spec.md"
-assert_exit 2 "a copied, unfilled spec template is HATMISS (C03)" --hat define "$F"
+# 3 = HATMISS + 模板 §11 两条「待确认」示例行各一处 OPENQ（Q-EXPORT-TIER、Q-EXPORT-PARTIAL）
+assert_exit 3 "a copied, unfilled spec template is HATMISS (C03)" --hat define "$F"
 assert_tag HATMISS
 
 # 46. DIAGRAM：功能目录里的图必须过绘图闸门（与 DBML 语义一致、svg-lint 零警告）

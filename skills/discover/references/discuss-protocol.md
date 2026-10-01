@@ -50,7 +50,7 @@ Update the existing briefing/work brief rather than creating a new document each
 - Decisions with authority/source and scope. Agreement on a direction is not validation of its promised effect; silence is not a decision.
 - Material corrections: what changed, why, what remains valid, and affected requirements/consumers. Use existing Q-* / A-* / requirement IDs and version rules; do not silently overwrite a handed-off decision.
 
-Resume from those records. Do not re-ask answered questions or re-propose rejected options without new information. If the user changes a detail, revisit its rule/examples; if a solution changes, revisit its tradeoffs; if the goal or audience changes, revisit the problem frame. Block affected consumers only. Learning during conversation is not automatically a definition failure.
+Resume from those records. Do not re-ask answered questions or re-propose rejected options without new information. If the user changes a detail, revisit its rule/examples; if a solution changes, revisit its tradeoffs; if the goal or audience changes, revisit the problem frame. Block affected consumers; in a lane, a pending spec `Q-*` row holds the whole next stage, so route independent work as scoped work. Learning during conversation is not automatically a definition failure.
 
 ## Ready for the next action
 
