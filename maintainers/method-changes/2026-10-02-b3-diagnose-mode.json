@@ -1,0 +1,30 @@
+{
+ "id": "b3-diagnose-mode",
+ "at": "2026-10-02T08:56:13+08:00",
+ "kind": "behavioral",
+ "failure_form": "omission",
+ "verdict": "improved",
+ "reason": "sdlc-eval gains a report-only diagnose mode (diagnose-mode.md + diagnosis-report.md, session_digest.py) implementing the 09-28 decision to add on-demand process diagnosis. Registry change is the argument hint only. Verified by sdlc-eval case 4, baseline 7351a32 vs current.",
+ "evidence": [
+  "~/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/04-B3诊断模式验证",
+  "~/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/04-B3诊断模式验证 (sdlc-eval 4: baseline 0 pass/3 deviation — no landing or target file; current 3/3 pass)"
+ ],
+ "decided_by": "user approval 2026-10-02 「批准执行」",
+ "files": {
+  "skills/sdlc-eval/SKILL.md": "830a2ba1e889e818cddb49984eb23d1fbfe75b8b51772d9fc2332960676a66fe",
+  "skills/sdlc-eval/references/diagnose-mode.md": "ac61e1c39cd65e24e3699f4dbcc2a1a56a737c82094deeeb20444064a9cb05a7",
+  "skills/sdlc-eval/templates/diagnosis-report.md": "2c5bf7b8bdabe7b3d436829c803240710373f64a51c5faf0c92a92111dd0a658",
+  "workflow/registry.json": "e0e2ea93e0c76d320daef2f6e8dde31017ec9273e173ce959a635bab8a0bb95a"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-10-02T13:19:14+08:00",
+   "from": "pending",
+   "to": "improved",
+   "evidence": [
+    "~/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/04-B3诊断模式验证 (sdlc-eval 4: baseline 0 pass/3 deviation — no landing or target file; current 3/3 pass)"
+   ]
+  }
+ ]
+}

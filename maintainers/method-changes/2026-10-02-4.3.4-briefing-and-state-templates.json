@@ -1,0 +1,28 @@
+{
+ "id": "4.3.4-briefing-and-state-templates",
+ "at": "2026-10-02T08:52:45+08:00",
+ "kind": "behavioral",
+ "failure_form": "omission",
+ "verdict": "no_change",
+ "reason": "Briefing Q table gains 类别 and the spec status words so decision gates read it; state template documents skip_why, roles_skipped_why and exact Q-id matching. Verified by discover case 3.",
+ "evidence": [
+  "~/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/02-B1首次验证",
+  "~/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/02-B1首次验证 (discover 3: baseline 5/5 pass, current 5/5 pass; both arms read the new-format fixture)"
+ ],
+ "decided_by": "user approval 2026-10-02 「批准执行」",
+ "files": {
+  "skills/discover/templates/briefing.md": "707ba953b9185961896aea40920f2b6970c164ad25f4f7e2c673a444ddfc1c0f",
+  "skills/sdlc/templates/state.yaml": "6e82af041a1bb478223861c34afa49c544245d8205911ad37b81baa4709942c6"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-10-02T13:19:14+08:00",
+   "from": "pending",
+   "to": "no_change",
+   "evidence": [
+    "~/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/02-B1首次验证 (discover 3: baseline 5/5 pass, current 5/5 pass; both arms read the new-format fixture)"
+   ]
+  }
+ ]
+}

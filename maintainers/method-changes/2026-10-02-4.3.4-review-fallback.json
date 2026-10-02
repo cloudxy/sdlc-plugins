@@ -1,0 +1,28 @@
+{
+ "id": "4.3.4-review-fallback",
+ "at": "2026-10-02T08:52:45+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "no_change",
+ "reason": "Reviewer/qc never fall back to a writable generic agent: review-mode step 4 and packet.md now match hosts.md and SKILL.md (verified read-only fresh context or blocked). Verified by sdlc case 10, baseline 7351a32 vs current.",
+ "evidence": [
+  "~/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/02-B1首次验证",
+  "~/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/02-B1首次验证 (sdlc 10: baseline 5/5 pass, 3/5 had to resolve the review-mode vs hosts contradiction; current 5/5 pass, 0/5)"
+ ],
+ "decided_by": "user approval 2026-10-02 「批准执行」",
+ "files": {
+  "skills/sdlc/references/packet.md": "26f623c4b1536766dd540f89a0f5377d175f762eae56967a9873907b4fff4e5e",
+  "skills/sdlc/references/review-mode.md": "c262b0efcd210f71c1dbcaf1c3784904b56b4c9ab6ea0b849ba4c104ac1a2ea7"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-10-02T13:02:45+08:00",
+   "from": "pending",
+   "to": "no_change",
+   "evidence": [
+    "~/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/02-B1首次验证 (sdlc 10: baseline 5/5 pass, 3/5 had to resolve the review-mode vs hosts contradiction; current 5/5 pass, 0/5)"
+   ]
+  }
+ ]
+}

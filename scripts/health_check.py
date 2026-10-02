@@ -85,6 +85,25 @@ def check_vendor(root: str, err, warn, ok) -> None:
     ok(f"vendor 来源 {len(locks)} 个、{n_files} 个文件与锁文件一致，引用规则通过" if locks else "vendor 无来源")
 
 
+def check_method_ledger(root: str, err, warn, ok) -> None:
+    """Every edit to a method source file carries a change record (scripts/method_ledger.py)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("method_ledger", os.path.join(root, "scripts", "method_ledger.py"))
+    if spec is None or spec.loader is None:
+        err("METHODCHANGE", "scripts/method_ledger.py 缺失")
+        return
+    ledger = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ledger)
+    from pathlib import Path
+    errors, warnings = ledger.check(Path(root))
+    for line in errors:
+        err("METHODCHANGE", line.split("] ", 1)[-1])
+    for line in warnings:
+        warn("METHODPENDING", line.split("] ", 1)[-1])
+    if not errors:
+        ok(f"方法文件 {len(ledger.method_files(Path(root)))} 个，改动均有变更记录")
+
+
 def main() -> int:
     root = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     V = 0
@@ -664,6 +683,7 @@ def main() -> int:
         if os.path.isdir(d) and not os.path.isfile(os.path.join(d, "SKILL.md")):
             err("SKILL", f"skills/{name}/ 没有 SKILL.md：技能目录必须是一个技能（空壳目录删掉；上游原件放 vendor/）")
     check_vendor(root, err, warn, ok)
+    check_method_ledger(root, err, warn, ok)
 
     for line in errs:
         print(line)
@@ -678,4 +698,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(min(main(), 125))  # exit status is taken mod 256: 256 violations must not read as success

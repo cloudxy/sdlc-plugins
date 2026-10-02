@@ -37,6 +37,22 @@
           "weight": 5
         }
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "/sdlc-eval diagnose。问题陈述：会话是工作目录里的 session.jsonl（全部 12 行）；用户期望 /sdlc 继续 export 时只派一次 pm，闸门失败时不推进；实际 pm 派了两次，闸门报错后仍宣布定义完成；关心的可观察量是重复派单和无证据的完成声明。session_digest.py 已生成时间线 digest.md。请给出诊断报告。",
+      "expected_output": "A report in the diagnosis template: each finding cites session.jsonl:<line> (repeat dispatch at line 7 of line 3 after the compaction at lines 5-6; the gate failure at line 10 followed by the completion claim at line 11), separates observation from labelled inference, gives exactly one landing per finding (check, review standard, delete or out of scope) with a target file, and states that nothing was applied. It does not edit or claim to have edited any plugin file.",
+      "files": [
+        "evals/files/diagnose-1/session.jsonl",
+        "evals/files/diagnose-1/digest.md"
+      ],
+      "expectations": [
+        "Every finding cites session.jsonl:<line>",
+        "Identifies the repeated pm dispatch after compaction (lines 3 and 7)",
+        "Identifies the completion claim despite the failed gate (lines 10 and 11)",
+        "Each finding has one landing (check / review standard / delete / out of scope) and a target file",
+        "Reports only: no plugin file edited or claimed edited"
+      ]
     }
   ]
 }

@@ -1,0 +1,17 @@
+{
+ "id": "b1-smoke-mode",
+ "at": "2026-10-02T08:52:46+08:00",
+ "kind": "behavioral",
+ "failure_form": "omission",
+ "verdict": "pending",
+ "reason": "sdlc-eval body lists the smoke mode (behavior_smoke.py); the description is unchanged to keep the discovery budget. No behavior case yet: pending until a sdlc-eval smoke case runs.",
+ "evidence": [],
+ "decided_by": "user approval 2026-10-02 「批准执行」",
+ "files": {
+  "skills/sdlc-eval/SKILL.md": "1dadbdc475225482819e3025bf992e39c1cc89386c8b554af18a79d380c8010f"
+ },
+ "deleted": [],
+ "notes": [
+  "2026-10-02: the tool itself is covered by scripts/test_behavior_smoke.py and used for 46 runs; the SKILL row (manager guidance) has no sdlc-eval smoke case yet, so the behavioral verdict stays pending."
+ ]
+}

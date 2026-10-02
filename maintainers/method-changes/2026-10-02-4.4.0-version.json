@@ -1,0 +1,14 @@
+{
+ "id": "4.4.0-version",
+ "at": "2026-10-02T18:07:01+08:00",
+ "kind": "editorial",
+ "failure_form": "n/a",
+ "verdict": "n/a",
+ "reason": "Version 4.4.0 for the B1–B3 release (method ledger, repeated behavior smoke, session diagnosis); no behaviour change.",
+ "evidence": [],
+ "decided_by": "user 2026-10-02 「提交推送」",
+ "files": {
+  "adapters/hosts.json": "3f1196017b2044e5d00e20b73ed8315d9148a3dc2e24921e839ba5bb213e1a55"
+ },
+ "deleted": []
+}

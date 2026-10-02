@@ -1,0 +1,17 @@
+{
+ "id": "4.3.4-editorial",
+ "at": "2026-10-02T08:52:45+08:00",
+ "kind": "editorial",
+ "failure_form": "n/a",
+ "verdict": "n/a",
+ "reason": "No behaviour change: task-protocol lists the escalation decision kind and accepted ISO time offsets; discover and product-mode fallback lists name Kimi coder like hosts.md; hosts.json version 4.3.4.",
+ "evidence": [],
+ "decided_by": "user approval 2026-10-02 「批准执行」",
+ "files": {
+  "adapters/hosts.json": "14d03f1771b588d82686903addce14cca30d8d8b7d64231d3d125a11aa53f3c0",
+  "skills/discover/SKILL.md": "a22703992823e8d15570e7b5a9140fd9be4a05624630f2cbc160b8c21da0699f",
+  "skills/sdlc/references/product-mode.md": "7cae67d06e512b601bb08f0aa138ebfe23f6c318600af01bcb5e27224116b07b",
+  "skills/sdlc/references/task-protocol.md": "e1ee121e39ad31382d6d76550e183961ed4c1fe995179764674f138c6ca3371a"
+ },
+ "deleted": []
+}

@@ -1,0 +1,19 @@
+{
+ "id": "4.3.4-role-descriptions",
+ "at": "2026-10-02T08:52:45+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "pending",
+ "reason": "18 role descriptions: 'Do NOT use while /sdlc is running in the parent window' became 'While /sdlc runs, only its manager dispatches this role, with a spawn packet'. The same registry edit carries the B1 smoke argument hint. Verified by sdlc cases 3 and 5.",
+ "evidence": [
+  "~/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/02-B1首次验证"
+ ],
+ "decided_by": "user approval 2026-10-02 「批准执行」",
+ "files": {
+  "workflow/registry.json": "c244435b48d76fd79af203b814a5efbea15761ba2e2068601fb4cfb7497167be"
+ },
+ "deleted": [],
+ "notes": [
+  "2026-10-02: sdlc 3 and 5 smoke runs (Read tool only) cannot observe this change: role descriptions are shown in the host's agent list, which a read-only smoke does not present. Both arms kept native pm dispatch (sdlc 3: 4 pass/1 deviation vs 3/2; sdlc 5: 5/0 vs 4/1, deviations unrelated). Needs a dispatch-level test with the Agent tool enabled; verdict stays pending."
+ ]
+}

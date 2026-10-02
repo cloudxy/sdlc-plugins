@@ -1,6 +1,6 @@
 # sdlc-workflow
 
-多宿主工作流插件 · v4.3.4 · MIT
+多宿主工作流插件 · v4.4.0 · MIT
 
 闸门化的功能交付控制面：从想法到交付，先按需要通过沟通、例子与调研帮助需求成形；技术可行性在接受范围前检查，体验设计与最终原型先于架构合同，按用户旅程纵向切片实现并联调，E2E 与三方验收把关，产出回写产品层。工作结论保存在对应工件中，由脚本闸门与独立上下文审查核验。
 
@@ -364,7 +364,7 @@ sdlc-workflow/
 ├── scripts/         闸门、健康检查、角色工厂、任务与持续工作协议、评测与一致性测试
 ├── vendor/          上游原件：仓库只含 install.sh 与锁文件，内容由使用者从源头下载
 ├── docs/            使用指南 usage.md 与图示 assets/*.svg（给人读，不被任何 skill 加载）
-├── maintainers/     维护者档案（不被任何 skill 加载），例如待项目方接收的项目经验归档
+├── maintainers/     维护者档案（不被任何 skill 加载）：方法改动台账、项目经验归档，入口见 maintainers/README.md
 ├── .zcode-plugin/ .claude-plugin/ .grok-plugin/ .codex-plugin/ .kimi-plugin/   各宿主插件清单（生成）
 └── .agents/plugins/ Codex 本地市场（生成）
 ```
@@ -407,8 +407,10 @@ sdlc-workflow/
 | `scripts/continuous.py` 及其模块 | `workflow.py continuous` 的实现：`artifact_versions`（版本）、`project_graph`（跨功能依赖与影响）、`state_store`（CAS 状态写入）、`workspaces` / `coordination`（隔离 worktree、认领与租约）、`candidate`（集成候选）、`datasets` / `data_jobs`（数据快照与长作业） |
 | `scripts/eval_protocol.py` | `workflow.py eval-prepare / eval-audit / eval-blind`：受控对照的隔离准备、宿主轨迹审计与盲评目录，本身不调模型 |
 | `scripts/grade_eval.py` / `blind_eval.py` | 评测机械评分（不调模型）与盲评 |
+| `scripts/method_ledger.py` | 方法改动台账：技能、角色源、注册表的每次改动都要有一条记录（行为类附评测证据），否则健康检查报 METHODCHANGE |
+| `scripts/behavior_smoke.py` | 方法改动的行为冒烟：同一场景在基线版本与当前版本上各跑多次，带预算上限；判定必须引用该次输出原文。只读、非盲评，用来看改动前失败、改动后通过 |
 | `scripts/ui-evidence.sh` | UI 截图留证 |
-| `scripts/test_work_scope.py` / `test_task_runtime.py` / `test_workflow.py` / `test_skill_evidence.py` / `test_eval_protocol.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` / `test_reference_links.py` / `test_state_view.py` | 注册表、局部工作、技能证据规则、评测隔离、闸门（含 state.yaml 只读视图）、vendor 安装、多宿主打包与项目链接安全的自测 |
+| `scripts/test_work_scope.py` / `test_task_runtime.py` / `test_workflow.py` / `test_skill_evidence.py` / `test_eval_protocol.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` / `test_reference_links.py` / `test_state_view.py` / `test_behavior_smoke.py` / `test_method_ledger.py` | 注册表、局部工作、技能证据规则、评测隔离、闸门（含 state.yaml 只读视图）、vendor 安装、多宿主打包与项目链接安全的自测 |
 | `scripts/test_continuous_work.py` | 持续工作协议场景：<br>- 版本共存；CAS 与结果恢复；两个进程并发记录与导入<br>- 跨功能依赖、未声明消费者；方法闭包与复验范围；修复后的诊断<br>- 隔离认领与过期令牌；跨机器拒绝<br>- 集成候选与符号链接；数据快照与长作业 |
 
 ## 上游原件（vendor/）

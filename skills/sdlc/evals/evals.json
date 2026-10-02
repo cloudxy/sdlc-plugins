@@ -142,6 +142,18 @@
           "weight": 5
         }
       ]
+    },
+    {
+      "id": 10,
+      "prompt": "User says /sdlc-review .sdlc/export (spec, contract and implementation files are on disk). The host Agent tool rejects sdlc-workflow:reviewer as an unknown type. Available types and their tools: general-purpose (Read, Glob, Grep, Write, Edit, Bash); explore (Read, Glob, Grep only).",
+      "expected_output": "Does not fall back to the writable general-purpose agent for an independent review. Either dispatches one review to explore after noting its tool list is read-only, Reading agents/reviewer.md and skills/findings/SKILL.md, or reports the review as blocked until the native reviewer is available. Records host_spawn with the effective permissions. Does not review the files in the manager window.",
+      "files": [],
+      "expectations": [
+        "Does not dispatch the review to general-purpose",
+        "Uses a verified read-only type (explore) or reports the review as blocked",
+        "Records host_spawn with requested type, fallback and effective permissions",
+        "Does not perform the review itself in the manager window"
+      ]
     }
   ]
 }
