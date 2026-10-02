@@ -25,4 +25,5 @@ discovery:
   at: "2026-09-28T16:20:00+08:00"
 roles_skipped: [growth]
 roles_skipped_why: {growth: "内部效率改动，不涉及定位"}
-open_questions: []
+open_questions:
+  - {id: Q-EXPORT-COLS, class: 运营, status: open, owner: pm, recommended: 沿用后台列表顺序}

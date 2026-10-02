@@ -27,7 +27,7 @@ def neutral_preamble(role, task, tools):
     Whitelisting identity/authority data prevents a newly added section leaking a procedure.
     """
     r=load_registry(); meta=r['roles'][role]
-    t=resolve_task(r,role,task['stage'],task['task'])
+    resolve_task(r,role,task['stage'],task['task'])  # rejects an unregistered task before any text is built
     fresh=meta['fresh']
     return ('Role: '+role+'; function: '+meta['function']+'.\n'
             'Task: '+task['stage']+'/'+task['task']+'.\n'

@@ -477,7 +477,7 @@ print(json.dumps({"job_id":"job-1","status":"submitted" if mode=="start" else "s
         # Both imports race on the same canonical state digest: CAS lets one win; the loser retries.
         expected = file_hash(f.root / 'state.yaml')
         def publish(index):
-            (feature, req, bindings, claim), run = workers[index], runs[index]
+            (_, _, bindings, claim), run = workers[index], runs[index]
             task = bindings['task_id']; state = expected; conflicts = 0
             for _ in range(5):
                 try:

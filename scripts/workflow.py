@@ -539,7 +539,14 @@ def main():
         # Read-only impact query; the index is rebuilt from artifacts on every run (sdlc_trace.py).
         from sdlc_trace import main as trace_main
         return trace_main(sys.argv[2:])
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="Also routed before these subcommands (each has its own --help):\n"
+               "  task protocol   prepare · seal · record · check-tasks · migrate-tasks\n"
+               "  scoped work     check-work · complete-work · impact\n"
+               "  continuous      continuous <operation> --request <json>\n"
+               "  evaluation      eval-prepare · eval-audit · eval-blind\n"
+               "  trace           trace <id> --feature <dir> | --project-root <root>")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("validate")
     sub.add_parser("stages")
@@ -600,7 +607,11 @@ def main():
                 raise ValueError(f"unknown lane {args.lane}")
             print(" ".join(r["lanes"][key])); return 0
         if args.command == "rank":
-            print(r["stages"].get(args.stage, {}).get("rank", 0)); return 0
+            # Unknown is an error, not rank 0: discovery stages really rank 0, and a stray comment or typo
+            # must not silently disable every rank comparison in check-sdlc.sh.
+            if args.stage not in r["stages"]:
+                raise ValueError(f"unknown stage {args.stage!r} (valid: {' '.join(r['stages'])})")
+            print(r["stages"][args.stage]["rank"]); return 0
         if args.command == "paths":
             print("\n".join(artifact_paths(r, [args.artifact], args.legacy))); return 0
         if args.command == "contract":

@@ -87,7 +87,7 @@ def check_reference(edge, stack=()):
 
 def readiness(roots, changed=None, coordinator=None):
     from task_state import check_tasks
-    index = graph(roots); reports = {}; rows = {}
+    index = graph(roots); rows = {}
     claims = {}
     if coordinator:
         from coordination import _read

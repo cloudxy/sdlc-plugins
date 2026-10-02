@@ -18,7 +18,7 @@ The command's arguments name the refresh scope (step 3). Arguments starting with
    6. **data-collector** (after dba — event objects use domain terms) → `data/tracking-plan.yaml`. Only if the product has a data line.
    7. **data-warehouse-engineer** (after data-collector — metrics are computed from events) → `data/metrics.yaml`, `data/tags.yaml`.
    8. **growth** (last — highlights sit on feature-map journeys, segments reference `tag:<id>`, KPIs reference `metric:<id>`; every external market claim cites a dated source it actually opened, first-party facts cite dated internal artifacts) → `growth.md`.
-   Spawn the host's role type ([hosts.md](hosts.md)). On an unknown type: one fallback with the host's generic type (`general-purpose`; Codex `default`) that Reads `PLUGIN_ROOT/agents/<role>.md` and the owning skill; note it in `progress.md`.
+   Spawn the host's role type ([hosts.md](hosts.md)). On an unknown type: one fallback with the host's generic type (`general-purpose`; Codex `default`; Kimi `coder`) that Reads `PLUGIN_ROOT/agents/<role>.md` and the owning skill; note it in `progress.md`.
    After dba (and the data hats when they ran): `python3 <PLUGIN_ROOT>/scripts/data_dictionary.py --product-root <product_root>` writes `data-dictionary.md`, a generated view of `erd.dbml` + the `domain-model.md` glossary + `data/metrics.yaml`. Nobody edits it; its 缺口 section goes back to the owners as open items.
 5. **Gate:** `bash <PLUGIN_ROOT>/scripts/check-sdlc.sh --hat product <product_root>`.
    - PRODUCTCTX → respawn the owner with the failing line.

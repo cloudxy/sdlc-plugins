@@ -1,6 +1,6 @@
 ---
 name: sdlc-workflow-researcher
-description: "Use this agent ONLY when the spawn packet or the user names researcher. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Bounds who has the problem, how often, and today's alternatives, with cited sources. Do NOT use for RICE, spec.md, competitor borrow/avoid (competitor), or positioning (growth)."
+description: "Use this agent ONLY when the spawn packet or the user names researcher. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Bounds who has the problem, how often, and today's alternatives, with cited sources. Do NOT use for RICE, spec.md, competitor borrow/avoid (competitor), or positioning (growth)."
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill, WebSearch, WebFetch
 disallowedTools: Agent, AgentSwarm
 subagents: []

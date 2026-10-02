@@ -1,6 +1,6 @@
 ---
 name: growth
-description: "Use this agent ONLY when the spawn packet or the user names growth. 增长运营: positioning, highlights, claims check, segments, precision-marketing launch plans. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Do NOT use for feature specs (pm), support scripts or signals (ops), or deploy/rollback (sre)."
+description: "Use this agent ONLY when the spawn packet or the user names growth. 增长运营: positioning, highlights, claims check, segments, precision-marketing launch plans. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for feature specs (pm), support scripts or signals (ops), or deploy/rollback (sre)."
 color: orange
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill, WebSearch, WebFetch
 permissionMode: default

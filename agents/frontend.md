@@ -1,6 +1,6 @@
 ---
 name: frontend
-description: "Use this agent when implementing UI slices from accepted final prototype code, tokens and state contracts, including integration runs with screenshots. Use proactively for UI tickets. Do NOT use while /sdlc is running in the parent window. Do NOT use for API implementation or token definition."
+description: "Use this agent when implementing UI slices from accepted final prototype code, tokens and state contracts, including integration runs with screenshots. Use proactively for UI tickets. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for API implementation or token definition."
 color: cyan
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 permissionMode: default

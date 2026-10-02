@@ -1,6 +1,6 @@
 ---
 name: sdlc-workflow-algo
-description: "Use this agent ONLY when the spawn packet or the user names algo. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Designs eval sets, model choice, RAG, AI fallback chains. Do NOT use for business CRUD or UI."
+description: "Use this agent ONLY when the spawn packet or the user names algo. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Designs eval sets, model choice, RAG, AI fallback chains. Do NOT use for business CRUD or UI."
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 disallowedTools: Agent, AgentSwarm
 subagents: []

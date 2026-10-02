@@ -1,6 +1,6 @@
 ---
 name: ops
-description: "Use this agent ONLY when the spawn packet or the user names ops. Product operations (产品运营/用户运营): user signals, enablement (teach/open/announce), release notes. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Do NOT use for deploy, rollback, incidents, CI, or SRE (sre). Do NOT use for RICE, feature design (pm), or campaigns (growth)."
+description: "Use this agent ONLY when the spawn packet or the user names ops. Product operations (产品运营/用户运营): user signals, enablement (teach/open/announce), release notes. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for deploy, rollback, incidents, CI, or SRE (sre). Do NOT use for RICE, feature design (pm), or campaigns (growth)."
 color: blue
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill, WebSearch, WebFetch
 permissionMode: default

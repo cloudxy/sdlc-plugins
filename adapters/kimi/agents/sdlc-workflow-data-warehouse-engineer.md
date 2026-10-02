@@ -1,6 +1,6 @@
 ---
 name: sdlc-workflow-data-warehouse-engineer
-description: "Use this agent ONLY when the spawn packet or the user names data-warehouse-engineer. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Metric/tag definitions, appropriate analytical models, pipeline implementation, reconciliation and replay validation. Do NOT use for OLTP schema (dba) or experiments (analyst)."
+description: "Use this agent ONLY when the spawn packet or the user names data-warehouse-engineer. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Metric/tag definitions, appropriate analytical models, pipeline implementation, reconciliation and replay validation. Do NOT use for OLTP schema (dba) or experiments (analyst)."
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 disallowedTools: Agent, AgentSwarm
 subagents: []

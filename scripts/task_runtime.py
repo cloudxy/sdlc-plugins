@@ -16,7 +16,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from runtime_protocol import (CAPABILITIES, ProtocolError, changes, digest, enabled, encoded,
-                              file_hash, file_record, load, loads, now, object_keys, path_inside,
+                              file_hash, file_record, load, loads, now, object_keys, parse_time, path_inside,
                               require, safe_id, snapshot, state_read, version, write_json)
 from workflow import ROOT, artifact_paths, check_task, deliverable, load_registry, resolve_task, ticket_pattern
 
@@ -140,7 +140,7 @@ def decision(path, target=None, scope=None):
         require(isinstance(d[key], str) and bool(d[key].strip()), f'decision missing {key}')
     require(d['status'] == 'accepted', 'decision is not accepted')
     require(isinstance(d['obligations'], list), 'decision obligations must be a list')
-    dt.datetime.fromisoformat(d['at'])
+    parse_time(d['at'])
     target_path = Path(d['target']).resolve()
     require(target_path.is_file() and file_hash(target_path) == d['target_sha256'], 'decision target version changed')
     if target:

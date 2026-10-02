@@ -1,6 +1,6 @@
 # sdlc-workflow
 
-多宿主工作流插件 · v4.3.3 · MIT
+多宿主工作流插件 · v4.3.4 · MIT
 
 闸门化的功能交付控制面：从想法到交付，先按需要通过沟通、例子与调研帮助需求成形；技术可行性在接受范围前检查，体验设计与最终原型先于架构合同，按用户旅程纵向切片实现并联调，E2E 与三方验收把关，产出回写产品层。工作结论保存在对应工件中，由脚本闸门与独立上下文审查核验。
 
@@ -395,6 +395,7 @@ sdlc-workflow/
 | `scripts/check_packet.py` | 派单前 lint 派单包：输入齐备、不许把调研与证据写成「可选」、所有输出字段按真实路径与拥有者校验 |
 | `scripts/sdlc_trace.py` | `workflow.py trace` 的实现：每次从工件重建只读索引，不写任何文件 |
 | `scripts/check_research_sources.py` | 只查带日期的 URL / 本地工件引用是否存在，不评判研究质量、不设来源配额 |
+| `scripts/state_view.py` | `check-sdlc.sh` 读取 state.yaml 的只读视图（待决问题、闸门记录、跳过理由、最近一次独立审查），容忍行内注释与 flow/块式写法 |
 | `scripts/evidence.py` | 把测试与验证的运行记录绑定到当时的代码版本（`state.yaml` 写「pass」不算证据） |
 | `scripts/diagram/` | 图示闸门：来源声明、安全检查、节点与边对照权威来源的语义比对 |
 | `scripts/image/` | 出图与它的闸门：生成位图素材并留证（提示词原文、模型、参数、digest），`check.py` 把每张图绑到提示词与声明它的工件上 |
@@ -407,7 +408,7 @@ sdlc-workflow/
 | `scripts/eval_protocol.py` | `workflow.py eval-prepare / eval-audit / eval-blind`：受控对照的隔离准备、宿主轨迹审计与盲评目录，本身不调模型 |
 | `scripts/grade_eval.py` / `blind_eval.py` | 评测机械评分（不调模型）与盲评 |
 | `scripts/ui-evidence.sh` | UI 截图留证 |
-| `scripts/test_work_scope.py` / `test_task_runtime.py` / `test_workflow.py` / `test_skill_evidence.py` / `test_eval_protocol.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` / `test_reference_links.py` | 注册表、局部工作、技能证据规则、评测隔离、闸门、vendor 安装、多宿主打包与项目链接安全的自测 |
+| `scripts/test_work_scope.py` / `test_task_runtime.py` / `test_workflow.py` / `test_skill_evidence.py` / `test_eval_protocol.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` / `test_reference_links.py` / `test_state_view.py` | 注册表、局部工作、技能证据规则、评测隔离、闸门（含 state.yaml 只读视图）、vendor 安装、多宿主打包与项目链接安全的自测 |
 | `scripts/test_continuous_work.py` | 持续工作协议场景：<br>- 版本共存；CAS 与结果恢复；两个进程并发记录与导入<br>- 跨功能依赖、未声明消费者；方法闭包与复验范围；修复后的诊断<br>- 隔离认领与过期令牌；跨机器拒绝<br>- 集成候选与符号链接；数据快照与长作业 |
 
 ## 上游原件（vendor/）

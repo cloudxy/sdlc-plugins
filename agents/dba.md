@@ -1,6 +1,6 @@
 ---
 name: dba
-description: "Use this agent ONLY when the spawn packet or the user names dba. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Domain models, engine-specific constraints, query optimization and scoped migration design/implementation with explicit recovery limits. Do NOT use for Service/Repository code or API shapes."
+description: "Use this agent ONLY when the spawn packet or the user names dba. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Domain models, engine-specific constraints, query optimization and scoped migration design/implementation with explicit recovery limits. Do NOT use for Service/Repository code or API shapes."
 color: green
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 permissionMode: default

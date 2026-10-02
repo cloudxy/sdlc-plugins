@@ -1,6 +1,6 @@
 ---
 name: qa
-description: "Use this agent when designing risk-based tests, E2E journeys, tracking validation, coverage matrices, or defect reports. Use for early test planning and post-implementation verification. Do NOT use while /sdlc is running in the parent window. Do NOT use for fixing defects or release decisions."
+description: "Use this agent when designing risk-based tests, E2E journeys, tracking validation, coverage matrices, or defect reports. Use for early test planning and post-implementation verification. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for fixing defects or release decisions."
 color: orange
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 permissionMode: default

@@ -1,6 +1,6 @@
 ---
 name: sdlc-workflow-miner
-description: "Use this agent ONLY when the spawn packet or the user names miner. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Builds predictive models, segmentation, feature as-of design. Do NOT use for online LLM/RAG (algo) or dashboards (analyst)."
+description: "Use this agent ONLY when the spawn packet or the user names miner. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Builds predictive models, segmentation, feature as-of design. Do NOT use for online LLM/RAG (algo) or dashboards (analyst)."
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 disallowedTools: Agent, AgentSwarm
 subagents: []

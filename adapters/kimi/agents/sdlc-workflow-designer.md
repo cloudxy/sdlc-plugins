@@ -1,6 +1,6 @@
 ---
 name: sdlc-workflow-designer
-description: "Use this agent ONLY when the spawn packet or the user names designer. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Reuses or explores design directions, delivers runnable final prototypes and applicable states, coordinates scoped discovery prototypes, and performs design QA. Do NOT use for frontend implementation."
+description: "Use this agent ONLY when the spawn packet or the user names designer. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Reuses or explores design directions, delivers runnable final prototypes and applicable states, coordinates scoped discovery prototypes, and performs design QA. Do NOT use for frontend implementation."
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill, WebSearch, WebFetch
 disallowedTools: Agent, AgentSwarm
 subagents: []

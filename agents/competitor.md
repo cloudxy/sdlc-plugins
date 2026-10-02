@@ -1,6 +1,6 @@
 ---
 name: competitor
-description: "Use this agent ONLY when the spawn packet or the user names competitor. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. How rivals and the status quo serve this job, where users complain, where we can win. Do NOT use for RICE, spec.md, market sizing (researcher), or positioning (growth)."
+description: "Use this agent ONLY when the spawn packet or the user names competitor. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. How rivals and the status quo serve this job, where users complain, where we can win. Do NOT use for RICE, spec.md, market sizing (researcher), or positioning (growth)."
 color: blue
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill, WebSearch, WebFetch
 permissionMode: default

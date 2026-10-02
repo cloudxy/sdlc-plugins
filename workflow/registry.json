@@ -59,7 +59,7 @@
   "roles": {
     "pm": {
       "skill": "prd-gwt",
-      "description": "Use this agent when defining product value, core features, key journeys, spec.md (FR/GWT), tracking needs, or walking acceptance on the build. Use proactively when the user states a problem before technical design. Do NOT use while /sdlc is running in the parent window. Do NOT use for architecture, schema, or implementation.",
+      "description": "Use this agent when defining product value, core features, key journeys, spec.md (FR/GWT), tracking needs, or walking acceptance on the build. Use proactively when the user states a problem before technical design. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for architecture, schema, or implementation.",
       "color": "blue",
       "fresh": false,
       "product_writes": [
@@ -70,7 +70,7 @@
     },
     "growth": {
       "skill": "growth",
-      "description": "Use this agent ONLY when the spawn packet or the user names growth. 增长运营: positioning, highlights, claims check, segments, precision-marketing launch plans. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Do NOT use for feature specs (pm), support scripts or signals (ops), or deploy/rollback (sre).",
+      "description": "Use this agent ONLY when the spawn packet or the user names growth. 增长运营: positioning, highlights, claims check, segments, precision-marketing launch plans. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for feature specs (pm), support scripts or signals (ops), or deploy/rollback (sre).",
       "color": "orange",
       "fresh": false,
       "product_writes": [
@@ -80,7 +80,7 @@
     },
     "ops": {
       "skill": "signals",
-      "description": "Use this agent ONLY when the spawn packet or the user names ops. Product operations (产品运营/用户运营): user signals, enablement (teach/open/announce), release notes. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Do NOT use for deploy, rollback, incidents, CI, or SRE (sre). Do NOT use for RICE, feature design (pm), or campaigns (growth).",
+      "description": "Use this agent ONLY when the spawn packet or the user names ops. Product operations (产品运营/用户运营): user signals, enablement (teach/open/announce), release notes. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for deploy, rollback, incidents, CI, or SRE (sre). Do NOT use for RICE, feature design (pm), or campaigns (growth).",
       "color": "blue",
       "fresh": false,
       "product_writes": [],
@@ -88,7 +88,7 @@
     },
     "designer": {
       "skill": "design-contract",
-      "description": "Use this agent ONLY when the spawn packet or the user names designer. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Reuses or explores design directions, delivers runnable final prototypes and applicable states, coordinates scoped discovery prototypes, and performs design QA. Do NOT use for frontend implementation.",
+      "description": "Use this agent ONLY when the spawn packet or the user names designer. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Reuses or explores design directions, delivers runnable final prototypes and applicable states, coordinates scoped discovery prototypes, and performs design QA. Do NOT use for frontend implementation.",
       "color": "blue",
       "fresh": false,
       "product_writes": [
@@ -108,7 +108,7 @@
     },
     "dba": {
       "skill": "schema",
-      "description": "Use this agent ONLY when the spawn packet or the user names dba. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Domain models, engine-specific constraints, query optimization and scoped migration design/implementation with explicit recovery limits. Do NOT use for Service/Repository code or API shapes.",
+      "description": "Use this agent ONLY when the spawn packet or the user names dba. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Domain models, engine-specific constraints, query optimization and scoped migration design/implementation with explicit recovery limits. Do NOT use for Service/Repository code or API shapes.",
       "color": "green",
       "fresh": false,
       "product_writes": [
@@ -119,7 +119,7 @@
     },
     "frontend": {
       "skill": "impl-evidence",
-      "description": "Use this agent when implementing UI slices from accepted final prototype code, tokens and state contracts, including integration runs with screenshots. Use proactively for UI tickets. Do NOT use while /sdlc is running in the parent window. Do NOT use for API implementation or token definition.",
+      "description": "Use this agent when implementing UI slices from accepted final prototype code, tokens and state contracts, including integration runs with screenshots. Use proactively for UI tickets. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for API implementation or token definition.",
       "color": "cyan",
       "fresh": false,
       "product_writes": [],
@@ -127,7 +127,7 @@
     },
     "backend": {
       "skill": "impl-evidence",
-      "description": "Use this agent when implementing APIs, services, repositories, transactions, idempotency, or server-side events. Use proactively for API tickets. Do NOT use while /sdlc is running in the parent window. Do NOT use for schema design or changing GWT.",
+      "description": "Use this agent when implementing APIs, services, repositories, transactions, idempotency, or server-side events. Use proactively for API tickets. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for schema design or changing GWT.",
       "color": "cyan",
       "fresh": false,
       "product_writes": [],
@@ -135,7 +135,7 @@
     },
     "sre": {
       "skill": "deliver",
-      "description": "Use this agent ONLY when the spawn packet or the user names sre. SRE / 运维: pre-QC readiness, scoped CI wiring, authorized deployment, recovery, monitoring and incidents. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Do NOT use for user-facing copy, support scripts, or signal aggregation (ops / 产品运营). Do NOT use for business code or schema changes.",
+      "description": "Use this agent ONLY when the spawn packet or the user names sre. SRE / 运维: pre-QC readiness, scoped CI wiring, authorized deployment, recovery, monitoring and incidents. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for user-facing copy, support scripts, or signal aggregation (ops / 产品运营). Do NOT use for business code or schema changes.",
       "color": "green",
       "fresh": false,
       "product_writes": [],
@@ -143,7 +143,7 @@
     },
     "qa": {
       "skill": "coverage-matrix",
-      "description": "Use this agent when designing risk-based tests, E2E journeys, tracking validation, coverage matrices, or defect reports. Use for early test planning and post-implementation verification. Do NOT use while /sdlc is running in the parent window. Do NOT use for fixing defects or release decisions.",
+      "description": "Use this agent when designing risk-based tests, E2E journeys, tracking validation, coverage matrices, or defect reports. Use for early test planning and post-implementation verification. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for fixing defects or release decisions.",
       "color": "orange",
       "fresh": false,
       "product_writes": [],
@@ -151,7 +151,7 @@
     },
     "algo": {
       "skill": "impl-evidence",
-      "description": "Use this agent ONLY when the spawn packet or the user names algo. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Designs eval sets, model choice, RAG, AI fallback chains. Do NOT use for business CRUD or UI.",
+      "description": "Use this agent ONLY when the spawn packet or the user names algo. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Designs eval sets, model choice, RAG, AI fallback chains. Do NOT use for business CRUD or UI.",
       "color": "blue",
       "fresh": false,
       "product_writes": [],
@@ -159,7 +159,7 @@
     },
     "miner": {
       "skill": "impl-evidence",
-      "description": "Use this agent ONLY when the spawn packet or the user names miner. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Builds predictive models, segmentation, feature as-of design. Do NOT use for online LLM/RAG (algo) or dashboards (analyst).",
+      "description": "Use this agent ONLY when the spawn packet or the user names miner. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Builds predictive models, segmentation, feature as-of design. Do NOT use for online LLM/RAG (algo) or dashboards (analyst).",
       "color": "blue",
       "fresh": false,
       "product_writes": [],
@@ -167,7 +167,7 @@
     },
     "analyst": {
       "skill": "retro",
-      "description": "Use this agent ONLY when the spawn packet or the user names analyst. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Early measurement plans, experiments, funnels, cohorts, readouts and metric interpretation; PM applies strategy decisions. Do NOT use for writing FRs or implementation.",
+      "description": "Use this agent ONLY when the spawn packet or the user names analyst. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Early measurement plans, experiments, funnels, cohorts, readouts and metric interpretation; PM applies strategy decisions. Do NOT use for writing FRs or implementation.",
       "color": "blue",
       "fresh": false,
       "product_writes": [],
@@ -175,7 +175,7 @@
     },
     "data-warehouse-engineer": {
       "skill": "warehouse",
-      "description": "Use this agent ONLY when the spawn packet or the user names data-warehouse-engineer. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Metric/tag definitions, appropriate analytical models, pipeline implementation, reconciliation and replay validation. Do NOT use for OLTP schema (dba) or experiments (analyst).",
+      "description": "Use this agent ONLY when the spawn packet or the user names data-warehouse-engineer. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Metric/tag definitions, appropriate analytical models, pipeline implementation, reconciliation and replay validation. Do NOT use for OLTP schema (dba) or experiments (analyst).",
       "color": "blue",
       "fresh": false,
       "product_writes": [
@@ -186,7 +186,7 @@
     },
     "data-collector": {
       "skill": "collect",
-      "description": "Use this agent ONLY when the spawn packet or the user names data-collector. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Tracking/source design, scoped collection implementation and destination validation for events, identities, logs and external sources. Do NOT use for warehouse ETL or backend APIs.",
+      "description": "Use this agent ONLY when the spawn packet or the user names data-collector. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Tracking/source design, scoped collection implementation and destination validation for events, identities, logs and external sources. Do NOT use for warehouse ETL or backend APIs.",
       "color": "cyan",
       "fresh": false,
       "product_writes": [
@@ -196,7 +196,7 @@
     },
     "reviewer": {
       "skill": "findings",
-      "description": "Use this agent ONLY when the spawn packet or the user names reviewer. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Memory-free review of artifacts (G-fresh), including product value and experience evidence. Do NOT use for writing code, fixing issues, or release approval (qc).",
+      "description": "Use this agent ONLY when the spawn packet or the user names reviewer. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Memory-free review of artifacts (G-fresh), including product value and experience evidence. Do NOT use for writing code, fixing issues, or release approval (qc).",
       "color": "red",
       "fresh": true,
       "product_writes": [],
@@ -204,7 +204,7 @@
     },
     "qc": {
       "skill": "release-gate",
-      "description": "Use this agent ONLY when the spawn packet or the user names qc. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Scoped verification/release-readiness opinion from acceptance, SRE preparation and residual risk; no deployment authorization. Do NOT use for finding defects (reviewer) or writing tests (qa).",
+      "description": "Use this agent ONLY when the spawn packet or the user names qc. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Scoped verification/release-readiness opinion from acceptance, SRE preparation and residual risk; no deployment authorization. Do NOT use for finding defects (reviewer) or writing tests (qa).",
       "color": "red",
       "fresh": true,
       "product_writes": [],
@@ -212,7 +212,7 @@
     },
     "researcher": {
       "skill": "market",
-      "description": "Use this agent ONLY when the spawn packet or the user names researcher. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Bounds who has the problem, how often, and today's alternatives, with cited sources. Do NOT use for RICE, spec.md, competitor borrow/avoid (competitor), or positioning (growth).",
+      "description": "Use this agent ONLY when the spawn packet or the user names researcher. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Bounds who has the problem, how often, and today's alternatives, with cited sources. Do NOT use for RICE, spec.md, competitor borrow/avoid (competitor), or positioning (growth).",
       "color": "blue",
       "fresh": false,
       "product_writes": [],
@@ -220,7 +220,7 @@
     },
     "competitor": {
       "skill": "compete",
-      "description": "Use this agent ONLY when the spawn packet or the user names competitor. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. How rivals and the status quo serve this job, where users complain, where we can win. Do NOT use for RICE, spec.md, market sizing (researcher), or positioning (growth).",
+      "description": "Use this agent ONLY when the spawn packet or the user names competitor. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. How rivals and the status quo serve this job, where users complain, where we can win. Do NOT use for RICE, spec.md, market sizing (researcher), or positioning (growth).",
       "color": "blue",
       "fresh": false,
       "product_writes": [],

@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: "Use this agent ONLY when the spawn packet or the user names reviewer. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Memory-free review of artifacts (G-fresh), including product value and experience evidence. Do NOT use for writing code, fixing issues, or release approval (qc)."
+description: "Use this agent ONLY when the spawn packet or the user names reviewer. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Memory-free review of artifacts (G-fresh), including product value and experience evidence. Do NOT use for writing code, fixing issues, or release approval (qc)."
 color: red
 tools: Read, Glob, Grep, Skill
 disallowedTools: Write, Edit, Bash

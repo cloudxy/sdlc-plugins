@@ -396,7 +396,6 @@ def _self_test() -> int:
     import tempfile
     import unittest
 
-    global TRANSPORT
     one_png = (b"\x89PNG\r\n\x1a\n" + struct.pack(">I", 13) + b"IHDR" + struct.pack(">II", 8, 8)
                + b"\x08\x06\x00\x00\x00" + b"\x00" * 16)
 

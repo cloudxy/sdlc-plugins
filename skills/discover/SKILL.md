@@ -59,7 +59,7 @@ For each selected track, spawn **once** (native `sdlc-workflow:<role>`, packet v
 - `hat: researcher`, `stage: market`, `task: survey`, `primary_skill: sdlc-workflow:market` → `00-discover/market.md`
 - `hat: competitor`, `stage: compete`, `task: survey`, `primary_skill: sdlc-workflow:compete` → `00-discover/compete.md`
 
-If host unknown type: one fallback with the host's generic type (`general-purpose`; Codex `default`; [hosts.md](../sdlc/references/hosts.md)) that Reads `PLUGIN_ROOT/agents/<role>.md` + the skill. Record `host_spawn`. Then `check-sdlc.sh --require --hat market` / `--hat compete`.
+If host unknown type: one fallback with the host's generic type (`general-purpose`; Codex `default`; Kimi `coder`; [hosts.md](../sdlc/references/hosts.md)) that Reads `PLUGIN_ROOT/agents/<role>.md` + the skill. Record `host_spawn`. Then `check-sdlc.sh --require --hat market` / `--hat compete`.
 
 For a full discovery record, document omitted tracks with `roles_skipped` + why. A bounded exchange need not manufacture survey files; if compete is selected, include 现状 even for an internal tool.
 

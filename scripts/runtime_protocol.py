@@ -106,6 +106,19 @@ def now():
     return dt.datetime.now(ZoneInfo('Asia/Shanghai')).isoformat(timespec='microseconds')
 
 
+def parse_time(value):
+    """ISO 8601 as people and tools write it. Python < 3.11 fromisoformat rejects `Z` and `+0800`."""
+    require(isinstance(value, str) and bool(value.strip()), 'time must be a nonempty ISO 8601 string')
+    text = value.strip()
+    if text.endswith(('Z', 'z')):
+        text = text[:-1] + '+00:00'
+    text = re.sub(r'([+-]\d{2})(\d{2})$', r'\1:\2', text)
+    try:
+        return dt.datetime.fromisoformat(text)
+    except ValueError:
+        raise ValueError(f'invalid ISO 8601 time: {value!r}') from None
+
+
 def safe_id(value, label='id'):
     require(isinstance(value, str) and bool(SAFE_ID.fullmatch(value)), f'unsafe {label}: {value!r}')
     return value

@@ -1,6 +1,6 @@
 ---
 name: data-collector
-description: "Use this agent ONLY when the spawn packet or the user names data-collector. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Tracking/source design, scoped collection implementation and destination validation for events, identities, logs and external sources. Do NOT use for warehouse ETL or backend APIs."
+description: "Use this agent ONLY when the spawn packet or the user names data-collector. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Tracking/source design, scoped collection implementation and destination validation for events, identities, logs and external sources. Do NOT use for warehouse ETL or backend APIs."
 color: cyan
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 permissionMode: default

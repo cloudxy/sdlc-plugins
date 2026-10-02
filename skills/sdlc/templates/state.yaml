@@ -30,7 +30,7 @@ intent:
 
 discovery:
   status: pending     # pending|done|skipped|killed
-  skip_why: ""
+  skip_why: ""        # status: skipped 时必填（L2+ 闸门检查）：复用的授权/合同/缺陷证据，以及不需要再探索的原因
   briefing: 00-discover/briefing.md
   tracks:
     discuss: pending  # pending|done|skipped
@@ -47,7 +47,7 @@ design:               # ui: yes 时由经理在「设计方向选择」人工决
   at: ""
 
 roles_skipped: []     # 单行 flow 列表（[architect, growth]），精确 token；block-style 无效。`product-ops` ≡ `ops`（跳过别名，不是 spawn type）
-roles_skipped_why: {}
+roles_skipped_why: {} # 每个跳过的角色一条理由，如 {growth: "内部工具，无对外宣称"}；v4 缺理由 = SKIPWHY；ui: yes 不能跳过 designer
 q_security: no        # yes 当 Q2|Q3|Q4；此时 02-shape/contract.md 须含 [SEC-n]
 
 tickets: []           # [{id, title, journey: J-n, roles: [backend, frontend], status: todo|doing|done|blocked, evidence, integration}]
@@ -65,6 +65,7 @@ review_findings: []   # [{id, severity, status: fixed|waived, reason?}]
 stale_artifacts: []   # 上游变更导致失效的下游工件
 open_questions: []    # 必须含 spec/briefing 里「待确认」的 Q-* ；空数组而仍待确认 = OPENQ
                       # 推荐 {id, class: 战略|运营, status: open|answered|external, owner, recommended: <帽子的推荐>}；纯字符串视为 open
+                      # id 按全名精确匹配（Q-PRICE、Q-1 都可；Q-TIER-B 的回答不算 Q-TIER 的）；flow 与块式写法闸门都认
                       # 战略决策 answered 必须带 quote: "<操作者原话>", by: user, at；没回答 = open（沉默不是同意）
                       # 由他人决定、操作者转达时另记 decided_by: <决定者>, relayed_by: user, authority: <为何有权决定>；
                       # 闸门只检查会话里记录的原话，不核验身份：写明「据操作者转达」，不要写成已核实

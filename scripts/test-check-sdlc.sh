@@ -692,7 +692,7 @@ rm -f "$F/05-review/findings.md" "$F/product-delta.md" "$F/03-impl/T-1-frontend-
 printf '泳道：L2\nJ-1 走查 ![](../03-impl/screens/j1.png)\n结论：通过\n' >"$F/04-verify/accept-pm.md"
 assert_exit 0 "v4 --hat accept all 通过 with screenshots" --hat accept "$F"
 rm "$F/04-verify/accept-growth.md"
-printf 'roles_skipped: [growth]\n' >>"$F/state.yaml"
+printf 'roles_skipped: [growth]\nroles_skipped_why: {growth: "内部工具，无对外宣称"}\n' >>"$F/state.yaml"
 assert_exit 0 "v4 --hat accept skips growth via roles_skipped" --hat accept "$F"
 printf '泳道：L2\n## 第 1 轮\n结论：不通过\n## 第 2 轮\nJ-1 走查 ![](../03-impl/screens/j1.png)\n结论：通过\n' >"$F/04-verify/accept-pm.md"
 assert_exit 2 "v4 accept file with two different verdicts is ambiguous, not first-wins (P12)" --hat accept "$F"
@@ -968,7 +968,7 @@ assert_tag CLOSED
 # 50. P10 安全责任不随角色跳过
 mk_v4 sec
 F="$T/sec/.sdlc/f"
-printf 'q_security: yes\nroles_skipped: [architect]\n' >>"$F/state.yaml"
+printf 'q_security: yes\nroles_skipped: [architect]\nroles_skipped_why: {architect: "小改动"}\n' >>"$F/state.yaml"
 assert_exit 1 "q_security yes cannot skip architect (P10)" --hat define "$F"
 assert_tag NOSEC
 
@@ -1043,6 +1043,136 @@ printf '| ID | 来源 |\n|---|---|\n| SIG-202608-1 | 工单 |\n| SIG-202608-2 | 
 printf '| Q-PRICE | 付费墙 | 战略 | 首月免费（推荐） | 默认 | |\n' >>"$CY/outputs/decisions.md"
 assert_exit 1 "a strategic call defaulted inside a cycle is DEFAULTED" --hat cycle "$CY"
 assert_tag DEFAULTED
+
+# 61. 解析鲁棒性（2026-10-01 深度检查）：这些写法曾让闸门静默放行
+mk_lane() { # $1 = 目录；$2 = current_hat 行（可带行内注释）；其余 state 行由调用方追加
+  mkdir -p "$1/01-define" "$1/05-review"
+  printf '泳道：L2\n| id | 问题 | 类别 | 状态 |\n|---|---|---|---|\n| Q-PRICE | 定价 | 战略 | 待确认 |\n' >"$1/01-define/spec.md"
+  printf 'feature: t\nsdlc_version: 4\nlane: L2\nappetite: 4h\n%s\nhats_done: [define, shape]\nopen_questions:\n  - {id: Q-PRICE, class: 战略, status: open}\n' "$2" >"$1/state.yaml"
+}
+# 61a. 模板自带的 current_hat 行内注释不能关掉按阶段排位的检查
+mk_lane "$T/hc1" 'current_hat: implement   # 英文主词（define/signals/shape/implement）'
+assert_exit 2 "an inline comment on current_hat keeps OPENQOPEN + DECISIONPENDING" --require "$T/hc1"
+assert_tag OPENQOPEN
+assert_tag DECISIONPENDING
+# 61b. 未登记的 current_hat 明确报 STATE，而不是排位 0 后全部跳过
+mk_lane "$T/hc2" 'current_hat: impelment'
+assert_exit 1 "an unregistered current_hat is STATE" --require "$T/hc2"
+assert_tag STATE
+
+# 62. 数字编号的决策（Q-1）与字母编号同样受决策闸约束
+mk_lane "$T/qn1" 'current_hat: implement'
+sed -i.bak 's/Q-PRICE/Q-1/' "$T/qn1/01-define/spec.md" "$T/qn1/state.yaml" && rm -f "$T/qn1"/*.bak "$T/qn1"/01-define/*.bak
+assert_exit 2 "numeric Q-1 pending past define is OPENQOPEN + DECISIONPENDING" --require "$T/qn1"
+assert_tag DECISIONPENDING
+
+# 63. open_questions 精确匹配：前缀相同的另一个 id、unanswered 都不算回答；块式写法算记账
+mk_lane "$T/qm1" 'current_hat: implement'
+printf '| Q-TIER | 档位 | 运营 | 待确认 |\n' >>"$T/qm1/01-define/spec.md"
+printf '  - {id: Q-TIER-B, class: 运营, status: answered, quote: "x", by: user}\n' >>"$T/qm1/state.yaml"
+assert_exit 4 "Q-TIER-B answered does not answer Q-TIER (OPENQ + OPENQOPEN for Q-TIER; Q-PRICE still pending)" --require "$T/qm1"
+assert_tag OPENQ
+mk_lane "$T/qm2" 'current_hat: define'
+cat >"$T/qm2/state.yaml" <<'Y'
+feature: t
+sdlc_version: 4
+lane: L2
+appetite: 4h
+current_hat: shape
+hats_done: [define]
+open_questions:
+  - id: Q-PRICE
+    class: 战略
+    status: unanswered
+Y
+assert_exit 2 "status unanswered is not answered (OPENQOPEN + DECISIONPENDING)" --require "$T/qm2"
+assert_tag OPENQOPEN
+sed -i.bak 's/| 待确认 |/| 已确认 | 「先免费三个月」· 操作者 · 2026-10-01 |/; s/^| id .*/| id | 问题 | 类别 | 状态 | 来源 |/' "$T/qm2/01-define/spec.md" && rm -f "$T/qm2/01-define/spec.md.bak"
+assert_exit 0 "a block-style open_questions entry counts as recorded" --require "$T/qm2"
+
+# 64. briefing 里的待确认问题也要记账；战略待确认挡住 define 之后
+mk_v4 bq
+F="$T/bq/.sdlc/f"
+mkdir -p "$F/00-discover"
+printf '# briefing\n| id | 问题 | 类别 | 阻塞 | 谁答 | 状态 |\n|---|---|---|---|---|---|\n| Q-AUDIENCE | 先服务买方还是使用者 | 战略 | define 全部 | operator | 待确认 |\n' >"$F/00-discover/briefing.md"
+sed -i.bak 's/^current_hat: define/current_hat: implement/' "$F/state.yaml" && rm -f "$F/state.yaml.bak"
+assert_exit 2 "a pending strategic briefing question past define is OPENQ + DECISIONPENDING" --require "$F"
+assert_tag OPENQ
+assert_tag DECISIONPENDING
+
+# 65. 路径含空格：逐文件检查不能因为按空格切分而跳过
+mkdir -p "$T/sp ace/f/01-define"
+printf 'feature: t\nlane: L2\nappetite: 4h\ncurrent_hat: define\nhats_done: []\n' >"$T/sp ace/f/state.yaml"
+printf '泳道：L2\n## 验收标准\n- 系统应该很快\n' >"$T/sp ace/f/01-define/spec.md"
+assert_exit 1 "GWT still runs when the feature path has a space" --require "$T/sp ace/f"
+assert_tag GWT
+mk_lane "$T/sp ace/d" 'current_hat: implement'
+assert_exit 2 "decision gates still run when the feature path has a space" --require "$T/sp ace/d"
+assert_tag DECISIONPENDING
+
+# 66. 违规数封顶 63：退出码按 256 取模，256 处违规曾经等于通过
+mkdir -p "$T/wrap/01-define" "$T/wrap/04-verify"
+{ echo '泳道：L2'; i=1; while [ $i -le 256 ]; do echo "FR-$i 导出第 $i 项"; i=$((i+1)); done; } >"$T/wrap/01-define/spec.md"
+printf '# coverage\n| FR | case |\n|---|---|\n' >"$T/wrap/04-verify/coverage.md"
+printf 'feature: t\nlane: L2\nappetite: 4h\ncurrent_hat: verify\nhats_done: [define, shape, implement]\n' >"$T/wrap/state.yaml"
+assert_exit 63 "256 violations exit 63, never wrap to 0" --require "$T/wrap"
+grep -q '共 256 处违规' "$T/out" || { echo "FAIL summary must keep the true count"; fail=$((fail+1)); }
+
+# 67. 无界面的 v4 功能也要验收才能关闭（只有设计走查随 ui 变化）
+mk_v4 clu
+F="$T/clu/.sdlc/f"
+sed -i.bak 's/^ui: yes/ui: no/; s/^hats_done: \[\]/hats_done: [define, shape, implement, verify, review]/' "$F/state.yaml" && rm -f "$F/state.yaml.bak"
+printf 'phase: Closed\n' >>"$F/state.yaml"
+printf '## Snapshot\nok\n' >"$F/05-review/findings.md"; printf '无产品层变更：内部 API\n' >"$F/product-delta.md"
+printf '# coverage\n| id | case |\n|---|---|\n| J-1 | E2E 导入并看到报告 |\n| EV-1 | 埋点校验 |\n' >"$F/04-verify/coverage.md"
+assert_exit 1 "a ui: no feature cannot close without accept" --hat define "$F"
+assert_tag CLOSED
+
+# 68. 跳过要写理由：发现带 skip_why、roles_skipped_why；ui: yes 不能跳过 designer
+mkdir -p "$T/dsk/01-define"
+printf '泳道：L3\n' >"$T/dsk/01-define/spec.md"
+printf 'feature: t\nlane: L3\nappetite: 4h\ncurrent_hat: define\nhats_done: []\ndiscovery:\n  status: skipped\n  skip_why: ""\n' >"$T/dsk/state.yaml"
+assert_exit 1 "L2+ discovery skipped without skip_why is NODISCOVER" --require "$T/dsk"
+assert_tag NODISCOVER
+sed -i.bak 's/skip_why: ""/skip_why: "已批准的缺陷修复：复现与验收已在工单 BUG-12"/' "$T/dsk/state.yaml" && rm -f "$T/dsk/state.yaml.bak"
+assert_exit 0 "discovery skipped with a reason passes" --require "$T/dsk"
+mk_v4 dsg
+F="$T/dsg/.sdlc/f"
+printf 'roles_skipped: [designer, growth]\nroles_skipped_why: {growth: 内部工具}\n' >>"$F/state.yaml"
+assert_exit 2 "ui: yes cannot skip designer, and every skip needs a reason (DESIGNSKIP + SKIPWHY)" --hat define "$F"
+assert_tag DESIGNSKIP
+assert_tag SKIPWHY
+
+# 69. null 闸门要各自带 reason；文件别处的 reason: 不算
+mkdir -p "$T/ng/01-define"
+printf '泳道：L2\n' >"$T/ng/01-define/spec.md"
+printf 'feature: t\nlane: L2\nappetite: 4h\ncurrent_hat: define\nhats_done: []\ngates:\n  - {name: lint, result: null, reason: 项目没有 lint}\n  - name: e2e\n    result: null\nlane_changes:\n  - {from: L1, to: L2, reason: 改了 schema, at: 2026-10-01}\n' >"$T/ng/state.yaml"
+assert_exit 1 "a null gate without its own reason is NULLGATE even if other records carry reason" --require "$T/ng"
+assert_tag NULLGATE
+
+# 70. 一行 flow 写法的 fresh-context 失败记录也要挡住越级；注释里的示例不是记录
+mkdir -p "$T/ff/01-define" "$T/ff/05-review"
+printf '泳道：L3\n' >"$T/ff/01-define/spec.md"; printf 'f\n' >"$T/ff/05-review/findings.md"
+printf 'feature: t\nlane: L3\nappetite: 4h\ncurrent_hat: shape\nhats_done: [define]\ngates:\n  - {name: fresh-context, kind: fresh-context, stage: define, result: fail, blocker: 1}\n' >"$T/ff/state.yaml"
+assert_exit 1 "a flow-style fresh-context fail still blocks advancing (HATADVANCE)" --require "$T/ff"
+assert_tag HATADVANCE
+mkdir -p "$T/fc"
+printf 'feature: t\nlane: L2\nappetite: 4h\ncurrent_hat: define\nhats_done: []\ngates: []\n  # fresh-context:{name, kind: fresh-context, stage: <stage-id>, result}\n' >"$T/fc/state.yaml"
+assert_exit 0 "kind: fresh-context inside a comment is not a recorded review" --require "$T/fc"
+
+# 71. 配置了 layering 但根目录不存在：报错，不静默跳过
+mkdir -p "$T/lay/.sdlc/f/01-define"
+printf 'extra_gates: [layering]\nlayering_root: backend\n' >"$T/lay/sdlc.config.yaml"
+printf '泳道：L1\n' >"$T/lay/.sdlc/f/01-define/spec.md"
+printf 'feature: t\nlane: L1\ncurrent_hat: implement\nhats_done: []\n' >"$T/lay/.sdlc/f/state.yaml"
+assert_exit 1 "configured layering with a missing root is LAYERING" --require "$T/lay/.sdlc/f"
+assert_tag LAYERING
+
+# 72. 原样复制 state 模板：行尾注释（lane「# L0-L4」、current_hat、注释里的 fresh-context 示例）不能改变判决
+mkdir -p "$T/tpl"
+cp "$ROOT/skills/sdlc/templates/state.yaml" "$T/tpl/state.yaml"
+assert_exit 1 "the verbatim state template at L2 with discovery pending is exactly NODISCOVER" --require "$T/tpl"
+assert_tag NODISCOVER
 
 if [ "$fail" -ne 0 ]; then
   echo "----------------------------------------"

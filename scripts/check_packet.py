@@ -771,7 +771,7 @@ def self_test() -> int:
             return fail("a valid packet must pass", good["errors"])
         # A nested mapping used to read as an empty list; a repeated field used to win silently (plan §1.2).
         for extra in ("evidence_inputs:\n  build_revision: git:abc\n  verification_records: [run.json]\n",
-                      f"lane: L3\n", "memory_file: x\n  - stray\n", "inputs:\n- orphan\n"):
+                      "lane: L3\n", "memory_file: x\n  - stray\n", "inputs:\n- orphan\n"):
             parsed = legacy_lint(packet() + extra)
             if "PARSE" not in {e["code"] for e in parsed["errors"]}:
                 return fail("unsupported v2 syntax must be a PARSE error", extra, parsed["errors"])

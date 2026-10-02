@@ -1,6 +1,6 @@
 ---
 name: pm
-description: "Use this agent when defining product value, core features, key journeys, spec.md (FR/GWT), tracking needs, or walking acceptance on the build. Use proactively when the user states a problem before technical design. Do NOT use while /sdlc is running in the parent window. Do NOT use for architecture, schema, or implementation."
+description: "Use this agent when defining product value, core features, key journeys, spec.md (FR/GWT), tracking needs, or walking acceptance on the build. Use proactively when the user states a problem before technical design. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for architecture, schema, or implementation."
 color: blue
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill, WebSearch, WebFetch
 permissionMode: default

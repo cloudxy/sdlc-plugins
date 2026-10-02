@@ -1,6 +1,6 @@
 ---
 name: backend
-description: "Use this agent when implementing APIs, services, repositories, transactions, idempotency, or server-side events. Use proactively for API tickets. Do NOT use while /sdlc is running in the parent window. Do NOT use for schema design or changing GWT."
+description: "Use this agent when implementing APIs, services, repositories, transactions, idempotency, or server-side events. Use proactively for API tickets. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Do NOT use for schema design or changing GWT."
 color: cyan
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 permissionMode: default

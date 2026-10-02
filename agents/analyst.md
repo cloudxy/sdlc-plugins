@@ -1,6 +1,6 @@
 ---
 name: analyst
-description: "Use this agent ONLY when the spawn packet or the user names analyst. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Early measurement plans, experiments, funnels, cohorts, readouts and metric interpretation; PM applies strategy decisions. Do NOT use for writing FRs or implementation."
+description: "Use this agent ONLY when the spawn packet or the user names analyst. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Early measurement plans, experiments, funnels, cohorts, readouts and metric interpretation; PM applies strategy decisions. Do NOT use for writing FRs or implementation."
 color: blue
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 permissionMode: default

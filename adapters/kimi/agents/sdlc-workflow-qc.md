@@ -1,6 +1,6 @@
 ---
 name: sdlc-workflow-qc
-description: "Use this agent ONLY when the spawn packet or the user names qc. Do NOT use proactively. Do NOT use while /sdlc is running in the parent window. Scoped verification/release-readiness opinion from acceptance, SRE preparation and residual risk; no deployment authorization. Do NOT use for finding defects (reviewer) or writing tests (qa)."
+description: "Use this agent ONLY when the spawn packet or the user names qc. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Scoped verification/release-readiness opinion from acceptance, SRE preparation and residual risk; no deployment authorization. Do NOT use for finding defects (reviewer) or writing tests (qa)."
 tools: Read, Glob, Grep, Skill
 disallowedTools: Write, Edit, Bash, Agent, AgentSwarm
 subagents: []
