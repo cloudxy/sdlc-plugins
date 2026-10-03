@@ -1,0 +1,36 @@
+feature: order-export-filter
+sdlc_version: 4
+lane: L2
+delivery_goal: release_ready
+phase: Spawned
+current_hat: implement
+hats_done: [define, shape]
+task_protocol: 1
+required_capabilities: [work-scope-v1]
+active_work: export-keeps-filters
+work_items:
+  - id: export-keeps-filters
+    kind: refine
+    intent_quote: "导出的时候保留列表上当前的筛选条件"
+    scope: "订单列表导出 FR-4"
+    target: "导出的行与列表当前筛选一致，验证通过"
+    tasks:
+      - task: be-export-filter
+        requires: verified
+    continuation: stop
+    status: active
+selected_tasks:
+  - id: be-export-filter
+    work_id: export-keeps-filters
+    role: backend
+    stage: implement
+    task: implement
+    gate_stage: implement
+    selection:
+      required: true
+      reason: "导出接口按筛选取数"
+      source: "本次用户原话"
+    depends_on: []
+    attempt_kind: iteration
+    rework_rounds: 0
+    status: in_progress

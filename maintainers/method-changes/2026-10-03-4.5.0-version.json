@@ -1,0 +1,14 @@
+{
+ "id": "4.5.0-version",
+ "at": "2026-10-03T16:34:24+08:00",
+ "kind": "editorial",
+ "failure_form": "n/a",
+ "verdict": "n/a",
+ "reason": "Version 4.5.0 for the B4–B7 release (gate catalog, outcomes and due readouts, deepen-survey, uncertainty routing, drift warning, smoke hardening); no behaviour change.",
+ "evidence": [],
+ "decided_by": "user 2026-10-03 「提交并且推送」",
+ "files": {
+  "adapters/hosts.json": "084d61812da67bff2b983cf9be315b58178033a36b8cfe5ee382f2e4d3e8375b"
+ },
+ "deleted": []
+}

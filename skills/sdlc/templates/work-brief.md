@@ -4,6 +4,8 @@
 
 Original request/source; iteration, defect, investigation or revalidation; affected object and version.
 
+For a defect, record where it escaped: the feature or release it came from, the stage that should have caught it (including collect or warehouse validation for data defects), the gate, review or acceptance that missed it, and the defect class (code, data definition, tracking, configuration, requirement). The manager copies these into the fix's `escape:` in state.yaml.
+
 ## Outcome and boundary
 
 Behavior or question to resolve, explicit stopping point, exclusions and applicable acceptance/verification.

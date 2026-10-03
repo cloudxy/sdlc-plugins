@@ -1,0 +1,16 @@
+{
+ "id": "t7-1-uncertainty-routing",
+ "at": "2026-10-03T09:54:55+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "improved",
+ "reason": "B7 T7.1: optional work-item uncertainty spike|bounded|architectural with observable predicates (an answer with throwaway code / flow readable today and nothing consumed changes / new subsystem or a consumed interface changes) and a one-way ratchet via successor work items; work_scope.py accepts the field. Adopted by the plan rule (routing not below control); the gain is the spike time box, routing itself unchanged.",
+ "evidence": [
+  "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/10-T7.1不确定性分流实验 (sdlc cases 12-14, control C0 ff38ecf vs variant C1 ed75f74: routing 9/9 both; spike time box 3/3 vs 0/3; variant opens a successor work item on escalation 3/3)"
+ ],
+ "decided_by": "maintainer",
+ "files": {
+  "skills/sdlc/references/work-scope.md": "e76a16839a20d3eb9cce4c54717436156be9e1cba242ce54ba42afc1632c7cf5"
+ },
+ "deleted": []
+}

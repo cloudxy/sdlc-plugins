@@ -18,6 +18,14 @@ Explicit current scope wins over an unfinished feature. Identify the feature/obj
 
 Keep the feature's `delivery_goal` and lane. A local work item has a concrete textual `target` and selected completion levels; completing it claims only that scope. Do not lower risk because the request is small: schema, auth, external contracts and irreversible changes still select their applicable obligations. UI, telemetry, external collection and warehouse participation are independent choices; external collection does not imply telemetry or a warehouse.
 
+**Uncertainty.** Record `uncertainty` on the work item from what can be observed now:
+
+- `spike`: the deliverable is an answer to a stated question (feasibility, cost, performance). Time-box it and name the measurement that answers it. Its code is thrown away, never merged or promoted, so no spec, acceptance, release or deployment task is selected; building it for real is a new work item.
+- `bounded`: the flow to change can be read in the repository today (files, call path, tests) and nothing that others consume changes. The ordinary create/refine/fix tasks apply.
+- `architectural`: a new project or subsystem, or a change to an interface, schema, event or contract that others consume. Select architect shape/contract (an ADR for a hard-to-reverse choice) and the consumers' impact before implementation tasks.
+
+The value only moves toward `architectural`. When work shows a heavier predicate holds (a bounded fix needs an interface change), stop that task, record the evidence and continue in a successor work item at the heavier value. Never lower it to drop tasks.
+
 The product map stays coarse for future work. Detail the current slice's journeys, rules, permissions, exceptional states and acceptance criteria before handoff design. An exploratory prototype can answer an unresolved requirement earlier. High-level architecture/data feasibility can inform both; final UI-dependent contracts consume accepted design. API/data models are checked together before their consumers start. Complete implementation tickets only for the next executable slices, with one integration owner each.
 
 Preflight follows the selected task: a requirement/design handoff needs resolved project/product roots and its actual inputs, not a running future application or release configuration. Create a minimal config with known `product_root` when needed; do not invent app/gate commands. Request or delegate only the configuration required for the next execution. Prototype rendering uses the prototype runtime; real application evidence uses the actual application. Product files are filled only when needed, with hypotheses labelled.
@@ -31,6 +39,7 @@ active_work: requirements-r2
 work_items:
   - id: requirements-r2
     kind: refine
+    uncertainty: bounded
     intent_quote: "补齐退款权限和异常规则，停在需求确认"
     scope: "订单退款 FR-12 至 FR-15"
     target: "规则完整且可测试，需求版本已确认，可交给设计"
@@ -56,7 +65,7 @@ selected_tasks:
     status: todo
 ```
 
-Each work item requires `id`, `kind` (create/refine/fix), `intent_quote`, `scope`, `target`, nonempty `tasks`, `continuation` (stop/continue), and `status` (active/completed/cancelled). Fixes also require `origin`, naming the defect and original feature/build/release reference. Cancellation needs `reason`; it is not completion. `tasks` rows use `task` and `requires: produced|accepted|verified`. A draft may stop at produced; an approved handoff needs accepted; a verified fix needs verified evidence and the applicable independent verification/acceptance tasks. Do not relabel a requested approval or verification as mere production.
+Each work item requires `id`, `kind` (create/refine/fix), `intent_quote`, `scope`, `target`, nonempty `tasks`, `continuation` (stop/continue), and `status` (active/completed/cancelled). Fixes also require `origin`, naming the defect and original feature/build/release reference. `uncertainty` (spike/bounded/architectural) is optional; see Scope, target and risk. Cancellation needs `reason`; it is not completion. `tasks` rows use `task` and `requires: produced|accepted|verified`. A draft may stop at produced; an approved handoff needs accepted; a verified fix needs verified evidence and the applicable independent verification/acceptance tasks. Do not relabel a requested approval or verification as mere production.
 
 New tasks belong to their `work_id`; existing completed protocol tasks can be referenced for reuse. Dependencies remain on the selected task instances. `work_items` and task rows use block mappings, not YAML flow objects. Seal the scope/target and each issued task's completion level with dispatch. Add required tasks or revalidation instances without changing those facts; changed scope/target or an issued completion level requires a successor work item, preserving or cancelling the prior request with a reason. Never remove issued tasks. A superseded task may close through an explicitly selected, completed successor of the same task contract; consumers still need their dependencies rebound and revalidated. Do not rewrite historical results.
 

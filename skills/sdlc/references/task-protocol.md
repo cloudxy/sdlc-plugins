@@ -111,7 +111,7 @@ The final message retains its summary, product delta, verified lessons and any f
 
 Unresolved entries require `id`, `owner`, `blocks` (task IDs), `item`, `severity: blocker|major|minor`. Proposed changes require `target`, `change`, `evidence_refs` (declared input IDs or output paths). Required methods must be reported used with reasons. These are model reports, not host trace. No host trace currently means `read_observations.host: null`, `level: unobservable`.
 
-`record` runs registered presence checks and validates supplied execution records; it never runs commands in the return or packet. It saves incomplete/interrupted results as such (`--interrupted REASON`), and never edits a prior result. Missing output, malformed return, stale read input or observed unauthorized write prevents completion. A legal read-write post-version is an output and does not invalidate its own run. On recovery, preserve partial run directories and inspect them; a missing manifest cannot be dispatched or recorded as success.
+`record` runs registered presence checks and validates supplied execution records; it never runs commands in the return or packet. It saves incomplete/interrupted results as such (`--interrupted REASON`), and never edits a prior result. Missing output, malformed return, stale read input or observed unauthorized write prevents completion. A legal read-write post-version is an output and does not invalidate its own run. On recovery, preserve partial run directories and inspect them; a missing manifest cannot be dispatched or recorded as success. `seal` refuses a new run of a task while an earlier run of that task has no result: record its saved return, or mark it `--interrupted`, before sealing again.
 
 ## Reuse, obligations and closure
 

@@ -66,6 +66,7 @@ Task presence checks do not advance state. Use `check-sdlc.sh --hat <stage>` onl
 | growth | cycle | experiments | cycle · learn | growth | outputs/experiments.md |
 | pm | cycle | apply-decisions | cycle · learn | prd-gwt | outputs/decisions.md |
 | data-warehouse-engineer | cycle | tags-refresh | cycle · learn | warehouse | outputs/tags-refresh.md |
+| architect | cycle | deepen-survey | cycle · learn | architecture | outputs/deepening.md |
 | frontend | implement | fix | feature · implement | impl-evidence | 03-impl/fix-frontend-evidence.md |
 | backend | implement | fix | feature · implement | impl-evidence | 03-impl/fix-backend-evidence.md |
 | backend | implement | diagnose | feature · implement | debug | 04-verify/diagnosis-backend.md |

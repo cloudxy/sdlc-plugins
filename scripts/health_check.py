@@ -104,6 +104,34 @@ def check_method_ledger(root: str, err, warn, ok) -> None:
         ok(f"方法文件 {len(ledger.method_files(Path(root)))} 个，改动均有变更记录")
 
 
+def check_vendor_drift(root: str, err, warn, ok) -> None:
+    """Adapted references carry an upstream header; a lock that moved past it is a warning (vendorlib.drift)."""
+    from pathlib import Path
+    lines = vendorlib.drift(Path(root))
+    for line in lines:
+        warn("VENDORDRIFT", line)
+    if not lines:
+        ok("改写自上游的文件与锁文件一致")
+
+
+def check_gate_catalog(root: str, err, warn, ok) -> None:
+    """Each gate tag has a fixture and a recorded origin (scripts/gate_catalog.py); findings are warnings."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("gate_catalog", os.path.join(root, "scripts", "gate_catalog.py"))
+    if spec is None or spec.loader is None:
+        warn("GATECATALOG", "scripts/gate_catalog.py 缺失")
+        return
+    catalog = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(catalog)
+    from pathlib import Path
+    cat = catalog.catalog(Path(root))
+    lines = catalog.findings(cat)
+    for line in lines:
+        warn("GATECATALOG", line.split("] ", 1)[-1])
+    if not lines:
+        ok(f"闸门标签 {len(cat['tags'])} 个，均有夹具与来历")
+
+
 def main() -> int:
     root = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     V = 0
@@ -683,7 +711,9 @@ def main() -> int:
         if os.path.isdir(d) and not os.path.isfile(os.path.join(d, "SKILL.md")):
             err("SKILL", f"skills/{name}/ 没有 SKILL.md：技能目录必须是一个技能（空壳目录删掉；上游原件放 vendor/）")
     check_vendor(root, err, warn, ok)
+    check_vendor_drift(root, err, warn, ok)
     check_method_ledger(root, err, warn, ok)
+    check_gate_catalog(root, err, warn, ok)
 
     for line in errs:
         print(line)

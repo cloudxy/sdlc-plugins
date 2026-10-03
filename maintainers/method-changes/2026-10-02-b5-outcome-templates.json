@@ -1,0 +1,16 @@
+{
+ "id": "b5-outcome-templates",
+ "at": "2026-10-02T18:42:53+08:00",
+ "kind": "behavioral",
+ "failure_form": "omission",
+ "verdict": "pending",
+ "reason": "B5: briefing bet line names H-n and the readout date; state template documents bet: and escape:; work brief records where a defect escaped. Template fields (omission form); no behavior case yet.",
+ "evidence": [],
+ "decided_by": "user 2026-10-02 「全部继续」",
+ "files": {
+  "skills/discover/templates/briefing.md": "f2dd737f4b3e9a9bb3c56f169b074efe8f3443e68655307304c42cb7a1dab064",
+  "skills/sdlc/templates/state.yaml": "60b8e0c4c94e1877d0069b47bc833949565705bac5932eae911245702e7e0751",
+  "skills/sdlc/templates/work-brief.md": "cd22d03b62f0bdc2a6b72dfd9fde42c9e10b0155444d51f79becfad2d9ad11d1"
+ },
+ "deleted": []
+}

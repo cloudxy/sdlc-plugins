@@ -1,5 +1,7 @@
 # 视觉方向 — 反模板默认
 
+<!-- upstream: anthropic-skills skills/frontend-design/SKILL.md sha256=d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3 reviewed=2026-10-02 -->
+
 > 为什么存在这个文件：AI 生成的设计会聚成几种"默认脸"。用户看到默认脸的结论不是"这个模型能力不行"，而是"这个设计没有为我的产品做过选择"。本文件是检测锚点 + 决策流程，来源为 Anthropic frontend-design skill（原件见 [vendor/anthropic-skills/skills/frontend-design/SKILL.md](../../../vendor/anthropic-skills/skills/frontend-design/SKILL.md)，由 plugin-updater 每日收纳，不在插件内另存副本）。
 
 ## 五个 AI 默认簇（自检锚点）

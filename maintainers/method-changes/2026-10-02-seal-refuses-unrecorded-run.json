@@ -1,0 +1,14 @@
+{
+ "id": "seal-refuses-unrecorded-run",
+ "at": "2026-10-02T18:53:50+08:00",
+ "kind": "editorial",
+ "failure_form": "n/a",
+ "verdict": "n/a",
+ "reason": "Documents a code-enforced rule (task_runtime.seal, test_unrecorded_run_blocks_a_second_seal): candidate gap from the diagnose-mode eval, confirmed: a returned but unrecorded task could be sealed and dispatched again.",
+ "evidence": [],
+ "decided_by": "user 2026-10-02 「全部继续」",
+ "files": {
+  "skills/sdlc/references/task-protocol.md": "94ca11522071e62e870dfc217dacbb99d9c472922694f6f08ae361818ad29179"
+ },
+ "deleted": []
+}

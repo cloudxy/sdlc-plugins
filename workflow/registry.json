@@ -781,6 +781,12 @@
         "03-impl/mining-evaluate-evidence.md"
       ],
       "legacy": []
+    },
+    "cycle-deepening": {
+      "paths": [
+        "outputs/deepening.md"
+      ],
+      "legacy": []
     }
   },
   "stages": {
@@ -3175,6 +3181,28 @@
         "cycle-tags"
       ],
       "partial_stage": true,
+      "scopes": [
+        "cycle"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ],
+      "gate_stages": [
+        "cycle"
+      ]
+    },
+    {
+      "role": "architect",
+      "stage": "cycle",
+      "task": "deepen-survey",
+      "skill": "architecture",
+      "required": [
+        "cycle-deepening"
+      ],
+      "partial_stage": true,
+      "reads": [
+        "skills/architecture/references/deepening.md"
+      ],
       "scopes": [
         "cycle"
       ],

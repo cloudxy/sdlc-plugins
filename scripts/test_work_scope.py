@@ -91,6 +91,14 @@ class WorkTests(unittest.TestCase):
         self.finish(); self.work['scope'] = 'All export features'; self.save_state()
         self.assertTrue(check_work(self.root, self.work['id'])['errors'])
 
+    def test_uncertainty_is_optional_and_enumerated(self):
+        self.work['uncertainty'] = 'bounded'; self.save_state(); self.finish()
+        self.assertFalse(check_work(self.root, self.work['id'])['errors'])
+        from work_scope import validate_work_items
+        bad = copy.deepcopy(self.state); bad['work_items'][0]['uncertainty'] = 'huge'
+        with self.assertRaises(ProtocolError):
+            validate_work_items(bad, {t['id']: t for t in bad['selected_tasks']})
+
     def test_later_request_does_not_rewrite_old_task_intent(self):
         self.finish(); self.state['intent'] = {'class': 'fix', 'quote': 'A later unrelated request'}; self.save_state()
         self.assertEqual(check_tasks(self.root)['tasks']['pm-spec']['validity'], 'current')

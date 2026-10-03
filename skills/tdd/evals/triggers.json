@@ -1,0 +1,25 @@
+{
+  "note": "T7.2 trigger experiment (2026-10-02): 2 prompts that should load this skill, 2 that should not. Run with scripts/trigger_smoke.py.",
+  "triggers": [
+    {
+      "id": 1,
+      "should_trigger": true,
+      "prompt": "$tdd 实现 FR-1：没有匹配行时导出只含表头的 CSV，退出码 0。GWT：Given 无匹配行 When 导出 Then 只有表头行。"
+    },
+    {
+      "id": 2,
+      "should_trigger": true,
+      "prompt": "SPAWN PACKET v2\nrole: backend\nstage: implement\ntask: implement\ncompanions: [tdd]\nticket: T-7 FR-2 发票满 100 打九折，四舍五入到分\ndeliverable_paths: [03-impl/backend-evidence.md]\n\n按这个派单开始实现。"
+    },
+    {
+      "id": 3,
+      "should_trigger": false,
+      "prompt": "/sdlc 继续 export 功能，下一步是实现。"
+    },
+    {
+      "id": 4,
+      "should_trigger": false,
+      "prompt": "帮导出功能出一份 QA 覆盖矩阵：每条 GWT 对应哪些测试用例、哪些边界和异常还没覆盖。"
+    }
+  ]
+}

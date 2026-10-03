@@ -49,7 +49,7 @@ After define / shape / implement (L1+), and at the final review:
 3. Spawn the producer to fix, then a **new** reviewer on the new files (a new snapshot is not reviewer shopping).
 4. `review_findings[].status: fixed` is bookkeeping written only after a later G-fresh verified that id independently.
 
-`check-sdlc.sh --require` fails **HATADVANCE** when `current_hat` ranks past the stage of the last failed fresh-context gate (ranks in [stage-map.md](stage-map.md)).
+`check-sdlc.sh --require` fails **HATADVANCE** when `current_hat` ranks past the stage of the last failed fresh-context gate, or past the stage of a script gate whose latest record for that name and stage is a fail (record script gates with `stage:`; ranks in [stage-map.md](stage-map.md)).
 
 ## 2b. Acceptance fail (v4)
 

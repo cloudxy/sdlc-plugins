@@ -39,6 +39,7 @@ Assignments (generated):
 - `verify` / `conformance` → `sdlc-workflow:architecture`; companions allowed by contract: none; no project source writes; task check only until stage dependencies finish. Protocol 1: dispatch only a sealed v3 packet.
 - `shape` / `contract` → `sdlc-workflow:architecture`; companions allowed by contract: none; no project source writes; task check, then applicable stage gate. Legacy v2 task route.
 - `product` / `bootstrap` → `sdlc-workflow:architecture`; companions allowed by contract: none; no project source writes; task check, then applicable stage gate. Legacy v2 task route.
+- `cycle` / `deepen-survey` → `sdlc-workflow:architecture`; companions allowed by contract: none; no project source writes; task check only until stage dependencies finish. Legacy v2 task route.
 
 Product write scope (generated): architecture.md. Packet may narrow it.
 

@@ -32,6 +32,7 @@ mkdir -p "$T/nolan"
 printf '# note\n' >"$T/nolan/note.md"
 assert_exit 1 "NOLANE exit==1 not 2" --require "$T/nolan"
 assert_tag 'SDLC-SUMMARY'
+assert_tag NOLANE
 
 # 2.（翻转）current_hat=shape + last fresh=fail（无 stage 标记）→ 合法返工 exit 0
 mkdir -p "$T/adv/01-define" "$T/adv/05-review"
@@ -1173,6 +1174,87 @@ mkdir -p "$T/tpl"
 cp "$ROOT/skills/sdlc/templates/state.yaml" "$T/tpl/state.yaml"
 assert_exit 1 "the verbatim state template at L2 with discovery pending is exactly NODISCOVER" --require "$T/tpl"
 assert_tag NODISCOVER
+
+# 73. 每个闸门标签都要有一条让它出现的夹具（2026-10-02 闸门目录，scripts/gate_catalog.py）
+# 73a. 目标不存在时 --require 不能当放行
+assert_exit 1 "--require on a missing target is SKIP" --require "$T/does-not-exist"
+assert_tag SKIP
+# 73b. protocol 1 的空任务表交给任务协议检查
+mkdir -p "$T/tp/01-define"
+printf '泳道：L2\n' >"$T/tp/01-define/spec.md"
+printf 'feature: t\nlane: L2\nappetite: 4h\ncurrent_hat: define\nhats_done: []\ntask_protocol: 1\nselected_tasks: []\n' >"$T/tp/state.yaml"
+assert_exit 1 "an empty protocol-1 task list is TASKPROTOCOL" --require "$T/tp"
+assert_tag TASKPROTOCOL
+# 73c. hats_done 记了 accept，却没有 pm 验收文件
+mk_v4 am
+F="$T/am/.sdlc/f"
+sed -i.bak 's/^hats_done: \[\]/hats_done: [define, shape, implement, verify, accept]/' "$F/state.yaml" && rm -f "$F/state.yaml.bak"
+printf '# coverage\n| id | case |\n|---|---|\n| J-1 | E2E 导入并看到报告 |\n| EV-1 | 埋点校验 |\n' >"$F/04-verify/coverage.md"
+assert_exit 1 "accept in hats_done without accept-pm.md is ACCEPTMISS" --require "$F"
+assert_tag ACCEPTMISS
+# 73d. 自测证据没有退出码、没有原样输出
+mkdir -p "$T/ev/03-impl"
+printf 'feature: t\nlane: L1\ncurrent_hat: verify\nhats_done: [implement]\n' >"$T/ev/state.yaml"
+printf '泳道：L1\n## 自测证据\n跑过了，都通过\n' >"$T/ev/03-impl/T-1-backend-evidence.md"
+assert_exit 2 "evidence without an exit code or a verbatim block is EVID twice" --require "$T/ev"
+assert_tag EVID
+# 73e. 期望退出码 0，证据却记录了 1
+BT='```'
+printf '泳道：L1\n## 自测证据\nFR-1 Given 已登录 When 导出 Then 退出码 0\nFR-1（导出）\n%s\nexit code 1\n%s\n' "$BT" "$BT" >"$T/ev/03-impl/T-1-backend-evidence.md"
+assert_exit 1 "evidence recording exit 1 where the GWT expects 0 is EVIDMISMATCH" --require "$T/ev"
+assert_tag EVIDMISMATCH
+# 73f. 有界面却没有关键用户旅程
+mk_v4 jr
+F="$T/jr/.sdlc/f"
+printf '泳道：L2\n## 核心价值与 Aha 时刻\n首次导入后 30 秒看到第一份报告\n' >"$F/01-define/spec.md"
+assert_exit 1 "ui: yes spec without J-n is JOURNEY" --hat define "$F"
+assert_tag JOURNEY
+# 73g. 指标口径重复
+mkdir -p "$T/md/01-define"
+printf '泳道：L2\n' >"$T/md/01-define/spec.md"
+printf 'feature: t\nlane: L2\nappetite: 4h\ncurrent_hat: define\nhats_done: []\n' >"$T/md/state.yaml"
+printf 'metrics:\n  - id: weekly_export_tenants\n  - id: weekly_export_tenants\n' >"$T/md/metrics.yaml"
+assert_exit 1 "a metric id defined twice is METDUP" --require "$T/md"
+assert_tag METDUP
+# 73h/73i. 发现带 done：briefing 缺 Growth 或缺 Market
+mk_v4 bg
+F="$T/bg/.sdlc/f"
+mkdir -p "$F/00-discover"
+printf 'discovery:\n  status: done\n' >>"$F/state.yaml"
+printf '# Briefing\n## Compete\n现状：主管每周手工复制到 Excel，约 40 分钟\n## Market\n可及集合：未量化\n## Falsify\n杀死条件：上线 30 天内少于 2 个租户使用导出\n' >"$F/00-discover/briefing.md"
+assert_exit 1 "a done briefing without ## Growth is NOGROWTH" --require "$F"
+assert_tag NOGROWTH
+printf '# Briefing\n## Compete\n现状：主管每周手工复制到 Excel，约 40 分钟\n## Growth\n定位：给主管省去手工复制\n## Falsify\n杀死条件：上线 30 天内少于 2 个租户使用导出\n' >"$F/00-discover/briefing.md"
+assert_exit 1 "a done briefing without ## Market is NOMARKET" --require "$F"
+assert_tag NOMARKET
+# 73j. 阶段合同无法加载时报 CONTRACT 并以用法错误退出（插件副本里让 define 指向不存在的工件）
+mkdir -p "$T/plug"
+cp -R "$ROOT/scripts" "$ROOT/workflow" "$ROOT/skills" "$T/plug/"
+python3 - "$T/plug/workflow/registry.json" <<'PY'
+import json, sys
+p = sys.argv[1]
+r = json.load(open(p, encoding='utf-8'))
+r['stages']['define']['required'] = [{'any': ['no-such-artifact']}]
+json.dump(r, open(p, 'w', encoding='utf-8'), ensure_ascii=False)
+PY
+mkdir -p "$T/ct/01-define"
+printf '泳道：L2\n' >"$T/ct/01-define/spec.md"
+printf 'feature: t\nlane: L2\nappetite: 4h\ncurrent_hat: define\nhats_done: []\n' >"$T/ct/state.yaml"
+bash "$T/plug/scripts/check-sdlc.sh" --hat define "$T/ct" >"$T/out" 2>&1
+got=$?
+if [ "$got" -ne 64 ]; then echo "FAIL an unloadable stage contract is CONTRACT: want exit 64 got $got"; cat "$T/out"; fail=$((fail+1)); else echo "ok   an unloadable stage contract is CONTRACT (exit 64)"; fi
+assert_tag CONTRACT
+
+# 74. 脚本闸门失败后推进 current_hat 也是越级（2026-10-02 诊断模式评测发现：此前只看 fresh-context）
+mkdir -p "$T/sg/01-define"
+printf '泳道：L2\n' >"$T/sg/01-define/spec.md"
+printf 'feature: t\nlane: L2\nappetite: 4h\ncurrent_hat: shape\nhats_done: [define]\ngates:\n  - {name: check-sdlc-define, kind: script, stage: define, result: fail, exit_code: 1}   # 闸门失败\n' >"$T/sg/state.yaml"
+assert_exit 1 "a failed script gate at define with current_hat shape is HATADVANCE" --require "$T/sg"
+assert_tag HATADVANCE
+printf '  - name: check-sdlc-define\n    kind: script\n    stage: define\n    result: pass\n    exit_code: 0\n' >>"$T/sg/state.yaml"
+assert_exit 0 "a later pass of the same script gate clears it" --require "$T/sg"
+printf 'feature: t\nlane: L2\nappetite: 4h\ncurrent_hat: shape\nhats_done: [define]\ngates:\n  - {name: unit, kind: script, result: fail, exit_code: 1}\n' >"$T/sg/state.yaml"
+assert_exit 0 "a script gate without a stage keeps the legacy reading" --require "$T/sg"
 
 if [ "$fail" -ne 0 ]; then
   echo "----------------------------------------"

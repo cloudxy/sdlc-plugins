@@ -281,6 +281,26 @@
           "weight": 3
         }
       ]
+    },
+    {
+      "id": 12,
+      "prompt": "产品周期 2026-10 选了 architect 的 deepen-survey：在工作目录这个仓库里找值得加深的模块，给出候选。git 历史热点和本窗口的缺陷修复已导出到 hotspots.txt。领域模型在 docs/product/domain-model.md，ADR 在 docs/adr/（目前有 0003-repository-per-aggregate.md）。只出调查结果，不改代码。",
+      "expected_output": "A report of deepening candidates driven by the hot spots: the order service with its pass-through validator and pricing helpers is the main candidate (shallow modules, bugs at the seams, both escapes there), with files, problem, direction, benefit in locality/leverage and how tests would cross one interface, the dependency category, and a strength (strong / worth exploring / speculative), ending with a top recommendation. It does not propose concrete interfaces, does not edit code, and does not suggest folding OrderRepository into the service against ADR 0003 (or flags it explicitly as contradicting the ADR).",
+      "files": [
+        "evals/files/deepen-1/docs/adr/0003-repository-per-aggregate.md",
+        "evals/files/deepen-1/docs/product/domain-model.md",
+        "evals/files/deepen-1/hotspots.txt",
+        "evals/files/deepen-1/src/orders/order_pricing.py",
+        "evals/files/deepen-1/src/orders/order_repository.py",
+        "evals/files/deepen-1/src/orders/order_service.py",
+        "evals/files/deepen-1/src/orders/order_validator.py"
+      ],
+      "expectations": [
+        "Candidates come from the hot spots and recorded escapes, not a whole-repository sweep",
+        "Each candidate names files, problem, benefit and a strength label",
+        "No concrete interface proposal and no code edits",
+        "Respects ADR 0003 (repository per aggregate) or flags any conflict with it"
+      ]
     }
   ]
 }

@@ -9,8 +9,14 @@ outputs (agents/, host agent files, commands/, generated references) are checked
   check                              METHODCHANGE (error) for an edit not in the baseline, or a baseline entry no
                                      record vouches for; METHODPENDING (warning) for behavioral records awaiting a verdict
   record  --id ID --kind behavioral|editorial --reason R [--failure-form F] [--verdict V] [--evidence P …] [--files P …]
-                                     records the unregistered changes (all, or only --files) and moves the baseline to them
-  verdict --id ID --verdict V [--evidence P …]   appends the outcome to an existing behavioral record
+          [--unchecked-evidence REASON]
+                                     records the unregistered changes (all, or only --files) and moves the baseline to them;
+                                     a verdict other than pending needs the same evidence as `verdict`
+  verdict --id ID --verdict V --evidence P … [--unchecked-evidence REASON]
+                                     appends the outcome to an existing behavioral record. Evidence that is a
+                                     behavior_smoke.py directory must contain a run whose tree carries exactly the
+                                     recorded file digests (no verdict from text edited afterwards); a verdict without
+                                     such run evidence needs --unchecked-evidence with the reason
 
 failure_form follows writing-skills "match the form to the failure": discipline (knows the rule, skips it),
 shape (output has the wrong form), omission (a required element is missing), conditional (depends on a condition).
@@ -142,12 +148,20 @@ def cmd_record(root: Path, args) -> int:
     if not changed:
         print('method_ledger: nothing to record', file=sys.stderr)
         return 2
+    if args.kind == 'behavioral':  # a verdict given at record time needs the same evidence as `verdict`
+        problem = evidence_problem(args.id, {k: v for k, v in changed.items() if v is not None}, args.verdict,
+                                   args.evidence, args.unchecked_evidence)
+        if problem:
+            print(f'method_ledger: {problem}', file=sys.stderr)
+            return 2
     rec = {'id': args.id, 'at': _now().isoformat(timespec='seconds'), 'kind': args.kind,
            'failure_form': args.failure_form if args.kind == 'behavioral' else 'n/a',
            'verdict': args.verdict if args.kind == 'behavioral' else 'n/a', 'reason': args.reason,
            'evidence': args.evidence or [], 'decided_by': args.decided_by,
            'files': {k: v for k, v in changed.items() if v is not None},
            'deleted': sorted(k for k, v in changed.items() if v is None)}
+    if args.unchecked_evidence:
+        rec['unchecked_evidence'] = args.unchecked_evidence
     target = _write_record(changes, rec)
     for rel, digest in changed.items():
         if digest is None:
@@ -160,6 +174,36 @@ def cmd_record(root: Path, args) -> int:
     return 0
 
 
+def _evidence_path(entry: str) -> Path:
+    return Path(entry.split(' (', 1)[0].strip()).expanduser()
+
+
+def evidence_matches(files: dict, evidence: list) -> tuple[bool, bool]:
+    """(has run evidence, some run tree carries exactly these file digests)."""
+    manifests = []
+    for entry in evidence or []:
+        trees = _evidence_path(entry) / 'trees'
+        if trees.is_dir():
+            manifests += [json.loads(m.read_text(encoding='utf-8')) for m in sorted(trees.glob('*/manifest.json'))]
+    if not manifests:
+        return False, False
+    return True, any(all(m.get('method_hashes', {}).get(rel) == digest for rel, digest in files.items())
+                     for m in manifests)
+
+
+def evidence_problem(change_id: str, files: dict, verdict: str, evidence: list, unchecked: str) -> str:
+    """Why a non-pending verdict may not be recorded with this evidence ('' when it may)."""
+    if verdict == 'pending':
+        return ''
+    has_runs, matches = evidence_matches(files, evidence)
+    if has_runs and not matches:
+        return (f'evidence was not produced on the recorded text of {change_id} '
+                '(no run tree carries the recorded file digests); rerun on the current text')
+    if not has_runs and not unchecked:
+        return 'no behavior_smoke run evidence; pass --unchecked-evidence with the reason'
+    return ''
+
+
 def cmd_verdict(root: Path, args) -> int:
     _, changes = _paths(root)
     hits = [p for p in changes.glob('*.json') if p.name.endswith(f'-{args.id}.json')]
@@ -170,8 +214,13 @@ def cmd_verdict(root: Path, args) -> int:
     if rec.get('kind') != 'behavioral':
         print('method_ledger: only behavioral records carry a verdict', file=sys.stderr)
         return 2
+    problem = evidence_problem(args.id, rec.get('files', {}), args.verdict, args.evidence, args.unchecked_evidence)
+    if problem:
+        print(f'method_ledger: {problem}', file=sys.stderr)
+        return 2
     rec.setdefault('history', []).append({'at': _now().isoformat(timespec='seconds'), 'from': rec['verdict'],
-                                          'to': args.verdict, 'evidence': args.evidence or []})
+                                          'to': args.verdict, 'evidence': args.evidence or [],
+                                          'unchecked_evidence': args.unchecked_evidence or ''})
     rec['verdict'] = args.verdict
     rec['evidence'] = list(dict.fromkeys(rec.get('evidence', []) + (args.evidence or [])))
     hits[0].write_text(json.dumps(rec, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
@@ -196,10 +245,12 @@ def main(argv=None) -> int:
     rec.add_argument('--evidence', nargs='*')
     rec.add_argument('--decided-by', default='maintainer')
     rec.add_argument('--files', nargs='*')
+    rec.add_argument('--unchecked-evidence')
     ver = sub.add_parser('verdict')
     ver.add_argument('--id', required=True)
     ver.add_argument('--verdict', required=True)
     ver.add_argument('--evidence', nargs='*')
+    ver.add_argument('--unchecked-evidence')
     args = ap.parse_args(argv)
     root = args.root.resolve()
     if args.command == 'seed':

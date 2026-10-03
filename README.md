@@ -1,6 +1,6 @@
 # sdlc-workflow
 
-多宿主工作流插件 · v4.4.0 · MIT
+多宿主工作流插件 · v4.5.0 · MIT
 
 闸门化的功能交付控制面：从想法到交付，先按需要通过沟通、例子与调研帮助需求成形；技术可行性在接受范围前检查，体验设计与最终原型先于架构合同，按用户旅程纵向切片实现并联调，E2E 与三方验收把关，产出回写产品层。工作结论保存在对应工件中，由脚本闸门与独立上下文审查核验。
 
@@ -409,8 +409,12 @@ sdlc-workflow/
 | `scripts/grade_eval.py` / `blind_eval.py` | 评测机械评分（不调模型）与盲评 |
 | `scripts/method_ledger.py` | 方法改动台账：技能、角色源、注册表的每次改动都要有一条记录（行为类附评测证据），否则健康检查报 METHODCHANGE |
 | `scripts/behavior_smoke.py` | 方法改动的行为冒烟：同一场景在基线版本与当前版本上各跑多次，带预算上限；判定必须引用该次输出原文。只读、非盲评，用来看改动前失败、改动后通过 |
+| `scripts/trigger_smoke.py` | 技能描述的触发冒烟：只开放 Read 与 Skill，看宿主在前两轮加载了哪个技能，按 `skills/<技能>/evals/triggers.json` 的应触发 / 不应触发机械计分 |
+| `scripts/session_digest.py` | 把 Claude Code 会话记录整理成可引用的时间线（`path:line`、工具错误、重复、压缩、注入文本），供 `sdlc-eval` 的 diagnose 模式使用 |
+| `scripts/gate_catalog.py` | 闸门目录：每个闸门标签要有夹具和来历（`maintainers/gate-provenance.json`），缺了健康检查报 GATECATALOG；`report` 汇总各项目的逃逸归因 |
+| `scripts/outcomes.py` | 结果记录：功能关闭时写 `.sdlc/_outcomes/`，记赌注读数，列出到期未读数；`check-sdlc.sh --stats` 的统计由它给出 |
 | `scripts/ui-evidence.sh` | UI 截图留证 |
-| `scripts/test_work_scope.py` / `test_task_runtime.py` / `test_workflow.py` / `test_skill_evidence.py` / `test_eval_protocol.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` / `test_reference_links.py` / `test_state_view.py` / `test_behavior_smoke.py` / `test_method_ledger.py` | 注册表、局部工作、技能证据规则、评测隔离、闸门（含 state.yaml 只读视图）、vendor 安装、多宿主打包与项目链接安全的自测 |
+| `scripts/test_work_scope.py` / `test_task_runtime.py` / `test_workflow.py` / `test_skill_evidence.py` / `test_eval_protocol.py` / `test-check-sdlc.sh` / `test_vendor_install.py` / `test_hosts.py` / `test_reference_links.py` / `test_state_view.py` / `test_gate_variants.py` / `test_gate_catalog.py` / `test_behavior_smoke.py` / `test_trigger_smoke.py` / `test_method_ledger.py` / `test_session_digest.py` / `test_outcomes.py` / `test_vendor_drift.py` | 注册表、局部工作、技能证据规则、评测隔离、闸门（含 state.yaml 只读视图与写法变体）、闸门目录、冒烟工具、方法台账、结果记录、vendor 安装与改写漂移、多宿主打包与项目链接安全的自测 |
 | `scripts/test_continuous_work.py` | 持续工作协议场景：<br>- 版本共存；CAS 与结果恢复；两个进程并发记录与导入<br>- 跨功能依赖、未声明消费者；方法闭包与复验范围；修复后的诊断<br>- 隔离认领与过期令牌；跨机器拒绝<br>- 集成候选与符号链接；数据快照与长作业 |
 
 ## 上游原件（vendor/）

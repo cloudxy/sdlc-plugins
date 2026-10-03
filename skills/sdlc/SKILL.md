@@ -65,7 +65,8 @@ This file is `<plugin>/skills/sdlc/SKILL.md`; **PLUGIN_ROOT** is two directories
 1. Resolve the user's explicit scope/target before preflight or resume. Read `sdlc.config.yaml`; if absent, create only the known project/product-root settings. Run `check_config.py`, but gate only tasks that need each missing capability. Requirements do not need an app/E2E command, prototype design uses its own runtime, and actual build verification waits for the real app. Delegate authorized config changes to SRE ci; ask only for missing facts/authority.
 2. **Product layer:** resolve `product_root` (default `docs/product`); initialize only the files the selected tasks need, never overwrite. New feature state gets `sdlc_version: 4`. Reuse evidence from an existing product; do not force a full bootstrap for a local change or bug.
 3. **Resume:** explicit refinement, repair, review or a new scope wins over unfinished state. Bare continuation resumes `active_work`, otherwise unfinished feature tasks; a completed work item is not authorization to continue downstream. Preserve old states and normalize legacy hat words once. An unresolved failed review still blocks its affected dependents.
-4. Note whether this host's role types exist ([references/hosts.md](references/hosts.md): `sdlc-workflow:<role>`, Codex/Kimi `sdlc-workflow-<role>`); if not, use the `host_spawn` fallback ([orchestrator-gates.md](references/orchestrator-gates.md) §1).
+4. **Due readouts:** name each overdue bet in `.sdlc/_outcomes/index.json` in one line atop your report; it never blocks the requested work.
+5. Note whether this host's role types exist ([references/hosts.md](references/hosts.md): `sdlc-workflow:<role>`, Codex/Kimi `sdlc-workflow-<role>`); if not, use the `host_spawn` fallback ([orchestrator-gates.md](references/orchestrator-gates.md) §1).
 
 ## Step 1 — intent (before any spawn)
 
@@ -125,7 +126,7 @@ For `coordinated-state-v1`, bind saved results through CAS instead of rerunning 
 
 ## Step 5 — state.yaml
 
-Update after each task using [state-records.md](references/state-records.md) for field enums, evidence and decision provenance. The task graph and work_items govern readiness; current_hat is a display/resume hint. Scoped completion does not add hats_done or set Closed. Record actual execution evidence, authorized decision quotes and product deltas; historical completion remains separate from current validity. Use CAS for coordinated states and never overwrite a stale revision.
+Update after each task using [state-records.md](references/state-records.md) for field enums, evidence and decision provenance. The task graph and work_items govern readiness; current_hat is a display/resume hint. Scoped completion does not add hats_done or set Closed. Record actual execution evidence, authorized decision quotes and product deltas; historical completion remains separate from current validity. Use CAS for coordinated states and never overwrite a stale revision. Closed → result record (state-records).
 
 ## Step 6 — gates
 

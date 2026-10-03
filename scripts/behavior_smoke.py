@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Repeated read-only behavior smoke runs of this plugin's own eval cases, one method tree per arm.
 
-  run    --skill S --cases 1,3 --reps N --arm current|baseline [--baseline-ref REF] --out DIR --budget-usd X
-         One record per (case, rep) under DIR/<arm>/. Case text and fixtures come from the current repository
-         (they are the test); only the method tree varies by arm. Both arms run from exported copies under
-         DIR/trees/<tree-id>/ so later edits cannot leak into a run and the path does not name the arm.
+  run    --skill S --cases 1,3 --reps N --arm LABEL [--ref REF] --out DIR --budget-usd X
+         One record per (case, rep) under DIR/<arm>/. `current` is the working tree; any other label needs --ref
+         (a git ref or commit, e.g. a baseline or a variant). Case text and fixtures come from the current
+         repository (they are the test); only the method tree varies by arm. Every arm runs from an exported copy
+         in a temporary cache named by content, so later edits cannot leak into a run and the path does not name
+         the arm; the evidence directory keeps only DIR/trees/<tree-id>/manifest.json (file digests).
          An existing ok record is skipped, so an interrupted run resumes; host failures are retried.
   judge  --out DIR --file judgments.json
          judgments.json maps each record's path (relative to DIR) to {verdict: pass|fail|deviation, quote}.
@@ -16,7 +18,8 @@ a blind rubric comparison (blind_eval.py), a whole workflow or a human trial.
 Run arms one after another. Each run spends the operator's own subscription session quota, which the operator's
 interactive session shares: on 2026-10-02 four parallel processes hit "You've hit your session limit" within ten
 minutes and stopped that session too. Those runs are recorded as host failures and retried on the next invocation.
-Exit: 0 ok · 1 missing/invalid judgments · 2 usage · 3 budget stop.
+Exit: 0 ok · 1 missing/invalid judgments · 2 usage · 3 budget stop · 4 quota stop (the session limit was hit: the
+rest of the arm is not attempted; rerun after the reset and it resumes).
 """
 from __future__ import annotations
 
@@ -42,6 +45,12 @@ SECRETS = [
     (re.compile(r'(?i)("?(?:authorization|api[_-]?key|access[_-]?token|secret)"?\s*[:=]\s*"?)[^\s",]{12,}'), r'\1<REDACTED>'),
 ]
 METHOD_DIRS = ('skills', 'agents', 'agent-sources', 'workflow', 'commands', 'adapters')
+QUOTA = re.compile(r"hit your (?:session|usage|weekly) limit", re.I)
+
+
+def quota_hit(rec: dict) -> bool:
+    """The host refused for the operator's subscription quota: every further run would fail the same way."""
+    return rec.get('status') != 'ok' and bool(QUOTA.search(rec.get('reply') or ''))
 
 
 def redact(text: str) -> str:
@@ -76,6 +85,9 @@ def export_tree(ref: str, staging: Path) -> Path:
     for child in (vendor.iterdir() if vendor.is_dir() else []):
         if child.is_dir() and not (staging / 'vendor' / child.name).exists():
             shutil.copytree(child, staging / 'vendor' / child.name)
+    for dirpath, _dirs, files in os.walk(staging):
+        for name in files:  # fresh times: copied atimes from files untouched for days let the OS temp cleaner
+            os.utime(os.path.join(dirpath, name), None)  # purge them (2026-10-03: 276 of 651 files gone on wake)
     return staging
 
 
@@ -89,19 +101,51 @@ def tree_manifest(tree: Path) -> dict:
     return {'tree_id': digest[:12], 'method_hashes': files}
 
 
+CACHE = Path(os.environ.get('SDLC_SMOKE_CACHE') or Path(tempfile.gettempdir()) / 'sdlc-smoke-trees')
+
+
+def listing(tree: Path) -> dict[str, int]:
+    """Every file of an exported tree with its size: enough to notice files removed from the cache."""
+    found = {}
+    for dirpath, _dirs, files in os.walk(tree):
+        for name in files:
+            p = os.path.join(dirpath, name)
+            found[os.path.relpath(p, tree)] = os.path.getsize(p)
+    return found
+
+
 def prepare_tree(out: Path, ref: str) -> tuple[Path, dict]:
-    staging = out / 'trees' / f'.staging-{os.getpid()}'
+    """Export `ref` into the cache (replacing a damaged copy); the evidence directory records only the manifest."""
+    staging = CACHE / f'.staging-{os.getpid()}'
     if staging.exists():
         shutil.rmtree(staging)
     export_tree(ref, staging / 'sdlc-workflow')
     manifest = tree_manifest(staging / 'sdlc-workflow')
-    final = out / 'trees' / manifest['tree_id']
-    if final.exists():
+    final = CACHE / manifest['tree_id']
+    if final.exists() and listing(final / 'sdlc-workflow') == listing(staging / 'sdlc-workflow') and \
+            tree_manifest(final / 'sdlc-workflow') == manifest:
         shutil.rmtree(staging)
     else:
+        if final.exists():
+            shutil.rmtree(final)
         staging.rename(final)
-        (final / 'manifest.json').write_text(json.dumps(dict(manifest, ref=ref), ensure_ascii=False, indent=1))
+    manifest = dict(manifest, files=listing(final / 'sdlc-workflow'))
+    record = out / 'trees' / manifest['tree_id'] / 'manifest.json'
+    if not record.exists():
+        record.parent.mkdir(parents=True, exist_ok=True)
+        saved = {k: v for k, v in manifest.items() if k != 'files'}
+        record.write_text(json.dumps(dict(saved, ref=ref), ensure_ascii=False, indent=1))
     return final / 'sdlc-workflow', manifest
+
+
+def ensure_tree(out: Path, ref: str, tree: Path, manifest: dict) -> tuple[Path, dict, str]:
+    """Before each run: the cached tree still holds every exported file, or it is exported again."""
+    if listing(tree) == manifest['files']:
+        return tree, manifest, 'ok'
+    tree, fresh = prepare_tree(out, ref)
+    if fresh['tree_id'] != manifest['tree_id']:
+        raise SystemExit(f"behavior_smoke: {ref} now exports as {fresh['tree_id']}, not {manifest['tree_id']}")
+    return tree, fresh, 'repaired'
 
 
 def load_case(skill: str, case_id: str) -> dict:
@@ -168,7 +212,8 @@ def spent(arm_dir: Path) -> tuple[float, int]:
     return total, n
 
 
-def run_one(args, arm_dir: Path, tree: Path, manifest: dict, case: dict, rep: int, host: str) -> dict:
+def run_one(args, arm_dir: Path, tree: Path, manifest: dict, case: dict, rep: int, host: str,
+            tree_check: str = 'ok') -> dict:
     name = f"{args.skill}-{case['id']}-r{rep}"
     target = arm_dir / f'{name}.json'
     now = dt.datetime.now(BEIJING)
@@ -179,7 +224,8 @@ def run_one(args, arm_dir: Path, tree: Path, manifest: dict, case: dict, rep: in
     command = build_command(tree, prompt, args.per_run_usd)
     record = {'at': now.isoformat(timespec='seconds'), 'skill': args.skill, 'case_id': str(case['id']),
               'arm': args.arm, 'arm_ref': args.ref, 'rep': rep, 'tree_id': manifest['tree_id'],
-              'tree_path': str(tree), 'host_version': host, 'cwd': str(cwd), 'fixtures': fixtures,
+              'tree_path': str(tree), 'tree_check': tree_check, 'host_version': host, 'cwd': str(cwd),
+              'fixtures': fixtures,
               'scope': 'one next-turn read-only smoke; not a blind comparison, whole workflow or human trial',
               'prompt': prompt, 'command': command}
     started = dt.datetime.now()
@@ -213,10 +259,13 @@ def run_one(args, arm_dir: Path, tree: Path, manifest: dict, case: dict, rep: in
 
 
 def cmd_run(args) -> int:
-    if args.arm == 'baseline' and not args.baseline_ref:
-        print('behavior_smoke: --arm baseline needs --baseline-ref', file=sys.stderr)
+    if not re.fullmatch(r'[a-z][a-z0-9-]{0,30}', args.arm) or args.arm in ('trees', 'work'):
+        print('behavior_smoke: --arm is a short lowercase label', file=sys.stderr)
         return 2
-    args.ref = args.baseline_ref if args.arm == 'baseline' else 'WORKTREE'
+    if args.arm != 'current' and not args.ref:
+        print('behavior_smoke: an arm other than current needs --ref', file=sys.stderr)
+        return 2
+    args.ref = args.ref or 'WORKTREE'
     cases = [load_case(args.skill, c.strip()) for c in args.cases.split(',') if c.strip()]
     if args.dry_run:
         for case in cases:
@@ -242,8 +291,13 @@ def cmd_run(args) -> int:
                                              ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
                 print(f'budget stop: spent {total:.2f} of {args.budget_usd:.2f} before {target.name}')
                 return 3
-            rec = run_one(args, arm_dir, tree, manifest, case, rep, host)
-            print(f"{args.arm} {target.stem}: {rec['status']} ${rec.get('cost_usd') or 0:.3f} {rec['duration_s']}s")
+            tree, manifest, check = ensure_tree(args.out, args.ref, tree, manifest)
+            rec = run_one(args, arm_dir, tree, manifest, case, rep, host, check)
+            print(f"{args.arm} {target.stem}: {rec['status']} ${rec.get('cost_usd') or 0:.3f} {rec['duration_s']}s"
+                  + ('' if check == 'ok' else ' (cached tree was damaged: exported again)'))
+            if quota_hit(rec):
+                print(f"quota stop: {rec['reply'].strip()[:120]}")
+                return 4
     total, n = spent(arm_dir)
     print(f'{args.arm}: {n} costed runs, ${total:.2f} of ${args.budget_usd:.2f}')
     return 0
@@ -257,11 +311,13 @@ def cmd_judge(args) -> int:
     out = args.out.resolve()
     judgments = json.loads(Path(args.file).read_text(encoding='utf-8'))
     problems, table = [], {}
-    for arm_dir in sorted(p for p in out.iterdir() if p.is_dir() and p.name in ('current', 'baseline')):
+    for arm_dir in sorted(p for p in out.iterdir() if p.is_dir() and p.name not in ('trees', 'work')):
         for rec_path in sorted(arm_dir.glob('*.json')):
             if '.attempt-' in rec_path.name:
                 continue
             rec = json.loads(rec_path.read_text(encoding='utf-8'))
+            if 'arm' not in rec or 'skill' not in rec:
+                continue
             key = rec_path.relative_to(out).as_posix()
             row = table.setdefault((rec['skill'], rec['case_id'], rec['arm']),
                                    {'pass': 0, 'fail': 0, 'deviation': 0, 'not_judged': 0, 'host': 0})
@@ -297,8 +353,8 @@ def main(argv=None) -> int:
     run.add_argument('--skill', required=True)
     run.add_argument('--cases', required=True)
     run.add_argument('--reps', type=int, default=5)
-    run.add_argument('--arm', choices=['current', 'baseline'], required=True)
-    run.add_argument('--baseline-ref')
+    run.add_argument('--arm', required=True)
+    run.add_argument('--ref', '--baseline-ref', dest='ref')
     run.add_argument('--out', type=Path, required=True)
     run.add_argument('--budget-usd', type=float, required=True)
     run.add_argument('--per-run-usd', type=float, default=1.0)

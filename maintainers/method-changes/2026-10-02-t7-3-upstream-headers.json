@@ -1,0 +1,15 @@
+{
+ "id": "t7-3-upstream-headers",
+ "at": "2026-10-02T19:02:06+08:00",
+ "kind": "editorial",
+ "failure_form": "n/a",
+ "verdict": "n/a",
+ "reason": "B7 T7.3: upstream header (anthropic-skills skills/frontend-design/SKILL.md sha256=d919…c1d3) in the two adaptations so health_check warns VENDORDRIFT when the lock moves. Reviewed 2026-10-02 against that text: ux-writing.md covers 'More on writing in design'; visual-direction.md lacks three upstream items (ground the design in the subject matter first, the hero default treatment, deliberate typeface choice with a type scale) — left as a candidate behavioral change, not applied.",
+ "evidence": [],
+ "decided_by": "maintainer",
+ "files": {
+  "skills/design-contract/references/ux-writing.md": "ad3d9fd81517ffa74c37c850c62f4a7cb60ac77c100a7b486df1e841fef4786e",
+  "skills/design-contract/references/visual-direction.md": "3ac654336488cdc0f3befa3776935a5347c56e9d524604ec577dbddd32065bba"
+ },
+ "deleted": []
+}

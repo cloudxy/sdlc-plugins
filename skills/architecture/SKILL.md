@@ -19,8 +19,9 @@ Task names, output paths and ownership have one source: `workflow/registry.json`
 | shape / contract | Turn approved scope and design into boundaries, contracts and executable slices |
 | shape / change-impact | Assess a discovered mismatch; route decisions and invalidate affected artifacts |
 | verify / conformance | Use [conformance-task.md](references/conformance-task.md) to compare accepted obligations with actual implementation and checks |
+| cycle / deepen-survey | In a product cycle, use [deepening.md](references/deepening.md) to list hot-spot deepening candidates for a person to choose; no refactor |
 
-These are conditional tasks in existing stages, not five mandatory stages. A small change can reuse the baseline and existing contracts. Early feasibility does not require a frozen spec or final prototype; a final UI contract does consume the approved design.
+These are conditional tasks in existing stages, not mandatory stages. A small change can reuse the baseline and existing contracts. Early feasibility does not require a frozen spec or final prototype; a final UI contract does consume the approved design.
 
 ## Working procedure
 

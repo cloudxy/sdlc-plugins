@@ -495,6 +495,13 @@ def seal(draft_path):
     readiness = check_tasks(draft['request']['root'], task_id=draft['bindings']['task_id'])
     require(not readiness['errors'], 'task dependencies not ready: ' + '; '.join(readiness['errors']))
     root = Path(draft['request']['root']).resolve()
+    task_id = draft['bindings']['task_id']
+    for earlier in sorted((root / 'runs').glob('*/*-manifest.json')):
+        m = load(earlier)
+        if m.get('bindings', {}).get('task_id') == task_id and not Path(m['paths']['result']).exists():
+            # A returned but unrecorded run must not be dispatched twice (diagnosis 2026-10-02: repeat after compaction).
+            raise ProtocolError(f"task {task_id} has an unrecorded run {m['run_id']}: record its saved return "
+                                "(workflow.py record) or mark it interrupted (record --interrupted REASON) before sealing again")
     run_id = dt.datetime.now(ZoneInfo('Asia/Shanghai')).strftime('%Y-%m-%d-%H%M%S%z') + '-' + draft['request']['role'] + '-' + draft['request']['task'] + '-' + uuid.uuid4().hex[:8]
     home = root / 'runs' / run_id
     home.mkdir(parents=True, exist_ok=False)

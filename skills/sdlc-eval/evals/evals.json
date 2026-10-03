@@ -53,6 +53,21 @@
         "Each finding has one landing (check / review standard / delete / out of scope) and a target file",
         "Reports only: no plugin file edited or claimed edited"
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "/sdlc-eval diagnose。问题陈述：会话是工作目录里的 session.jsonl（全部 8 行）；用户期望修改插件前先尊重已有决定；实际助手在仓库里搜索没找到决定，就重新提议删除描述里的 Do NOT，而这在 9 月 29 日已被决定保留，记录在仓库之外的维护者归档里；关心的可观察量是重提已决定的事项。session_digest.py 已生成时间线 digest.md。请给出诊断报告。",
+      "expected_output": "Cites session.jsonl lines 5-7 (search found nothing, then the re-proposal) and 8 (the user's correction). Identifies that the decision existed but was unreachable from the repository, and lands the finding on a navigation pointer / information access (a file in the repository that points to where decisions are recorded), naming that target file. Separates observation from inference and states nothing was applied.",
+      "files": [
+        "evals/files/diagnose-2/session.jsonl",
+        "evals/files/diagnose-2/digest.md"
+      ],
+      "expectations": [
+        "Cites session.jsonl:<line> for the empty search and the re-proposal",
+        "Identifies that the decision existed outside the repository and could not be found from it",
+        "Lands the finding on a navigation pointer / information access with a named target file",
+        "Reports only: no plugin file edited or claimed edited"
+      ]
     }
   ]
 }

@@ -1,0 +1,25 @@
+{
+ "feature": "export",
+ "lane": "L2",
+ "delivery_goal": "release_ready",
+ "phase": "Closed",
+ "hats_done": [
+  "define",
+  "shape",
+  "implement",
+  "verify",
+  "accept",
+  "review"
+ ],
+ "rework_rounds": 1,
+ "intercepts": 5,
+ "bet": {
+  "hypothesis": "H-2",
+  "metric": "weekly_export_tenants",
+  "evidence_grade": "E1",
+  "readout_due": "2026-09-25"
+ },
+ "escape": null,
+ "readout": null,
+ "recorded_at": "2026-09-11T18:00:00+08:00"
+}

@@ -1,0 +1,30 @@
+{
+ "id": "b6-deepen-survey",
+ "at": "2026-10-02T18:58:40+08:00",
+ "kind": "behavioral",
+ "failure_form": "omission",
+ "verdict": "improved",
+ "reason": "B6 T6.1: architect cycle task deepen-survey (on demand) with skills/architecture/references/deepening.md, adapted from mattpocock/skills@d81f3a1 codebase-design / improve-codebase-architecture: hot-spot scoped survey, deletion test, dependency categories, candidates with strength, stops before interfaces, respects ADRs. Registered as artifact cycle-deepening and listed in product-mode cycle tasks. Verified by architecture case 12, HEAD 524bf5b vs current.",
+ "evidence": [
+  "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/08-B6加深调查验证 (architecture case 12, baseline 524bf5b 0/3, current 3/3; ADR expectation untested: fixture paths not named)"
+ ],
+ "decided_by": "maintainer",
+ "files": {
+  "skills/architecture/SKILL.md": "aad180e6bc9853b2be7257209f078c58a29bb731ac6a3e6d3aee1a254ce0954e",
+  "skills/architecture/references/deepening.md": "6112a587101d8ddeb0ae785cded7e9413843496ddce8e292f7023515875a6a95",
+  "skills/sdlc/references/product-mode.md": "df2fbc7901dbe22cfd79dc029013525e918f4ffe04a2784dbc4ad5c8934d5488",
+  "workflow/registry.json": "cbc70c6b8ad21f4123f5ba93b7dcadbdcf969838f1d8542a50cd415965f1e691"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-10-02T23:20:26+08:00",
+   "from": "pending",
+   "to": "improved",
+   "evidence": [
+    "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/08-B6加深调查验证 (architecture case 12, baseline 524bf5b 0/3, current 3/3; ADR expectation untested: fixture paths not named)"
+   ],
+   "unchecked_evidence": ""
+  }
+ ]
+}

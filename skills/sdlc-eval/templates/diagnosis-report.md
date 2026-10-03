@@ -15,7 +15,7 @@ From `session_digest.py --stats` and the read region: tool uses, errors, repeats
 
 | # | What the transcript shows | Where (`path:line`) | Inference (labelled) | Landing | Target file |
 |---|---|---|---|---|---|
-| F1 | <observed event> | <path:line, path:line> | <why it happened, if supported> | check / review standard / delete / out of scope | <file the change would touch> |
+| F1 | <observed event> | <path:line, path:line> | <why it happened, if supported> | check / review standard / delete / pointer / out of scope | <file the change would touch> |
 
 ## Not established
 

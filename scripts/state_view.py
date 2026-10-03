@@ -7,6 +7,8 @@ its verdict. Each command prints TAB-separated rows; the shell decides what is a
   questions  <state>   id, status for each open_questions entry (a bare string is an open question)
   null-gates <state>   name of each gates[] record with result null and no reason
   last-fresh <state>   result, stage of the last fresh-context gate record (no row when there is none)
+  failed-gates <state> kind, name, stage of each staged gate (fresh-context or script) whose latest record for that
+                       name and stage is a fail; a later pass clears it, records without a stage are not listed
   skips      <state>   role, reason for each roles_skipped token (reason empty when roles_skipped_why lacks it)
   discovery  <state>   status, skip_why, reopened (y or empty)
 
@@ -100,7 +102,7 @@ def read_items(text: str, key: str) -> list:
     for line in child:
         im = re.match(r"^\s*-\s*(.*)$", line)
         if im:
-            body = im.group(1).strip()
+            body = _strip_comment(im.group(1)).strip()
             if body.startswith("{") and body.endswith("}"):
                 items.append(_flow_map(body))
                 continue
@@ -145,7 +147,7 @@ def skipped_roles(text: str) -> list[str]:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("view", choices=["questions", "null-gates", "last-fresh", "skips", "discovery"])
+    ap.add_argument("view", choices=["questions", "null-gates", "last-fresh", "failed-gates", "skips", "discovery"])
     ap.add_argument("state")
     args = ap.parse_args(argv)
     try:
@@ -171,6 +173,15 @@ def main(argv=None) -> int:
                  and g.get("result") in ("pass", "fail")]
         if fresh:
             rows.append((fresh[-1]["result"], fresh[-1].get("stage", "")))
+    elif args.view == "failed-gates":
+        latest = {}
+        for g in read_items(text, "gates"):
+            if isinstance(g, dict) and g.get("kind") in ("fresh-context", "script") and g.get("stage") \
+                    and g.get("result") in ("pass", "fail"):
+                key = (g["kind"], g.get("name") or g["kind"], g["stage"])
+                latest.pop(key, None)  # keep insertion order of the latest record
+                latest[key] = g["result"]
+        rows = [key for key, result in latest.items() if result == "fail"]
     elif args.view == "skips":
         why = read_map(text, "roles_skipped_why")
         rows = [(r, why.get(r, "").strip()) for r in skipped_roles(text)]

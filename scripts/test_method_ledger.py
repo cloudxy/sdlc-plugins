@@ -100,6 +100,47 @@ class LedgerTests(unittest.TestCase):
         self.assertIn('skills/refactor/SKILL.md', p.stdout)
         self.assertNotIn('skills/tdd/SKILL.md:', p.stdout)
 
+    def evidence_dir(self, rel, digest):
+        ev = self.tmp / 'evidence'
+        (ev / 'trees' / 'abc').mkdir(parents=True, exist_ok=True)
+        (ev / 'trees' / 'abc' / 'manifest.json').write_text(json.dumps({'tree_id': 'abc', 'method_hashes': {rel: digest}}))
+        return ev
+
+    def test_verdict_needs_evidence_run_on_the_recorded_text(self):
+        import hashlib
+        self.edit('skills/tdd/SKILL.md')
+        self.ledger('record', '--id', 'tdd-rule', '--kind', 'behavioral', '--failure-form', 'omission',
+                    '--reason', 'r', '--verdict', 'pending')
+        recorded = hashlib.sha256((self.root / 'skills/tdd/SKILL.md').read_bytes()).hexdigest()
+        stale = self.evidence_dir('skills/tdd/SKILL.md', '0' * 64)
+        p = self.ledger('verdict', '--id', 'tdd-rule', '--verdict', 'improved', '--evidence', f'{stale} (runs on old text)')
+        self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
+        self.assertIn('not produced on the recorded text', p.stderr)
+        good = self.evidence_dir('skills/tdd/SKILL.md', recorded)
+        p = self.ledger('verdict', '--id', 'tdd-rule', '--verdict', 'improved', '--evidence', f'{good} (runs on this text)')
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+
+    def test_verdict_without_run_evidence_needs_an_explicit_reason(self):
+        self.edit('skills/tdd/SKILL.md')
+        self.ledger('record', '--id', 'tdd-doc', '--kind', 'behavioral', '--failure-form', 'omission',
+                    '--reason', 'r', '--verdict', 'pending')
+        p = self.ledger('verdict', '--id', 'tdd-doc', '--verdict', 'no_change', '--evidence', 'a review note')
+        self.assertEqual(p.returncode, 2)
+        p = self.ledger('verdict', '--id', 'tdd-doc', '--verdict', 'no_change', '--evidence', 'a review note',
+                        '--unchecked-evidence', 'judged by reading; no smoke case applies')
+        self.assertEqual(p.returncode, 0, p.stderr)
+
+    def test_record_with_a_verdict_checks_evidence_too(self):
+        self.edit('skills/tdd/SKILL.md')
+        p = self.ledger('record', '--id', 'tdd-doc', '--kind', 'behavioral', '--failure-form', 'omission',
+                        '--reason', 'r', '--verdict', 'improved', '--evidence', 'a review note')
+        self.assertEqual(p.returncode, 2)  # not a way around `verdict`
+        self.assertIn('unchecked-evidence', p.stderr)
+        p = self.ledger('record', '--id', 'tdd-doc', '--kind', 'behavioral', '--failure-form', 'omission',
+                        '--reason', 'r', '--verdict', 'improved', '--evidence', 'a review note',
+                        '--unchecked-evidence', 'judged by reading')
+        self.assertEqual(p.returncode, 0, p.stderr)
+
     def test_behavioral_record_needs_failure_form(self):
         self.edit('skills/tdd/SKILL.md')
         p = self.ledger('record', '--id', 'x', '--kind', 'behavioral', '--reason', 'r', '--verdict', 'pending')

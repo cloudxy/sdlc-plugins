@@ -70,28 +70,9 @@ if [ "$WORK_GIVEN" = "1" ]; then
   exec python3 "$SCRIPT_DIR/workflow.py" check-work --root "$1" --work-id "$WORKID"
 fi
 
-# ---------- --stats：四度量汇总（泳道分布/闸门拦截/返工/耗时） ----------
+# ---------- --stats：度量汇总（泳道 / 独立审查拦截 / 返工 / 逃逸 / 赌注读数），由 outcomes.py 计算 ----------
 if [ "${1:-}" = "--stats" ]; then
-  trap "" PIPE
-  ROOT="${2:-.sdlc}"
-  echo "SDLC 四度量（${ROOT}）"
-  echo "================================"
-  declare -a LANE_C=(0 0 0 0 0); TOTAL=0; INTERCEPT=0; REWORK=0; DUR=0; DURN=0
-  to_farr "$(find "$ROOT" -name state.yaml 2>/dev/null)"
-  for st in ${FARR[@]+"${FARR[@]}"}; do
-    L=$(grep -m1 -E "^lane:" "$st" | sed -E 's/[[:space:]]+#.*$//' | grep -m1 -oE "L[0-4]" | tr -d L); [ -z "$L" ] && continue # 模板行尾注释写着 L0-L4
-    LANE_C[$L]=$((LANE_C[$L]+1)); TOTAL=$((TOTAL+1))
-    FI=$(grep -m1 -oE "findings_total: [0-9]+" "$st" | grep -oE "[0-9]+$"); [ -n "$FI" ] && INTERCEPT=$((INTERCEPT+FI))
-    RW=$(grep -m1 -oE "rework_rounds: [0-9]+" "$st" | grep -oE "[0-9]+$"); [ -n "$RW" ] && REWORK=$((REWORK+RW))
-    DM=$(grep -m1 -oE "duration_min: [0-9]+" "$st" | grep -oE "[0-9]+$"); [ -n "$DM" ] && { DUR=$((DUR+DM)); DURN=$((DURN+1)); }
-  done
-  [ $TOTAL -eq 0 ] && { echo "无已记账 feature"; exit 0; }
-  echo "泳道分布: L0=${LANE_C[0]} L1=${LANE_C[1]} L2=${LANE_C[2]} L3=${LANE_C[3]} L4=${LANE_C[4]}（共 ${TOTAL}）"
-  echo "独立审查拦截: $INTERCEPT 个自审未发现问题"
-  echo "返工轮次: $REWORK"
-  [ $DURN -gt 0 ] && echo "平均耗时: $((DUR/DURN)) 分钟/票"
-  echo "L3+ 占比: $(( (LANE_C[3]+LANE_C[4])*100/TOTAL ))%（>40% 判定过严）"
-  exit 0
+  exec python3 "$SCRIPT_DIR/outcomes.py" stats --root "${2:-.sdlc}"
 fi
 
 # ---------- --hat 校验（隐含 --require；spawn 角色名非法） ----------
@@ -883,6 +864,18 @@ if [ -f "$ST" ]; then
       red HATADVANCE "$ST: 最近 G-fresh fail@${NFAIL} 但 current_hat=${HAT}（越级；应留在 ${NFAIL} 返工，HATADVANCE）"
     fi
   fi
+  # 脚本闸门同理：带 stage 的记录，最近一次是 fail 却已越过该阶段（2026-10-02 诊断模式评测发现的缺口）
+  FGS=$(sv failed-gates) || red STATE "$ST: state_view 无法读取 gates[]"
+  while IFS=$'\t' read -r fg_kind fg_name fg_stage; do
+    [ "$fg_kind" = "script" ] || continue
+    NFG=$(norm_hat "$fg_stage"); RFG=0
+    [ -n "$NFG" ] && RFG=$(rank_of "$NFG")
+    if [ "$RFG" -gt 0 ] && [ "$(rank_of "$NHAT")" -gt "$RFG" ]; then
+      red HATADVANCE "$ST: 脚本闸门 ${fg_name} 最近一次在 ${NFG} 失败，current_hat=${HAT} 却已越过（留在 ${NFG}，修复后重跑并记 pass）"
+    fi
+  done <<EOF
+$FGS
+EOF
 
   SPEC=$(find "$ROOT" -name spec.md -o -name spec-s.md 2>/dev/null | head -1)
   if [ -n "$SPEC" ]; then

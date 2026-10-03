@@ -53,7 +53,8 @@ q_security: no        # yes 当 Q2|Q3|Q4；此时 02-shape/contract.md 须含 [S
 tickets: []           # [{id, title, journey: J-n, roles: [backend, frontend], status: todo|doing|done|blocked, evidence, integration}]
 
 gates: []             # 三类记录：
-  # script:      {name, kind: script, result: pass|fail, cmd, exit_code, at}   # E2E 记为 name: e2e
+  # script:      {name, kind: script, stage: <stage-id>, result: pass|fail, cmd, exit_code, at}   # E2E 记为 name: e2e
+  #              带 stage 的脚本闸门失败后，没有重跑并记 pass 就推进 current_hat = HATADVANCE
   # fresh-context:{name, kind: fresh-context, stage: <stage-id>, result, findings_total, blocker: 0, major: 0,
   #                minor: {fixed: 0, waived: 0}, root_cause: <一行，同帽第二轮起必填>, at}
   # self-review: {name, kind: self-review, decision, duration_min, at}
@@ -71,6 +72,17 @@ open_questions: []    # 必须含 spec/briefing 里「待确认」的 Q-* ；空
                       # 闸门只检查会话里记录的原话，不核验身份：写明「据操作者转达」，不要写成已核实
                       # status≠answered 且 current_hat 已过 define = OPENQOPEN
 lane_changes: []      # [{from, to, reason, at}]
+# bet:                 # 带赌注的功能：关闭时由 scripts/outcomes.py record 写入结果记录，到期未读数会在 /sdlc 开头提醒
+#   hypothesis: H-<n>  # 产品策略 §7 的假设编号
+#   metric: <metric_id>
+#   evidence_grade: E1 # 下注时关键假设的证据等级（E0-E4），用于统计各等级的命中率
+#   readout_due: <YYYY-MM-DD>
+# escape:              # 缺陷修复：这个缺陷从哪里逃出来
+#   origin_feature: <feature>
+#   origin_release: <版本或日期>
+#   should_have_caught_at: <define|shape|implement|verify|accept|review|collect|warehouse>
+#   gate: <闸门标签、fresh-context、accept 或 none>
+#   defect_class: <code|data-definition|tracking|config|requirement>
 # host_spawn:          # 缺省不要写 host_spawn: {} —— 整文件重写会覆盖已有回退记录
 #   researcher:
 #     requested: sdlc-workflow:researcher

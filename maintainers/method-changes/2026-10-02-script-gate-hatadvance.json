@@ -1,0 +1,15 @@
+{
+ "id": "script-gate-hatadvance",
+ "at": "2026-10-02T18:47:30+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "pending",
+ "reason": "Candidate gap from the diagnose-mode eval, confirmed by fixture: a failed script gate at define with current_hat shape passed. check-sdlc now applies HATADVANCE to staged script gates (fixture group 74); the template and orchestrator-gates ask the manager to record script gates with stage:. The gate is enforced by fixtures; whether managers write stage: is untested.",
+ "evidence": [],
+ "decided_by": "user 2026-10-02 「全部继续」",
+ "files": {
+  "skills/sdlc/references/orchestrator-gates.md": "fcffdab68e61db52a80b5e8d512bf88e8fd70cba8df2bf350e78df0d8502d173",
+  "skills/sdlc/templates/state.yaml": "0703282064f2054ba40a26125741a8c91057fde701bf515a35faa90a508f9bac"
+ },
+ "deleted": []
+}

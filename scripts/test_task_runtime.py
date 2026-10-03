@@ -169,6 +169,13 @@ class RuntimeTests(unittest.TestCase):
         paths=self.sealed(); self.put(self.root/'01-define/spec.md','FR-1\n'); self.response()
         result=record(paths['manifest'],self.return_path,concurrent=True)
         self.assertEqual(result['write_scope']['level'],'group_observed'); self.assertFalse(result['execution_complete'])
+    def test_unrecorded_run_blocks_a_second_seal(self):
+        # Diagnosis 2026-10-02: a returned but unrecorded task was dispatched again after context compaction.
+        first=self.sealed()
+        with self.assertRaises(ProtocolError) as e: self.sealed()
+        self.assertIn('unrecorded run', str(e.exception))
+        record(first['manifest'],interrupted='never dispatched')
+        self.sealed()
     def test_missing_return_and_interrupted_run(self):
         paths=self.sealed(); result=record(paths['manifest'],interrupted='host timeout')
         self.assertFalse(result['execution_complete']); self.assertIsNone(result['judgments'])
@@ -208,7 +215,7 @@ class RuntimeTests(unittest.TestCase):
         self.req['scope']='cycle'
         with self.assertRaisesRegex(ProtocolError,'feature only'): self.prepared()
     def test_same_day_run_names_unique_and_dated(self):
-        a=self.sealed(); b=self.sealed()
+        a=self.sealed(); record(a['manifest'],interrupted='naming test: superseded before dispatch'); b=self.sealed()
         self.assertNotEqual(a['manifest'],b['manifest']); self.assertRegex(Path(a['manifest']).name,r'^\d{4}-\d{2}-\d{2}-\d{6}\+0800-pm-spec-')
     def test_duplicate_json_key_and_unknown_capability(self):
         with self.assertRaises(ProtocolError): loads('{"x":1,"x":2}')

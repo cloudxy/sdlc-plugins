@@ -1,0 +1,25 @@
+{
+  "note": "T7.2 trigger experiment (2026-10-02): 2 prompts that should load this skill, 2 that should not. Run with scripts/trigger_smoke.py.",
+  "triggers": [
+    {
+      "id": 1,
+      "should_trigger": true,
+      "prompt": "帮我把「订单部分退款」写成 PRD：核心价值、用户旅程，验收标准用 Given/When/Then 写。"
+    },
+    {
+      "id": 2,
+      "should_trigger": true,
+      "prompt": "导出功能上线两周了，帮我按产品经理的角度定一套指标蓝图：北极星、过程指标和护栏指标各是什么。"
+    },
+    {
+      "id": 3,
+      "should_trigger": false,
+      "prompt": "给订单部分退款设计数据库表结构和 REST 接口，字段、索引和幂等键都要写清楚。"
+    },
+    {
+      "id": 4,
+      "should_trigger": false,
+      "prompt": "/sdlc 给订单加部分退款功能。"
+    }
+  ]
+}

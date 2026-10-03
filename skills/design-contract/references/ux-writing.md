@@ -1,5 +1,7 @@
 # 文案即设计内容
 
+<!-- upstream: anthropic-skills skills/frontend-design/SKILL.md sha256=d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3 reviewed=2026-10-02 -->
+
 > 界面里出现文字只有一个理由：让产品更容易被理解和使用。文案是设计内容，不是装饰——它和间距、颜色一样需要刻意设计。这直接决定 edge-states.md 的质量：每个状态的文案都是设计决策，不是实现时随手编的。
 
 ## 命名：用户视角，不是系统视角

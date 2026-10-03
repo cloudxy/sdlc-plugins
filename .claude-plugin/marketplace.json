@@ -8,7 +8,7 @@
     {
       "name": "sdlc-workflow",
       "source": "./",
-      "version": "4.4.0",
+      "version": "4.5.0",
       "description": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
       "category": "workflow"
     }

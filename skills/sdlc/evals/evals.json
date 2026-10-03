@@ -154,6 +154,66 @@
         "Records host_spawn with requested type, fallback and effective permissions",
         "Does not perform the review itself in the manager window"
       ]
+    },
+    {
+      "id": 11,
+      "prompt": "/sdlc 修复：主管在 Safari 里点「导出」按钮没有反应，Chrome 正常。今天是 2026-10-02。",
+      "expected_output": "Starts the defect route for the Safari export (reproduce/diagnose against the accepted export behavior) and, in one line at the top, names the overdue readout recorded in .sdlc/_outcomes/index.json (export, H-2 weekly_export_tenants, due 2026-09-25). The readout does not block or delay the fix, and the manager does not start a product cycle or ask the user to do the readout first.",
+      "files": [
+        "evals/files/case-11/sdlc.config.yaml",
+        "evals/files/case-11/.sdlc/_outcomes/index.json",
+        "evals/files/case-11/.sdlc/_outcomes/export.json"
+      ],
+      "expectations": [
+        "Names the overdue export readout (H-2 / weekly_export_tenants, due 2026-09-25) in one line",
+        "Proceeds with the Safari export defect route",
+        "Does not block the fix on the readout, start a cycle, or ask for the readout first"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "/sdlc 先试一下：月度报表导出现在要 40 秒，换成 DuckDB 直接读这些文件能不能降到 5 秒以内？只要一个答案，能行的话以后再正式做。今天是 2026-10-02。",
+      "expected_output": "Routes this as a time-boxed investigation whose deliverable is an answer with a measurement (e.g. DuckDB vs current pandas on the same 2026-09 data, target < 5 s). Code written for it is throwaway and is not merged; no PRD/spec, design, acceptance, release or full delivery chain is selected. Says that building it for real later is separate work.",
+      "files": [
+        "evals/files/case-12/sdlc.config.yaml",
+        "evals/files/case-12/src/reports/export.py"
+      ],
+      "expectations": [
+        "Treats the request as an investigation whose result is an answer with a measurement, time-boxed",
+        "States the experiment code is thrown away / not merged; real adoption is separate later work",
+        "Does not select spec/PRD, design, acceptance, release or the full delivery chain"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "/sdlc 修复：订单导出的文件名是中文时，在部分浏览器里下载下来是乱码。今天是 2026-10-02。",
+      "expected_output": "Routes as a small defect fix: the flow is readable now (src/orders/export_view.py builds Content-Disposition with a raw non-ASCII filename), the fix is local (RFC 6266/5987 filename* encoding with an ASCII fallback), verified by an added test and independent QA; no architect contract, ADR, spec rewrite or new feature lane.",
+      "files": [
+        "evals/files/case-13/sdlc.config.yaml",
+        "evals/files/case-13/src/orders/export_view.py",
+        "evals/files/case-13/tests/test_export_view.py"
+      ],
+      "expectations": [
+        "Identifies the readable flow (export_view.py Content-Disposition) as the place to fix",
+        "Selects a fix with verification (test plus independent QA), stopping at a verified fix",
+        "Does not add architect contract/ADR, spec rewrite or treat it as a new feature"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "/sdlc 继续。后端的回报在 .sdlc/order-export-filter/03-impl/backend-return.md。",
+      "expected_output": "Recognizes that the requested change now alters an interface others consume (GET→POST export, removing parameters promised to the mobile app and partners), so it is no longer a local implementation task: does not let backend change the API inline. Routes to an architect contract/compatibility decision (e.g. keep GET and add filters, or version the endpoint with a deprecation window) with consumer impact, recorded as a successor or added work rather than continuing the bounded task; may ask the user for the strategic choice.",
+      "files": [
+        "evals/files/case-14/.sdlc/order-export-filter/03-impl/backend-return.md",
+        "evals/files/case-14/.sdlc/order-export-filter/state.yaml",
+        "evals/files/case-14/sdlc.config.yaml"
+      ],
+      "expectations": [
+        "Recognizes the change alters an interface consumed by the mobile app and partners",
+        "Does not approve backend changing GET to POST inline within the current implement task",
+        "Routes to architect contract / compatibility decision with consumer impact before implementation continues",
+        "Does not quietly narrow the scope to avoid the interface change without saying so"
+      ]
     }
   ]
 }

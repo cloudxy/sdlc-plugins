@@ -34,6 +34,22 @@
           "weight": 5
         }
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "用 tdd 实现工单 T-7 的 FR-2（见 ticket.md），测试沿用 tests/test_invoice.py 现有的写法。这次只能读文件：把你要写的测试代码、红和绿各自应看到什么写出来，不要声称已经运行。",
+      "expected_output": "Writes FR-2.1 and FR-2.2 tests through invoice_total (the seam contract C-3 names, without asking to confirm it) with literal expected values 135.87 and 40.00 taken from the GWT rows, not recomputed with the code's formula, DISCOUNT_RATE or _cents. Points out that the existing tests compute their expectation the way the code does (and test_discount_rate_applied accepts either result), so they cannot fail; does not copy that pattern. Describes the red it expects (current code returns 150.97 for FR-2.1) without claiming a run.",
+      "files": [
+        "evals/files/tautology-1/src/invoice.py",
+        "evals/files/tautology-1/tests/test_invoice.py",
+        "evals/files/tautology-1/ticket.md"
+      ],
+      "expectations": [
+        "Expected values are literals from the GWT rows (135.87, 40.00), not computed with the code's formula, constants or helpers",
+        "Points out that the existing tests recompute the expectation the way the code does and does not follow that pattern",
+        "Tests go through invoice_total as contract C-3 names, without asking to confirm the seam",
+        "Does not claim red or green runs it did not execute"
+      ]
     }
   ]
 }

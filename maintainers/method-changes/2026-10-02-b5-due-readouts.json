@@ -1,0 +1,29 @@
+{
+ "id": "b5-due-readouts",
+ "at": "2026-10-02T18:42:53+08:00",
+ "kind": "behavioral",
+ "failure_form": "omission",
+ "verdict": "improved",
+ "reason": "B5: Step 0 names overdue bets from .sdlc/_outcomes/index.json in one line without blocking; state-records documents outcomes.py record at Closed; product-mode closes a bet with outcomes.py readout. Verified by sdlc case 11, HEAD 524bf5b vs current. sdlc SKILL.md is now at 4999/5000 tokens.",
+ "evidence": [
+  "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/07-B5结果记录验证 (sdlc case 11, baseline 524bf5b 0/5, b5 tree 527ca83 5/5; b5 had 3 of 8 finished attempts stop at the 8-turn limit, baseline 0 of 5)"
+ ],
+ "decided_by": "user 2026-10-02 「全部继续」",
+ "files": {
+  "skills/sdlc/SKILL.md": "1726bdff8716ea816ecca09b0e8c72e9ec3964599683bf334dfa9f2fe9a1fc37",
+  "skills/sdlc/references/product-mode.md": "095769ffb6da5a06d645a24f50ea6d2e9fe851011b786f3f39962fc0861d9548",
+  "skills/sdlc/references/state-records.md": "1688f068140ed66f9945343634f1e1a3aa9e96309bf57f5842fc724f59168f37"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-10-02T23:34:36+08:00",
+   "from": "pending",
+   "to": "improved",
+   "evidence": [
+    "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/07-B5结果记录验证 (sdlc case 11, baseline 524bf5b 0/5, b5 tree 527ca83 5/5; b5 had 3 of 8 finished attempts stop at the 8-turn limit, baseline 0 of 5)"
+   ],
+   "unchecked_evidence": ""
+  }
+ ]
+}

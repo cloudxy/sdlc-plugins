@@ -1,0 +1,25 @@
+{
+  "note": "T7.2 trigger experiment (2026-10-02): 2 prompts that should load this skill, 2 that should not. Run with scripts/trigger_smoke.py.",
+  "triggers": [
+    {
+      "id": 1,
+      "should_trigger": true,
+      "prompt": "我想给街边小餐馆做点东西帮他们少浪费食材，但还没想清楚到底做什么、给谁用，帮我理一理。"
+    },
+    {
+      "id": 2,
+      "should_trigger": true,
+      "prompt": "团队在纠结先做多租户还是先做单租户，两边都有人坚持。我们自己也说不清该怎么选，帮我把这个产品选择想清楚。"
+    },
+    {
+      "id": 3,
+      "should_trigger": false,
+      "prompt": "需求已经确认：导出只保留最近 90 天、最多 5 万行、文件名带日期。把它写进 spec.md 的功能需求和验收标准。"
+    },
+    {
+      "id": 4,
+      "should_trigger": false,
+      "prompt": "实现这个已确认的函数：parse_amount(text) 把「¥1,234.50」这类字符串转成以分为单位的整数，非法输入抛 ValueError。直接给代码。"
+    }
+  ]
+}

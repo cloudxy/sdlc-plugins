@@ -10,7 +10,7 @@ from runtime_protocol import (CAPABILITIES, file_hash, load, now, object_keys,
                               path_inside, require, safe_id, state_read, version, write_json)
 
 WORK_REQUIRED = {'id', 'kind', 'intent_quote', 'scope', 'target', 'tasks', 'continuation', 'status'}
-WORK_KEYS = WORK_REQUIRED | {'result', 'result_sha256', 'origin', 'reason'}
+WORK_KEYS = WORK_REQUIRED | {'result', 'result_sha256', 'origin', 'reason', 'uncertainty'}
 
 
 def work_definition(work):
@@ -38,6 +38,7 @@ def validate_work_items(state, graph):
             require(isinstance(work[field], str) and bool(work[field].strip()), 'work missing ' + field)
         require(work['continuation'] in ('stop', 'continue'), 'unknown work continuation')
         require(work['status'] in ('active', 'completed', 'cancelled'), 'unknown work status')
+        require(work.get('uncertainty', 'bounded') in ('spike', 'bounded', 'architectural'), 'unknown work uncertainty')
         require(isinstance(work['tasks'], list) and bool(work['tasks']), 'work needs selected tasks')
         seen = set()
         for edge in work['tasks']:

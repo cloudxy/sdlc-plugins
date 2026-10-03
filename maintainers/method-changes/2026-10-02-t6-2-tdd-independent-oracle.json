@@ -1,0 +1,27 @@
+{
+ "id": "t6-2-tdd-independent-oracle",
+ "at": "2026-10-02T18:59:51+08:00",
+ "kind": "behavioral",
+ "failure_form": "omission",
+ "verdict": "no_change",
+ "reason": "B6 T6.2: tdd red step tests through the seam the accepted contract or ticket names and asks only when neither does (no re-confirming an accepted boundary, 09-28 appendix B); new gotcha and self-check item: expected values come from an independent source, never the code's own formula, constants or helpers. Verified by tdd case 4, HEAD 524bf5b vs current.",
+ "evidence": [
+  "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/09-T6.2测试独立期望验证 (tdd case 4, baseline 524bf5b 3/3 pass, current 3/3 pass: the baseline already avoids tautological expectations)"
+ ],
+ "decided_by": "maintainer",
+ "files": {
+  "skills/tdd/SKILL.md": "82a083e8b31315fa274e36e586b131704daec60ed5704fda23ae23c45b85b4b5"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-10-02T23:30:22+08:00",
+   "from": "pending",
+   "to": "no_change",
+   "evidence": [
+    "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/09-T6.2测试独立期望验证 (tdd case 4, baseline 524bf5b 3/3 pass, current 3/3 pass: the baseline already avoids tautological expectations)"
+   ],
+   "unchecked_evidence": ""
+  }
+ ]
+}

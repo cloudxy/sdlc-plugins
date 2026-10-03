@@ -1,0 +1,28 @@
+{
+ "id": "g5-diagnose-pointer-landing",
+ "at": "2026-10-02T18:40:08+08:00",
+ "kind": "behavioral",
+ "failure_form": "omission",
+ "verdict": "improved",
+ "reason": "Diagnosis 2026-10-02 (session 11e9b105 G5): none of the four landings fitted information that existed but could not be reached; adds a pointer landing (navigation or information access). Verified by sdlc-eval case 5, HEAD 524bf5b vs current.",
+ "evidence": [
+  "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/06-诊断小项验证 (sdlc-eval case 5, baseline 524bf5b 0/3 pass, current 3/3 pass; confounded with new AGENTS.md and out-of-scope/)"
+ ],
+ "decided_by": "user 2026-10-02 「全部继续」",
+ "files": {
+  "skills/sdlc-eval/references/diagnose-mode.md": "8a1ced319f07d64f4945b9598f94a22c1f03b195d63c702e4de7824504369de1",
+  "skills/sdlc-eval/templates/diagnosis-report.md": "27215a6a5a6b29941f23bcc4b38505fec49390ac35165270a3c1c12ef7c75809"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-10-02T18:57:40+08:00",
+   "from": "pending",
+   "to": "improved",
+   "evidence": [
+    "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/06-诊断小项验证 (sdlc-eval case 5, baseline 524bf5b 0/3 pass, current 3/3 pass; confounded with new AGENTS.md and out-of-scope/)"
+   ],
+   "unchecked_evidence": ""
+  }
+ ]
+}

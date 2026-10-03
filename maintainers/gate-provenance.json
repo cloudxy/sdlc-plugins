@@ -1,0 +1,490 @@
+{
+ "ACCEPT": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "ACCEPTMISS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "APPETITE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "ARCH": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "CLOSED": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "45298b5 kernel: run evidence bound to the current code; closing, acceptance and security follow real end states",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": ""
+ },
+ "CONTRACT": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "CORE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "CYCLE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-27",
+  "origin": "3921a98 round 1 (2026-09-24 plan): consistent contracts, a clarified task model, product cycles and trace",
+  "review_by": "2027-03-28",
+  "cost": "",
+  "note": ""
+ },
+ "CYCLE-CLOSE": {
+  "source": "scripts/workflow.py",
+  "added": "2026-09-27",
+  "origin": "3921a98 round 1 (2026-09-24 plan): consistent contracts, a clarified task model, product cycles and trace",
+  "review_by": "2027-03-28",
+  "cost": "",
+  "note": ""
+ },
+ "CYCLE-INTERIM": {
+  "source": "scripts/workflow.py",
+  "added": "2026-09-27",
+  "origin": "3921a98 round 1 (2026-09-24 plan): consistent contracts, a clarified task model, product cycles and trace",
+  "review_by": "2027-03-28",
+  "cost": "",
+  "note": ""
+ },
+ "DECISIONPENDING": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "DEFAULTED": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "DESIGNFIRST": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "DESIGNSKIP": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-10-02",
+  "origin": "c3572d5 fix: make check-sdlc read state robustly and close silent passes in 4.3.4",
+  "review_by": "2027-04-02",
+  "cost": "",
+  "note": ""
+ },
+ "DIAGRAM": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "bba1227 diagrams: vendored svg-diagram conventions + a checked diagram gate (packages C and E)",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": ""
+ },
+ "DIRECTIONS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "E2E": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "ENABLE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "EVID": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "EVIDMISMATCH": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "EXPLAIN": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "FINDINGS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "GWT": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "HATADVANCE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "HATMISS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "HOSTSPAWN": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "IMAGE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-27",
+  "origin": "66deac7 imagery: Grok-subscription image generation behind a registered, checked gate",
+  "review_by": "2027-03-28",
+  "cost": "",
+  "note": ""
+ },
+ "INTEGRATION": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "JOURNEY": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "LAUNCH": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "LAYERING": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "MATRIX": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "MATRIXMISS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "METDUP": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOCOMPETE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NODISCOVER": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOFALSIFY": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOGROWTH": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOLANE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOMARKET": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOSEC": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOSNAP": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NULLGATE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "OPENQ": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "OPENQOPEN": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "PRODUCTCTX": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "PRODUCTSIZE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "PRODUCTUI": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "READINESS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-19",
+  "origin": "df72aa7 roles work by task scope: early feasibility, scoped source writes, evidence-based research, verification separate from release",
+  "review_by": "2027-03-20",
+  "cost": "",
+  "note": ""
+ },
+ "REFS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "ROOTCAUSE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "SIGDUP": {
+  "source": "scripts/workflow.py",
+  "added": "2026-09-27",
+  "origin": "3921a98 round 1 (2026-09-24 plan): consistent contracts, a clarified task model, product cycles and trace",
+  "review_by": "2027-03-28",
+  "cost": "",
+  "note": ""
+ },
+ "SKIP": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "SKIPWHY": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-10-02",
+  "origin": "c3572d5 fix: make check-sdlc read state robustly and close silent passes in 4.3.4",
+  "review_by": "2027-04-02",
+  "cost": "",
+  "note": ""
+ },
+ "SOURCES": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "STATE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "STRESS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "TASKPROTOCOL": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-27",
+  "origin": "1ed6158 task protocol 1 (round 2, 2026-09-25 plan): prepare, seal, record and check-tasks for three pilots",
+  "review_by": "2027-03-28",
+  "cost": "",
+  "note": ""
+ },
+ "TRACKING": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "VAGUE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "WRITEBACK": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ }
+}

@@ -17,7 +17,7 @@ Use red-green-refactor for controllable behavior. Statistical model quality need
 ## The loop (per FR / per ticket slice)
 
 1. **Pick one GWT row** from the ticket's FR (smallest first: happy path, then empty/boundary, then unauthorized/error).
-2. **Red.** Write the test for that row against the current code. Run it. Paste the **failing** output + exit code verbatim — this is evidence the test can fail. For a new regression demonstrate failure on the pre-fix behavior where practical. Existing/characterization tests remain useful; do not manufacture a red run or damage working code just to satisfy a ritual.
+2. **Red.** Write the test for that row against the current code, through the seam the accepted architecture contract or the ticket names; ask only when neither names one (do not re-confirm an accepted test boundary). Run it. Paste the **failing** output + exit code verbatim — this is evidence the test can fail. For a new regression demonstrate failure on the pre-fix behavior where practical. Existing/characterization tests remain useful; do not manufacture a red run or damage working code just to satisfy a ritual.
 3. **Green.** Write the minimum product code that makes exactly that row pass. Run the test. Paste passing output.
 4. **Refactor** only while green, only within the seam you just touched, re-run after each step.
 5. Next GWT row. Business ambiguity → return to PM; a missing seam or technical testing gap belongs to implementation/QA and may be resolved inside authorized scope — do not silently reinterpret the oracle.
@@ -26,6 +26,7 @@ Use red-green-refactor for controllable behavior. Statistical model quality need
 
 - **Never edit a GWT row to make a test pass.** GWT changes belong to pm; silent oracle drift is a defect the reviewer will catch (dimension 6) — that is a whole rework round wasted.
 - **Red must be real.** Red = assertion failure for the right reason, not import error, not fixture crash. Check the failure message names your oracle.
+- **Expected values come from an independent source.** A test that computes its expectation with the code's own formula, constants or helper passes by construction and proves nothing. Take the expected value from the GWT row, a worked example or a hand calculation, write it as a literal, and point out existing tests built the other way.
 - **No snapshot-approval tests for new behavior.** Approval snapshots freeze whatever the code first did — including the bug.
 - **Test the lane's own surface.** frontend tests the component contract, backend the service/API contract; do not reach across lanes to make a test pass (that is a contract question for architect).
 - **Evidence = both outputs.** The red run and the green run go into the packet’s per-ticket/per-role evidence path; a green-only record is incomplete evidence.
@@ -34,6 +35,7 @@ Use red-green-refactor for controllable behavior. Statistical model quality need
 
 - [ ] New behavior/regression tests demonstrate the intended failure then success where applicable; execution limits honestly recorded?
 - [ ] No GWT row edited, reinterpreted, or skipped silently?
+- [ ] Every expected value independent of the code under test (no recomputed oracle)?
 - [ ] Refactoring only while green, only inside the touched seam?
 - [ ] Untestable rows returned as open questions, not improvised?
 - [ ] Coverage matrix holes (qa's domain) not pre-empted here — this is per-ticket execution, not the full matrix?

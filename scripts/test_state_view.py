@@ -58,6 +58,19 @@ class StateViewTests(unittest.TestCase):
         self.assertEqual(read_items(text, 'open_questions'),
                          [{'id': 'Q-OPEN-GATE', 'status': 'open'}, {'id': 'Q-SORT', 'status': 'answered', 'quote': 'a, b'}])
 
+    def test_flow_item_with_trailing_comment(self):
+        text = 'open_questions:   # 必须含待确认\n  - {id: Q-1, class: 战略, status: open}   # 注释\n'
+        self.assertEqual(read_items(text, 'open_questions'), [{'id': 'Q-1', 'class': '战略', 'status': 'open'}])
+
+    def test_failed_gates_keep_the_latest_record_per_name_and_stage(self):
+        text = ('gates:\n'
+                '  - {name: lint, kind: script, stage: define, result: fail}\n'
+                '  - {name: lint, kind: script, stage: define, result: pass}\n'
+                '  - {name: check-sdlc, kind: script, stage: define, result: fail, exit_code: 1}\n'
+                '  - {name: unit, kind: script, result: fail}\n'
+                '  - {name: fresh-context, kind: fresh-context, stage: shape, result: fail}\n')
+        self.assertEqual(rows('failed-gates', text), [['script', 'check-sdlc', 'define'], ['fresh-context', 'fresh-context', 'shape']])
+
     def test_null_gates_need_their_own_reason(self):
         self.assertEqual(rows('null-gates', STATE), [['e2e']])
 
