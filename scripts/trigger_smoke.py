@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """Trigger smoke: does a plain user message make the host load the intended skill, per method tree?
 
-  run    --skills a,b --reps N --arm LABEL [--ref REF] --out DIR --budget-usd X
-         For each skills/<s>/evals/triggers.json row {id, prompt, should_trigger}, start the host with this plugin,
+  run    --skills a,b --reps N --arm LABEL [--ref REF] --out DIR --budget-usd X [--group G]
+         For each skills/<s>/evals/triggers.json row {id, prompt, should_trigger[, group]} (only group G when given),
+         start the host with this plugin,
          only Read and Skill available and no instruction to load anything, and record which skills it loads
          (Skill tool calls, plus Reads of a skills/<name>/SKILL.md). Arms and trees work as in behavior_smoke.py:
          `current` is the working tree, any other label needs --ref, trees are exported to a content-named cache
          and the evidence keeps only DIR/trees/<id>/manifest.json. An ok record is skipped on rerun.
   score  --out DIR [--json]
          Per skill, prompt and arm: how often the target skill loaded, and accuracy against should_trigger.
+         An entry point listed in triggers.json `counts_as_loaded` (e.g. the /sdlc-discover command, which only
+         says to follow discover) counts as loading the skill; the strict count is shown beside it.
          Scoring is mechanical; there is nothing to judge.
 
 Limits: the first turns of one host (default 2: a skill loads in the first action, then the answer is written),
@@ -35,8 +38,9 @@ from behavior_smoke import BEIJING, ROOT, ensure_tree, prepare_tree, quota_hit, 
 SKILL_READ = re.compile(r'/skills/([a-z0-9-]+)/SKILL\.md$')
 
 
-def load_rows(skill: str) -> list[dict]:
+def load_rows(skill: str, group: str | None = None) -> list[dict]:
     rows = json.loads((ROOT / 'skills' / skill / 'evals' / 'triggers.json').read_text(encoding='utf-8'))['triggers']
+    rows = [r for r in rows if group is None or r.get('group') == group]
     for row in rows:
         if not isinstance(row.get('should_trigger'), bool) or not row.get('prompt'):
             raise SystemExit(f'trigger_smoke: skills/{skill}/evals/triggers.json row {row.get("id")} is malformed')
@@ -79,8 +83,14 @@ def parse_stream(stdout: str) -> dict:
     return out
 
 
-def loaded_target(loaded: list[str], skill: str) -> bool:
-    return any(name.split(':')[-1] == skill for name in loaded)
+def loaded_target(loaded: list[str], skill: str, aliases: tuple = ()) -> bool:
+    return any(name.split(':')[-1] in (skill, *aliases) for name in loaded)
+
+
+def aliases_of(skill: str) -> tuple:
+    """Entry points whose only instruction is to follow this skill (triggers.json `counts_as_loaded`)."""
+    data = json.loads((ROOT / 'skills' / skill / 'evals' / 'triggers.json').read_text(encoding='utf-8'))
+    return tuple(data.get('counts_as_loaded', []))
 
 
 def run_one(args, arm_dir: Path, tree: Path, manifest: dict, skill: str, row: dict, rep: int, host: str,
@@ -134,7 +144,7 @@ def cmd_run(args) -> int:
         print('trigger_smoke: an arm other than current needs --ref', file=sys.stderr)
         return 2
     args.ref = args.ref or 'WORKTREE'
-    plan = [(s.strip(), row) for s in args.skills.split(',') if s.strip() for row in load_rows(s.strip())]
+    plan = [(s.strip(), row) for s in args.skills.split(',') if s.strip() for row in load_rows(s.strip(), args.group)]
     if args.dry_run:
         for skill, row in plan:
             print(skill, row['id'], row['should_trigger'], ' '.join(build_command(Path('<tree>'), '<prompt>',
@@ -177,12 +187,15 @@ def score(out: Path) -> dict:
             if rec.get('status') != 'ok':
                 continue
             key = (rec['skill'], rec['trigger_id'], rec['should_trigger'], rec['arm'])
-            r = rows.setdefault(key, {'runs': 0, 'triggered': 0, 'correct': 0, 'other': {}})
+            r = rows.setdefault(key, {'runs': 0, 'triggered': 0, 'correct': 0, 'strict_triggered': 0, 'other': {}})
+            aliases = aliases_of(rec['skill'])
+            hit = loaded_target(rec['loaded'], rec['skill'], aliases)  # recomputed: aliases may be declared later
             r['runs'] += 1
-            r['triggered'] += rec['triggered']
-            r['correct'] += rec['triggered'] == rec['should_trigger']
+            r['triggered'] += hit
+            r['strict_triggered'] += loaded_target(rec['loaded'], rec['skill'])
+            r['correct'] += hit == rec['should_trigger']
             for name in rec['loaded']:
-                if name.split(':')[-1] != rec['skill']:
+                if name.split(':')[-1] not in (rec['skill'], *aliases):
                     r['other'][name] = r['other'].get(name, 0) + 1
     arms: dict[str, dict] = {}
     for (skill, _tid, should, arm), r in rows.items():
@@ -199,12 +212,12 @@ def cmd_score(args) -> int:
     if args.json:
         print(json.dumps(s, ensure_ascii=False, indent=1))
         return 0
-    print('| skill | prompt | should | arm | loaded target | correct | other skills loaded |')
+    print('| skill | prompt | should | arm | loaded target (strict) | correct | other skills loaded |')
     print('|---|---|---|---|---|---|---|')
     for r in s['rows']:
         other = ', '.join(f'{k}×{v}' for k, v in sorted(r['other'].items())) or '—'
         print(f"| {r['skill']} | {r['trigger_id']} | {'yes' if r['should_trigger'] else 'no'} | {r['arm']} | "
-              f"{r['triggered']}/{r['runs']} | {r['correct']}/{r['runs']} | {other} |")
+              f"{r['triggered']}/{r['runs']} ({r['strict_triggered']}) | {r['correct']}/{r['runs']} | {other} |")
     for arm, a in sorted(s['arms'].items()):
         print(f"{arm}: should trigger {a['should'][0]}/{a['should'][1]} correct, "
               f"should not {a['should_not'][0]}/{a['should_not'][1]} correct")
@@ -224,6 +237,7 @@ def main(argv=None) -> int:
     run.add_argument('--per-run-usd', type=float, default=0.5)
     run.add_argument('--max-turns', type=int, default=2)
     run.add_argument('--timeout', type=int, default=300)
+    run.add_argument('--group')
     run.add_argument('--dry-run', action='store_true')
     sc = sub.add_parser('score')
     sc.add_argument('--out', type=Path, required=True)

@@ -71,10 +71,14 @@ class TriggerTests(unittest.TestCase):
         self.assertEqual(parsed['loaded'], ['sdlc-workflow:discover', 'read:tdd'])
         self.assertTrue(trigger_smoke.loaded_target(parsed['loaded'], 'tdd'))
         self.assertFalse(trigger_smoke.loaded_target(parsed['loaded'], 'prd-gwt'))
+        # the /sdlc-discover command only says to follow discover: declared as counting for it
+        self.assertEqual(trigger_smoke.aliases_of('discover'), ('sdlc-discover',))
+        self.assertTrue(trigger_smoke.loaded_target(['sdlc-workflow:sdlc-discover'], 'discover', ('sdlc-discover',)))
+        self.assertFalse(trigger_smoke.loaded_target(['sdlc-workflow:sdlc-discover'], 'discover'))
 
     def test_run_and_score_per_arm(self):
         p = self.run_trigger('run', '--skills', 'prd-gwt,tdd', '--reps', '2', '--arm', 'current',
-                             '--out', str(self.out), '--budget-usd', '5')
+                             '--out', str(self.out), '--budget-usd', '5', '--group', 'basic')
         self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
         recs = list((self.out / 'current').glob('*.json'))
         self.assertEqual(len(recs), 16)
@@ -112,8 +116,13 @@ class TriggerTests(unittest.TestCase):
 
     def test_trigger_rows_are_well_formed(self):
         for skill in ('prd-gwt', 'discover', 'tdd'):
-            rows = trigger_smoke.load_rows(skill)
+            rows = trigger_smoke.load_rows(skill, 'basic')
             self.assertEqual(sorted(r['should_trigger'] for r in rows), [False, False, True, True])
+            near = trigger_smoke.load_rows(skill, 'near-miss')
+            self.assertEqual(len(near), 4)
+            self.assertGreaterEqual(sum(not r['should_trigger'] for r in near), 3)
+            ids = [r['id'] for r in trigger_smoke.load_rows(skill)]
+            self.assertEqual(len(ids), len(set(ids)))
 
 
 if __name__ == '__main__':

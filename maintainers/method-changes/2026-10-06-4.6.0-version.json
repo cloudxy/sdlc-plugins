@@ -1,0 +1,14 @@
+{
+ "id": "4.6.0-version",
+ "at": "2026-10-06T19:16:12+08:00",
+ "kind": "editorial",
+ "failure_form": "n/a",
+ "verdict": "n/a",
+ "reason": "Version 4.6.0: visual-direction upstream items with a type scale in the plan, design-contract case 9, near-miss trigger prompts and alias scoring for the D5 test; no behaviour change in this record.",
+ "evidence": [],
+ "decided_by": "user 2026-10-06 「提交并推送」",
+ "files": {
+  "adapters/hosts.json": "15ee1f7ef1d2d76b4af0395e520de2301fc7a62522ef816959cb14fe5c1eef00"
+ },
+ "deleted": []
+}

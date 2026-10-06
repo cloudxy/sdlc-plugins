@@ -1,25 +1,56 @@
 {
-  "note": "T7.2 trigger experiment (2026-10-02): 2 prompts that should load this skill, 2 that should not. Run with scripts/trigger_smoke.py.",
+  "note": "Trigger prompts for scripts/trigger_smoke.py. basic (T7.2, 2026-10-02): 2 should and 2 should-not. near-miss (D5 follow-up, 2026-10-03): prompts that share the skill's vocabulary but fall under its exclusions, plus a paraphrased should-trigger where the skill has open triggers.",
+  "counts_as_loaded": [
+    "sdlc-discover"
+  ],
   "triggers": [
     {
       "id": 1,
       "should_trigger": true,
-      "prompt": "我想给街边小餐馆做点东西帮他们少浪费食材，但还没想清楚到底做什么、给谁用，帮我理一理。"
+      "prompt": "我想给街边小餐馆做点东西帮他们少浪费食材，但还没想清楚到底做什么、给谁用，帮我理一理。",
+      "group": "basic"
     },
     {
       "id": 2,
       "should_trigger": true,
-      "prompt": "团队在纠结先做多租户还是先做单租户，两边都有人坚持。我们自己也说不清该怎么选，帮我把这个产品选择想清楚。"
+      "prompt": "团队在纠结先做多租户还是先做单租户，两边都有人坚持。我们自己也说不清该怎么选，帮我把这个产品选择想清楚。",
+      "group": "basic"
     },
     {
       "id": 3,
       "should_trigger": false,
-      "prompt": "需求已经确认：导出只保留最近 90 天、最多 5 万行、文件名带日期。把它写进 spec.md 的功能需求和验收标准。"
+      "prompt": "需求已经确认：导出只保留最近 90 天、最多 5 万行、文件名带日期。把它写进 spec.md 的功能需求和验收标准。",
+      "group": "basic"
     },
     {
       "id": 4,
       "should_trigger": false,
-      "prompt": "实现这个已确认的函数：parse_amount(text) 把「¥1,234.50」这类字符串转成以分为单位的整数，非法输入抛 ValueError。直接给代码。"
+      "prompt": "实现这个已确认的函数：parse_amount(text) 把「¥1,234.50」这类字符串转成以分为单位的整数，非法输入抛 ValueError。直接给代码。",
+      "group": "basic"
+    },
+    {
+      "id": 5,
+      "group": "near-miss",
+      "should_trigger": true,
+      "prompt": "我们想给老客户做点什么提高复购，但具体做什么、先做哪块都没定，帮我一起理一理。"
+    },
+    {
+      "id": 6,
+      "group": "near-miss",
+      "should_trigger": false,
+      "prompt": "需求已经确认：会员积分 1 元 1 分、积分一年过期、退款扣回积分。直接写进 spec.md 的功能需求和验收标准，不用再讨论。"
+    },
+    {
+      "id": 7,
+      "group": "near-miss",
+      "should_trigger": false,
+      "prompt": "需求讨论已经结束，结论在会议纪要里：导出只保留 90 天、单次最多 5 万行。把纪要整理进 spec.md。"
+    },
+    {
+      "id": 8,
+      "group": "near-miss",
+      "should_trigger": false,
+      "prompt": "需求不太确定，你先直接写个能跑的 Flask 接口：GET /points 返回会员积分余额。"
     }
   ]
 }

@@ -1,25 +1,53 @@
 {
-  "note": "T7.2 trigger experiment (2026-10-02): 2 prompts that should load this skill, 2 that should not. Run with scripts/trigger_smoke.py.",
+  "note": "Trigger prompts for scripts/trigger_smoke.py. basic (T7.2, 2026-10-02): 2 should and 2 should-not. near-miss (D5 follow-up, 2026-10-03): prompts that share the skill's vocabulary but fall under its exclusions, plus a paraphrased should-trigger where the skill has open triggers.",
   "triggers": [
     {
       "id": 1,
       "should_trigger": true,
-      "prompt": "帮我把「订单部分退款」写成 PRD：核心价值、用户旅程，验收标准用 Given/When/Then 写。"
+      "prompt": "帮我把「订单部分退款」写成 PRD：核心价值、用户旅程，验收标准用 Given/When/Then 写。",
+      "group": "basic"
     },
     {
       "id": 2,
       "should_trigger": true,
-      "prompt": "导出功能上线两周了，帮我按产品经理的角度定一套指标蓝图：北极星、过程指标和护栏指标各是什么。"
+      "prompt": "导出功能上线两周了，帮我按产品经理的角度定一套指标蓝图：北极星、过程指标和护栏指标各是什么。",
+      "group": "basic"
     },
     {
       "id": 3,
       "should_trigger": false,
-      "prompt": "给订单部分退款设计数据库表结构和 REST 接口，字段、索引和幂等键都要写清楚。"
+      "prompt": "给订单部分退款设计数据库表结构和 REST 接口，字段、索引和幂等键都要写清楚。",
+      "group": "basic"
     },
     {
       "id": 4,
       "should_trigger": false,
-      "prompt": "/sdlc 给订单加部分退款功能。"
+      "prompt": "/sdlc 给订单加部分退款功能。",
+      "group": "basic"
+    },
+    {
+      "id": 5,
+      "group": "near-miss",
+      "should_trigger": true,
+      "prompt": "「批量导入客户」这个功能，验收条件怎么写才能测？帮我按场景列出前置条件、操作和预期结果，再说说它要解决用户什么问题。"
+    },
+    {
+      "id": 6,
+      "group": "near-miss",
+      "should_trigger": false,
+      "prompt": "根据 PRD 里这条 GWT（Given 订单已支付 When 申请部分退款 Then 生成退款单），设计 refund 表结构、索引和迁移脚本。"
+    },
+    {
+      "id": 7,
+      "group": "near-miss",
+      "should_trigger": false,
+      "prompt": "按这条 GWT 写后端接口代码：Given 购物车有 3 件商品 When 提交订单 Then 返回 201 和订单号。直接给 Python 代码。"
+    },
+    {
+      "id": 8,
+      "group": "near-miss",
+      "should_trigger": false,
+      "prompt": "/sdlc 继续 refund 功能，下一步是 pm 写 PRD 和 GWT。"
     }
   ]
 }

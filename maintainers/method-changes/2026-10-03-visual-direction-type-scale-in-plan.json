@@ -1,0 +1,27 @@
+{
+ "id": "visual-direction-type-scale-in-plan",
+ "at": "2026-10-03T16:58:41+08:00",
+ "kind": "behavioral",
+ "failure_form": "omission",
+ "verdict": "improved",
+ "reason": "Follow-up to visual-direction-upstream-gaps: case 9 showed 0/6 type scales because the plan template asked only for families and roles; item ② now asks for the type scale (sizes, weights, line heights). Verified by design-contract case 9, current runs against the 0/3 baseline and 0/3 previous current in 13-视觉方向补充验证.",
+ "evidence": [
+  "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/13b-字号阶梯补充 (design-contract case 9, current 3/3 with a type scale; baseline 5083543 0/3 and the previous current 0/3 in 13-视觉方向补充验证)"
+ ],
+ "decided_by": "user 2026-10-03 「视觉方向参考文件是否补上游内容：需要」",
+ "files": {
+  "skills/design-contract/references/visual-direction.md": "d3e2bee4bdebd203d80959a88827b4990b920375e269d41b7885bc24c54a7720"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-10-04T02:12:08+08:00",
+   "from": "pending",
+   "to": "improved",
+   "evidence": [
+    "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/13b-字号阶梯补充 (design-contract case 9, current 3/3 with a type scale; baseline 5083543 0/3 and the previous current 0/3 in 13-视觉方向补充验证)"
+   ],
+   "unchecked_evidence": ""
+  }
+ ]
+}

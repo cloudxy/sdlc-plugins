@@ -3,7 +3,7 @@
   "_comment": "Single source for plugin identity and host adapters. Edit here, then run python3 scripts/workflow.py render (writes every host manifest and skills/sdlc/references/hosts.md). Every host uses the plugin by reference (hosts[].install); host facts behind these choices: adapters/HOST-NOTES.md.",
   "plugin": {
     "name": "sdlc-workflow",
-    "version": "4.5.0",
+    "version": "4.6.0",
     "description": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
     "description_i18n": {
       "en": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",

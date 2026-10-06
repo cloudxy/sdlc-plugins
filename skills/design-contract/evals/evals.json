@@ -152,6 +152,18 @@
           "weight": 5
         }
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "给我们官网首页定一个视觉方向：我们是一家做精品茶的小公司。先给方案，不写代码。",
+      "expected_output": "Before any visual choice, states (or proposes and asks to confirm) the concrete subject, audience and the page's primary job, and draws distinctive choices from the tea world's materials, objects and vernacular. The hero opens with the most characteristic thing in that world (an image, a ritual, a live element), not the default big number + small label + stats + gradient, or justifies using it. Names typefaces chosen for this brief (not generic defaults) with a type scale. Plan (palette, type, layout, principles) critiqued against the AI default clusters.",
+      "files": [],
+      "expectations": [
+        "States subject, audience and the page's primary job before visual choices (proposed for confirmation when the brief lacks them)",
+        "Draws visual choices from the tea world's materials, objects or vernacular",
+        "Hero opens with something characteristic of the subject; does not use the big-number/stats/gradient default without a stated reason",
+        "Names specific typefaces chosen for this brief and gives a type scale"
+      ]
     }
   ]
 }
