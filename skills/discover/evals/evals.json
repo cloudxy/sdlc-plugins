@@ -44,7 +44,12 @@
       "id": 4,
       "prompt": "00-discover/market.md and compete.md are 200 lines each. Operator in chat said 80% of users export weekly. Freeze briefing.md.",
       "expected_output": "Briefing Market/Compete are summaries (≤5 lines) plus links to 00-discover/market.md and compete.md. Does not paste the survey files. Does not grade the operator 80% as E3 (that is E1). Asks for a counted snapshot or writes 未量化.",
-      "files": [],
+      "files": [
+        "evals/files/case-4/state.yaml",
+        "evals/files/case-4/00-discover/briefing.md",
+        "evals/files/case-4/00-discover/market.md",
+        "evals/files/case-4/00-discover/compete.md"
+      ],
       "expectations": [
         "Briefing compresses survey (links to 00-discover/market.md / compete.md, does not paste 200 lines)",
         "Does not grade the operator claim as 'E3'",
@@ -86,7 +91,10 @@
       "expected_output": "引用现有证据和授权，记录不适用研究范围；只解决剩余风险，不重复确认；将接受的输入交sdlc进入define/后续任务。",
       "files": [],
       "expectations": [
-        "Addresses the supplied task and its evidence/authority limits"
+        "Cites the existing defect reproduction, acceptance criteria and approval as the authority",
+        "Records market, compete and growth as not needed with a reason instead of running them",
+        "Does not ask for a second confirmation of the already approved fix",
+        "Returns the accepted input to the sdlc manager for the next task without writing spec or code in the discover window"
       ],
       "rubric": [
         {
@@ -230,6 +238,116 @@
           "criterion": "Separates direction authorization from evidence of effectiveness; continues authorized scope with explicit assumptions/appropriate learning rather than claiming usability or demand validation.",
           "weight": 5
         }
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "/sdlc-discover 调研和讨论都做完了（见工作目录 00-discover/），现在做证伪并给出本轮裁决。今天是 2026-10-06。",
+      "expected_output": "Writes load-bearing assumptions as falsifiable sentences with the cheapest test each, writes kill criteria before any result, and chooses exactly one verdict. Reach is unquantified and the 80% claim is E1, so the verdict is not pass: a bet names its review metric, narrow rewrites the claim, or pending names what is missing (for example the counted snapshot from warehouse.report_exports). No spec.md or FR.",
+      "files": [
+        "evals/files/case-15/00-discover/briefing.md",
+        "evals/files/case-15/00-discover/compete.md",
+        "evals/files/case-15/00-discover/market.md",
+        "evals/files/case-15/state.yaml"
+      ],
+      "expectations": [
+        "Writes falsifiable load-bearing assumptions with the cheapest test for each",
+        "Writes kill criteria before any result",
+        "Chooses exactly one verdict and does not pass with Reach unquantified; a bet names its review metric",
+        "Does not write spec.md or FR rows"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "/sdlc-discover 上次证伪的结论是不做（见 00-discover/briefing.md）。现在老板说还是想做，直接开始写需求吧。",
+      "expected_output": "Does not start define or write a spec while discovery.status is killed. Says reopening is the user's decision and needs to be recorded (discovery.reopened: by, at, reason in their words); asks what has changed since the kill and which assumption the new information affects, and resumes from that step rather than restarting discovery or ignoring the earlier evidence.",
+      "files": [
+        "evals/files/case-16/00-discover/briefing.md",
+        "evals/files/case-16/state.yaml"
+      ],
+      "expectations": [
+        "Does not start define or write a spec while the status is killed",
+        "States that reopening is the user's decision and records it as discovery.reopened with who, when and why",
+        "Asks what changed and resumes from the affected assumption instead of restarting or ignoring the kill evidence"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "/sdlc-discover 报销审批改版：财务要求每笔报销都走两级审批，销售负责人要求 500 元以下免审批。法务还没表态，可能涉及合规。我是这个项目的产品负责人。",
+      "expected_output": "Makes the conflict and the decision owner explicit without simulating agreement between finance and sales; prepares questions for legal as a questionnaire (00-discover/questionnaire-<slug>.md, purpose, how answers are used, one idea per question) instead of guessing their view; does not pick the approval rule on the owner's behalf. May explore the concrete cases behind each position.",
+      "files": [],
+      "expectations": [
+        "Names both positions and who decides; does not invent agreement",
+        "Prepares questions for legal as a questionnaire instead of guessing their view",
+        "Does not pick the approval rule on the decision owner's behalf"
+      ]
+    },
+    {
+      "id": 18,
+      "prompt": "/sdlc-discover 「工单超时」规则：产品经理和客服主管都说理解了——超过 24 小时未回复算超时。但产品经理举例：周五 18:00 提交、周一 10:00 回复，不算超时；客服主管举例：同样情况算超时。下一步怎么办？",
+      "expected_output": "Points out that the two examples contradict each other, so the shared rule hides a decision (calendar hours vs working hours, holidays). Separates the rule, the concrete examples and the open question; routes the question to its owner with options and consequences; does not write a GWT or pick the outcome of the disputed example.",
+      "files": [],
+      "expectations": [
+        "Points out that the examples contradict the stated shared understanding",
+        "Separates the rule, the concrete examples and the open question (calendar vs working hours)",
+        "Does not write a GWT or decide the disputed example"
+      ]
+    },
+    {
+      "id": 19,
+      "prompt": "/sdlc-discover 冻结这一轮。外部收件人还没定（等法务），其余都定了。能先做什么？",
+      "expected_output": "Freezes only the ready slice (scheduled CSV to tenant members) and says why it comes first; keeps Q-EXTERNAL pending with its owner and blocked scope (external recipients); routes the ready part through scoped work and does not mark the whole feature done or decide the legal question.",
+      "files": [
+        "evals/files/case-19/00-discover/briefing.md",
+        "evals/files/case-19/state.yaml"
+      ],
+      "expectations": [
+        "Freezes only the ready slice and says why it comes first",
+        "Keeps the external-recipient question pending with its owner and blocked scope",
+        "Does not mark the whole feature ready or decide the legal question"
+      ]
+    },
+    {
+      "id": 20,
+      "prompt": "/sdlc-research 报表定时发送到邮箱：只做市场和竞品调研，定位这次不用。",
+      "expected_output": "Survey-only mode: plans the researcher (market) and competitor (compete) spawns only, runs or plans the gates for those two tracks only (no growth gate), marks only executed and passed tracks done, leaves discovery.status pending, and returns paths with a short summary. No discussion, falsify, define or pm.",
+      "files": [
+        "evals/files/case-20/state.yaml"
+      ],
+      "expectations": [
+        "Plans market and compete only, with no growth spawn or growth gate",
+        "Leaves discovery.status pending and sets only the executed tracks",
+        "Does not run the discussion, falsify or define"
+      ]
+    },
+    {
+      "id": 21,
+      "prompt": "/sdlc-discover 调研和讨论都做完了（见 00-discover/），继续证伪并给出本轮裁决。今天是 2026-10-06。",
+      "expected_output": "Reads the result records in .sdlc/_outcomes/ before writing assumptions and cites the related refuted E1 bets (report subscriptions, export usage claimed by operations vs ~12% counted). Uses them to weigh the E1 evidence here, for example by asking for the warehouse.report_exports count or a cheaper test before betting, without letting them decide the verdict alone. Writes kill criteria and exactly one verdict.",
+      "files": [
+        "evals/files/case-15/00-discover/briefing.md",
+        "evals/files/case-15/00-discover/compete.md",
+        "evals/files/case-15/00-discover/market.md",
+        "evals/files/case-15/state.yaml",
+        "evals/files/case-21/.sdlc/_outcomes/export-shortcut.json",
+        "evals/files/case-21/.sdlc/_outcomes/index.json",
+        "evals/files/case-21/.sdlc/_outcomes/report-subscription-pdf.json"
+      ],
+      "expectations": [
+        "Reads and cites the related earlier refuted bets in .sdlc/_outcomes",
+        "Uses them to weigh the E1 evidence (counted snapshot or cheaper test first) without letting them decide the verdict alone",
+        "Writes kill criteria and exactly one verdict"
+      ]
+    },
+    {
+      "id": 22,
+      "prompt": "/sdlc-discover ToB 后台的小改动：租户管理员的成员列表加一列「最近登录时间」。用途是找出长期不登录的账号，需求负责人已同意。帮我过一下 Discuss-S。",
+      "expected_output": "Treats it as a bounded change: uses only the product-surface rows the change touches (tenant admin, permissions and privacy of login data, audit) and states in one line that the remaining rows are unaffected, instead of walking the whole ToB/ToC card. No survey, no new discovery state, no re-approval.",
+      "files": [],
+      "expectations": [
+        "Uses only the product-surface rows this change touches",
+        "States briefly that the remaining rows are unaffected instead of walking every row",
+        "Does not start a survey, new discovery state or a second approval"
       ]
     }
   ]

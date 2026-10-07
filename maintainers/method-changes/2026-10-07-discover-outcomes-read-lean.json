@@ -1,0 +1,27 @@
+{
+ "id": "discover-outcomes-read-lean",
+ "at": "2026-10-07T09:06:17+08:00",
+ "kind": "behavioral",
+ "failure_form": "shape",
+ "verdict": "improved",
+ "reason": "Follow-up to discover-falsify-earlier-outcomes: case 21 hit the 8-turn cap in 3 of 5 current attempts because the step was read file by file (directory listing, outcomes.py source, every record, their retro files). Now: read index.json, open only related records, rely on their readout note, run outcomes.py only with a shell and never read its source. Verified by case 21 (current, 3 runs): replies and turn-cap stops counted.",
+ "evidence": [
+  "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/16b-过往结果读取收紧 (case 21 current 3/3 replies, 0 turn-cap stops vs 3 of 5 before; 10-11 tool turns vs 17-18)"
+ ],
+ "decided_by": "user 2026-10-06 「执行」",
+ "files": {
+  "skills/discover/references/assumption-testing.md": "f260d5cf8d80054f0848a33495933384850c01fccca88b07ab40d3a64ea44abc"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-10-07T09:13:30+08:00",
+   "from": "pending",
+   "to": "improved",
+   "evidence": [
+    "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/16b-过往结果读取收紧 (case 21 current 3/3 replies, 0 turn-cap stops vs 3 of 5 before; 10-11 tool turns vs 17-18)"
+   ],
+   "unchecked_evidence": ""
+  }
+ ]
+}

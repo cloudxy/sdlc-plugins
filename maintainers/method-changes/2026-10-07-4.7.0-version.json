@@ -1,0 +1,14 @@
+{
+ "id": "4.7.0-version",
+ "at": "2026-10-07T09:33:00+08:00",
+ "kind": "editorial",
+ "failure_form": "n/a",
+ "verdict": "n/a",
+ "reason": "Version 4.7.0: discover review (stricter briefing gate, templates, earlier outcomes before falsify, proportional product surfaces, reopen after kill, interview/questionnaire templates, cases 15-22); no behaviour change in this record.",
+ "evidence": [],
+ "decided_by": "user 2026-10-07 「提交并推送」",
+ "files": {
+  "adapters/hosts.json": "af10ade24ca3c9bcdf3e95d66741c120a7c91adb9a8d45f19573fdb84dc23bae"
+ },
+ "deleted": []
+}

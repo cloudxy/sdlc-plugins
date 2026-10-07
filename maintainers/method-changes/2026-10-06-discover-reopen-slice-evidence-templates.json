@@ -1,0 +1,30 @@
+{
+ "id": "discover-reopen-slice-evidence-templates",
+ "at": "2026-10-06T19:32:59+08:00",
+ "kind": "behavioral",
+ "failure_form": "omission",
+ "verdict": "no_change",
+ "reason": "SKILL.md: reopening a killed discovery is the user's decision, recorded as discovery.reopened and resumed from the affected step; freeze names the slice and why it comes first (prd-gwt story map); falsify reads earlier outcomes first. New interview-script and questionnaire templates, linked from discuss-protocol.md and SKILL.md. Verified by discover cases 16, 17 and 19.",
+ "evidence": [
+  "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/16-discover深度整理验证 (cases 16, 17, 19: 16 3/3 both, 17 3/3 both, 19 3/3 vs 2/3 + 1 deviation)"
+ ],
+ "decided_by": "user 2026-10-06 「执行」",
+ "files": {
+  "skills/discover/SKILL.md": "66848bc04e01b0d04c5125008d55dc8b6e8d3b43580dbe8a98fac0621a79ea4c",
+  "skills/discover/references/discuss-protocol.md": "65d9ef86e514cb23b0704c57a5edd0b5e8362f85d138693b7c72c12a4eb4739a",
+  "skills/discover/templates/interview-script.md": "29f3bef6b9bf2f55a5d9389fe45c06bc615b799a6e02b59e913a5856148da557",
+  "skills/discover/templates/questionnaire.md": "207d3ff2233aa87743578a94ae8219d72a3962385d54b270137bac353c628970"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-10-07T09:06:08+08:00",
+   "from": "pending",
+   "to": "no_change",
+   "evidence": [
+    "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/16-discover深度整理验证 (cases 16, 17, 19: 16 3/3 both, 17 3/3 both, 19 3/3 vs 2/3 + 1 deviation)"
+   ],
+   "unchecked_evidence": ""
+  }
+ ]
+}

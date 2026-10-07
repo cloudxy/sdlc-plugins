@@ -68,6 +68,8 @@ Do not require all future unknowns to disappear. An accepted brief and authoriza
 
 ## Interview script (operator takes out)
 
+Template: [interview-script.md](../templates/interview-script.md).
+
 Ask past behaviour, not "would you use this":
 
 - Last time this happened: when, what did you do, how long, who else was involved?
@@ -76,7 +78,7 @@ Ask past behaviour, not "would you use this":
 
 ## Questionnaire (async)
 
-Write `00-discover/questionnaire-<slug>.md`: purpose, from/to, how answers will be used, one idea per question, answer stub, "why this matters" only when the question can be misread. Most-important-first. Closing catch-all.
+Write `00-discover/questionnaire-<slug>.md` from [questionnaire.md](../templates/questionnaire.md): purpose, from/to, how answers will be used, one idea per question, answer stub, "why this matters" only when the question can be misread. Most-important-first. Closing catch-all.
 
 ## Method provenance
 

@@ -1,0 +1,28 @@
+{
+ "id": "discover-briefing-verdict-slice",
+ "at": "2026-10-06T19:32:59+08:00",
+ "kind": "behavioral",
+ "failure_form": "omission",
+ "verdict": "no_change",
+ "reason": "briefing/assumptions templates: a single-choice verdict with 待定 (what is missing), research selection line, dated compete evidence, and a slice rationale in handoff readiness; assumptions.md completed to match briefing Falsify (H-n, readout due). The gate now rejects an unchosen verdict, a bet without a metric and template-only handoff/Discuss-P in new-format briefings. Verified by discover cases 15 and 19.",
+ "evidence": [
+  "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/16-discover深度整理验证 (cases 15 and 19: 15 3/3 both (pending chosen in both), 19 3/3 vs 2/3 + 1 deviation; the gate change is covered by fixtures)"
+ ],
+ "decided_by": "user 2026-10-06 「执行」",
+ "files": {
+  "skills/discover/templates/assumptions.md": "6254537cef0d269d5c072db21618515d0ae89a2d4f8c57e6cfaee8761ec8d2fd",
+  "skills/discover/templates/briefing.md": "2a5c0c2d14343809ad74d1a2dfd579a6ffcc1358314fa814aec9905a1ffb7597"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-10-07T09:06:07+08:00",
+   "from": "pending",
+   "to": "no_change",
+   "evidence": [
+    "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/16-discover深度整理验证 (cases 15 and 19: 15 3/3 both (pending chosen in both), 19 3/3 vs 2/3 + 1 deviation; the gate change is covered by fixtures)"
+   ],
+   "unchecked_evidence": ""
+  }
+ ]
+}

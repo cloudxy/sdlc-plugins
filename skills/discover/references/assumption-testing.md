@@ -4,6 +4,8 @@ Job: **write load-bearing assumptions that can be false**, the cheapest test, an
 
 Invoke when the current discussion exposes load-bearing uncertainty. Use relevant research, existing artifacts or interview returns; a survey is not required for every bounded question. No existing evidence means an explicit hypothesis and learning step, not fabricated findings or automatic rejection.
 
+**Read earlier outcomes first.** When `.sdlc/_outcomes/index.json` exists, read it: one row per bet with feature, hypothesis, metric, evidence grade and readout status. Open `.sdlc/_outcomes/<feature>.json` only for related features; its readout note is usually enough, so open the evidence it points to only when the note leaves the question open. With a shell, `python3 <PLUGIN_ROOT>/scripts/outcomes.py stats --root <project>/.sdlc --json` adds the hit rate by evidence grade (`bets_by_grade`); do not read the script to learn the format. Cite what bears on the current assumptions, for example "the two earlier E1 bets on export usage were refuted"; no index, or nothing related, takes one line. Earlier outcomes tell you how much a grade has been worth here; they do not decide the verdict.
+
 | Task | Approach |
 |---|---|
 | **Problem-layer** | Walk `prd-gwt` triage (no source / one customer / copy / future) against survey |
@@ -15,9 +17,8 @@ Invoke when the current discussion exposes load-bearing uncertainty. Use relevan
 - **"Users said they want it" is not a pass.** That is E1. **Pass** requires evidence relevant and strong enough for each load-bearing assumption, with predefined failure criteria not triggered. Merely attaching an E2 citation is insufficient. Unquantified cannot pass — only kill / narrow / bet.
 - **Do not upgrade E1 to E3.** E3 is counted behaviour (number + source + window). Operator chat stays E1.
 - **Kill criteria are written before results.** Do not relax them after a disappointing interview.
-- **Unquantified market cannot "pass".** Only kill / narrow / bet.
 - **Safety, permissions, consistency cannot be killed for appetite.** Narrow the surface; do not drop audit.
-- **A/B in discovery is fake science.** Sample size and peeking rules live in experiment-design. Discovery uses cheaper rungs (probe, counts, targeted past-behaviour interviews, competitor reviews, fake door, logic prototype).
+- **A/B in discovery is fake science.** Sample size and peeking rules live in [experiment-design](../../retro/references/experiment-design.md). Discovery uses cheaper rungs (probe, counts, targeted past-behaviour interviews, competitor reviews, fake door, logic prototype).
 
 ## Evidence grades
 
@@ -46,6 +47,7 @@ Write the table into `00-discover/briefing.md` § Falsify (template lives with d
 
 ## Self-check
 
+- [ ] Related earlier outcomes checked (or none, said in one line)?
 - [ ] Load-bearing rows, each one falsifiable sentence?
 - [ ] Kill criteria written before results?
 - [ ] Unquantified did not pass?

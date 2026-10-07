@@ -24,7 +24,7 @@ Borrowed: mattpocock **grilling** (decision dependencies) and superpowers **brai
 | **Bounded ambiguity / later refinement** | Clarify the consequential gap in the existing work brief; no full survey or new state just for a short exchange |
 | **Survey only** | Execute `research` mode via its reference |
 | **Briefing exists, user says continue** | Resume its decisions, hypotheses and open questions; return the accepted scope to the manager without repeating settled questions |
-| **Kill verdict** | `discovery.status: killed`. Do not spawn pm |
+| **Kill verdict** | `discovery.status: killed`. Do not spawn pm. Reopening is the user's decision: record `discovery.reopened: {by, at, reason}` with their words, then resume from the step the new information affects |
 
 ## Gotchas
 
@@ -78,17 +78,17 @@ Follow [discuss-protocol.md](references/discuss-protocol.md). Choose the next he
 
 Facts (repo, docs, survey files) are your job — spawn no extra hats for grep. Decisions are the user's.
 
-Interview scripts and questionnaires use the same reference. Proposed interviews are not observations; grade actual returns using evidence.md.
+Interview scripts and questionnaires use the same reference and the [interview script](templates/interview-script.md) / [questionnaire](templates/questionnaire.md) templates. Proposed interviews are not observations; grade actual returns using evidence.md.
 
 ### 4. Falsify (HITL)
 
-Apply [assumption-testing.md](references/assumption-testing.md); `$falsify` is only a deprecated compatibility entry to that same method (sunset 2026-12-31). Problem-layer uses survey evidence (triage tree). Solution-layer uses Discuss-S. Verdict: kill | narrow | bet | pass. Bet requires a named metric that later becomes the spec north-star or driver.
+Apply [assumption-testing.md](references/assumption-testing.md); `$falsify` is only a deprecated compatibility entry to that same method (sunset 2026-12-31). Read related earlier outcomes first (its first section). Problem-layer uses survey evidence (triage tree). Solution-layer uses Discuss-S. Verdict: kill | narrow | bet | pass. Bet requires a named metric that later becomes the spec north-star or driver.
 
 Optional: use registered `designer/market/prototype` for a scoped learning material or experiment. An inline sketch can clarify a question without delegation; neither sketches nor prototype code establish implementation or market success.
 
 ### 5. Freeze
 
-Apply the discussion method's readiness criteria to the current slice. Complete [templates/briefing.md](templates/briefing.md) for full discovery; preserve its five track headings and explain skipped research. Mark `discovery.status: done` only for the accepted slice (or `killed`). Open questions include owner, recommendation, decision source/status and blocked scope; future questions do not require all-unknowns closure. Partial readiness stays explicit and uses scoped-work routing, not a false full-completion claim.
+Apply the discussion method's readiness criteria to the current slice. Name the slice and why it comes first: a complete path through the user journey, using the story map in [product-shaping.md](../prd-gwt/references/product-shaping.md) when the cut is not obvious. Complete [templates/briefing.md](templates/briefing.md) for full discovery; preserve its five track headings and explain skipped research. Mark `discovery.status: done` only for the accepted slice (or `killed`). Open questions include owner, recommendation, decision source/status and blocked scope; future questions do not require all-unknowns closure. Partial readiness stays explicit and uses scoped-work routing, not a false full-completion claim.
 
 Freeze means the scope is ready for its next action, not that the hypothesis verdict is `pass`: an authorized bounded `bet` or accepted `narrow` can proceed. Missing evidence alone does not block authorized exploration or select a bet verdict. If scenario, investment boundary or metric is unknown, keep the verdict pending; obtain the missing context before prescribing test counts/thresholds. Do not re-ask approval of the same direction.
 
@@ -114,3 +114,4 @@ Return the accepted briefing to the sdlc manager for define when continuation is
 | [product-surfaces.md](references/product-surfaces.md) | ToB/ToC probe card in Discuss-S |
 | [templates/briefing.md](templates/briefing.md) | Writing the freeze artifact |
 | [templates/assumptions.md](templates/assumptions.md) | A standalone assumption table, linked from briefing § Falsify |
+| [templates/interview-script.md](templates/interview-script.md) / [templates/questionnaire.md](templates/questionnaire.md) | Evidence from real users the operator interviews, or from absent stakeholders |

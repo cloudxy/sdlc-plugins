@@ -178,6 +178,38 @@ kill_written() { # $1 = briefing：Falsify 节里「杀死条件」后要有内�
     END { exit found ? 0 : 1 }
   ' "$1"
 }
+verdict_state() { # $1 = briefing：Falsify 节的「本轮裁决」是否选定：missing / unchosen / bet-no-metric / ok
+  awk '
+    function lead(s) { # 去掉开头的空白、= : ： 与反引号（全角冒号按字节整体比较，避开 awk 的字节类）
+      while (s != "") {
+        if (substr(s, 1, 3) == "：") { s = substr(s, 4); continue }
+        c = substr(s, 1, 1)
+        if (c == " " || c == "\t" || c == "=" || c == ":" || c == "`") { s = substr(s, 2); continue }
+        break
+      }
+      return s
+    }
+    /^##[[:space:]]+/ { insec = ($0 ~ /^##[[:space:]]+Falsify([[:space:]]|$)/); next }
+    !insec { next }
+    index($0, "本轮裁决") && !seen {
+      seen = 1; v = substr($0, index($0, "本轮裁决") + length("本轮裁决"))
+      if (index(v, "复盘指标")) v = substr(v, 1, index(v, "复盘指标") - 1)
+    }
+    index($0, "复盘指标") {
+      r = lead(substr($0, index($0, "复盘指标") + length("复盘指标")))
+      if (r != "" && substr(r, 1, 1) != "<") m = 1
+    }
+    END {
+      if (!seen) { print "missing"; exit }
+      if (index(v, "|") || index(v, "<")) { print "unchosen"; exit }
+      n = split("杀死 缩小后存活 当作赌注 通过 待定", w, " "); k = 0
+      for (i = 1; i <= n; i++) if (index(v, w[i])) k++
+      if (k == 0) { print "unchosen"; exit }
+      if (index(v, "赌注") && !m) { print "bet-no-metric"; exit }
+      print "ok"
+    }
+  ' "$1"
+}
 research_offline() { # $1 = 起点目录：上溯找 sdlc.config.yaml；research.offline: true（只有用户能设）→ 0
   local d="$1" nd j=0
   while [ $j -lt 8 ]; do
@@ -960,6 +992,24 @@ EOF
               kill_written "$BR" || red NOFALSIFY "$BR: Falsify 未写杀死条件（「杀死条件」后要有实际内容）"
               if is_v4 && ! role_skipped growth; then
                 grep -qE '^##[[:space:]]+Growth' "$BR" || red NOGROWTH "$BR: 缺 ## Growth（定位与亮点假设；roles_skipped 含 growth 可跳）"
+              fi
+              # 新版简报（有「本轮交接就绪」节）：裁决选定一个、赌注写复盘指标、交接就绪与 Discuss-P 不只是模板原句。
+              # 旧版简报只在写了「本轮裁决」时检查它，已过 define 的老功能不会因此突然变红。
+              NEWBR=0; grep -qE '^##[[:space:]]+本轮交接就绪' "$BR" && NEWBR=1
+              if [ "$NEWBR" -eq 1 ] || grep -q '本轮裁决' "$BR"; then
+                case "$(verdict_state "$BR")" in
+                  missing) red NOFALSIFY "$BR: Falsify 未写「本轮裁决」" ;;
+                  unchosen) red NOFALSIFY "$BR: 本轮裁决未选定（只写一个：杀死 / 缩小后存活 / 当作赌注 / 通过 / 待定并写明缺什么）" ;;
+                  bet-no-metric) red NOFALSIFY "$BR: 裁决是赌注，但没写复盘指标（复盘指标 = 指标名）" ;;
+                esac
+              fi
+              if [ "$NEWBR" -eq 1 ]; then
+                [ -n "$(section_filled "$BR" 本轮交接就绪)" ] \
+                  || red NODISCOVER "$BR: 本轮交接就绪仍是模板原句（写明当前切片、成功/失败例子、就绪范围与下一步）"
+                if grep -qE '^##[[:space:]]+Discuss-P' "$BR"; then
+                  [ -n "$(section_filled "$BR" Discuss-P)" ] \
+                    || red NODISCOVER "$BR: Discuss-P 仍是模板原句（至少写一条用户原话、事实或当前理解）"
+                fi
               fi
             fi
             ;;

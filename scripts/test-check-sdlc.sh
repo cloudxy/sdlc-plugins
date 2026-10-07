@@ -311,9 +311,10 @@ assert_exit 1 "done with a verbatim briefing template (marker kept) is NODISCOVE
 assert_tag NODISCOVER
 mk_brief bfnomark
 sed 1d "$BTPL" >"$T/bfnomark/00-discover/briefing.md"
-assert_exit 2 "template text alone does not count as 现状 or kill criteria" --require "$T/bfnomark"
+assert_exit 5 "template text alone counts as none of 现状, kill criteria, verdict, handoff or Discuss-P" --require "$T/bfnomark"
 assert_tag NOCOMPETE
 assert_tag NOFALSIFY
+assert_tag NODISCOVER
 mk_brief bffilled
 cat >"$T/bffilled/00-discover/briefing.md" <<'B'
 # Briefing · 导出
@@ -1255,6 +1256,45 @@ printf '  - name: check-sdlc-define\n    kind: script\n    stage: define\n    re
 assert_exit 0 "a later pass of the same script gate clears it" --require "$T/sg"
 printf 'feature: t\nlane: L2\nappetite: 4h\ncurrent_hat: shape\nhats_done: [define]\ngates:\n  - {name: unit, kind: script, result: fail, exit_code: 1}\n' >"$T/sg/state.yaml"
 assert_exit 0 "a script gate without a stage keeps the legacy reading" --require "$T/sg"
+
+# 75. 新版 briefing（有「本轮交接就绪」）：裁决要选定、赌注要有复盘指标、交接就绪与 Discuss-P 不能只有模板原句
+#     （2026-10-06 discover 研判：只写一行现状和一条杀死条件、其余照抄模板的 briefing 此前零违规通过）
+nb() { # $1 = 用例目录名；stdin = briefing 正文
+  mk_brief "$1"; cat >"$T/$1/00-discover/briefing.md"
+}
+NB_HEAD='# Briefing · 导出
+## Discuss-P
+| 「每周一花 40 分钟复制工单」 | 观察 | 主管 A 访谈 | 周会准备耗时 |
+## Compete
+现状：主管每周手工复制工单到 Excel，约 40 分钟。
+## Market
+未量化
+## Falsify
+杀死条件：上线 30 天内少于 2 个租户使用导出'
+NB_READY='## 本轮交接就绪
+当前切片：租户主管导出本租户未结工单 CSV。'
+printf '%s\n本轮裁决：<只写一个：杀死 | 缩小后存活 | 当作赌注 | 通过 | 待定（写明缺的是场景、投入边界还是指标）>\n%s\n' "$NB_HEAD" "$NB_READY" | nb nbv
+assert_exit 1 "a verdict copied from the template is NOFALSIFY" --require "$T/nbv"
+assert_tag NOFALSIFY
+printf '%s\n本轮裁决：当作赌注\n复盘指标 = `<指标名>`\n%s\n' "$NB_HEAD" "$NB_READY" | nb nbm
+assert_exit 1 "a bet without a review metric is NOFALSIFY" --require "$T/nbm"
+assert_tag NOFALSIFY
+printf '%s\n本轮裁决：当作赌注。复盘指标 = `weekly_export_tenants`\n## 本轮交接就绪\n当前切片：<对象、场景、目标、范围、重要约束>。\n' "$NB_HEAD" | nb nbr
+assert_exit 1 "handoff readiness left as template text is NODISCOVER" --require "$T/nbr"
+assert_tag NODISCOVER
+printf '%s\n本轮裁决：待定（缺投入边界）\n%s\n' "$(printf '%s' "$NB_HEAD" | sed '/^| 「/d')" "$NB_READY" | nb nbp
+assert_exit 1 "a Discuss-P with only template lines is NODISCOVER" --require "$T/nbp"
+assert_tag NODISCOVER
+printf '%s\n本轮裁决：当作赌注。复盘指标 = `weekly_export_tenants`（define 的驱动指标必须是它）\n%s\n' "$NB_HEAD" "$NB_READY" | nb nbok
+assert_exit 0 "a chosen bet with its metric on the same line passes" --require "$T/nbok"
+printf '%s\n本轮裁决：当作赌注（证据不足以通过）\n复盘指标：周导出租户数\n%s\n' "$NB_HEAD" "$NB_READY" | nb nbfw
+assert_exit 0 "a full-width colon metric and the word 通过 inside the reason pass" --require "$T/nbfw"
+# 旧版 briefing（没有「本轮交接就绪」）：照抄的四选项裁决仍算未选；不写裁决行的老档不变
+printf '%s\n本轮裁决：杀死 | 缩小后存活 | 当作赌注 | 通过\n' "$NB_HEAD" | nb nbold
+assert_exit 1 "an old-format briefing with the four-option verdict copied is NOFALSIFY" --require "$T/nbold"
+assert_tag NOFALSIFY
+printf '%s\n' "$NB_HEAD" | nb nbold2
+assert_exit 0 "an old-format briefing without a verdict line keeps passing" --require "$T/nbold2"
 
 if [ "$fail" -ne 0 ]; then
   echo "----------------------------------------"

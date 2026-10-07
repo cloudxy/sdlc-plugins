@@ -1,0 +1,27 @@
+{
+ "id": "discover-proportional-surfaces",
+ "at": "2026-10-06T19:32:59+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "improved",
+ "reason": "product-surfaces.md: walk every row only for a new product or surface; a bounded change uses the rows it touches and says the rest are unaffected (the card's 'walk every row' contradicted the proportionality rule). Verified by discover case 22.",
+ "evidence": [
+  "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/16-discover深度整理验证 (case 22: baseline 0/3 (walked the whole ToB card), current 3/3)"
+ ],
+ "decided_by": "user 2026-10-06 「执行」",
+ "files": {
+  "skills/discover/references/product-surfaces.md": "3a29f7e67801d85d89588738d2cdf63f246d5345eb881037f4b934567dc204c7"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-10-07T09:06:07+08:00",
+   "from": "pending",
+   "to": "improved",
+   "evidence": [
+    "/Users/xuyun/Documents/grok-files/sdlc-workflow/2026-10-02-sdlc-workflow-学习与进化-执行记录/16-discover深度整理验证 (case 22: baseline 0/3 (walked the whole ToB card), current 3/3)"
+   ],
+   "unchecked_evidence": ""
+  }
+ ]
+}

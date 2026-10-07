@@ -1,6 +1,6 @@
 # Product surfaces — ToB / ToC probe card (Discuss-S)
 
-Walk every row. N/A + reason is fine. Silent skip is not. Answers become NFR/FR in define, not here.
+For a new product or a new surface, walk every row: N/A + reason is fine, silent skip is not. For a bounded change, use the rows the change touches and say in one line that the rest are unaffected. Answers become NFR/FR in define, not here.
 
 ## Four roles (draw first)
 

@@ -1,0 +1,14 @@
+feature: ai-weekly-summary
+sdlc_version: 4
+product_root: docs/product
+lane: L2
+current_hat: define
+hats_done: []
+phase: Discovering
+discovery:
+  status: killed
+  skip_why: ""
+  briefing: 00-discover/briefing.md
+  tracks: {discuss: done, compete: done, market: done, growth: done, falsify: done}
+  at: "2026-09-18T17:00:00+08:00"
+open_questions: []
