@@ -298,6 +298,23 @@ python3 /path/to/sdlc-workflow/scripts/link-kimi.py --project /path/to/project
 
 接入脚本会预检全部源与目标；存在外来文件或链接时保持原样并失败。已指向同一源的等价链接不会重写。Kimi 从最近的 `.git` 发现项目，需传入 Git 根；从子目录启动仍可发现。项目技能名是裸名，角色/任务包仍保留逻辑命名。
 
+### 在本仓库测试插件本身
+
+本仓库同时是插件源码和测试项目。五端入口与 `agents/`、`commands/`、`skills/` 同处仓库根目录；在这里升级插件时，应让宿主读取这份工作树，包括未提交的改动。
+
+克隆后先运行 `bash vendor/install.sh`，再在仓库根目录执行：
+
+```bash
+python3 scripts/link-codex.py --project .
+python3 scripts/link-kimi.py --project .
+python3 scripts/link-codex.py --project . --check
+python3 scripts/link-kimi.py --project . --check
+```
+
+Claude Code 在本仓库用 `claude --plugin-dir .` 启动，直接加载当前工作树；这样即使用户级已登记同名插件，也不会误测另一份检出。`.grok/config.toml` 让 Grok 从当前目录加载插件，不含个人绝对路径。首次使用时先信任项目；Grok 提示若仅信任本会话，可在仓库根目录运行 `grok --trust` 保存信任，再用 `grok inspect --json` 检查 `projectTrusted` 与 `plugins`。Codex 和 Kimi 的链接只在此项目生效，生成目录已加入 `.gitignore`，换机器后重新执行上面的命令。四个 CLI 都需要开启新会话来发现新增或改过的组件。
+
+ZCode 从其个人插件设置加载本地目录。测试本仓库时，让已启用的 `sdlc-workflow` 本地目录指向此仓库（可用指向仓库的链接，或在 ZCode「设置 → 插件」中切换本地来源）；若已启用另一份同名检出，先切换来源，避免测试到旧代码。修改源码后刷新插件源或重启相应会话，再调用对应命令或技能核对。ZCode 的个人配置、凭据与机器路径不进入仓库。
+
 reviewer/qc 的通用回退必须有实际只读工具或沙箱；提示词禁止写入不构成等价隔离。无法满足时保留审查待完成。新生成的角色需要新会话重新发现。
 
 ### 接入一个项目（一次性）

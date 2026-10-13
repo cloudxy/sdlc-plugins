@@ -3,6 +3,11 @@
 __pycache__/
 *.pyc
 .venv/
+# Generated project-local references to this checkout. Recreate with the link scripts.
+/.codex/skills/
+/.codex/agents/
+/.kimi-code/skills/
+/.kimi-code/agents/
 # vendor：仓库不分发任何上游内容，只提交安装脚本、说明和锁文件；使用者运行 bash vendor/install.sh 从源头下载
 vendor/*
 !vendor/install.sh

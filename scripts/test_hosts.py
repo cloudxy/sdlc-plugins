@@ -5,6 +5,7 @@ Structure only. Loading on real hosts is checked with their CLIs (adapters/HOST-
 """
 from __future__ import annotations
 
+import configparser
 import json
 import os
 import shutil
@@ -93,6 +94,12 @@ class Manifests(unittest.TestCase):
     def test_no_root_manifest_and_no_problems(self):
         self.assertFalse((ROOT / "plugin.json").exists())
         self.assertEqual(host_problems(REGISTRY), [])
+
+    def test_self_hosted_grok_uses_this_checkout(self):
+        config = configparser.ConfigParser()
+        config.read(ROOT / ".grok/config.toml", encoding="utf-8")
+        self.assertEqual(json.loads(config["plugins"]["paths"]), ["."])
+        self.assertIn(HOSTS["plugin"]["name"], json.loads(config["plugins"]["enabled"]))
 
     def test_root_manifest_is_reported(self):
         with tempfile.TemporaryDirectory() as td:
