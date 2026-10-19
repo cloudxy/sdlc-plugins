@@ -28,6 +28,12 @@ Job: **capture the data the product needs correctly the first time.** Select the
 - **Design completion is not collection completion.** A design document proves nothing about delivery: distinguish request emitted, accepted, persisted and queryable. A mock-only run does not prove destination delivery. Frontend/backend own their code; do not claim their changes from a design document.
 - **Transport may be at-least-once.** Validate the specified downstream deduplication boundary rather than promising exactly-once delivery. Alert thresholds depend on expected traffic and freshness, not universal event counts.
 - **Crawlers are their own subsystem.** They never import the application backend; choose an ingestion boundary appropriate to scale (an API, controlled batch or queue) with idempotent keys and explicit ownership; rate limits and the source's access contract are respected; repeated zero-item runs raise an alert. SQLite accepts PostgreSQL-only syntax such as `NULLS LAST` that MySQL rejects — test on the production dialect.
+- **Staging is not landed.** Between collector-side staging and consumer-side sync, keep an explicit cursor (an `unsynced` set or equivalent) and maintain it when deleting partial data. Before claiming collection complete, state which segment the data reached — the crawler analogue of emitted ≠ persisted.
+- **Classify failures; never retry uniformly.** Captcha → requeue and pause that source for the day; structural change → zero retries, fix the parser; dead task → dead-letter for humans. Retries amplify abnormal behaviour, especially when workers share accounts.
+- **Classify failure SCOPE, not just failure kind.** Account/session-level states (login expiry, session kicked) are global to every source and type sharing that account; scheduling them per-source or per-type re-opens the session in a loop — the open/close rhythm is itself a risk signal. Wait in place on the login page through the bounded manual window; terminal = one browser close plus a sleep signal the scheduler must treat globally, not "ban this type, try the next".
+- **Versioned captures are the contract of record.** Validate every routing/attribution assumption against real request+response captures, not memory or page bundles; a guard added "for hygiene" that rejects all valid payloads (substring month check vs millisecond timestamps) is worse than no guard — test guards in both directions with captures. Keep a real-capture regression set and run every parser change through it. When identity (geo id, date key) lives only in the request payload, extraction cannot recover it from the response — inject it, or the data is unattributable.
+- **Confirmed-empty is a delivery state.** A success shell with an empty list must be persisted as evidence (`data: []`) and downstream consumers must accept and retire empty batches; collapsing empty with missing turns a legitimately empty module into an infinite recollect loop and makes "no data" indistinguishable from "not collected".
+- **Additive metrics are free end-to-end pipeline checks.** Where parts sum to a whole (Σ city rows == province row exactly), cross-sum before declaring the pipeline healthy; non-additive metrics that legitimately disagree make the contrast informative.
 
 ## Excellence bar
 
@@ -73,7 +79,7 @@ The product tracking plan is the unique event-definition source; feature require
 - [ ] Identity stitching, consent and PII rules referenced, not reinvented?
 - [ ] Validation steps exist for every EV-n, and qa's matrix can reference them?
 - [ ] Product `data/tracking-plan.yaml` updated and the delta recorded (with the right status)?
-- [ ] External sources: rate limit, ToS/legal, retries, schema checks, zero-data alert?
+- [ ] External sources: rate limit, ToS/legal, classified retries, staging-to-landed cursor, schema checks, zero-data alert?
 - [ ] Implement/validate: evidence distinguishes emitted, accepted, persisted and queryable; no mock-only claim of delivery?
 
 ## Deep references — when to read them

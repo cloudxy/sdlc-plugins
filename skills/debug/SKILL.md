@@ -35,6 +35,8 @@ Use a feedback command that detects the original symptom. A diagnostic harness c
 - **Not every disagreement is a defect.** Business-direction or aesthetic disagreement routes to its decision owner; do not demand a shell reproduction for it.
 - **Causes can chain.** Several causal factors may form one failure chain; report limits and the next discriminating test.
 - **Mitigation first in incidents.** Incident response order belongs to deliver; diagnosis never delays a necessary mitigation.
+- **First-hand evidence outranks the fluent hypothesis.** Before ranking more hypotheses, connect read-only to the actual store/queue/log and look; an operator-reported symptom ("only 2 keys exist") can be a viewer pagination artifact while all 11 sit in the store. When parts sum to a whole, cross-sum (Σ detail == total, exactly) validates or convicts the whole pipeline in one probe.
+- **The stability of the failure set is itself evidence.** A missing-data set that varies run to run points at timing/state races (listen windows, shared keys, interleaved runs); a stable set points at semantics (routing, schema, empty-vs-missing). Split on that before hypothesizing.
 
 ## Self-check
 
