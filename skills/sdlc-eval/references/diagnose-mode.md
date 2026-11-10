@@ -14,7 +14,7 @@ Use when the user asks why a session went wrong: repeated work, an ignored plan 
    - **pointer**: the information existed but the agent could not reach it (a decision, archive, log or doc with no navigation pointer, or no read access) → name the file that should point to it and the material it points at;
    - **out of scope**: a request the plugin deliberately does not serve → the reason and what new evidence would reopen it.
    Name the target file for every landing. Separate what the transcript shows from what you infer.
-5. **Stop at the report.** Do not apply the changes. The maintainer decides; accepted behavioral changes are recorded with `method_ledger.py record` and verified with `behavior_smoke.py` (fail on the old method, pass on the new).
+5. **Stop at the report.** Do not apply the changes. The maintainer decides; accepted skill changes require scenario evaluation and applicable regression checks, recorded with `method_ledger.py record`. No model, client, call count or model comparison is prescribed. Use an available evaluation method when a client is unavailable; record `evaluated` after completing evaluation without claiming comparative gains, or `pending` while incomplete.
 
 ## Hard rules
 

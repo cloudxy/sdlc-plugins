@@ -2,6 +2,18 @@
   "skill_name": "schema",
   "evals": [
     {
+      "id": "durable-state-7",
+      "prompt": "评审 Redis 数据方案，不实施：响应缓存可从主库重建；pending 是任务唯一执行中记录；journal 保存未确认写入；staging List 的消失被当作 RENAME 已成功。团队想所有键设 5 分钟 TTL 加随机抖动并使用 allkeys-lru。重复启动的两个进程会写同一个 journal，靠各自 RLock。发布回执保留 1 天，但允许离线 7 天后重传；日志消费者先删正文，再提交 SQL，并按内容 hash 去重。请分别指出可接受与不可接受之处，给出生命周期、持久化、幂等和故障验证要求。",
+      "expected_output": "区分可重建缓存与权威 pending/journal/发布意图；后者不机械套 TTL/抖动/淘汰，定义确认清理、回收与容量背压；SET 回复与无 TTL 不证明持久化。单进程锁不跨进程；回执覆盖重放窗口，稳定事件 ID 而非内容去重，消费提交后才确认清理；staging 缺失的推断依赖不被逐出/过期/外删。计划与证据分开。",
+      "files": [],
+      "expectations": [
+        "Keeps cache expiry appropriate while rejecting automatic expiry or eviction of sole recovery state",
+        "Does not treat SET acknowledgement, no TTL, or a local lock as full durability/concurrency proof",
+        "Aligns deduplication retention with replay and commits consumer effects before acknowledgement",
+        "Tests stage loss, ambiguous replies and competing writers without inventing run evidence"
+      ]
+    },
+    {
       "id": 1,
       "prompt": "I'm building a new feature where users can tag their spider tasks. Each task can have multiple tags and each tag can be on multiple tasks. We also need to track who created each tag and when. How should I store this?",
       "expected_output": "Model M:N task/tag association and creation metadata at their correct grains: who created the tag is not who applied it. Names and surrogate/composite keys follow project constraints, not fixed naming/type rules.",
@@ -103,6 +115,28 @@
           "criterion": "Produce a compatible scoped plan with correct active-row constraint options, rollback/data-recovery distinction and explicit unverified database evidence. No MySQL commands as universal rules, invented EXPLAIN or claim that a backup file proves recovery.",
           "weight": 5
         }
+      ]
+    },
+    {
+      "id": "cache-control",
+      "prompt": "已有主库为权威，Redis 只缓存可重建且允许陈旧五分钟的响应，10万键，每键2KB；当前 SET 无 TTL。请给该缓存最小生命周期方案，不实施，不增加任务队列。",
+      "expected_output": "Recognizes a reconstructible cache and recommends justified expiry/invalidation; Addresses capacity and Redis failure behavior without introducing task state; Does not apply authoritative recovery-state restrictions to ordinary cache",
+      "files": [],
+      "expectations": [
+        "Recognizes a reconstructible cache and recommends justified expiry/invalidation",
+        "Addresses capacity and Redis failure behavior without introducing task state",
+        "Does not apply authoritative recovery-state restrictions to ordinary cache"
+      ]
+    },
+    {
+      "id": "receipt-control",
+      "prompt": "日志传输允许至少一次。事件 e1 与 e2 内容完全相同；e1 首次投递回复丢失，原内容仍在本地。消费者支持 SQL 唯一事件 ID。请设计最小事件身份、提交与确认协议，不实施。",
+      "expected_output": "Keeps distinct event IDs e1 and e2 despite identical content; Retransmits e1 with the same identity and payload after ambiguous acknowledgement; Commits business effects and deduplication before acknowledging/removing input",
+      "files": [],
+      "expectations": [
+        "Keeps distinct event IDs e1 and e2 despite identical content",
+        "Retransmits e1 with the same identity and payload after ambiguous acknowledgement",
+        "Commits business effects and deduplication before acknowledging/removing input"
       ]
     }
   ]

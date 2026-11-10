@@ -1,0 +1,30 @@
+{
+ "id": "mt-recovery-lessons-20261110",
+ "at": "2026-11-10T10:24:57+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "evaluated",
+ "reason": "Generalize verified MT code patterns into architecture, collection and DBA methods: task ownership and business checkpoints, scoped dependency stops, recoverable writes with explicit assumptions, publication/acknowledgement and cache-versus-authoritative lifecycle. Nine independently produced scenario responses passed predeclared criteria; no old/new improvement claim. Preserve and refine the existing collection references.",
+ "evidence": [
+  "maintainers/archive/mt-collection-2026-11-10/evaluation",
+  "maintainers/archive/mt-collection-2026-11-10/review.md"
+ ],
+ "decided_by": "maintainer",
+ "files": {
+  "agent-sources/profiles/architect/SOUL.md": "7f8f617aca7dff0f52dbc4a52e8f1ac4290ef809cf983cea5b6e88626f18febd",
+  "agent-sources/profiles/data-collector/SOUL.md": "1aaf34258b27ae2769c8577e58b7c1f2ddfddd2580107e03e6cd3ef74938ea03",
+  "agent-sources/profiles/dba/SOUL.md": "b7726101ca5f163e42db5624adafd950bd7c86369ff2aca8d17fb5db48cc5894",
+  "skills/architecture/SKILL.md": "035a729a6e17b50461f51ba39557916cf9728608e551c44300726f2db64abbd4",
+  "skills/architecture/references/adr-and-tradeoffs.md": "5d58d84f601da63a6268abbfa3d37cf5214fb3f4d4468b5de88dfc647ad3e8ff",
+  "skills/collect/SKILL.md": "868544f19cb34d463d2d22856c2d46355cf3487a7d6068207c90baa2e633ae85",
+  "skills/collect/references/anti-scraping-playbook.md": "f10a3cea88e753eec41fc6330c555324c4d88db1ef6b9f85034eabb83e109ce0",
+  "skills/collect/references/collection-recovery.md": "1245ca8b9c673a5999ec3f0d2b5d2aa256824277deaedeae970ef8f11cd5d7a3",
+  "skills/collect/references/scrapy-redis-distributed.md": "2ff607ac4a84354d9e4c0214e737373657103ac7b275feaa5c43e6ce4ad46d52",
+  "skills/collect/templates/data-source-analysis.md": "eac6fa4d130d55a34fc05b483a746d6d0ccdfb646f25dfa9df0a57181875cc84",
+  "skills/schema/SKILL.md": "bd01da3666fe7e1c9d269a7c663c00112218602d6c196b58d2968b2cadc97300",
+  "skills/schema/references/recoverable-writes.md": "86351b100fcff4714dcb6c055714a47b4bcab69ac42d7272892d8f3c1c0c4f1a",
+  "skills/schema/references/redis-key-governance.md": "5f4b1b034284e0dd6346b9ca9c5c9347439c9180cdfdb94bc744f7a1728f58db",
+  "skills/schema/templates/db-spec.md": "588c559a70c6399a5d038ba62859c0ae01d0c32f7cc3410bc52210066ce209c7"
+ },
+ "deleted": []
+}

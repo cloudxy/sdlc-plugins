@@ -1,0 +1,23 @@
+{
+  "repository": "hcdataspider",
+  "head": "1ee699920bbfd58db23a3409a6b21fc3f6d290b5",
+  "sources": {
+    "app/spider/mt/runtime/ownership.py": "a9a2707db1b187b400f404145001c1ae273cd533640e3ebe9b644fc264dbf225",
+    "app/spider/mt/runtime/admission.py": "a48603807619703d603208f9b17c6f1af2a91335af81a3c32114d5c36a8e74b9",
+    "app/spider/mt/execution/completion.py": "6f5d4cba99119836a62c2bcdf998c347422fdeb4c5876e8b292377919ae2f595",
+    "app/spider/mt/storage/operations.py": "9e56e4fbcf5f59b62386d529ebff920a8aed7823d456f8562647702664c7cba7",
+    "app/spider/mt/storage/quota.py": "93542d9f5d5fd870c8afed420d922d8d20ab7fd9703d193af86224bd348f8a6d",
+    "app/spider/mt/brand/checkpoint.py": "0997c3269c95100a92488f25a0298abb07325f6abb995a22da3da667e5d34075",
+    "app/spider/mt/brand/write_spider_mt_brand_data.py": "1fbbb8d252443a80b3885f3766f1f64d1c1f8188853a7bad836e8596d72dfb67",
+    "app/spider/mt/diagnostics/transport.py": "e409c2b0ccaa9061be68fe8971fcffbb87a6631a868d0362187548293e7cb061",
+    "app/spider/mt/diagnostics/limits.py": "f99e087f0f810854506547f7e35e2b477f70afa7c5104235c6c0e8b170a8c90e",
+    "tests/redis_fixture.py": "06cb6661faa4655af369051e92fd4c0eecfc7b7b0a17fbbd012569d038cbfb70",
+    "tests/test_mt_ordinary_redis.py": "eb6dde976f723e1b248916173c9264da313b65abcbf0efcf42b385fe50a58bb4",
+    "docs/spider/mt/mt_readme.md": "a7ed8a42113a682a28a17dbb600a4a61f5e2085930b4b4d001552f5c45391f62"
+  },
+  "limits": [
+    "Read-only local inspection; no production connection or deployment verification.",
+    "docs/ and tests/ are Git-ignored workspace evidence; hashes identify inspected contents, not tracked release artifacts.",
+    "Historical test counts have not been rerun in this task."
+  ]
+}

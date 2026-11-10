@@ -1,0 +1,22 @@
+{
+ "id": "inherited-unrecorded-methods-20261110",
+ "at": "2026-11-10T10:08:33+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "pending",
+ "reason": "Before MT extraction, health-check already failed on seven unrecorded method digests (including committed historical edits and two existing worktree references). Record the observed starting state without changing those methods or asserting their behavioral quality; separate from the new MT lesson change.",
+ "evidence": [
+  "/private/tmp/sdlc-mt-lessons-20261110"
+ ],
+ "decided_by": "maintainer",
+ "files": {
+  "agent-sources/profiles/backend/SOUL.md": "2a2d039045e2759550a843574f6b0f0edabc13984cb2ee063e7dc38f27eda6d3",
+  "agent-sources/profiles/data-collector/SOUL.md": "fe1d72222c6dde84c51e19380e79dc5e2ecb4317f1421fb1af002a697eff2f2d",
+  "skills/collect/SKILL.md": "4a4e348e7fa9125ebd271abf2bbdd91e5965184176a6ac2df1fd585073b82e5a",
+  "skills/collect/references/anti-scraping-playbook.md": "7e86ee82ec305f38b6c059452f08894c62474a51ab2fddce84464f988f5a3069",
+  "skills/collect/references/scrapy-redis-distributed.md": "9c6c3066845fe87afda96a9aa9cac0863f8a4435e6b93d1a6256807a40fb1307",
+  "skills/debug/SKILL.md": "4d6a8d676b024e67670d54d4ce841d97542081b6ab0813b79bf353a03b33d2cb",
+  "skills/impl-evidence/references/api.md": "74d49392e45ec81acc9d6eb1f7bd1855c6502a97ba3c5b0ba4208665ca943444"
+ },
+ "deleted": []
+}

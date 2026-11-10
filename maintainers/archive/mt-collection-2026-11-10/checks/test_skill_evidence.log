@@ -1,0 +1,9 @@
+test_dated_internal_source_and_missing_reference (__main__.EvidenceTests) ... ok
+test_empty_unknown_and_headerless_plans_never_pass (__main__.EvidenceTests) ... ok
+test_named_columns_use_rows_not_key_length (__main__.EvidenceTests) ... ok
+test_small_scan_and_explicit_budget (__main__.EvidenceTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.002s
+
+OK

@@ -36,6 +36,8 @@ These are conditional tasks in existing stages, not mandatory stages. A small ch
 
 Read [threat-model.md](references/threat-model.md) for changes affecting assets, trust, privileges, credentials, data sensitivity, dependencies or security configuration. Q2/Q3/Q4 are minimum triggers, not an exhaustive threat model. If a new trigger is discovered, return it to the manager to update `q_security`; do not edit workflow state yourself. Security controls require an implementation owner, verification and explicit residual-risk authority.
 
+For shared resources or recoverable multi-step state, distinguish task ownership, intermediate visibility, crash recovery, publication and downstream commitment. State which dependency a stop protects and what allows recovery; keep independent work available. Use the consistency decisions in [adr-and-tradeoffs.md](references/adr-and-tradeoffs.md), including the limits of a single-writer journal, rather than treating a replay plan or a completion marker as a transaction guarantee.
+
 ## Handoff and authority
 
 | Partner | Exchange |

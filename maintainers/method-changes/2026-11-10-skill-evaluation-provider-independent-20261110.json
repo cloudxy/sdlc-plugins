@@ -1,0 +1,18 @@
+{
+ "id": "skill-evaluation-provider-independent-20261110",
+ "at": "2026-11-10T10:24:57+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "evaluated",
+ "reason": "Maintainer explicitly retains mandatory skill scenario evaluation while removing any prescribed model, CLI, call count or model comparison. Two independent scenarios distinguish completed evaluation without the old client from mechanical checks without skill evaluation. Ledger accepts evaluated with non-model-run evidence; regression tests preserve evidence requirements and optional trace integrity.",
+ "evidence": [
+  "maintainers/archive/mt-collection-2026-11-10/evaluation",
+  "maintainers/out-of-scope/2026-11-10-不限定技能评测模型与客户端.md"
+ ],
+ "decided_by": "maintainer",
+ "files": {
+  "skills/sdlc-eval/SKILL.md": "70f085d68f7553187c198ffd9445a1a6a039489bab575a730da9c336b08a663a",
+  "skills/sdlc-eval/references/diagnose-mode.md": "e68820bee879f4d7b729c4976441bf9906b594b5b73cd054ea307e1631a2dca0"
+ },
+ "deleted": []
+}

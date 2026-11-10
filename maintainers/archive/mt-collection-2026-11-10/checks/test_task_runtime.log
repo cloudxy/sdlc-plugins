@@ -1,0 +1,21 @@
+......................................................
+----------------------------------------------------------------------
+Ran 54 tests in 16.470s
+
+OK
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-10-101952+0800-392253.json}
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-10-101954+0800-236255.json}
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-10-101957+0800-171320.json}
+unit: exit 2 → record in state.yaml gates:
+  - {name: unit, kind: script, result: fail, evidence: evidence/runs/unit-2026-11-10-101958+0800-482843.json}
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-10-101958+0800-763281.json}
+unit: exit 3 → record in state.yaml gates:
+  - {name: unit, kind: script, result: fail, evidence: evidence/runs/unit-2026-11-10-101958+0800-847033.json}
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-10-102006+0800-092536.json}
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-10-102007+0800-516435.json}

@@ -19,11 +19,10 @@
    - `conditional`：行为应随某个可观察条件变化。
 
    类型决定写法。明知故犯才用禁令和借口表。形式问题写正面配方，不写禁令。漏项加模板字段。条件写成「如果可观察条件成立，则……」。
-2. 行为类改动，先用 `scripts/behavior_smoke.py` 在基线版本上跑相关评测用例，看它失败；再在改后的工作树上跑，看它通过。每个场景至少重复 3 次，用例变化大或结果不一致时用 5 次。
-   - 两个臂依次跑，不要并行。每次运行消耗的是你自己的订阅会话额度，和你正在用的会话共用；2026-10-02 并行 4 个进程，10 分钟内就触发上限，连当前会话也停了。
-   - 基线臂也通过不等于改动没用：它可能是消除了模型需要自己调和的矛盾。这种情况记为 `no_change` 并写明，由复盘决定保留还是回退。
-   - 改技能描述（`description` / `when_to_use`，即触发条件）时，改用 `scripts/trigger_smoke.py`：提示写在 `skills/<技能>/evals/triggers.json`（应触发与不应触发各一半），它只看宿主在前两轮加载了哪个技能，机械计分，不需要判定。
-3. 运行 `python3 scripts/method_ledger.py record --id <简名> --kind behavioral --failure-form <类型> --verdict pending|improved|no_change|regressed --evidence <证据目录> --reason <为什么>`。证据还没出来就先记 `pending`，出来后用 `verdict` 子命令补结论。
+2. **技能改动必须做场景评测。** 按改动风险选择真实任务与正反场景，事先明确判定标准，保存实际输出、判定和未验证范围；来源核对、脚本回归不能单独替代技能场景评测。**不要求使用任何模型、客户端、调用次数或模型对照。** 某个客户端未登录时改用可用的评测方式，不能据此省略评测。
+   - 场景评测已完成而未做新旧对照时记 `evaluated`；不能据此宣称相对旧版提高、持平或退化。
+   - `scripts/behavior_smoke.py`、`scripts/trigger_smoke.py` 保留为可选工具；使用时如实保存输入版本、输出和判定依据。其他适当的场景评测同样可以作为台账证据，无需例外说明。
+3. 运行 `python3 scripts/method_ledger.py record --id <简名> --kind behavioral --failure-form <类型> --verdict pending|evaluated|improved|no_change|regressed --evidence <证据路径> --reason <为什么>`。`pending` 表示评测或结论仍待处理；`evaluated` 表示完成适当评测，不宣称对照收益。
 4. 不改变行为的修改（错字、链接、排版）记为 `--kind editorial`，并写明理由。方法复盘时会抽查编辑类记录的数量与内容，防止行为改动绕过评测。
 
 `bash scripts/health-check.sh` 对没有记录的改动报 `METHODCHANGE`（错误），对等待证据的行为改动报 `METHODPENDING`（告警）。

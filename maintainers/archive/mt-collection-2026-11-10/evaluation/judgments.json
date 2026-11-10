@@ -1,0 +1,187 @@
+{
+  "scope": "11 candidate-version scenarios in four isolated evaluator contexts; prompt-only evaluator inputs; not an old/new or blind comparison; no production execution",
+  "cases": [
+    {
+      "skill": "architecture",
+      "case_id": "recovery-boundaries-7",
+      "criteria": [
+        "Does not equate replayability with atomicity or process locks with cross-process exclusion",
+        "Addresses unguarded readers and competing writers; evaluates an available transactional alternative",
+        "Separates single-key publication, whole-task completeness and downstream delivery",
+        "Names crash/ambiguous-ack tests and evidence limits without claiming execution"
+      ],
+      "verdict": "pass",
+      "judge": "maintainer-window review against predeclared criteria; evaluator did not self-grade",
+      "evidence_file": "architecture-output.md",
+      "evidence_quotes": [
+        "最终值 journal 可以成为有限条件下的中断恢复协议",
+        "两个进程可能读取相同旧值",
+        "多个结果同批发布不等于源接口提供了一致快照"
+      ]
+    },
+    {
+      "skill": "architecture",
+      "case_id": "simple-control",
+      "criteria": [
+        "Reuses the accepted existing PostgreSQL transaction and keeps scope to the field change",
+        "Does not introduce Redis, journals or a mandatory fixed pause",
+        "Names relevant field/consumer compatibility checks without fabricated execution"
+      ],
+      "verdict": "pass",
+      "judge": "maintainer-window review against predeclared criteria; evaluator did not self-grade",
+      "evidence_file": "architecture-output.md",
+      "evidence_quotes": [
+        "复用已有 ADR 的 PostgreSQL 单事务方案即可",
+        "也无需另造选型方案"
+      ]
+    },
+    {
+      "skill": "architecture",
+      "case_id": "publication-control",
+      "criteria": [
+        "Respects approved per-indicator publication instead of imposing whole-report blocking",
+        "Preserves confirmed-empty as a valid result with consumer evidence",
+        "Distinguishes correctness from cross-time snapshot and downstream persistence"
+      ],
+      "verdict": "pass",
+      "judge": "maintainer-window review against predeclared criteria; evaluator did not self-grade",
+      "evidence_file": "architecture-output.md",
+      "evidence_quotes": [
+        "合法空集合不自动等于数值零",
+        "已满足自身完成条件的指标可以独立发布"
+      ]
+    },
+    {
+      "skill": "collect",
+      "case_id": "ownership-delivery-7",
+      "criteria": [
+        "Addresses claim gap, simultaneous pending/requeue ownership and expiry recovery",
+        "Uses business checkpoints and distinguishes missing data from confirmed-empty",
+        "Preserves event identity under ambiguous acknowledgements and requires downstream deduplication",
+        "Scopes critical dependency stops and treats noncritical telemetry differently"
+      ],
+      "verdict": "pass",
+      "judge": "maintainer-window review against predeclared criteria; evaluator did not self-grade",
+      "evidence_file": "collect-output.md",
+      "evidence_quotes": [
+        "同一错误重传沿用原 `error_id` 和内容",
+        "独立、非关键的性能统计失败按契约降级",
+        "旧执行者迟到提交必须因代次或所有权不符被拒绝"
+      ]
+    },
+    {
+      "skill": "collect",
+      "case_id": "healthy-control",
+      "criteria": [
+        "Stops both types sharing failed account A",
+        "Allows independent healthy source C to continue",
+        "Allows noncritical performance telemetry degradation and gives scoped recovery conditions"
+      ],
+      "verdict": "pass",
+      "judge": "maintainer-window review against predeclared criteria; evaluator did not self-grade",
+      "evidence_file": "collect-output.md",
+      "evidence_quotes": [
+        "甲、乙暂停使用账号 A 发起采集操作；丙继续运行",
+        "非关键性能统计上报失败按现有契约降级"
+      ]
+    },
+    {
+      "skill": "collect",
+      "case_id": "empty-control",
+      "criteria": [
+        "Records confirmed-empty and permits the supported empty batch to complete",
+        "Treats a missing response as uncollected/unknown rather than empty",
+        "Uses request identity and destination evidence for validation"
+      ],
+      "verdict": "pass",
+      "judge": "maintainer-window review against predeclared criteria; evaluator did not self-grade",
+      "evidence_file": "collect-output.md",
+      "evidence_quotes": [
+        "第一项保存为有证据的 `confirmed-empty`",
+        "第二项保持 `missing` 或等待响应状态"
+      ]
+    },
+    {
+      "skill": "schema",
+      "case_id": "durable-state-7",
+      "criteria": [
+        "Keeps cache expiry appropriate while rejecting automatic expiry or eviction of sole recovery state",
+        "Does not treat SET acknowledgement, no TTL, or a local lock as full durability/concurrency proof",
+        "Aligns deduplication retention with replay and commits consumer effects before acknowledgement",
+        "Tests stage loss, ambiguous replies and competing writers without inventing run evidence"
+      ],
+      "verdict": "pass",
+      "judge": "maintainer-window review against predeclared criteria; evaluator did not self-grade",
+      "evidence_file": "schema-output.md",
+      "evidence_quotes": [
+        "把所有键统一视为缓存",
+        "两个进程各自持有 RLock，仍然可以同时覆盖同一 journal",
+        "SQL 提交成功后，才返回明确表示“业务已提交”的确认"
+      ]
+    },
+    {
+      "skill": "schema",
+      "case_id": "cache-control",
+      "criteria": [
+        "Recognizes a reconstructible cache and recommends justified expiry/invalidation",
+        "Addresses capacity and Redis failure behavior without introducing task state",
+        "Does not apply authoritative recovery-state restrictions to ordinary cache"
+      ],
+      "verdict": "pass",
+      "judge": "maintainer-window review against predeclared criteria; evaluator did not self-grade",
+      "evidence_file": "schema-output.md",
+      "evidence_quotes": [
+        "这是可重建、允许陈旧五分钟的响应缓存",
+        "无需增加任务队列"
+      ]
+    },
+    {
+      "skill": "schema",
+      "case_id": "receipt-control",
+      "criteria": [
+        "Keeps distinct event IDs e1 and e2 despite identical content",
+        "Retransmits e1 with the same identity and payload after ambiguous acknowledgement",
+        "Commits business effects and deduplication before acknowledging/removing input"
+      ],
+      "verdict": "pass",
+      "judge": "maintainer-window review against predeclared criteria; evaluator did not self-grade",
+      "evidence_file": "schema-output.md",
+      "evidence_quotes": [
+        "e2 是独立事件，必须使用另一个 ID",
+        "e1 首次投递即使已提交但回复丢失，生产者也只是携带原 ID 重传"
+      ]
+    },
+    {
+      "skill": "sdlc-eval",
+      "case_id": "maintenance-without-client",
+      "criteria": [
+        "Accepts already completed scenario evaluation without requiring a specific CLI/model/count or old-new comparison",
+        "Requires actual outputs, criteria and results; uses evaluated without claiming comparative improvement"
+      ],
+      "verdict": "pass",
+      "judge": "maintainer-window review against predeclared criteria; evaluator did not self-grade",
+      "evidence_file": "sdlc-eval-output.md",
+      "evidence_quotes": [
+        "不必专门登录 Claude CLI",
+        "三个真实场景的当前版本答复均满足各自既定标准"
+      ]
+    },
+    {
+      "skill": "sdlc-eval",
+      "case_id": "evaluation-required-control",
+      "criteria": [
+        "Does not equate health/Python passes with skill scenario evaluation",
+        "Proposes actual scenarios and judgements without mandating a model/client/count or inventing execution"
+      ],
+      "verdict": "pass",
+      "judge": "maintainer-window review against predeclared criteria; evaluator did not self-grade",
+      "evidence_file": "sdlc-eval-output.md",
+      "evidence_quotes": [
+        "不能直接宣布 Skill 评测通过",
+        "并没有取消 Skill 修改后的场景评测要求"
+      ]
+    }
+  ],
+  "pass": 11,
+  "fail": 0
+}

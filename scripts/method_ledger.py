@@ -11,12 +11,12 @@ outputs (agents/, host agent files, commands/, generated references) are checked
   record  --id ID --kind behavioral|editorial --reason R [--failure-form F] [--verdict V] [--evidence P …] [--files P …]
           [--unchecked-evidence REASON]
                                      records the unregistered changes (all, or only --files) and moves the baseline to them;
-                                     a verdict other than pending needs the same evidence as `verdict`
+                                     evaluated records completed evaluation without claiming comparative improvement
   verdict --id ID --verdict V --evidence P … [--unchecked-evidence REASON]
                                      appends the outcome to an existing behavioral record. Evidence that is a
                                      behavior_smoke.py directory must contain a run whose tree carries exactly the
-                                     recorded file digests (no verdict from text edited afterwards); a verdict without
-                                     such run evidence needs --unchecked-evidence with the reason
+                                     recorded file digests (no verdict from text edited afterwards); other appropriate
+                                     evidence is accepted without a model run or exception flag
 
 failure_form follows writing-skills "match the form to the failure": discipline (knows the rule, skips it),
 shape (output has the wrong form), omission (a required element is missing), conditional (depends on a condition).
@@ -36,7 +36,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BINARY = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.pdf', '.zip', '.gz'}
 KINDS = ('behavioral', 'editorial')
 FORMS = ('discipline', 'shape', 'omission', 'conditional')
-VERDICTS = ('pending', 'improved', 'no_change', 'regressed')
+VERDICTS = ('pending', 'evaluated', 'improved', 'no_change', 'regressed')
 
 
 def _generated(path: Path) -> bool:
@@ -195,12 +195,14 @@ def evidence_problem(change_id: str, files: dict, verdict: str, evidence: list, 
     """Why a non-pending verdict may not be recorded with this evidence ('' when it may)."""
     if verdict == 'pending':
         return ''
+    if verdict == 'evaluated':
+        return '' if evidence else 'evaluated needs evidence of the completed evaluation'
     has_runs, matches = evidence_matches(files, evidence)
     if has_runs and not matches:
         return (f'evidence was not produced on the recorded text of {change_id} '
                 '(no run tree carries the recorded file digests); rerun on the current text')
-    if not has_runs and not unchecked:
-        return 'no behavior_smoke run evidence; pass --unchecked-evidence with the reason'
+    if not evidence and not unchecked:
+        return 'a verdict needs evidence; use pending while evaluation is incomplete'
     return ''
 
 
@@ -245,12 +247,12 @@ def main(argv=None) -> int:
     rec.add_argument('--evidence', nargs='*')
     rec.add_argument('--decided-by', default='maintainer')
     rec.add_argument('--files', nargs='*')
-    rec.add_argument('--unchecked-evidence')
+    rec.add_argument('--unchecked-evidence', help='Optional legacy evidence annotation; no model run is required')
     ver = sub.add_parser('verdict')
     ver.add_argument('--id', required=True)
     ver.add_argument('--verdict', required=True)
     ver.add_argument('--evidence', nargs='*')
-    ver.add_argument('--unchecked-evidence')
+    ver.add_argument('--unchecked-evidence', help='Optional legacy evidence annotation; no model run is required')
     args = ap.parse_args(argv)
     root = args.root.resolve()
     if args.command == 'seed':

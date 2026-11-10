@@ -41,6 +41,7 @@ Declare whether migrations/models or DBML are the schema authority for this proj
 - An index hit is not a performance verdict; a deliberate scan can be correct. `EXPLAIN ANALYZE` executes the statement: use a scoped environment, time/resource limits and safe data.
 - A nullable deletion marker in a unique key may permit duplicate live rows. Verify the chosen engine's active-row uniqueness behavior and concurrency, rather than trusting an index name.
 - A successful down migration may restore columns but lose business data; backups count as recovery only when restore and post-backup writes are addressed.
+- Redis may hold authoritative recovery state as well as caches. Classify the key before choosing expiry, eviction or cleanup. For multi-step writes/publication, use [recoverable-writes.md](references/recoverable-writes.md) to specify writer/read protocols, durability and ambiguous-ack recovery; replay is not transaction isolation.
 - Before completion check: owner/grain/invariants; applicable access patterns; versioned model; compatible rollout and real recovery scope; raw evidence or explicit unknowns; downstream owners; no invented business decision.
 
 ## References — load only applicable methods
@@ -50,5 +51,6 @@ Declare whether migrations/models or DBML are the schema authority for this proj
 - Engine/evidence selection: [engine-and-evidence.md](references/engine-and-evidence.md); MySQL plan details only: [explain-reading.md](references/explain-reading.md).
 - Migration: [expand-contract.md](references/expand-contract.md), [migration-review template](templates/migration-review.md).
 - Redis only when used: [redis-key-governance.md](references/redis-key-governance.md).
+- Multi-step state or uncertain commit/publication: [recoverable-writes.md](references/recoverable-writes.md).
 - Deliverables: [db-spec](templates/db-spec.md), [schema.dbml](templates/schema.dbml), [domain model](templates/domain-model.md), [product ER](templates/erd.dbml), [ER drawing](references/er-diagram.md).
 - Independent review uses the same [criteria](references/role-quality.md).

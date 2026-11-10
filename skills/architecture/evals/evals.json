@@ -2,6 +2,18 @@
   "skill_name": "architecture",
   "evals": [
     {
+      "id": "recovery-boundaries-7",
+      "prompt": "请评审一个批处理架构提案，不写代码。现有关系库可用，另有 Redis，但线上账号只允许普通读写。方案：GET 累计结果，SET 一个含最终值的 journal，然后 DEL/RPUSH 结果 List、HSET 完成态、DEL journal；进程内 RLock；读取方当前直接 LRANGE。下季度会让两个 Worker 使用相同任务 namespace。设计者认为这替代事务，并可把整个品牌的多个结果 List 依次 RENAME 后标记 complete，当成一个原子发布。还想让所有任务都照搬固定三小时暂停。请判断保证、适用条件、替代选择与验证义务，说明哪些结论目前无法成立。",
+      "expected_output": "区分单写入可恢复写入与事务隔离；指出绕过恢复的读者、中间态、双写者覆盖、持久化/淘汰及全量重写成本；评估现有事务存储或适用的并发/版本协议，不强制加 Redis。单键发布不等于多结果原子发布；完整与快照、下游交付分开，暂停取决于故障范围与恢复条件。提出中断及回复丢失验证，未执行保持未验证。",
+      "files": [],
+      "expectations": [
+        "Does not equate replayability with atomicity or process locks with cross-process exclusion",
+        "Addresses unguarded readers and competing writers; evaluates an available transactional alternative",
+        "Separates single-key publication, whole-task completeness and downstream delivery",
+        "Names crash/ambiguous-ack tests and evidence limits without claiming execution"
+      ]
+    },
+    {
       "id": 1,
       "prompt": "We need to add user tag functionality to spider tasks. Each task can have multiple tags, tags are shared across the tenant. The PRD has 5 FRs: FR-01 create tags, FR-02 apply tags to tasks, FR-03 filter tasks by tag, FR-04 tag CRUD API, FR-05 bulk tagging. Break this into modules and tickets.",
       "expected_output": "Derives responsibility and invariant owners from FRs and existing constraints, without a module-count quota. Describes collaborating modules, API-only end-to-end slices with integrators and FR anchors, and a data semantics handoff to DBA. Reuses existing decisions if applicable; does not invent mandatory UI work.",
@@ -300,6 +312,28 @@
         "Each candidate names files, problem, benefit and a strength label",
         "No concrete interface proposal and no code edits",
         "Respects ADR 0003 (repository per aggregate) or flags any conflict with it"
+      ]
+    },
+    {
+      "id": "simple-control",
+      "prompt": "已有 ADR 接受单进程批任务把少量结果写入现有 PostgreSQL 单事务；无 Redis、无新增共享状态。此次仅增加一个来源标识字段。请给最小架构建议及需要复验的边界，不实施。",
+      "expected_output": "Reuses the accepted existing PostgreSQL transaction and keeps scope to the field change; Does not introduce Redis, journals or a mandatory fixed pause; Names relevant field/consumer compatibility checks without fabricated execution",
+      "files": [],
+      "expectations": [
+        "Reuses the accepted existing PostgreSQL transaction and keeps scope to the field change",
+        "Does not introduce Redis, journals or a mandatory fixed pause",
+        "Names relevant field/consumer compatibility checks without fabricated execution"
+      ]
+    },
+    {
+      "id": "publication-control",
+      "prompt": "已批准产品要求：月报允许每个指标独立发布；源接口明确返回成功且 data=[]，请求身份已确认。团队要求因此整份月报停发直到出现非空数据。评审该要求及交付验证，不实施。",
+      "expected_output": "Respects approved per-indicator publication instead of imposing whole-report blocking; Preserves confirmed-empty as a valid result with consumer evidence; Distinguishes correctness from cross-time snapshot and downstream persistence",
+      "files": [],
+      "expectations": [
+        "Respects approved per-indicator publication instead of imposing whole-report blocking",
+        "Preserves confirmed-empty as a valid result with consumer evidence",
+        "Distinguishes correctness from cross-time snapshot and downstream persistence"
       ]
     }
   ]

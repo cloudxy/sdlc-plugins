@@ -1,0 +1,220 @@
+{
+  "skill_evaluation": {
+    "cases": 11,
+    "pass": 11,
+    "fail": 0,
+    "independent_evaluator_contexts": 4,
+    "criteria": "evaluation/criteria.json",
+    "judgments": "evaluation/judgments.json",
+    "method_hashes": "evaluation/method-hashes.json",
+    "limits": "Candidate-only dialogue scenarios, not production execution, blind evaluation or an old/new comparison. Evaluation requires no specific model, client or call count."
+  },
+  "python": [
+    {
+      "command": [
+        "python3",
+        "scripts/test_behavior_smoke.py"
+      ],
+      "exit_code": 0,
+      "seconds": 12.0,
+      "log": "checks/test_behavior_smoke.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_continuous_work.py"
+      ],
+      "exit_code": 0,
+      "seconds": 18.41,
+      "log": "checks/test_continuous_work.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_eval_protocol.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.28,
+      "log": "checks/test_eval_protocol.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_gate_catalog.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.11,
+      "log": "checks/test_gate_catalog.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_gate_variants.py"
+      ],
+      "exit_code": 0,
+      "seconds": 21.55,
+      "log": "checks/test_gate_variants.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_hosts.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.52,
+      "log": "checks/test_hosts.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_method_ledger.py"
+      ],
+      "exit_code": 0,
+      "seconds": 5.75,
+      "log": "checks/test_method_ledger.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_outcomes.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.68,
+      "log": "checks/test_outcomes.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_reference_links.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.37,
+      "log": "checks/test_reference_links.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_session_digest.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.39,
+      "log": "checks/test_session_digest.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_skill_evidence.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.05,
+      "log": "checks/test_skill_evidence.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_state_view.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.08,
+      "log": "checks/test_state_view.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_task_runtime.py"
+      ],
+      "exit_code": 0,
+      "seconds": 16.56,
+      "log": "checks/test_task_runtime.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_trigger_smoke.py"
+      ],
+      "exit_code": 0,
+      "seconds": 1.86,
+      "log": "checks/test_trigger_smoke.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_vendor_drift.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.13,
+      "log": "checks/test_vendor_drift.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_vendor_install.py"
+      ],
+      "exit_code": 0,
+      "seconds": 3.89,
+      "log": "checks/test_vendor_install.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_work_scope.py"
+      ],
+      "exit_code": 0,
+      "seconds": 11.11,
+      "log": "checks/test_work_scope.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_workflow.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.56,
+      "log": "checks/test_workflow.log"
+    }
+  ],
+  "shell": [
+    {
+      "command": [
+        "bash",
+        "scripts/test-check-sdlc.sh"
+      ],
+      "LC_ALL": null,
+      "exit_code": 0,
+      "seconds": 117.75,
+      "log": "checks/check-sdlc-bash.log"
+    },
+    {
+      "command": [
+        "/bin/bash",
+        "scripts/test-check-sdlc.sh"
+      ],
+      "LC_ALL": "zh_CN.UTF-8",
+      "exit_code": 0,
+      "seconds": 133.64,
+      "log": "checks/check-sdlc-zh_CN.log"
+    }
+  ],
+  "health": {
+    "command": [
+      "bash",
+      "scripts/health-check.sh"
+    ],
+    "exit_code": 0,
+    "log": "checks/health-check.log"
+  },
+  "additional_checks": {
+    "generated_roles": "python3 scripts/render-role-agents.py --check: exit 0",
+    "whitespace": "git diff --check: exit 0",
+    "local_reference_links": {
+      "checked": 68,
+      "missing": []
+    },
+    "generic_skill_creator_validator": "Not compatible with pre-existing project when_to_use metadata; project-native health/metadata and regression validation used without changing the schema."
+  },
+  "retained_warnings": [
+    "Existing compatibility and optional vendor warnings",
+    "Four historical pending method records",
+    "Separately recorded seven pre-existing unregistered method digests remain pending; not evaluated as new MT work."
+  ]
+}

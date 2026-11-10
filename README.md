@@ -425,8 +425,8 @@ sdlc-workflow/
 | `scripts/eval_protocol.py` | `workflow.py eval-prepare / eval-audit / eval-blind`：受控对照的隔离准备、宿主轨迹审计与盲评目录，本身不调模型 |
 | `scripts/grade_eval.py` / `blind_eval.py` | 评测机械评分（不调模型）与盲评 |
 | `scripts/method_ledger.py` | 方法改动台账：技能、角色源、注册表的每次改动都要有一条记录（行为类附评测证据），否则健康检查报 METHODCHANGE |
-| `scripts/behavior_smoke.py` | 方法改动的行为冒烟：同一场景在基线版本与当前版本上各跑多次，带预算上限；判定必须引用该次输出原文。只读、非盲评，用来看改动前失败、改动后通过 |
-| `scripts/trigger_smoke.py` | 技能描述的触发冒烟：只开放 Read 与 Skill，看宿主在前两轮加载了哪个技能，按 `skills/<技能>/evals/triggers.json` 的应触发 / 不应触发机械计分 |
+| `scripts/behavior_smoke.py` | 可选的场景评测工具；技能改动仍须完成评测，保存实际输出和判定。不限定模型、客户端、调用次数或新旧对照；完成非对照评测记 `evaluated` |
+| `scripts/trigger_smoke.py` | 可选的技能触发观察工具：只开放 Read 与 Skill，按 `skills/<技能>/evals/triggers.json` 记录实际加载结果；不是修改描述的完成条件 |
 | `scripts/session_digest.py` | 把 Claude Code 会话记录整理成可引用的时间线（`path:line`、工具错误、重复、压缩、注入文本），供 `sdlc-eval` 的 diagnose 模式使用 |
 | `scripts/gate_catalog.py` | 闸门目录：每个闸门标签要有夹具和来历（`maintainers/gate-provenance.json`），缺了健康检查报 GATECATALOG；`report` 汇总各项目的逃逸归因 |
 | `scripts/outcomes.py` | 结果记录：功能关闭时写 `.sdlc/_outcomes/`，记赌注读数，列出到期未读数；`check-sdlc.sh --stats` 的统计由它给出 |

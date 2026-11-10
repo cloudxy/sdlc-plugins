@@ -16,7 +16,7 @@ This window is the **manager**. You orchestrate **one human-triggered eval pass*
 | `rubric` | Is the with-skill output actually better than a capable baseline on the dimensions that matter? | `blind_eval.py prepare / aggregate` |
 | `regression` | On a real feature that went badly, is today's plugin output better than what it produced then? | `blind_eval.py regression-prepare / prepare --regression / aggregate --skill regression` |
 | `diagnose` | What went wrong in a real session, with `path:line` evidence? Report only; never edits a method | [references/diagnose-mode.md](references/diagnose-mode.md) → [templates/diagnosis-report.md](templates/diagnosis-report.md); `session_digest.py` |
-| `smoke` | Does a method change alter the next-turn behaviour, and how stable is it across repetitions? | `behavior_smoke.py run` (baseline ref and current tree, ≥3 reps each, budget cap) / `judge` (every verdict quotes its own run). Read-only and not blind; use it to see a change fail before and pass after, then `rubric` for quality claims |
+| `smoke` | Next-turn scenario evaluation for a selected method change | Choose an available evaluation method; `behavior_smoke.py run` / `judge` is one optional tool. Skill evaluation remains required for skill changes, with actual outputs, criteria and results; no model, client, call count or model comparison is prescribed. A missing client does not waive evaluation |
 
 ## Select the comparison before choosing a mode
 

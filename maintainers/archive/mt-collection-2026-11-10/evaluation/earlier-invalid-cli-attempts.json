@@ -1,0 +1,113 @@
+{
+  "note": "Old-policy attempts before the maintainer clarified provider independence. Host failures are not valid scenario evaluation and are not counted in the 11 passes. No further CLI login/calls required.",
+  "attempts": [
+    {
+      "skill": "architecture",
+      "case_id": "recovery-boundaries-7",
+      "arm": "baseline",
+      "rep": 1,
+      "status": "host_failure",
+      "reply": "Not logged in · Please run /login",
+      "exit_code": 1
+    },
+    {
+      "skill": "architecture",
+      "case_id": "recovery-boundaries-7",
+      "arm": "baseline",
+      "rep": 1,
+      "status": "host_failure",
+      "reply": "Not logged in · Please run /login",
+      "exit_code": 1
+    },
+    {
+      "skill": "architecture",
+      "case_id": "recovery-boundaries-7",
+      "arm": "baseline",
+      "rep": 2,
+      "status": "host_failure",
+      "reply": "Not logged in · Please run /login",
+      "exit_code": 1
+    },
+    {
+      "skill": "architecture",
+      "case_id": "recovery-boundaries-7",
+      "arm": "baseline",
+      "rep": 2,
+      "status": "host_failure",
+      "reply": "Not logged in · Please run /login",
+      "exit_code": 1
+    },
+    {
+      "skill": "architecture",
+      "case_id": "recovery-boundaries-7",
+      "arm": "baseline",
+      "rep": 3,
+      "status": "host_failure",
+      "reply": "Not logged in · Please run /login",
+      "exit_code": 1
+    },
+    {
+      "skill": "architecture",
+      "case_id": "recovery-boundaries-7",
+      "arm": "baseline",
+      "rep": 3,
+      "status": "host_failure",
+      "reply": "Not logged in · Please run /login",
+      "exit_code": 1
+    },
+    {
+      "skill": "collect",
+      "case_id": "ownership-delivery-7",
+      "arm": "baseline",
+      "rep": 1,
+      "status": "host_failure",
+      "reply": "Not logged in · Please run /login",
+      "exit_code": 1
+    },
+    {
+      "skill": "collect",
+      "case_id": "ownership-delivery-7",
+      "arm": "baseline",
+      "rep": 2,
+      "status": "host_failure",
+      "reply": "Not logged in · Please run /login",
+      "exit_code": 1
+    },
+    {
+      "skill": "collect",
+      "case_id": "ownership-delivery-7",
+      "arm": "baseline",
+      "rep": 3,
+      "status": "host_failure",
+      "reply": "Not logged in · Please run /login",
+      "exit_code": 1
+    },
+    {
+      "skill": "schema",
+      "case_id": "durable-state-7",
+      "arm": "baseline",
+      "rep": 1,
+      "status": "host_failure",
+      "reply": "Not logged in · Please run /login",
+      "exit_code": 1
+    },
+    {
+      "skill": "schema",
+      "case_id": "durable-state-7",
+      "arm": "baseline",
+      "rep": 2,
+      "status": "host_failure",
+      "reply": "Not logged in · Please run /login",
+      "exit_code": 1
+    },
+    {
+      "skill": "schema",
+      "case_id": "durable-state-7",
+      "arm": "baseline",
+      "rep": 3,
+      "status": "host_failure",
+      "reply": "Not logged in · Please run /login",
+      "exit_code": 1
+    }
+  ]
+}

@@ -2,6 +2,18 @@
   "skill_name": "collect",
   "evals": [
     {
+      "id": "ownership-delivery-7",
+      "prompt": "仅评审采集设计，不实施。共享账号的两个类型用同一浏览器：ZPOPMIN 后 SET pending EX 600；失败就 ZADD 回队但保留 pending。品牌采集到一半被限速，提议重开页面从像素位置继续；缺一个月份就当空列表，其他月份逐个发布。数据和 unsynced 用两条独立命令写。错误日志先 RPUSH，再 HSET 回执；追加回复丢失后下游可能已取走正文、也清掉回执。团队希望这时换 error_id 重传，同时把所有故障都切换类型继续，包括共享账号失效与配额账本读失败；独立的性能统计上报失败也停全部任务。请给出最小可行修订和验证方案，保留独立健康来源继续工作的能力。",
+      "expected_output": "修正弹出与 pending 窗口、双重所有权、TTL 到期回收；用业务单元/身份断点并复核，区分 missing 与 confirmed-empty、定义发布契约；数据/游标双写需恢复或对账。保持稳定事件 ID/内容，至少一次及消费者幂等、提交和清理边界；停止依赖共享账号/关键账本的操作而允许独立来源，普通统计可降级。预算和背压具备恢复条件，不套次日/固定暂停规则。",
+      "files": [],
+      "expectations": [
+        "Addresses claim gap, simultaneous pending/requeue ownership and expiry recovery",
+        "Uses business checkpoints and distinguishes missing data from confirmed-empty",
+        "Preserves event identity under ambiguous acknowledgements and requires downstream deduplication",
+        "Scopes critical dependency stops and treats noncritical telemetry differently"
+      ]
+    },
+    {
       "id": "tracking-1",
       "prompt": "companion_skills: [collect]. Spec metric: 'first report view rate within 24h of import'. The frontend lead proposes events click_import_btn, ImportSuccess, view_report_page and report_page_view_v2. Write 01-define/tracking.md.",
       "expected_output": "Derives events from the metric: dataset_imported (server-side, result truth) and report_viewed (client, triggered when the first chart renders, with is_first_view). Uses object_action past-tense snake_case, one behaviour one event, properties typed with allowed values, each event tied to a journey step and the metric id, validation steps for qa. Rejects the proposed inconsistent names and the page-view-as-value proxy. No PII in properties.",
@@ -106,6 +118,28 @@
           "criterion": "区分设计、发送、接收与持久化；追踪样本 ID 到目的端，定位重试/去重/迟到问题；提供实现和验证任务证据，不凭 HTTP 200 宣告完成。",
           "weight": 5
         }
+      ]
+    },
+    {
+      "id": "healthy-control",
+      "prompt": "账号 A 失效，类型甲乙共享 A；来源丙用独立账号和连接，一切健康。另有非关键性能统计上报失败。请给调度处理及恢复验证，不实施。",
+      "expected_output": "Stops both types sharing failed account A; Allows independent healthy source C to continue; Allows noncritical performance telemetry degradation and gives scoped recovery conditions",
+      "files": [],
+      "expectations": [
+        "Stops both types sharing failed account A",
+        "Allows independent healthy source C to continue",
+        "Allows noncritical performance telemetry degradation and gives scoped recovery conditions"
+      ]
+    },
+    {
+      "id": "empty-control",
+      "prompt": "真实抓包确认任务月份、地区、响应业务成功且 data=[]；消费契约支持 empty 批次。另一任务完全没收到响应。请说明保存、断点与完成处理，并给可执行验证思路，不实施。",
+      "expected_output": "Records confirmed-empty and permits the supported empty batch to complete; Treats a missing response as uncollected/unknown rather than empty; Uses request identity and destination evidence for validation",
+      "files": [],
+      "expectations": [
+        "Records confirmed-empty and permits the supported empty batch to complete",
+        "Treats a missing response as uncollected/unknown rather than empty",
+        "Uses request identity and destination evidence for validation"
       ]
     }
   ]

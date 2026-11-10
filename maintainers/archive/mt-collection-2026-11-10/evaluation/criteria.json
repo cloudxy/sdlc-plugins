@@ -1,0 +1,102 @@
+[
+  {
+    "skill": "architecture",
+    "case_id": "recovery-boundaries-7",
+    "criteria": [
+      "Does not equate replayability with atomicity or process locks with cross-process exclusion",
+      "Addresses unguarded readers and competing writers; evaluates an available transactional alternative",
+      "Separates single-key publication, whole-task completeness and downstream delivery",
+      "Names crash/ambiguous-ack tests and evidence limits without claiming execution"
+    ]
+  },
+  {
+    "skill": "architecture",
+    "case_id": "simple-control",
+    "criteria": [
+      "Reuses the accepted existing PostgreSQL transaction and keeps scope to the field change",
+      "Does not introduce Redis, journals or a mandatory fixed pause",
+      "Names relevant field/consumer compatibility checks without fabricated execution"
+    ]
+  },
+  {
+    "skill": "architecture",
+    "case_id": "publication-control",
+    "criteria": [
+      "Respects approved per-indicator publication instead of imposing whole-report blocking",
+      "Preserves confirmed-empty as a valid result with consumer evidence",
+      "Distinguishes correctness from cross-time snapshot and downstream persistence"
+    ]
+  },
+  {
+    "skill": "collect",
+    "case_id": "ownership-delivery-7",
+    "criteria": [
+      "Addresses claim gap, simultaneous pending/requeue ownership and expiry recovery",
+      "Uses business checkpoints and distinguishes missing data from confirmed-empty",
+      "Preserves event identity under ambiguous acknowledgements and requires downstream deduplication",
+      "Scopes critical dependency stops and treats noncritical telemetry differently"
+    ]
+  },
+  {
+    "skill": "collect",
+    "case_id": "healthy-control",
+    "criteria": [
+      "Stops both types sharing failed account A",
+      "Allows independent healthy source C to continue",
+      "Allows noncritical performance telemetry degradation and gives scoped recovery conditions"
+    ]
+  },
+  {
+    "skill": "collect",
+    "case_id": "empty-control",
+    "criteria": [
+      "Records confirmed-empty and permits the supported empty batch to complete",
+      "Treats a missing response as uncollected/unknown rather than empty",
+      "Uses request identity and destination evidence for validation"
+    ]
+  },
+  {
+    "skill": "schema",
+    "case_id": "durable-state-7",
+    "criteria": [
+      "Keeps cache expiry appropriate while rejecting automatic expiry or eviction of sole recovery state",
+      "Does not treat SET acknowledgement, no TTL, or a local lock as full durability/concurrency proof",
+      "Aligns deduplication retention with replay and commits consumer effects before acknowledgement",
+      "Tests stage loss, ambiguous replies and competing writers without inventing run evidence"
+    ]
+  },
+  {
+    "skill": "schema",
+    "case_id": "cache-control",
+    "criteria": [
+      "Recognizes a reconstructible cache and recommends justified expiry/invalidation",
+      "Addresses capacity and Redis failure behavior without introducing task state",
+      "Does not apply authoritative recovery-state restrictions to ordinary cache"
+    ]
+  },
+  {
+    "skill": "schema",
+    "case_id": "receipt-control",
+    "criteria": [
+      "Keeps distinct event IDs e1 and e2 despite identical content",
+      "Retransmits e1 with the same identity and payload after ambiguous acknowledgement",
+      "Commits business effects and deduplication before acknowledging/removing input"
+    ]
+  },
+  {
+    "skill": "sdlc-eval",
+    "case_id": "maintenance-without-client",
+    "criteria": [
+      "Accepts already completed scenario evaluation without requiring a specific CLI/model/count or old-new comparison",
+      "Requires actual outputs, criteria and results; uses evaluated without claiming comparative improvement"
+    ]
+  },
+  {
+    "skill": "sdlc-eval",
+    "case_id": "evaluation-required-control",
+    "criteria": [
+      "Does not equate health/Python passes with skill scenario evaluation",
+      "Proposes actual scenarios and judgements without mandating a model/client/count or inventing execution"
+    ]
+  }
+]

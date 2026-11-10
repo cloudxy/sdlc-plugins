@@ -1,0 +1,17 @@
+{
+  "skill": "architecture",
+  "cases": [
+    {
+      "id": "recovery-boundaries-7",
+      "prompt": "请评审一个批处理架构提案，不写代码。现有关系库可用，另有 Redis，但线上账号只允许普通读写。方案：GET 累计结果，SET 一个含最终值的 journal，然后 DEL/RPUSH 结果 List、HSET 完成态、DEL journal；进程内 RLock；读取方当前直接 LRANGE。下季度会让两个 Worker 使用相同任务 namespace。设计者认为这替代事务，并可把整个品牌的多个结果 List 依次 RENAME 后标记 complete，当成一个原子发布。还想让所有任务都照搬固定三小时暂停。请判断保证、适用条件、替代选择与验证义务，说明哪些结论目前无法成立。"
+    },
+    {
+      "id": "simple-control",
+      "prompt": "已有 ADR 接受单进程批任务把少量结果写入现有 PostgreSQL 单事务；无 Redis、无新增共享状态。此次仅增加一个来源标识字段。请给最小架构建议及需要复验的边界，不实施。"
+    },
+    {
+      "id": "publication-control",
+      "prompt": "已批准产品要求：月报允许每个指标独立发布；源接口明确返回成功且 data=[]，请求身份已确认。团队要求因此整份月报停发直到出现非空数据。评审该要求及交付验证，不实施。"
+    }
+  ]
+}

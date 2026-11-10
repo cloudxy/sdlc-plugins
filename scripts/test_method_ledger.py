@@ -120,26 +120,42 @@ class LedgerTests(unittest.TestCase):
         p = self.ledger('verdict', '--id', 'tdd-rule', '--verdict', 'improved', '--evidence', f'{good} (runs on this text)')
         self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
 
-    def test_verdict_without_run_evidence_needs_an_explicit_reason(self):
+    def test_verdict_accepts_non_model_evidence_without_exception_flag(self):
         self.edit('skills/tdd/SKILL.md')
         self.ledger('record', '--id', 'tdd-doc', '--kind', 'behavioral', '--failure-form', 'omission',
                     '--reason', 'r', '--verdict', 'pending')
         p = self.ledger('verdict', '--id', 'tdd-doc', '--verdict', 'no_change', '--evidence', 'a review note')
-        self.assertEqual(p.returncode, 2)
-        p = self.ledger('verdict', '--id', 'tdd-doc', '--verdict', 'no_change', '--evidence', 'a review note',
-                        '--unchecked-evidence', 'judged by reading; no smoke case applies')
         self.assertEqual(p.returncode, 0, p.stderr)
 
     def test_record_with_a_verdict_checks_evidence_too(self):
         self.edit('skills/tdd/SKILL.md')
         p = self.ledger('record', '--id', 'tdd-doc', '--kind', 'behavioral', '--failure-form', 'omission',
                         '--reason', 'r', '--verdict', 'improved', '--evidence', 'a review note')
-        self.assertEqual(p.returncode, 2)  # not a way around `verdict`
-        self.assertIn('unchecked-evidence', p.stderr)
-        p = self.ledger('record', '--id', 'tdd-doc', '--kind', 'behavioral', '--failure-form', 'omission',
-                        '--reason', 'r', '--verdict', 'improved', '--evidence', 'a review note',
-                        '--unchecked-evidence', 'judged by reading')
         self.assertEqual(p.returncode, 0, p.stderr)
+
+    def test_scenario_evaluation_completes_without_model_run_or_exception(self):
+        self.edit('skills/tdd/SKILL.md')
+        p = self.ledger('record', '--id', 'no-model', '--kind', 'behavioral', '--failure-form', 'conditional',
+                        '--reason', 'scenario evaluation and offline checks', '--verdict', 'evaluated',
+                        '--evidence', 'scenario outputs and criteria')
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        checked = self.ledger('check')
+        self.assertEqual(checked.returncode, 0, checked.stdout + checked.stderr)
+        self.assertNotIn('METHODPENDING', checked.stdout)
+
+    def test_measured_claim_still_needs_some_evidence(self):
+        self.edit('skills/tdd/SKILL.md')
+        p = self.ledger('record', '--id', 'unsupported', '--kind', 'behavioral', '--failure-form', 'conditional',
+                        '--reason', 'r', '--verdict', 'improved')
+        self.assertEqual(p.returncode, 2)
+        self.assertIn('evidence', p.stderr)
+
+    def test_evaluated_still_requires_evaluation_evidence(self):
+        self.edit('skills/tdd/SKILL.md')
+        p = self.ledger('record', '--id', 'untested', '--kind', 'behavioral', '--failure-form', 'conditional',
+                        '--reason', 'r', '--verdict', 'evaluated')
+        self.assertEqual(p.returncode, 2)
+        self.assertIn('completed evaluation', p.stderr)
 
     def test_behavioral_record_needs_failure_form(self):
         self.edit('skills/tdd/SKILL.md')
