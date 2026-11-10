@@ -3,6 +3,8 @@
 > 这是产品的长期记忆。每个功能的每顶帽子**先读这里**，产出后**回写这里**。功能目录（`.sdlc/<feature>/`）只放这一次变更的工件。
 > 规则全文：插件 `skills/sdlc/references/product-layer.md`。
 
+本目录由项目配置 `product_root` 指定，默认是 `docs/product/`。表中路径均相对本目录。
+
 ## 文件与负责人
 
 | 文件 | 负责人（写） | 一句话 |
@@ -16,10 +18,12 @@
 | `data/tracking-plan.yaml` | data-collector（pm 经 tracking.md 提事件） | 埋点规范与事件字典 |
 | `data/metrics.yaml` | data-warehouse-engineer | 指标树（北极星 → 驱动 → 护栏），全产品唯一口径 |
 | `data/tags.yaml` | data-warehouse-engineer | 用户标签体系，供增长运营精准分群 |
+| `README.md` | 经理 | 产品资料导航与维护约定 |
 | `CHANGELOG.md` | 经理（按帽子返回的变更行） | 每次变更一行 |
 
 ## 约定
 
+- 新建产品层时只补缺失文件，已有文件保留。写入归属以插件 `workflow/registry.json` 为准，任务派单可以进一步缩小范围。
 - 模板里的 `sdlc:unfilled` 标记 = 还没填。负责人写入真实内容后删除标记；闸门把带标记的文件当作缺失。
 - 只放**长期成立的事实**，不贴功能细节。`strategy.md` 控制在两屏内。
 - 改别人负责的文件 → 提 open question 给负责人，不直接改。

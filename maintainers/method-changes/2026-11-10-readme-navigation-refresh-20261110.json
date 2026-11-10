@@ -1,0 +1,19 @@
+{
+ "id": "readme-navigation-refresh-20261110",
+ "at": "2026-11-10T11:20:59+08:00",
+ "kind": "editorial",
+ "failure_form": "n/a",
+ "verdict": "n/a",
+ "reason": "Reorganize README navigation and update descriptions against existing registry, generators and product ownership. No task, permission or skill execution rule changes. Six bounded documentation-use scenarios recorded with actual answers and limits.",
+ "evidence": [
+  "maintainers/archive/readme-refresh-2026-11-10/evaluation.md"
+ ],
+ "decided_by": "maintainer",
+ "files": {
+  "agent-sources/profiles/README.md": "84e3a35353ad6d747d971883d73c8d99d2ea93af625b38df7a1c7b26523113aa",
+  "skills/sdlc-eval/regressions/README.md": "fb01b28442178da0fe2c453e47358457d58518073c3db069429e12747e279148",
+  "skills/sdlc/templates/m/README.md": "2ab89ad4723bd4168d961ab8d7e264817440822922ab4cda4f1ed816a3f1d41b",
+  "skills/sdlc/templates/product-readme.md": "dc1210ea747f235586fa8e2ab5563c8b67995bfc52b89a5789bdee709b95416a"
+ },
+ "deleted": []
+}

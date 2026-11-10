@@ -1,0 +1,318 @@
+{
+  "date": "2026-11-10",
+  "results": [
+    {
+      "check": "health-check",
+      "command": [
+        "bash",
+        "scripts/health-check.sh"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 0.44,
+      "summary": [
+        "✓ 健康检查全部通过"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/health-check.log",
+      "warnings": [
+        "⚠ [COMPAT] $falsify 为兼容入口，2026-12-31 退役（替代：discover）",
+        "⚠ [VENDOR] vendor/anthropic-docx 未安装：运行 bash vendor/install.sh anthropic-docx（许可证受限，需 --accept-restricted）",
+        "⚠ [VENDOR] vendor/claude-code 未安装：运行 bash vendor/install.sh claude-code（许可证受限，需 --accept-restricted）",
+        "⚠ [VENDOR] vendor/ 的锁文件或安装脚本有未提交的变化（plugin-updater 更新锁文件后由维护者提交）: vendor/README.md",
+        "⚠ [METHODPENDING] 4.3.4-role-descriptions: behavioral change awaiting evidence (1 files)",
+        "⚠ [METHODPENDING] b1-smoke-mode: behavioral change awaiting evidence (1 files)",
+        "⚠ [METHODPENDING] b5-outcome-templates: behavioral change awaiting evidence (3 files)",
+        "⚠ [METHODPENDING] script-gate-hatadvance: behavioral change awaiting evidence (2 files)",
+        "⚠ [METHODPENDING] inherited-unrecorded-methods-20261110: behavioral change awaiting evidence (7 files)"
+      ]
+    },
+    {
+      "check": "test_behavior_smoke",
+      "command": [
+        "python3",
+        "scripts/test_behavior_smoke.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 14.78,
+      "summary": [
+        "Ran 12 tests in 14.730s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_behavior_smoke.log"
+    },
+    {
+      "check": "test_continuous_work",
+      "command": [
+        "python3",
+        "scripts/test_continuous_work.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 17.02,
+      "summary": [
+        "Ran 25 tests in 16.885s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_continuous_work.log"
+    },
+    {
+      "check": "test_eval_protocol",
+      "command": [
+        "python3",
+        "scripts/test_eval_protocol.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 0.26,
+      "summary": [
+        "Ran 11 tests in 0.184s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_eval_protocol.log"
+    },
+    {
+      "check": "test_gate_catalog",
+      "command": [
+        "python3",
+        "scripts/test_gate_catalog.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 0.09,
+      "summary": [
+        "Ran 4 tests in 0.042s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_gate_catalog.log"
+    },
+    {
+      "check": "test_gate_variants",
+      "command": [
+        "python3",
+        "scripts/test_gate_variants.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 20.64,
+      "summary": [
+        "Ran 5 tests in 20.593s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_gate_variants.log"
+    },
+    {
+      "check": "test_hosts",
+      "command": [
+        "python3",
+        "scripts/test_hosts.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 0.49,
+      "summary": [
+        "Ran 22 tests in 0.428s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_hosts.log"
+    },
+    {
+      "check": "test_method_ledger",
+      "command": [
+        "python3",
+        "scripts/test_method_ledger.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 5.4,
+      "summary": [
+        "Ran 15 tests in 5.352s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_method_ledger.log"
+    },
+    {
+      "check": "test_outcomes",
+      "command": [
+        "python3",
+        "scripts/test_outcomes.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 0.7,
+      "summary": [
+        "Ran 6 tests in 0.656s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_outcomes.log"
+    },
+    {
+      "check": "test_reference_links",
+      "command": [
+        "python3",
+        "scripts/test_reference_links.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 0.33,
+      "summary": [
+        "Ran 9 tests in 0.252s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_reference_links.log"
+    },
+    {
+      "check": "test_session_digest",
+      "command": [
+        "python3",
+        "scripts/test_session_digest.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 0.35,
+      "summary": [
+        "Ran 7 tests in 0.303s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_session_digest.log"
+    },
+    {
+      "check": "test_skill_evidence",
+      "command": [
+        "python3",
+        "scripts/test_skill_evidence.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 0.04,
+      "summary": [
+        "Ran 4 tests in 0.002s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_skill_evidence.log"
+    },
+    {
+      "check": "test_state_view",
+      "command": [
+        "python3",
+        "scripts/test_state_view.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 0.05,
+      "summary": [
+        "Ran 11 tests in 0.006s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_state_view.log"
+    },
+    {
+      "check": "test_task_runtime",
+      "command": [
+        "python3",
+        "scripts/test_task_runtime.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 14.16,
+      "summary": [
+        "Ran 54 tests in 14.084s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_task_runtime.log"
+    },
+    {
+      "check": "test_trigger_smoke",
+      "command": [
+        "python3",
+        "scripts/test_trigger_smoke.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 2.46,
+      "summary": [
+        "Ran 4 tests in 2.406s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_trigger_smoke.log"
+    },
+    {
+      "check": "test_vendor_drift",
+      "command": [
+        "python3",
+        "scripts/test_vendor_drift.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 0.11,
+      "summary": [
+        "Ran 5 tests in 0.066s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_vendor_drift.log"
+    },
+    {
+      "check": "test_vendor_install",
+      "command": [
+        "python3",
+        "scripts/test_vendor_install.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 3.35,
+      "summary": [
+        "vendor install tests: all passed"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_vendor_install.log"
+    },
+    {
+      "check": "test_work_scope",
+      "command": [
+        "python3",
+        "scripts/test_work_scope.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 9.61,
+      "summary": [
+        "Ran 23 tests in 9.524s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_work_scope.log"
+    },
+    {
+      "check": "test_workflow",
+      "command": [
+        "python3",
+        "scripts/test_workflow.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 0.48,
+      "summary": [
+        "Ran 75 tests in 0.411s"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/test_workflow.log"
+    },
+    {
+      "check": "check-sdlc-bash",
+      "command": [
+        "bash",
+        "scripts/test-check-sdlc.sh"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "seconds": 98.69,
+      "summary": [
+        "test-check-sdlc: all passed"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/check-sdlc-bash.log"
+    },
+    {
+      "check": "check-sdlc-zh_CN",
+      "command": [
+        "/bin/bash",
+        "scripts/test-check-sdlc.sh"
+      ],
+      "env": {
+        "LC_ALL": "zh_CN.UTF-8"
+      },
+      "exit_code": 0,
+      "seconds": 99.27,
+      "summary": [
+        "test-check-sdlc: all passed"
+      ],
+      "log": "/private/tmp/sdlc-readme-checks-20261110/check-sdlc-zh_CN.log"
+    }
+  ],
+  "all_passed": true,
+  "python_test_files": 18,
+  "limits": [
+    "Existing METHODPENDING records remain open.",
+    "No live host end-to-end runs or historical auto_agents model comparisons in this documentation task."
+  ]
+}

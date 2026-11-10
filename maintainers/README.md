@@ -1,6 +1,6 @@
 # 维护者档案
 
-这里的文件只给插件维护者用，不被任何技能、角色或派单读取。
+这里的文件只给插件维护者用，不被任何技能、角色或派单默认加载。使用插件请先读[使用指南](../docs/usage.md)；修改插件前先读 [AGENTS.md](../AGENTS.md)。
 
 | 位置 | 是什么 | 什么时候看 |
 |---|---|---|
@@ -8,7 +8,28 @@
 | `method-changes/` | 每次方法改动一条记录：改了哪些文件、行为类还是编辑类、失败类型、证据位置、结论 | 改技能或规则文本之后；方法复盘时 |
 | `gate-provenance.json` | 每个闸门标签的来历、加入日期、复审日期和维护成本，由 `scripts/gate_catalog.py` 校验 | 新增或修改闸门时；复审到期时 |
 | `out-of-scope/` | 有意不做的事：结论、理由、来源、什么证据会让我们重新考虑 | 准备提新规则或借鉴外部做法之前 |
-| `archive/` | 已移出技能的项目经验原文 | 需要追溯来源时 |
+| `archive/` | 项目经验原文、维护验证与场景评测证据 | 追溯具体变更的依据时 |
+
+## 维护入口与完成检查
+
+- [角色源文件](../agent-sources/profiles/README.md)：身份、风格与共享行为的编译入口。
+- [上游原件](../vendor/README.md)：锁文件、安装与引用边界。
+- [拒绝清单](out-of-scope/README.md)：包括[技能评测不限定模型与客户端](out-of-scope/2026-11-10-不限定技能评测模型与客户端.md)。
+- [auto_agents 经验归档](archive/auto_agents/README.md)：历史项目条目与接收状态。
+- [2026-11-10 采集方法维护记录](archive/mt-collection-2026-11-10/)：该次变更留下的检查与场景评测材料。
+
+在仓库根目录完成以下全部检查；方法台账登记在检查前完成：
+
+```bash
+bash scripts/health-check.sh
+for test_file in scripts/test_*.py; do
+  python3 "$test_file" || exit 1
+done
+bash scripts/test-check-sdlc.sh
+LC_ALL=zh_CN.UTF-8 /bin/bash scripts/test-check-sdlc.sh
+```
+
+修改注册表或宿主源后用 `python3 scripts/workflow.py render` 更新生成物；修改角色源后用 `python3 scripts/render-role-agents.py` 更新角色。技能修改还需下述场景评测；脚本检查不能替代它。
 
 ## 改方法文本的流程
 
@@ -58,7 +79,7 @@
 3. 候选只能用两种方式进来：
    - 原件走 vendor 锁定（`vendor/<源>.lock.json` + `vendor/install.sh`）；
    - 改写进技能参考，文件头写来源；有上游原件的写 `<!-- upstream: … -->` 头，让 `VENDORDRIFT` 能盯住。
-4. 进来之后照「改方法文本的流程」走：变更记录，再做冒烟对比。
+4. 进来之后照「改方法文本的流程」走：完成适当的场景评测并登记变更；只有实际做过对照时才给出相对收益结论。
 5. **从不自动安装。** 搜到的技能只读、只比较；装不装由维护者决定。不采纳的写进 `out-of-scope/`（例如 `2026-10-02-不自动安装外部技能.md`）。
 
-方案与执行记录在插件仓库之外的维护者归档中（`~/Documents/grok-files/sdlc-workflow/`）。
+早期方案与执行记录按约定存放在仓库外的 `~/Documents/grok-files/sdlc-workflow/<date>-…/`。复述历史结论前应读取对应原记录；该路径在当前环境不可用时，明确证据缺口，不从旧 README 推断早期评测结果。仓库内的 `archive/` 与台账 `evidence` 字段也保存或指向部分维护证据。

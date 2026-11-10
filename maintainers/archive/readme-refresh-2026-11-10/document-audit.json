@@ -1,0 +1,22 @@
+{
+  "readme_files": [
+    "README.md",
+    "agent-sources/profiles/README.md",
+    "maintainers/README.md",
+    "maintainers/archive/auto_agents/README.md",
+    "maintainers/out-of-scope/README.md",
+    "skills/sdlc-eval/regressions/README.md",
+    "skills/sdlc/templates/m/README.md",
+    "skills/sdlc/templates/product-readme.md",
+    "vendor/README.md"
+  ],
+  "local_links_and_anchors_checked": 81,
+  "registry_counts": {
+    "commands": 9,
+    "skills": 27,
+    "roles": 19,
+    "tasks": 68
+  },
+  "evaluated_hashes_match": true,
+  "errors": []
+}
