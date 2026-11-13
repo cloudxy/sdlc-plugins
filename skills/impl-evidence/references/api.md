@@ -89,6 +89,7 @@ The following mapping applies to projects that explicitly adopt this layered Pyt
 |---|---|
 | [concurrency-and-transactions.md](api/concurrency-and-transactions.md) | Handling concurrent writes, deciding transaction boundaries, or debugging deadlocks |
 | [layering-and-contracts.md](api/layering-and-contracts.md) | Router/Service/Repository boundaries, ORM leak, contract mapping |
+| [provider-authorization.md](api/provider-authorization.md) | API Key/subscription/CLI integration, readiness claims, channel dispatch, diagnostic and output boundaries |
 | [templates/impl-evidence.md](../templates/impl-evidence.md) | Story evidence (command + exit code) |
 
 > Historical project incidents remain in the maintainer archive; this procedure states their applicability without treating one project as the default.

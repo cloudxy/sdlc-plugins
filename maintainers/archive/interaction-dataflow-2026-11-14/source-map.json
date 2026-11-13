@@ -1,0 +1,34 @@
+{
+  "kind": "origin pointers and digests only; no raw private contents",
+  "sources": [
+    {
+      "workspace": "vsc-workflow",
+      "path": "docs/plans/active/service-operations/feedback.md",
+      "sha256": "2fa9f53941e70e0cd2357fc0d9fd24d386e99eb1296fb1d605dfc5b9cb689ca6"
+    },
+    {
+      "workspace": "vsc-workflow",
+      "path": "docs/plans/active/creative-production/design/sidebar-sky-20261113.md",
+      "sha256": "6dd6e201a82ebdceeb82f6bf60283916fb9d9d3726897c57050a7368e068c762"
+    },
+    {
+      "workspace": "vsc-workflow",
+      "path": "docs/plans/active/creative-production/design/codex-authorization-20261113.md",
+      "sha256": "185133a436222b3a227874b051497f0ca8833ed99d48f5e757c7c6f51cd6af28"
+    },
+    {
+      "workspace": "vsc-workflow",
+      "path": "docs/plans/active/creative-production/design/official-assets-design-20261114.md",
+      "sha256": "a4454cec5775e7e59c1398c672c18fd410d40e75d85e1e45cdec5121b54d9f6a"
+    },
+    {
+      "workspace": "vsc-workflow",
+      "path": ".vsc-local/official-assets-redesign-20261114/verification.json",
+      "sha256": "f5fcd27273518363938d6fd19fb33ef25bff95ab8058663c6ace5bac76a314cc"
+    }
+  ],
+  "user_constraints": [
+    "Scope tests to changed and affected areas; do not run the full suite.",
+    "Summarize the above lessons in sdlc-workflow corresponding agent Skills."
+  ]
+}

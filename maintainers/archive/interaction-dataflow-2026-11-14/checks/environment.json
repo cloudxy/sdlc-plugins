@@ -1,0 +1,7 @@
+{
+  "initial_health_exit": 3,
+  "cause": "Clean Git clone omitted ignored vendor installations; no method defect inferred.",
+  "correction": "Copied the two existing required vendor directories from the original checkout to the isolated checkout, retaining in-tree paths. No download/install or source changes.",
+  "vendor_committed": false,
+  "symlink_used": false
+}

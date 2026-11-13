@@ -1,0 +1,12 @@
+{
+  "name": "role-render",
+  "command": [
+    "python3",
+    "scripts/render-role-agents.py",
+    "--check"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 0.112,
+  "stdout": "",
+  "stderr": ""
+}

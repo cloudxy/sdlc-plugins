@@ -1,0 +1,12 @@
+{
+  "name": "method-closure-regression",
+  "command": [
+    "python3",
+    "scripts/test_reference_links.py",
+    "HostMethodValidity"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 0.151,
+  "stdout": "",
+  "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.034s\n\nOK\n"
+}

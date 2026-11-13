@@ -1,0 +1,104 @@
+{
+  "role_method_closures": [
+    {
+      "role": "designer",
+      "primary_skill": "design-contract",
+      "sha256": "bb64b62a8f279d35d9f1c246c1586692ce9930251e8518d876b8b1fbc987b8b6",
+      "files": 107,
+      "complete": true,
+      "gaps": [],
+      "unresolved_links": 9
+    },
+    {
+      "role": "frontend",
+      "primary_skill": "impl-evidence",
+      "sha256": "92c18fbb79c4499c3f23f1fecf5a348d51eed7e16a9d8db4c3d7b60df7bacbdc",
+      "files": 108,
+      "complete": true,
+      "gaps": [],
+      "unresolved_links": 2
+    },
+    {
+      "role": "backend",
+      "primary_skill": "impl-evidence",
+      "sha256": "c3733998192914b5e0c97f817af0804600c435d1984023e59aefed7d5abf5657",
+      "files": 108,
+      "complete": true,
+      "gaps": [],
+      "unresolved_links": 2
+    },
+    {
+      "role": "qa",
+      "primary_skill": "coverage-matrix",
+      "sha256": "eb255d83ca7cb9d501e564027ffac7791bbc57b1afb0df514b87dde8a451d014",
+      "files": 84,
+      "complete": true,
+      "gaps": [],
+      "unresolved_links": 0
+    },
+    {
+      "role": "sre",
+      "primary_skill": "deliver",
+      "sha256": "8f35480cd08178ab071095430ce01ecc521feaa70591a28313d32971a07b6925",
+      "files": 105,
+      "complete": true,
+      "gaps": [],
+      "unresolved_links": 1
+    },
+    {
+      "role": "qc",
+      "primary_skill": "release-gate",
+      "sha256": "8d34db1339b0deadbb1465aca4f58c012e76051a3d5975bc1cc007ef1185f23d",
+      "files": 78,
+      "complete": true,
+      "gaps": [],
+      "unresolved_links": 0
+    },
+    {
+      "role": "architect",
+      "primary_skill": "architecture",
+      "sha256": "992a32e046b87cf7d9c55c93603cf0496da5a535a7758e5e1537af5dc96e877f",
+      "files": 100,
+      "complete": true,
+      "gaps": [],
+      "unresolved_links": 1
+    },
+    {
+      "role": "dba",
+      "primary_skill": "schema",
+      "sha256": "17ff412ac9488bdf7f8a4460a86df9ad88c6e571f0b73847b166a5a7e12cb009",
+      "files": 92,
+      "complete": true,
+      "gaps": [],
+      "unresolved_links": 1
+    }
+  ],
+  "new_reference_links": [
+    {
+      "source": "skills/design-contract/SKILL.md",
+      "target": "references/interaction-preserving-refinement.md",
+      "exists": true
+    },
+    {
+      "source": "skills/impl-evidence/references/ui.md",
+      "target": "ui/interaction-and-result-integrity.md",
+      "exists": true
+    },
+    {
+      "source": "skills/impl-evidence/references/api.md",
+      "target": "api/provider-authorization.md",
+      "exists": true
+    },
+    {
+      "source": "skills/impl-evidence/references/ui/interaction-and-result-integrity.md",
+      "target": "../api/provider-authorization.md",
+      "exists": true
+    },
+    {
+      "source": "skills/architecture/references/boundary-derivation.md",
+      "target": "../../impl-evidence/references/api/provider-authorization.md",
+      "exists": true
+    }
+  ],
+  "claim": "Role method closures and new reference discovery only; does not claim each conditional reference was executed by each runtime host."
+}

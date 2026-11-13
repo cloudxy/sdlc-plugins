@@ -37,6 +37,8 @@ Use a feedback command that detects the original symptom. A diagnostic harness c
 - **Mitigation first in incidents.** Incident response order belongs to deliver; diagnosis never delays a necessary mitigation.
 - **First-hand evidence outranks the fluent hypothesis.** Before ranking more hypotheses, connect read-only to the actual store/queue/log and look; an operator-reported symptom ("only 2 keys exist") can be a viewer pagination artifact while all 11 sit in the store. When parts sum to a whole, cross-sum (Σ detail == total, exactly) validates or convicts the whole pipeline in one probe.
 - **The stability of the failure set is itself evidence.** A missing-data set that varies run to run points at timing/state races (listen windows, shared keys, interleaved runs); a stable set points at semantics (routing, schema, empty-vs-missing). Split on that before hypothesizing.
+- **A visual line is not necessarily a progress indicator.** Capture the focused element, geometry, overflow and matching CSS state while the symptom exists. A structural host's focus outline and a running progress bar can coexist; remove a rejected hypothesis's speculative patch rather than layering fixes over it.
+- **A visible menu is not a working click path.** Reproduce the actual focus/pointer/click/close sequence through a child action. A direct handler test cannot disprove an earlier blur handler hiding the target before click.
 
 ## Self-check
 

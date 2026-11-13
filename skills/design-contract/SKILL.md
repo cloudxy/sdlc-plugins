@@ -20,6 +20,8 @@ Job: **design an experience people remember and can use without thinking, then s
 
 A named flow/page can be refined against its accepted requirement and design baseline. Record feedback, affected states and a concrete completion criterion; reuse settled components/directions. A changed business outcome goes to PM, a feasibility conflict to architecture. Ordinary preference iteration does not count as failed technical rework. Discovery prototypes may help clarify requirements; final handoff prototypes still need accepted behavior. Return the input/output versions and affected consumers, including prior design acceptance needing revalidation.
 
+For an already accepted local direction, apply the steps below to the affected states and deliverables; do not invent a new D<n> selection or approval cycle. A short change contract can hand off an unambiguous refinement. Unresolved structure or interaction needs an appropriate prototype; claims about rendered layout or the running build still require actual visual evidence. Use [interaction-preserving-refinement.md](references/interaction-preserving-refinement.md) for existing menus, libraries and settings.
+
 ## Choose the scope before exploring
 
 Record mode `reuse`, `local-exploration` or `new-direction`, why it fits, the approved baseline/version and unresolved decisions. Reuse existing components/tokens and direction when valid; no new visual competition or external research is required for a settled local change. New consequential choices need credible alternatives and an authorized selection, not a fixed number. Cite existing user/delegated authority instead of asking again. Early architecture feasibility may precede final design.
@@ -110,6 +112,7 @@ Follow [design-review.md](references/design-review.md): screenshot the build at 
 | [visual-direction.md](references/visual-direction.md) | Any surface with visual freedom — the AI-default clusters, the plan-then-critique method, where boldness belongs |
 | [design-review.md](references/design-review.md) | Task design-qa: comparing the build with the prototype, severity, verdict |
 | [ia-and-flow.md](references/ia-and-flow.md) | Navigation, collection semantics, compact cards, FR-to-screen mapping and flow notation |
+| [interaction-preserving-refinement.md](references/interaction-preserving-refinement.md) | Existing menus, media libraries or provider settings: retain actions, verify source-specific loading, focus and narrow-screen controls |
 | [ux-writing.md](references/ux-writing.md) | Any interface copy — naming, CTAs, error and empty copy |
 | [tokens-and-a11y.md](references/tokens-and-a11y.md) | Tokens, contrast pairs, focus order |
 | [generated-imagery.md](references/generated-imagery.md) | The packet lists `imagery` — when a generated image is worth it, where its style anchors come from, how it lands in an artifact (a reference image is never the direction) |

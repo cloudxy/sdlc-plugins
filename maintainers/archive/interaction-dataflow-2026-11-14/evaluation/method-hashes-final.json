@@ -1,0 +1,18 @@
+{
+  "adapters/hosts.json": "d21730978940b4778ac16212b689f3a29ff6cdd77e18bf0aff1b9cae9090a5e9",
+  "skills/architecture/references/boundary-derivation.md": "d76b65cc72d87d15b3c67b847b4a066cc373a61c44fd3d30dcbd52d98f6b5c1f",
+  "skills/coverage-matrix/SKILL.md": "8316b44c92878e2e7dc0ec05b9bc90d917bfe592f0c437b7772b32ee9c9fbe06",
+  "skills/coverage-matrix/references/e2e-and-exploratory.md": "9cdf21e1d62c9bc424b868ba818d168bc87118bee9f705ee64f6863b43d6c862",
+  "skills/coverage-matrix/references/test-layering.md": "1263b6d7645c25b53034d17e96ba124d1d27095cfca85478da89a896b51ce9e2",
+  "skills/debug/SKILL.md": "387bafd99f8c8508c438f9101ddcd1fcc5e021da7092d1b23d7c351742244385",
+  "skills/deliver/references/release-and-rollback.md": "1ed36e9dd1b1525b47a16af24422fbfcb0c58cdddd972533096f629423eee093",
+  "skills/design-contract/SKILL.md": "17d9cf402d6b4dde698979acff2f0b09d79b9e52424b33c7a63db78e3ef17bb9",
+  "skills/design-contract/references/interaction-preserving-refinement.md": "a3682dd8bdf805bb4c53bb2aa931cc76a6de13e4280c1f30ff8ea92bc22209d6",
+  "skills/impl-evidence/references/api.md": "5214508d32174a2970281ede213e453a7545e2afe324ad919a11484ca83075e2",
+  "skills/impl-evidence/references/api/layering-and-contracts.md": "9d9ca9d9939f3e1f29f16a4a4a8c548b2e7e8a37ef0163b6382e00bfdc7815e1",
+  "skills/impl-evidence/references/api/provider-authorization.md": "68f614467d1832b9e1f90ab701728eae6625c761af09db6276720a6116344b1c",
+  "skills/impl-evidence/references/ui.md": "f16bc2830544084cec09d81a77d1fb375c6fd26b11b8c13ea230d226b5ca2a6b",
+  "skills/impl-evidence/references/ui/interaction-and-result-integrity.md": "04506f0bb4cc65b5c0f8e455672e4d8cc75b943e32c6db2a0410d401e79fb57c",
+  "skills/release-gate/SKILL.md": "9323015f2a1c7d8182c10c00417875543da3b85272b4c106a5012fb15475f6e1",
+  "skills/schema/references/modeling-patterns.md": "b7317102fc11b23f0624503e826c06878cf1f52395243d51522c9e4e38fcd85f"
+}

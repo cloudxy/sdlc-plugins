@@ -1,0 +1,13 @@
+{
+  "name": "host-render",
+  "command": [
+    "python3",
+    "scripts/workflow.py",
+    "render",
+    "--check"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 0.085,
+  "stdout": "",
+  "stderr": ""
+}

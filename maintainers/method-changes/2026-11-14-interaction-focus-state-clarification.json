@@ -1,0 +1,17 @@
+{
+ "id": "interaction-focus-state-clarification",
+ "at": "2026-11-14T02:26:11+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "evaluated",
+ "reason": "Clarify browse, saved configuration, active channel and execution as separate states, and preserve focus according to the menu close reason, following the A/B scenario outputs.",
+ "evidence": [
+  "maintainers/archive/interaction-dataflow-2026-11-14/evaluation/designer-final-application.md",
+  "maintainers/archive/interaction-dataflow-2026-11-14/evaluation/judgments.json"
+ ],
+ "decided_by": "maintainer",
+ "files": {
+  "skills/design-contract/references/interaction-preserving-refinement.md": "a3682dd8bdf805bb4c53bb2aa931cc76a6de13e4280c1f30ff8ea92bc22209d6"
+ },
+ "deleted": []
+}

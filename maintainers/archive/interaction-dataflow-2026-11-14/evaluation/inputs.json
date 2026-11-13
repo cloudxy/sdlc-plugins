@@ -1,0 +1,123 @@
+{
+  "A": {
+    "role": "designer",
+    "request": "沿既有供应商设置样式细化新增通道卡，不改变已保存的配置。请给出范围、状态和交接。",
+    "facts": {
+      "accepted_mode": "reuse",
+      "existing_patterns": [
+        "单章节模式切换",
+        "授权卡",
+        "检查/刷新按钮"
+      ],
+      "saved_api_config": "present, redacted",
+      "selected_mode": "subscription",
+      "login": "valid",
+      "server_support": "unknown",
+      "generation_evidence": "none",
+      "visual_evidence": "desktop prototype by another operator only"
+    }
+  },
+  "B": {
+    "role": "designer",
+    "request": "重新设计既有媒体库，参考两站；列出实现所需的契约和验证。",
+    "facts": {
+      "source_A": "observed automatic append at list tail; batch size unknown",
+      "source_B": "observed manual load more with remaining group count",
+      "source_B_code": "initial groups=60; explicit single selection=96; later batch=60; other filters reset=60",
+      "existing_actions": [
+        "preview",
+        "select primary/backup",
+        "reference",
+        "add project",
+        "authorized recoverable trash",
+        "source/rights",
+        "angle/depth",
+        "recipe"
+      ],
+      "existing_history_store": "browser local",
+      "accepted_navigation": "history after portrait; no authority migration requested",
+      "mobile_observation": "none",
+      "fixed_dock": "single row with unknown fit",
+      "parent_report": "parent saw desktop only; designer has not opened browser"
+    }
+  },
+  "C": {
+    "role": "frontend/debug",
+    "request": "诊断菜单看得到点不到、绿线及预览污染，给出最小修复和回归。",
+    "facts": {
+      "trace": [
+        "focusout relatedTarget=null",
+        "menu.hidden=true",
+        "click target removed before dispatch"
+      ],
+      "line_probe": {
+        "generation": "complete",
+        "progress_node": "not visible",
+        "focused_element": "structural main tabindex=-1",
+        "matched_rule": ":focus-visible outline 1px green; host spans viewport"
+      },
+      "preview_trace": [
+        "generatedUrl=result-a.png",
+        "openStitch writes generatedUrl=reference-composite.png",
+        "download result now returns reference-composite.png"
+      ],
+      "minimal_DOM_error": "new nav code uses getAttribute; old fixture has only setAttribute"
+    }
+  },
+  "D": {
+    "role": "backend/dba",
+    "request": "核个人反馈的数据流并给出实现边界。",
+    "facts": {
+      "actor": "u1 authenticated",
+      "client_owner_param": "u2",
+      "request_types": "mixed",
+      "current_query": "ORDER BY created_at DESC LIMIT 24, then filter feedback and owner in UI",
+      "rows": "60 newer other-type rows, 30 u2 feedback rows, 3 u1 feedback rows",
+      "detail_lookup": "by id only",
+      "admin_query": "same route, UI toggle only",
+      "classification": "form value exists, column absent",
+      "legacy": "category unknown",
+      "status": "approved displayed as processed"
+    }
+  },
+  "E": {
+    "role": "backend/frontend",
+    "request": "订阅卡已授权但生成索要 API Key；说明接通与成功判据。",
+    "facts": {
+      "ui_channel": "subscription-image",
+      "server_allowlist": [
+        "api-image"
+      ],
+      "validator": "requires API key for every channel",
+      "CLI_login": "valid",
+      "CLI_image_option": "consumes following positional arguments until terminator",
+      "attempt_1": "CLI binary absent during upgrade",
+      "attempt_2": "automation tool 401 before reaching provider",
+      "attempt_3": "exit 0; only pre-existing output file is reported",
+      "previous_valid_result": "keep.png",
+      "new_generation_authorization": "one attempt; no fallback authorization"
+    }
+  },
+  "F": {
+    "role": "qa/sre/qc",
+    "request": "只验证此次修改影响范围；其他工作不可动。给出验证发布决定。",
+    "facts": {
+      "changed": "menu focus + scoped CSS + minimal DOM fixture + version metadata",
+      "relevant_checks": [
+        "menu event-sequence",
+        "asset browser consumers",
+        "scoped browser walkthrough"
+      ],
+      "workspace_other_WIP": [
+        "unrelated staged permissions.py",
+        "untracked media files"
+      ],
+      "hook": "clean tree required; targeted scope supported",
+      "old_report": "full suite passed previous revision",
+      "current_candidate": "new commit after fixture edit; not retested",
+      "browser": "another operator changes tab and opens save dialog",
+      "production_seed_authorization": "yes, existing actor/project; marked records retained",
+      "deployment": "static resources served live; production generation in flight"
+    }
+  }
+}

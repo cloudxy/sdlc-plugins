@@ -1,0 +1,71 @@
+{
+  "kind": "scenario application; no before/after comparison",
+  "results": {
+    "A": {
+      "criteria": [
+        "reuse settled direction, preserve config and actions",
+        "separate login, selection, support and successful generation",
+        "no invented mobile or independent acceptance"
+      ],
+      "verdict": "satisfies decision-level scenario criteria",
+      "output": "designer-final-application.md",
+      "executor": "reused designer role; final clarification checked by maintainer"
+    },
+    "B": {
+      "criteria": [
+        "source-specific pagination and reset contract",
+        "retain member/version actions and local history authority",
+        "actual viewport/fixed dock/current tab checks, no fabricated browser result"
+      ],
+      "verdict": "satisfies decision-level scenario criteria",
+      "output": "designer-final-application.md",
+      "executor": "reused designer role; final clarification checked by maintainer"
+    },
+    "C": {
+      "criteria": [
+        "event order mechanism, not only onclick test",
+        "host focus diagnosis scoped; no global outline removal",
+        "preview and generated state/download separate; accurate fixture API"
+      ],
+      "verdict": "satisfies decision-level scenario criteria",
+      "output": "outputs-C-F.md",
+      "executor": "maintainer scenario application"
+    },
+    "D": {
+      "criteria": [
+        "server actor and independent admin authorization",
+        "filter before count/page; detail and audit scoped",
+        "persist category via DBA; unknown legacy and real status semantics"
+      ],
+      "verdict": "satisfies decision-level scenario criteria",
+      "output": "outputs-C-F.md",
+      "executor": "maintainer scenario application"
+    },
+    "E": {
+      "criteria": [
+        "same channel from config through dispatch and consumer",
+        "subscription and API credentials separated; no fallback or leakage",
+        "classify three errors; reject old output; preserve previous result and bounded consumption"
+      ],
+      "verdict": "satisfies decision-level scenario criteria",
+      "output": "outputs-C-F.md",
+      "executor": "maintainer scenario application"
+    },
+    "F": {
+      "criteria": [
+        "affected checks only, final candidate revalidated, old report not substituted",
+        "exact candidate in clean copy, original targeted hook; preserve WIP",
+        "browser interruption not pass; production data IDs/retention; no restart during in-flight generation"
+      ],
+      "verdict": "satisfies decision-level scenario criteria",
+      "output": "outputs-C-F.md",
+      "executor": "maintainer scenario application"
+    }
+  },
+  "limits": [
+    "No production/UI/CLI execution in this method evaluation.",
+    "C–F and the final A/B text clarification are maintainer self-evaluation, not independent review.",
+    "The existing designer retained earlier context; no fresh/blind claim.",
+    "No relative improvement claim or guarantee of future runtime behavior."
+  ]
+}

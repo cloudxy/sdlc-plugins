@@ -1,0 +1,74 @@
+{
+  "scope": "Only changed method ledger, manifests, role/method discovery and structural validation; explicit user scope overrides historical full-script default.",
+  "commands": [
+    {
+      "name": "health",
+      "command": [
+        "bash",
+        "scripts/health-check.sh"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.418
+    },
+    {
+      "name": "host-render",
+      "command": [
+        "python3",
+        "scripts/workflow.py",
+        "render",
+        "--check"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.085
+    },
+    {
+      "name": "role-render",
+      "command": [
+        "python3",
+        "scripts/render-role-agents.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.112
+    },
+    {
+      "name": "method-ledger",
+      "command": [
+        "python3",
+        "scripts/test_method_ledger.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 5.677
+    },
+    {
+      "name": "manifest-regressions",
+      "command": [
+        "python3",
+        "scripts/test_hosts.py",
+        "Manifests"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.102
+    },
+    {
+      "name": "method-closure-regression",
+      "command": [
+        "python3",
+        "scripts/test_reference_links.py",
+        "HostMethodValidity"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.151
+    }
+  ],
+  "regression_cases": 28,
+  "scenarios": 6,
+  "full_suite_run": false,
+  "not_run": [
+    "All scripts/test_*.py",
+    "Full scripts/test-check-sdlc.sh fixtures in either locale",
+    "Live production, provider generation or data writes"
+  ],
+  "prior_failed_environment": "health-initial.json; corrected by reusing existing in-tree vendor installations; environment.json",
+  "remaining_warnings": "health.json includes prior unrelated pending method records and optional vendor installations; this change has evaluated records."
+}

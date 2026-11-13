@@ -1,0 +1,11 @@
+{
+  "name": "method-ledger",
+  "command": [
+    "python3",
+    "scripts/test_method_ledger.py"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 5.677,
+  "stdout": "",
+  "stderr": "...............\n----------------------------------------------------------------------\nRan 15 tests in 5.611s\n\nOK\n"
+}

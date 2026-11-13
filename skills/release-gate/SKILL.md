@@ -25,6 +25,8 @@ Procedure for the **release-readiness opinion**: a judgment about one named vers
 
 ## Target and scope
 
+Judge the authorized affected checks for the named candidate; a large unrelated suite is not stronger feature evidence. An older baseline failure is neither this change's regression nor an automatic waiver. Require the scope decision, any unresolved obligation and the final candidate's actual outputs; never promote a DOM/mock check, author self-check or selected cases into full-suite, independent or production acceptance.
+
 | Target | What the opinion may say | Extra evidence before the opinion |
 |---|---|---|
 | `local_verified` | The build at `<version>` passes its applicable gates and acceptance locally | None beyond the six points |
