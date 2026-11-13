@@ -38,6 +38,7 @@ Load inside `sdlc-workflow:competitor`. Long form (full battlecard) is [template
 
 | Reference | Read when... |
 |---|---|
+| [replication-scope.md](references/replication-scope.md) | A selected product/module is being replicated: scope, cross-entry observations and local-resource inventory |
 | [templates/snapshot.md](templates/snapshot.md) | Writing `00-discover/compete.md` |
 | [templates/competitor-analysis.md](templates/competitor-analysis.md) | The long-form battlecard, when one snapshot row is not enough |
 

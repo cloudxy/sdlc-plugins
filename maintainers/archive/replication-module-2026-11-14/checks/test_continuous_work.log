@@ -1,0 +1,38 @@
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-14-005448+0800-221462.json}
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-14-005449+0800-354336.json}
+integration: exit 1 → record in state.yaml gates:
+  - {name: integration, kind: script, result: fail, evidence: evidence/runs/integration-2026-11-14-005449+0800-777781.json}
+integration: exit 0 → record in state.yaml gates:
+  - {name: integration, kind: script, result: pass, evidence: evidence/runs/integration-2026-11-14-005450+0800-002396.json}
+integration: exit 0 → record in state.yaml gates:
+  - {name: integration, kind: script, result: pass, evidence: evidence/runs/integration-2026-11-14-005450+0800-583020.json}
+reproduce: exit 0 → record in state.yaml gates:
+  - {name: reproduce, kind: script, result: pass, evidence: evidence/runs/reproduce-2026-11-14-005451+0800-712937.json}
+model: exit 0 → record in state.yaml gates:
+  - {name: model, kind: script, result: pass, evidence: evidence/runs/model-2026-11-14-005456+0800-374190.json}
+model: exit 0 → record in state.yaml gates:
+  - {name: model, kind: script, result: pass, evidence: evidence/runs/model-2026-11-14-005456+0800-984642.json}
+reproduce: exit 0 → record in state.yaml gates:
+  - {name: reproduce, kind: script, result: pass, evidence: evidence/runs/reproduce-2026-11-14-005458+0800-491296.json}
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-14-005459+0800-156545.json}
+analysis: exit 0 → record in state.yaml gates:
+  - {name: analysis, kind: script, result: pass, evidence: evidence/runs/analysis-2026-11-14-005500+0800-135596.json}
+........................F
+======================================================================
+FAIL: test_unrelated_method_update_keeps_result_current (__main__.ContinuousTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/sdlc-replication-methods-20261114/scripts/test_continuous_work.py", line 514, in test_unrelated_method_update_keeps_result_current
+    self.assertEqual(check_tasks(f.root)['tasks'][f.task['id']]['validity'], 'current')
+AssertionError: 'needs-revalidation' != 'current'
+- needs-revalidation
++ current
+
+
+----------------------------------------------------------------------
+Ran 25 tests in 18.801s
+
+FAILED (failures=1)

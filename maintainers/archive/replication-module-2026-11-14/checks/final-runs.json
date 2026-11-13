@@ -1,0 +1,41 @@
+[
+  {
+    "command": [
+      "python3",
+      "scripts/test_continuous_work.py"
+    ],
+    "exit_code": 0,
+    "seconds": 18.712,
+    "log": "checks/test_continuous_work-final.log"
+  },
+  {
+    "command": [
+      "bash",
+      "scripts/health-check.sh"
+    ],
+    "exit_code": 0,
+    "seconds": 0.357,
+    "log": "checks/health-check-verified.log"
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/render-role-agents.py",
+      "--check"
+    ],
+    "exit_code": 0,
+    "seconds": 0.078,
+    "log": "checks/role-render-check.log"
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/workflow.py",
+      "render",
+      "--check"
+    ],
+    "exit_code": 0,
+    "seconds": 0.056,
+    "log": "checks/host-render-check.log"
+  }
+]

@@ -1,0 +1,84 @@
+{
+  "kind": "independent prompt-bound scenario execution with maintainer review",
+  "verdict": "evaluated",
+  "old_new_comparison": false,
+  "independent_runtime_role_activation": false,
+  "criteria_fixed_before_execution": true,
+  "cases": {
+    "A": {
+      "criteria": [
+        "local byte and actual consumer paths are distinguished from URL metadata",
+        "fixed business hash/reference stays unchanged",
+        "ETag cannot be assumed to be response MD5, especially snapshot representation",
+        "inline cover is counted; no remote fallback for the accepted local requirement",
+        "actual output includes a bounded executable verification or precise unverifiable limits; no fabricated video play"
+      ],
+      "result": "satisfies scoped criteria",
+      "reason": "Separates immutable business reference, original and transformed byte identities, every local consumer and inline cover. Executed ETag negative and corrected 14 checks; clearly denies real decode/play/integration claims.",
+      "outputs": [
+        "outputs/A/implementation-plan.md",
+        "outputs/A/verification-result.json",
+        "outputs/A/legacy-etag-result.json"
+      ]
+    },
+    "B": {
+      "criteria": [
+        "p1 personal, p2 team, p3 participating, p4 excluded",
+        "ownership rather than creator/current view determines categories",
+        "classification matches totals/options/pagination before page slicing",
+        "privacy includes tooltip/aria; readonly state retained",
+        "no new approval/design contest outside accepted scope"
+      ],
+      "result": "satisfies scoped criteria",
+      "reason": "p1 personal, p2 team, p3 participating and p4 excluded. Covers union/disjointness, counts/pages/options and hidden assistive labels while retaining readonly; reuses existing decision.",
+      "outputs": [
+        "outputs/B/classification-contract.md"
+      ]
+    },
+    "C": {
+      "criteria": [
+        "not deployed while observed A still live; source/package name is insufficient",
+        "controlled graceful stop, wait and one readiness feature check precede bulk checks",
+        "new runtime contract/shape checked beyond 200",
+        "unrelated WIP and exact candidate/test identity preserved; no destructive production execution"
+      ],
+      "result": "satisfies scoped criteria",
+      "reason": "Keeps not deployed, identifies old build response and draining/port ownership, preserves unrelated WIP, waits for one new-runtime feature readiness check before bulk probes; no production execution.",
+      "outputs": [
+        "outputs/C/release-plan.md"
+      ]
+    },
+    "D": {
+      "criteria": [
+        "one feature snapshot with status quo and claim-specific evidence",
+        "keeps approved CDN and research-only scope, no automatic mirroring",
+        "does not infer unobserved private algorithm or full parity"
+      ],
+      "result": "satisfies scoped criteria",
+      "reason": "Keeps the approved CDN and research-only scope. One feature snapshot with current product and claim-specific E1 limits, no invented private algorithm or unapproved mirror.",
+      "outputs": [
+        "outputs/D/snapshot.md"
+      ]
+    },
+    "E": {
+      "criteria": [
+        "download identity mismatch and false save-success are classified from the supplied synthetic observation, never production claims",
+        "clipboard click and unrun mouse/touch tests are not accepted as successful behavior",
+        "plans pairwise preview/detail/copy/download and input-mode checks at the correct object/version",
+        "keeps synthetic DOM, desktop report and untested 375px evidence limits explicit",
+        "no code fix or new global full-suite requirement"
+      ],
+      "result": "satisfies scoped criteria",
+      "reason": "Separates two supplied synthetic contract contradictions from unknown clipboard/gesture/detail/viewport evidence. Does not infer that 503 proves no commit; scopes follow-up and does not fix production code.",
+      "outputs": [
+        "outputs/E/test-report.md",
+        "outputs/E/coverage.md"
+      ]
+    }
+  },
+  "limits": [
+    "synthetic method scenarios, not native host role integration",
+    "no production or network mutation",
+    "not a comparative gain or model-training claim"
+  ]
+}

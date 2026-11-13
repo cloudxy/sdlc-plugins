@@ -1,0 +1,52 @@
+{
+  "id": "E",
+  "skill": "coverage-matrix",
+  "request": "仅根据这份合成观察记录，给出跨入口缺陷判断、尚缺证据与针对性复验计划。不要修代码，不要把它描述成真实生产环境已复现。涉及详情、预览、复制、下载、保存反馈和比较手势。",
+  "facts": {
+    "accepted_contract": {
+      "selected_artifact": "depth-map@2",
+      "download_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "save_success": "only after persistence succeeds",
+      "copy_fields": [
+        "title",
+        "parameters"
+      ],
+      "comparison_inputs": [
+        "mouse",
+        "touch"
+      ]
+    },
+    "observations": {
+      "preview": {
+        "artifact": "depth-map@2"
+      },
+      "download": {
+        "http": 200,
+        "mime": "image/png",
+        "artifact": "white-model@1",
+        "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "save": {
+        "post_status": 503,
+        "toast": "saved successfully",
+        "draft_retained": true
+      },
+      "copy": {
+        "button_click_recorded": true,
+        "clipboard_result_recorded": false
+      },
+      "comparison": {
+        "mouse_test": "not run",
+        "touch_test": "not run"
+      },
+      "automated_component_checks": {
+        "result": "pass",
+        "environment": "synthetic DOM"
+      },
+      "screenshots": {
+        "desktop": "available by report only",
+        "375px": "not captured"
+      }
+    }
+  }
+}

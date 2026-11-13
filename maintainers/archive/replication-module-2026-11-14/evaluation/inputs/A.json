@@ -1,0 +1,44 @@
+{
+  "id": "A",
+  "skill": "impl-evidence",
+  "lane_file": "ui",
+  "request": "为这个已授权的本地案例展示切片写实施方案和可执行的最小验证；暂不改生产代码。所有资源必须本地，历史引用不能变。材料仅是合成夹具，不能声称已实际播放视频。输出到指定目录。",
+  "facts": {
+    "accepted_version": "case-contract-v1",
+    "fixed_reference": {
+      "id": "demo-1",
+      "version": 1,
+      "source_url": "https://cdn.example.test/demo.mp4",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "source_responses": [
+      {
+        "name": "video",
+        "content_type": "video/mp4",
+        "bytes": "original video bytes",
+        "etag": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      },
+      {
+        "name": "cover",
+        "content_type": "image/jpeg",
+        "bytes": "derived snapshot bytes",
+        "etag": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "query": "snapshot_at_0"
+      }
+    ],
+    "local_files": [
+      "video.bin",
+      "cover.bin"
+    ],
+    "consumer_sources": {
+      "grid": "https://cdn.example.test/demo.jpg",
+      "dialog": "https://cdn.example.test/demo.mp4",
+      "download": "https://cdn.example.test/demo.mp4"
+    },
+    "other_resource": {
+      "name": "method-cover",
+      "format": "inline data:image/webp;base64,UmVzb3VyY2U=",
+      "bytes_acquired": false
+    }
+  }
+}

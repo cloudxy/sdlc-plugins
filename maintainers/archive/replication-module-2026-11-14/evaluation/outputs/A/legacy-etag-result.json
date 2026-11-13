@@ -1,0 +1,17 @@
+{
+  "method": "unsupported assumption: ETag == MD5",
+  "mismatches": [
+    {
+      "resource": "video",
+      "assumed_md5": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "actual_fixture_md5": "ce7a059663c03bcab71d1f3b7ccd3717"
+    },
+    {
+      "resource": "cover",
+      "assumed_md5": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "actual_fixture_md5": "69651041c36580d9aa3994458aa9af2e"
+    }
+  ],
+  "conclusion": "validator assumption rejected; no source corruption conclusion",
+  "synthetic_only": true
+}

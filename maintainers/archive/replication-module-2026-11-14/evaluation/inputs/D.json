@@ -1,0 +1,23 @@
+{
+  "id": "D",
+  "skill": "compete",
+  "request": "只做一个已指定筛选功能的竞品比较；保持本产品已批准的在线CDN方案，不做离线包，不改代码，不下载媒体。已有调研材料如下，给出snapshot及未验证项。",
+  "facts": {
+    "current_product": {
+      "filter": "只有关键字",
+      "cdn": "approved online strategy"
+    },
+    "reference_observation": {
+      "date": "2026-11-14",
+      "version": "public-ui-r2",
+      "surface": "public UI screenshot plus observation transcript",
+      "observed": "可切换全部/图片/视频，图片使用CDN URL",
+      "unobserved": [
+        "private filtering algorithm",
+        "all historical results",
+        "offline behavior"
+      ]
+    },
+    "user_decision": "保留在线部署约束，仅比较筛选入口"
+  }
+}

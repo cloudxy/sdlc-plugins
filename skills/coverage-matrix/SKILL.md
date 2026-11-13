@@ -26,6 +26,7 @@ Job: **find what will hurt users before they do** — prove the key journeys wor
 - **SQLite silently accepts PostgreSQL syntax (like `NULLS LAST`).** SQLite unit tests can be useful but do not establish production-dialect correctness for affected SQL behavior — a verified production escape came from exactly this.
 - **Cases may go beyond the literal GWT.** Derive boundary, concurrency, security and compatibility cases from accepted invariants; escalate an ambiguous business outcome to PM instead of guessing it, and do not stop only because a case was not spelled out.
 - **Regression follows change impact** (story dependency graph). Full regression is a release-policy decision, not a per-ticket rule.
+- **Cross-entry parity needs matching content, not matching labels.** For changed preview/detail/copy/download/gesture consumers, use the fixed-object checks in [e2e-and-exploratory.md](references/e2e-and-exploratory.md); local-media claims also require actual bytes and consumption evidence.
 
 ## Key decisions
 

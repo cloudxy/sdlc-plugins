@@ -1,0 +1,36 @@
+{
+  "scene": "C",
+  "evaluation_identity": "prompt-bound independent evaluator; not a native SDLC role runtime",
+  "input": {
+    "path": "maintainers/archive/replication-module-2026-11-14/evaluation/inputs/C.json",
+    "sha256": "12558826cf8776843f28c62b8dd57a782d4d6d22c1d8f63f6d0e1d5d7aca4453"
+  },
+  "method_reads": [
+    {
+      "path": "skills/deliver/SKILL.md",
+      "sha256": "edc74faf948ed52c5d56824fbf20e0038fecd585cd517ac2de01fc88152e5cd8",
+      "bytes": 8255
+    },
+    {
+      "path": "skills/deliver/references/release-and-rollback.md",
+      "sha256": "028075d2d516c18e24c3ec51c2746f3324c5a9be3d9ad43a4b447e0ffe55553a",
+      "bytes": 9410
+    },
+    {
+      "path": "skills/deliver/references/role-quality.md",
+      "sha256": "c4b7bd243e56a85079072d69d3133fe33b6dbce3d446446cbf9e5c679b278cb9",
+      "bytes": 351
+    },
+    {
+      "path": "skills/deliver/templates/release-checklist.md",
+      "sha256": "4d9cb160dc943fe153c1eaa691837d7ba3264182157ab4a50c9f644321d540b0",
+      "bytes": 9197
+    }
+  ],
+  "method_snapshot_time": "2026-11-14; hashes taken after content reads, source held unchanged by maintainer during evaluation",
+  "execution_registry": "../commands.json",
+  "scenario_execution_ids": [],
+  "execution_scope": "document creation only; no production or scenario-runtime commands executed",
+  "excluded_reads": "no maintainer rubric, VSC source evidence, other archive content or old case conclusions read",
+  "limits": "Only provided scenario facts and routed method references used; no network, deployment, process operation, production/source writes or native-role execution."
+}

@@ -1,0 +1,59 @@
+{
+  "scene": "A",
+  "evaluation_identity": "prompt-bound independent evaluator; not a native SDLC role runtime",
+  "input": {
+    "path": "maintainers/archive/replication-module-2026-11-14/evaluation/inputs/A.json",
+    "sha256": "1d47b681c0193ebac76e0335504e000ccc2ef02ec509418367fd31ff32b44470"
+  },
+  "method_reads": [
+    {
+      "path": "skills/impl-evidence/SKILL.md",
+      "sha256": "423639c30f0f1681ca7388092e3448025290b9a98b64de1dcef3e9d2b482e318",
+      "bytes": 8810
+    },
+    {
+      "path": "skills/impl-evidence/references/ui.md",
+      "sha256": "fe29bbcce34f1c3ad705047b57a414cd27d39cf105639ab5059d59723c955336",
+      "bytes": 7956
+    },
+    {
+      "path": "skills/impl-evidence/references/ui/state-and-data.md",
+      "sha256": "a02a1abe6a00d6f8b6b9ab5370225d5a01bff91dce888ee724924386829232bc",
+      "bytes": 7095
+    },
+    {
+      "path": "skills/impl-evidence/references/ui/edge-states-impl.md",
+      "sha256": "85da33a1d32c17507ed58b098d180287dc63a280bfc626e3c4489cc1bce02ced",
+      "bytes": 8909
+    },
+    {
+      "path": "skills/impl-evidence/references/local-media.md",
+      "sha256": "d8652d4243e0ce2fbbb2a581b5a2370e97e452d13d49873fa245c4af4dc9e869",
+      "bytes": 3176
+    },
+    {
+      "path": "skills/impl-evidence/references/role-quality.md",
+      "sha256": "841916fc740e33898cc57b2e0902ea3e4d8fc09ee19f057a0c18bac0b255d06d",
+      "bytes": 2595
+    },
+    {
+      "path": "skills/impl-evidence/templates/impl-evidence.md",
+      "sha256": "4ad1fe9ecb82e365342d6c8ec3b5f03446aad55bcbe5e2448fc448346e94ec8e",
+      "bytes": 5415
+    },
+    {
+      "path": "skills/impl-evidence/templates/integration.md",
+      "sha256": "29a4842b81c9d2def82a2944a65113a3ce5f3da93f6baffd2baae4dc2ae0711c",
+      "bytes": 1673
+    }
+  ],
+  "method_snapshot_time": "2026-11-14; hashes taken after content reads, source held unchanged by maintainer during evaluation",
+  "execution_registry": "../commands.json",
+  "scenario_execution_ids": [
+    "a-legacy",
+    "a-corrected"
+  ],
+  "execution_scope": "synthetic local checks only",
+  "excluded_reads": "no maintainer rubric, VSC source evidence, other archive content or old case conclusions read",
+  "limits": "Only provided scenario facts and routed method references used; no network, deployment, process operation, production/source writes or native-role execution."
+}

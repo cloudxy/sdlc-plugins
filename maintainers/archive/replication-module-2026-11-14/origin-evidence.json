@@ -1,0 +1,55 @@
+{
+  "source": "user-requested deidentified maintenance retrospective",
+  "source_commits": [
+    "855a614",
+    "0b00498",
+    "307cf182"
+  ],
+  "records": [
+    {
+      "label": "directory",
+      "source_sha256": "5cd2897d1b14ea19faf486f9f0cc537445148f201620e322bb01567818a3b4e8",
+      "raw_retention": "origin workspace local evidence; not distributed"
+    },
+    {
+      "label": "media",
+      "source_sha256": "7286a4e52c9839c532f047e8e38ad7bfc394ef63411f25b551faa59f09e00d50",
+      "raw_retention": "origin workspace local evidence; not distributed"
+    },
+    {
+      "label": "http",
+      "source_sha256": "3f77b9d7007dfda635de9e606544edc9ec09d5dc2e958b7e71db5d3b8602e427",
+      "raw_retention": "origin workspace local evidence; not distributed"
+    },
+    {
+      "label": "corrected-check",
+      "source_sha256": "c5fcf52a3676f105b51061532dec36f94e0468ee737a5b8beb334c7fc82df382",
+      "raw_retention": "origin workspace local evidence; not distributed"
+    },
+    {
+      "label": "initial-checker",
+      "source_sha256": "5e55f0f12154715865c615d2b5194040db0e1492fce7085a46cd0dddea8438cc",
+      "raw_retention": "origin workspace local evidence; not distributed"
+    }
+  ],
+  "observed": {
+    "media_files": 236,
+    "videos_full_decoded": 114,
+    "images_decoded": 122,
+    "local_head_checks": 236,
+    "local_video_range_checks": 114,
+    "media_total_bytes": 1691728954,
+    "related_tests": 16,
+    "subtests": 388,
+    "skipped": 0,
+    "initial_false_cover_failures": 113
+  },
+  "unverified": [
+    "mobile visual parity",
+    "all historical copy/download/gesture defects",
+    "full product equivalence",
+    "professional content quality",
+    "cause of stale runtime source loading",
+    "cause of test duration variation"
+  ]
+}

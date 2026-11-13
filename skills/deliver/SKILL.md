@@ -81,7 +81,7 @@ Recovery methods for changed data are owned by [schema](../schema/SKILL.md); ope
 | Reference | Read when... |
 |---|---|
 | [observability-and-incident.md](references/observability-and-incident.md) | Alerts, runbooks, four-phase incident response |
-| [release-and-rollback.md](references/release-and-rollback.md) | Checklist, verified rollback, canary |
+| [release-and-rollback.md](references/release-and-rollback.md) | Checklist, runtime identity/readiness, shared-worktree boundaries, verified rollback and canary |
 | [templates/release-checklist.md](templates/release-checklist.md) | Deploy checklist |
 | [templates/incident-report.md](templates/incident-report.md) | Incident write-up |
 

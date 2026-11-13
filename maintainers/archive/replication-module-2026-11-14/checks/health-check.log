@@ -1,0 +1,28 @@
+sdlc-workflow 健康检查
+========================================
+[0;32m✓ plugin.json JSON 合法[0m
+[0;32m✓ commands/sdlc.md 存在[0m
+[0;32m✓ commands/sdlc-review.md 存在[0m
+[0;32m✓ commands/sdlc-discover.md 存在[0m
+[0;32m✓ commands/sdlc-research.md 存在[0m
+[0;32m✓ commands/sdlc-eval.md 存在[0m
+[0;32m✓ agents/*.md 与 profiles/_lib 一致（编译期引入）[0m
+[0;32m✓ $pm 已按期删除（PR4b）[0m
+[0;32m✓ $dba 已按期删除（PR4b）[0m
+[0;32m✓ $qa 已按期删除（PR4b）[0m
+[0;32m✓ skill metadata 预算 3481/4200（excerpt capped 250 + names）[0m
+[0;32m✓ vendor 来源 5 个、42 个文件与锁文件一致，引用规则通过[0m
+[0;32m✓ 改写自上游的文件与锁文件一致[0m
+[0;32m✓ 方法文件 274 个，改动均有变更记录[0m
+[0;32m✓ 闸门标签 61 个，均有夹具与来历[0m
+[0;33m⚠ [COMPAT][0m $falsify 为兼容入口，2026-12-31 退役（替代：discover）
+[0;33m⚠ [VENDOR][0m vendor/anthropic-docx 未安装：运行 bash vendor/install.sh anthropic-docx（许可证受限，需 --accept-restricted）
+[0;33m⚠ [VENDOR][0m vendor/claude-code 未安装：运行 bash vendor/install.sh claude-code（许可证受限，需 --accept-restricted）
+[0;33m⚠ [METHODPENDING][0m 4.3.4-role-descriptions: behavioral change awaiting evidence (1 files)
+[0;33m⚠ [METHODPENDING][0m b1-smoke-mode: behavioral change awaiting evidence (1 files)
+[0;33m⚠ [METHODPENDING][0m b5-outcome-templates: behavioral change awaiting evidence (3 files)
+[0;33m⚠ [METHODPENDING][0m script-gate-hatadvance: behavioral change awaiting evidence (2 files)
+[0;33m⚠ [METHODPENDING][0m inherited-unrecorded-methods-20261110: behavioral change awaiting evidence (7 files)
+[0;33m⚠ [METHODPENDING][0m replication-module-local-media: behavioral change awaiting evidence (13 files)
+----------------------------------------
+[0;32m✓ 健康检查全部通过[0m

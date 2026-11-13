@@ -1,0 +1,8 @@
+ok   install_and_check
+ok   digest_mismatch
+ok   local_edit
+ok   restricted
+ok   missing_required
+ok   fetch_failure
+ok   only_named
+vendor install tests: all passed

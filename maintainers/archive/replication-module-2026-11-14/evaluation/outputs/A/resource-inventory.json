@@ -1,0 +1,33 @@
+[
+  {
+    "resource": "video",
+    "path": "fixtures/video.bin",
+    "sha256": "55465bfb37c9a1e3ea3f04878157e420153958b6af1a6d2b29c5f136fdc30dbc",
+    "length": 20,
+    "declared_content_type": "video/mp4",
+    "source_etag_opaque": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "synthetic": true,
+    "decode": "not verified",
+    "relation": "original"
+  },
+  {
+    "resource": "cover",
+    "path": "fixtures/cover.bin",
+    "sha256": "3f530dc985cd9c2b056b2658d0132385d2fc6aadc8663e7898b3dd2df6f749b3",
+    "length": 22,
+    "declared_content_type": "image/jpeg",
+    "source_etag_opaque": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "synthetic": true,
+    "decode": "not verified",
+    "relation": "snapshot_at_0 of demo-1@1/video"
+  },
+  {
+    "resource": "method-cover",
+    "path": "fixtures/method-cover.bin",
+    "sha256": "eb7a842ff958c49c6bb5ac2610915c41b9625d8bb553a87deaff5d1884430f34",
+    "length": 8,
+    "declared_content_type": "image/webp",
+    "synthetic": true,
+    "decode": "not verified"
+  }
+]

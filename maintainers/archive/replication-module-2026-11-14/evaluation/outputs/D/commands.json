@@ -1,0 +1,41 @@
+{
+  "scene": "D",
+  "evaluation_identity": "prompt-bound independent evaluator; not a native SDLC role runtime",
+  "input": {
+    "path": "maintainers/archive/replication-module-2026-11-14/evaluation/inputs/D.json",
+    "sha256": "59dfbef9d190d49c1667202da02e8c2ef6525e0e3c5bb73cf42ea1310b596d6e"
+  },
+  "method_reads": [
+    {
+      "path": "skills/compete/SKILL.md",
+      "sha256": "b355a64407c2052033de4f32ca0ca591bff4f3f184c39352635265d32e975b04",
+      "bytes": 2833
+    },
+    {
+      "path": "skills/compete/templates/snapshot.md",
+      "sha256": "975a951e6be6940724920b492ae03cb54a37b5fb17bab025cf7327e2fcddef27",
+      "bytes": 1184
+    },
+    {
+      "path": "skills/compete/references/role-quality.md",
+      "sha256": "f28b134bd4e9fe1137fd0892f80e5e2d77f9971cff60c42fea197ee0ec4bce8c",
+      "bytes": 351
+    },
+    {
+      "path": "skills/discover/references/evidence.md",
+      "sha256": "db4566093a9c6398551c41b6d68dee8485bf958af04edce661a983d5999ce5f9",
+      "bytes": 1428
+    },
+    {
+      "path": "skills/compete/references/replication-scope.md",
+      "sha256": "872c2bb05f81e6e64d05132187c2de2df55ca5395892f82897512db86bb31fea",
+      "bytes": 2041
+    }
+  ],
+  "method_snapshot_time": "2026-11-14; hashes taken after content reads, source held unchanged by maintainer during evaluation",
+  "execution_registry": "../commands.json",
+  "scenario_execution_ids": [],
+  "execution_scope": "document creation only; no production or scenario-runtime commands executed",
+  "excluded_reads": "no maintainer rubric, VSC source evidence, other archive content or old case conclusions read",
+  "limits": "Only provided scenario facts and routed method references used; no network, deployment, process operation, production/source writes or native-role execution."
+}

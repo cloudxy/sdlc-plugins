@@ -1,0 +1,15 @@
+{
+  "initial_setup": "Installed vendor directories were referenced by symlinks outside the isolated plugin root.",
+  "observed_gap": "vendor/svg-diagram/SKILL.md -> assets/xxx.svg",
+  "baseline_original_complete": true,
+  "isolated_before_complete": false,
+  "correction": "Copied existing locked installations into the isolated vendor directories; source vendor files and plugin runtime were not modified.",
+  "copied_vendor": [
+    "svg-diagram",
+    "agentskills",
+    "anthropic-skills"
+  ],
+  "isolated_after_complete": true,
+  "gaps_after": [],
+  "runtime_code_changed": false
+}

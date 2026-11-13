@@ -1,0 +1,14 @@
+{
+  "fixed_reference": {
+    "id": "demo-1",
+    "version": 1,
+    "source_url": "https://cdn.example.test/demo.mp4",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "consumers": {
+    "grid": "local:cover",
+    "dialog": "local:video",
+    "download": "local:video"
+  },
+  "status": "synthetic proposal only"
+}

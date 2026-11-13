@@ -1,0 +1,43 @@
+{
+ "id": "replication-module-local-media",
+ "at": "2026-11-14T00:54:34+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "evaluated",
+ "reason": "Distill observed replication and module failures into conditional resource, ownership, consumer-evidence and runtime-readiness methods for existing roles; no new stage or permission.",
+ "evidence": [
+  "maintainers/archive/replication-module-2026-11-14/evaluation/README.md",
+  "maintainers/archive/replication-module-2026-11-14/evaluation/criteria-and-judgments.json",
+  "maintainers/archive/replication-module-2026-11-14/evaluation/method-hashes.json"
+ ],
+ "decided_by": "maintainer",
+ "files": {
+  "adapters/hosts.json": "2ec99b30dd0cfd760c0d11c0f42fcf1b45053681879b093da3a43d3e95f15e8f",
+  "skills/architecture/SKILL.md": "0f89af173c3ea7e820dd6d9d2e3fccce0cb073d75c35273a79269a4d33bc0d5e",
+  "skills/architecture/references/boundary-derivation.md": "d4d6312fa0d0963fd28ee9937333248203d9e95bf01688bf89cfa730ddce79db",
+  "skills/compete/SKILL.md": "b355a64407c2052033de4f32ca0ca591bff4f3f184c39352635265d32e975b04",
+  "skills/compete/references/replication-scope.md": "872c2bb05f81e6e64d05132187c2de2df55ca5395892f82897512db86bb31fea",
+  "skills/coverage-matrix/SKILL.md": "9f711148fdb08e96cfdda75c82b5ac22c8741092abe26d60b9db706ff6dc3177",
+  "skills/coverage-matrix/references/e2e-and-exploratory.md": "2946c55baadb3f6d060a3d4b3cacfc996476bc8e3dbcc2a5fd90a29c6ccdfe54",
+  "skills/deliver/SKILL.md": "edc74faf948ed52c5d56824fbf20e0038fecd585cd517ac2de01fc88152e5cd8",
+  "skills/deliver/references/release-and-rollback.md": "028075d2d516c18e24c3ec51c2746f3324c5a9be3d9ad43a4b447e0ffe55553a",
+  "skills/design-contract/SKILL.md": "3470667fa55a09f204903e09220b92fd08779c9c80ac630dd157362cc2b38b3d",
+  "skills/design-contract/references/ia-and-flow.md": "011c9994b9c24463374044d8b48c6ffa77c03d9e56faf5a03978666ce5503241",
+  "skills/impl-evidence/SKILL.md": "423639c30f0f1681ca7388092e3448025290b9a98b64de1dcef3e9d2b482e318",
+  "skills/impl-evidence/references/local-media.md": "d8652d4243e0ce2fbbb2a581b5a2370e97e452d13d49873fa245c4af4dc9e869"
+ },
+ "deleted": [],
+ "history": [
+  {
+   "at": "2026-11-14T01:03:56+08:00",
+   "from": "pending",
+   "to": "evaluated",
+   "evidence": [
+    "maintainers/archive/replication-module-2026-11-14/evaluation/README.md",
+    "maintainers/archive/replication-module-2026-11-14/evaluation/criteria-and-judgments.json",
+    "maintainers/archive/replication-module-2026-11-14/evaluation/method-hashes.json"
+   ],
+   "unchecked_evidence": ""
+  }
+ ]
+}

@@ -1,0 +1,61 @@
+{
+  "id": "B",
+  "skills": [
+    "architecture",
+    "design-contract"
+  ],
+  "request": "已有三类目录和现有深色布局获得用户批准。本轮只补分类契约与紧凑卡片字段，不重做方向或原型，不改业务数据。当前用户为m。三类须互斥覆盖所有可访问记录；隐藏归属人/创建者，保留必要只读状态。输出分类结果、判定依据和对列表/计数/分页的约束。",
+  "facts": {
+    "accepted_categories": [
+      "个人",
+      "参与",
+      "团队"
+    ],
+    "records": [
+      {
+        "id": "p1",
+        "owner_kind": "personal",
+        "owner_actor": "m",
+        "created_by": "someone",
+        "authorized": true
+      },
+      {
+        "id": "p2",
+        "owner_kind": "team",
+        "owner_actor": "team-a",
+        "created_by": "m",
+        "authorized": true,
+        "direct_member": true
+      },
+      {
+        "id": "p3",
+        "owner_kind": "personal",
+        "owner_actor": "closed-user",
+        "owner_active": false,
+        "created_by": null,
+        "authorized": true,
+        "read_only": true
+      },
+      {
+        "id": "p4",
+        "owner_kind": "personal",
+        "owner_actor": "another",
+        "created_by": "m",
+        "authorized": false
+      }
+    ],
+    "current_card_fields": [
+      "cover",
+      "title",
+      "date",
+      "type",
+      "owner_name",
+      "created_by",
+      "role"
+    ],
+    "current_hidden_labels": [
+      "owner_name in tooltip",
+      "created_by in aria-label"
+    ]
+  }
+}

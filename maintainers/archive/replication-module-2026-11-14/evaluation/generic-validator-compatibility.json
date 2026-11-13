@@ -1,0 +1,29 @@
+{
+  "observation": "Generic skill-creator validator rejects the existing SDLC when_to_use extension in both baseline and candidate. Existing protocol retained; native SDLC checks are authoritative for this plugin. This is not a new candidate syntax regression.",
+  "runs": [
+    {
+      "skill": "impl-evidence",
+      "variant": "baseline",
+      "exit_code": 1,
+      "output": "Unexpected key(s) in SKILL.md frontmatter: when_to_use. Allowed properties are: allowed-tools, description, license, metadata, name"
+    },
+    {
+      "skill": "impl-evidence",
+      "variant": "candidate",
+      "exit_code": 1,
+      "output": "Unexpected key(s) in SKILL.md frontmatter: when_to_use. Allowed properties are: allowed-tools, description, license, metadata, name"
+    },
+    {
+      "skill": "compete",
+      "variant": "baseline",
+      "exit_code": 1,
+      "output": "Unexpected key(s) in SKILL.md frontmatter: when_to_use. Allowed properties are: allowed-tools, description, license, metadata, name"
+    },
+    {
+      "skill": "compete",
+      "variant": "candidate",
+      "exit_code": 1,
+      "output": "Unexpected key(s) in SKILL.md frontmatter: when_to_use. Allowed properties are: allowed-tools, description, license, metadata, name"
+    }
+  ]
+}

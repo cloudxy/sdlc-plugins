@@ -1,0 +1,27 @@
+.........................
+----------------------------------------------------------------------
+Ran 25 tests in 18.648s
+
+OK
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-14-010022+0800-279654.json}
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-14-010023+0800-387246.json}
+integration: exit 1 → record in state.yaml gates:
+  - {name: integration, kind: script, result: fail, evidence: evidence/runs/integration-2026-11-14-010023+0800-802534.json}
+integration: exit 0 → record in state.yaml gates:
+  - {name: integration, kind: script, result: pass, evidence: evidence/runs/integration-2026-11-14-010024+0800-021299.json}
+integration: exit 0 → record in state.yaml gates:
+  - {name: integration, kind: script, result: pass, evidence: evidence/runs/integration-2026-11-14-010024+0800-571358.json}
+reproduce: exit 0 → record in state.yaml gates:
+  - {name: reproduce, kind: script, result: pass, evidence: evidence/runs/reproduce-2026-11-14-010025+0800-669072.json}
+model: exit 0 → record in state.yaml gates:
+  - {name: model, kind: script, result: pass, evidence: evidence/runs/model-2026-11-14-010030+0800-293554.json}
+model: exit 0 → record in state.yaml gates:
+  - {name: model, kind: script, result: pass, evidence: evidence/runs/model-2026-11-14-010030+0800-901629.json}
+reproduce: exit 0 → record in state.yaml gates:
+  - {name: reproduce, kind: script, result: pass, evidence: evidence/runs/reproduce-2026-11-14-010032+0800-391963.json}
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-14-010033+0800-049215.json}
+analysis: exit 0 → record in state.yaml gates:
+  - {name: analysis, kind: script, result: pass, evidence: evidence/runs/analysis-2026-11-14-010033+0800-988563.json}

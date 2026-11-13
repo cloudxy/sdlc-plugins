@@ -1,0 +1,30 @@
+unit: exit 0 → record in state.yaml gates:
+  - {name: unit, kind: script, result: pass, evidence: evidence/runs/unit-2026-11-14-005557+0800-370968.json}
+test_accepted_target_cannot_end_at_production (__main__.WorkTests) ... ok
+test_added_revalidation_supersedes_result_without_erasing_history (__main__.WorkTests) ... ok
+test_backend_fix_uses_accepted_baseline_without_full_prd (__main__.WorkTests) ... ok
+test_collector_source_needs_no_ui_tracking_or_schema (__main__.WorkTests) ... ok
+test_designer_exploration_uses_accepted_spec_without_architecture (__main__.WorkTests) ... ok
+test_graph_impact_includes_previously_passed_acceptance (__main__.WorkTests) ... ok
+test_historical_work_completion_survives_current_revalidation_need (__main__.WorkTests) ... ok
+test_later_request_does_not_rewrite_old_task_intent (__main__.WorkTests) ... ok
+test_normal_iteration_does_not_require_technical_debug (__main__.WorkTests) ... ok
+test_requirements_handoff_without_app_or_feature_closure (__main__.WorkTests) ... ok
+test_schema_cannot_prepare_without_accepted_contract (__main__.WorkTests) ... ok
+test_schema_design_completion_is_not_a_migration (__main__.WorkTests) ... ok
+test_scope_requires_capability_and_fix_origin (__main__.WorkTests) ... ok
+test_security_architecture_requires_and_can_bind_the_diagram (__main__.WorkTests) ... ok
+test_shell_work_gate_is_distinct_from_feature_gate (__main__.WorkTests) ... ok
+test_superseding_a_task_cannot_erase_its_open_obligation (__main__.WorkTests) ... ok
+test_third_rework_requires_owner_escalation (__main__.WorkTests) ... ok
+test_uncertainty_is_optional_and_enumerated (__main__.WorkTests) ... ok
+test_unrelated_invalid_task_does_not_block_scoped_handoff (__main__.WorkTests) ... ok
+test_unresolved_dependency_blocks_only_consumers (__main__.WorkTests) ... ok
+test_warehouse_design_does_not_require_metrics_or_tags (__main__.WorkTests) ... ok
+test_work_files_cannot_be_worker_outputs (__main__.WorkTests) ... ok
+test_work_scope_cannot_change_after_dispatch (__main__.WorkTests) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 10.855s
+
+OK

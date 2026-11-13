@@ -1,0 +1,96 @@
+{
+  "synthetic_only": true,
+  "checks": [
+    {
+      "check": "fixture_sha256_video",
+      "result": "passed",
+      "detail": "55465bfb37c9a1e3ea3f04878157e420153958b6af1a6d2b29c5f136fdc30dbc"
+    },
+    {
+      "check": "fixture_sha256_cover",
+      "result": "passed",
+      "detail": "3f530dc985cd9c2b056b2658d0132385d2fc6aadc8663e7898b3dd2df6f749b3"
+    },
+    {
+      "check": "original_consumer_sources_are_remote",
+      "result": "passed",
+      "detail": "the supplied current state does not meet the local requirement"
+    },
+    {
+      "check": "all_three_static_consumers_mapped_local",
+      "result": "passed",
+      "detail": {
+        "grid": "local:cover",
+        "dialog": "local:video",
+        "download": "local:video"
+      }
+    },
+    {
+      "check": "function_local_read_grid",
+      "result": "passed",
+      "detail": "function-level fixture read, not actual browser consumption"
+    },
+    {
+      "check": "function_local_read_dialog",
+      "result": "passed",
+      "detail": "function-level fixture read, not actual browser consumption"
+    },
+    {
+      "check": "function_local_read_download",
+      "result": "passed",
+      "detail": "function-level fixture read, not actual browser consumption"
+    },
+    {
+      "check": "path_escape_rejected",
+      "result": "passed",
+      "detail": "path escape rejected"
+    },
+    {
+      "check": "missing_rejected",
+      "result": "passed",
+      "detail": "[Errno 2] No such file or directory: '/private/tmp/sdlc-method-scenario-outputs-20261114/A/fixtures/absent.bin'"
+    },
+    {
+      "check": "corrupt_rejected",
+      "result": "passed",
+      "detail": "fixture digest mismatch; no network fallback"
+    },
+    {
+      "check": "opaque_same_etag_not_same_object",
+      "result": "passed",
+      "detail": "video and transformed cover have different bytes"
+    },
+    {
+      "check": "inline_resource_extracts_locally",
+      "result": "passed",
+      "detail": "bytes acquired from supplied fixture URI; decode remains unverified"
+    },
+    {
+      "check": "fixture_does_not_validate_business_sha",
+      "result": "passed",
+      "detail": "a mismatch remains explicit; the business pin is preserved"
+    },
+    {
+      "check": "fixed_reference_unchanged",
+      "result": "passed",
+      "detail": {
+        "id": "demo-1",
+        "version": 1,
+        "source_url": "https://cdn.example.test/demo.mp4",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    }
+  ],
+  "passed": 14,
+  "failed": 0,
+  "not_verified": [
+    "real source pin integrity",
+    "media decode",
+    "browser requests",
+    "real backend integration",
+    "video playback",
+    "HTTP HEAD/Range",
+    "package install",
+    "production deployment"
+  ]
+}

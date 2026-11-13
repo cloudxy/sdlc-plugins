@@ -1,0 +1,88 @@
+{
+  "scene": "E",
+  "evaluation_identity": "prompt-bound independent evaluator; not a native SDLC QA role runtime",
+  "input": {
+    "path": "maintainers/archive/replication-module-2026-11-14/evaluation/inputs/E.json",
+    "sha256": "b78539d82a5a426d95a76ee32750a80b3ac2423643a6804b873ebe2520243665",
+    "bytes": 1532
+  },
+  "method_reads": [
+    {
+      "path": "skills/coverage-matrix/SKILL.md",
+      "sha256": "9f711148fdb08e96cfdda75c82b5ac22c8741092abe26d60b9db706ff6dc3177",
+      "bytes": 8628
+    },
+    {
+      "path": "skills/coverage-matrix/references/e2e-and-exploratory.md",
+      "sha256": "2946c55baadb3f6d060a3d4b3cacfc996476bc8e3dbcc2a5fd90a29c6ccdfe54",
+      "bytes": 5209
+    },
+    {
+      "path": "skills/coverage-matrix/references/test-layering.md",
+      "sha256": "88d27d9abc7b3628ea8fe7728099bba78930e2bb4f225e8c82e3788865a7dba3",
+      "bytes": 7867
+    },
+    {
+      "path": "skills/coverage-matrix/references/case-derivation.md",
+      "sha256": "327ef9f742de5fa217b16c3ddb5473fda473fb15ce4c13a41bfcaf55b46a8e59",
+      "bytes": 8526
+    },
+    {
+      "path": "skills/coverage-matrix/references/role-quality.md",
+      "sha256": "db7444dc6e650280b28ab52b6a80a6f912597041de2e66d532851d65a73e8b45",
+      "bytes": 359
+    },
+    {
+      "path": "skills/coverage-matrix/templates/trace-matrix.md",
+      "sha256": "e3b915db8dbcc01299893dcd4ba3404b01b5df3654196c10b955f109e5f35a46",
+      "bytes": 7314
+    },
+    {
+      "path": "skills/coverage-matrix/templates/test-report.md",
+      "sha256": "5ff2e7a81132c34c8792969659c71cd938949ecf72151c457841d009138a9d59",
+      "bytes": 5064
+    },
+    {
+      "path": "skills/coverage-matrix/templates/bug-report.md",
+      "sha256": "1b463671bfd949803ebfaf60ef1b780825ad653aef4a8a563bdc6ed07dfa8d5c",
+      "bytes": 4505
+    }
+  ],
+  "hash_binding": "Hashes calculated from the same read-only candidate method paths after method reads; parent maintained method text unchanged during evaluation.",
+  "commands": [
+    {
+      "command": "cat maintainers/archive/replication-module-2026-11-14/evaluation/inputs/E.json skills/coverage-matrix/SKILL.md",
+      "exit_code": 0,
+      "purpose": "Read only the specified input and skill",
+      "cwd": "/private/tmp/sdlc-replication-methods-20261114"
+    },
+    {
+      "command": "cat skills/coverage-matrix/references/e2e-and-exploratory.md skills/coverage-matrix/references/test-layering.md skills/coverage-matrix/references/case-derivation.md skills/coverage-matrix/references/role-quality.md skills/coverage-matrix/templates/trace-matrix.md skills/coverage-matrix/templates/test-report.md skills/coverage-matrix/templates/bug-report.md",
+      "exit_code": 0,
+      "purpose": "Read routed method references and applicable report/matrix/defect templates",
+      "cwd": "/private/tmp/sdlc-replication-methods-20261114"
+    },
+    {
+      "command": "python3 -B /private/tmp/sdlc-method-scenario-outputs-20261114/E/record-evidence.py",
+      "exit_code": 0,
+      "purpose": "Generate provenance only; not a scenario test",
+      "result": "Observed tool completion: exit 0; stdout: E: recorded input and 8 method SHA-256 bindings; 0 scenario runtime tests; report and targeted coverage plan written.",
+      "cwd": "/private/tmp/sdlc-replication-methods-20261114"
+    }
+  ],
+  "scenario_runtime_commands_executed": [],
+  "artifacts": [
+    "test-report.md",
+    "coverage.md"
+  ],
+  "scope": "Only supplied synthetic observations reviewed; no product runtime, clipboard, gesture, network, deployment, process operation or source mutation.",
+  "limits": [
+    "No actual media/download file or computed download SHA",
+    "No persistence record",
+    "No screenshot opened",
+    "No real input device used",
+    "No formal project FR/NFR/J/EV catalog supplied",
+    "No production reproduction or release conclusion"
+  ],
+  "read_exclusions": "No maintainer criteria, retrospective conclusions, VSC source evidence or other archive material was read."
+}

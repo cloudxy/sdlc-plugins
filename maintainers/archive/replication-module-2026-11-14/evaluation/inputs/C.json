@@ -1,0 +1,32 @@
+{
+  "id": "C",
+  "skill": "deliver",
+  "request": "给获授权的同端口服务更新写操作及验证顺序；本场景只写计划，不能执行生产命令。已有候选包和相关测试回执，保留其他任务WIP。根据观测说明现在能否宣称部署完成，以及下一步如何定位。",
+  "facts": {
+    "accepted_artifact": "build-B",
+    "tested_artifact": "build-B",
+    "working_tree": "shared, contains unrelated uncommitted files",
+    "requested_stop": "service-A owner confirmed, graceful stop requested",
+    "process_observation": "service-A is still draining",
+    "target_port": "still held by service-A",
+    "health_get": {
+      "status": 200,
+      "body": {
+        "build": "build-A"
+      }
+    },
+    "feature_query": {
+      "status": 200,
+      "parameters": [
+        "old_filter"
+      ]
+    },
+    "candidate_contract": {
+      "parameters": [
+        "old_filter",
+        "new_category"
+      ]
+    },
+    "bulk_asset_probe": "not executed"
+  }
+}

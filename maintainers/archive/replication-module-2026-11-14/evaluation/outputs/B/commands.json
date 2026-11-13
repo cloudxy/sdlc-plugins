@@ -1,0 +1,86 @@
+{
+  "scene": "B",
+  "evaluation_identity": "prompt-bound independent evaluator; not a native SDLC role runtime",
+  "input": {
+    "path": "maintainers/archive/replication-module-2026-11-14/evaluation/inputs/B.json",
+    "sha256": "46d1282513e2edacc99b602ac67ead4bc4c7de2626b2bdbb68f1ac26ffe41c41"
+  },
+  "method_reads": [
+    {
+      "path": "skills/architecture/SKILL.md",
+      "sha256": "0f89af173c3ea7e820dd6d9d2e3fccce0cb073d75c35273a79269a4d33bc0d5e",
+      "bytes": 9024
+    },
+    {
+      "path": "skills/architecture/references/lifecycle.md",
+      "sha256": "c036227766a8e49c94ba76b2b9090373084c37c389520bc94bc1c0c4a320379d",
+      "bytes": 7155
+    },
+    {
+      "path": "skills/architecture/references/boundary-derivation.md",
+      "sha256": "d4d6312fa0d0963fd28ee9937333248203d9e95bf01688bf89cfa730ddce79db",
+      "bytes": 4805
+    },
+    {
+      "path": "skills/architecture/references/contract-design.md",
+      "sha256": "94777d0ef79bf062a8cad497c959fc80f6a99d1f3e1a025b541f8eaafd7fbed9",
+      "bytes": 10312
+    },
+    {
+      "path": "skills/architecture/references/adr-and-tradeoffs.md",
+      "sha256": "5d58d84f601da63a6268abbfa3d37cf5214fb3f4d4468b5de88dfc647ad3e8ff",
+      "bytes": 6453
+    },
+    {
+      "path": "skills/architecture/references/role-quality.md",
+      "sha256": "5926b79601e06721fcaca1b1da6d3711b48c71511536e598d0a15ab20139f876",
+      "bytes": 573
+    },
+    {
+      "path": "skills/architecture/templates/contract.md",
+      "sha256": "625bbaff5bda623713d62c06e9dc5a79e374a90514a234b6dd886c8a9c9dab21",
+      "bytes": 4072
+    },
+    {
+      "path": "skills/architecture/references/threat-model.md",
+      "sha256": "42ec2fd773828728bf84085974949b8350d83e56e790bab2d52085e567df8904",
+      "bytes": 3405
+    },
+    {
+      "path": "skills/architecture/references/quality-attributes.md",
+      "sha256": "9d6ebd5472ac7cb35c82e68ccde06daa6472d683e6850df4f951cae96c8b8663",
+      "bytes": 7023
+    },
+    {
+      "path": "skills/design-contract/SKILL.md",
+      "sha256": "3470667fa55a09f204903e09220b92fd08779c9c80ac630dd157362cc2b38b3d",
+      "bytes": 13071
+    },
+    {
+      "path": "skills/design-contract/references/ia-and-flow.md",
+      "sha256": "011c9994b9c24463374044d8b48c6ffa77c03d9e56faf5a03978666ce5503241",
+      "bytes": 7581
+    },
+    {
+      "path": "skills/design-contract/references/ux-writing.md",
+      "sha256": "ad3d9fd81517ffa74c37c850c62f4a7cb60ac77c100a7b486df1e841fef4786e",
+      "bytes": 3788
+    },
+    {
+      "path": "skills/design-contract/references/tokens-and-a11y.md",
+      "sha256": "a60f447a1470b1cd18e5ddbc5c555e4cdc741bf1dbdaf1c895f5f3ff2ec687ce",
+      "bytes": 7643
+    },
+    {
+      "path": "skills/design-contract/references/role-quality.md",
+      "sha256": "f97a1b0b5ffa3ffa65e629c1a2a1da5f4f3f10e102d31bd2de850ebfbfd24685",
+      "bytes": 359
+    }
+  ],
+  "method_snapshot_time": "2026-11-14; hashes taken after content reads, source held unchanged by maintainer during evaluation",
+  "execution_registry": "../commands.json",
+  "scenario_execution_ids": [],
+  "execution_scope": "document creation only; no production or scenario-runtime commands executed",
+  "excluded_reads": "no maintainer rubric, VSC source evidence, other archive content or old case conclusions read",
+  "limits": "Only provided scenario facts and routed method references used; no network, deployment, process operation, production/source writes or native-role execution."
+}

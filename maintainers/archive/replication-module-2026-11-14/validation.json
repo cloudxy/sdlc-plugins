@@ -1,0 +1,296 @@
+{
+  "status": "passed",
+  "required_commands": [
+    {
+      "command": [
+        "bash",
+        "scripts/health-check.sh"
+      ],
+      "exit_code": 0,
+      "seconds": 0.357,
+      "log": "checks/health-check-verified.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_behavior_smoke.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 12.065,
+      "log": "checks/test_behavior_smoke.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_continuous_work.py"
+      ],
+      "exit_code": 0,
+      "seconds": 18.712,
+      "log": "checks/test_continuous_work-final.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_eval_protocol.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 0.286,
+      "log": "checks/test_eval_protocol.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_gate_catalog.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 0.093,
+      "log": "checks/test_gate_catalog.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_gate_variants.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 20.225,
+      "log": "checks/test_gate_variants.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_hosts.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 0.469,
+      "log": "checks/test_hosts.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_method_ledger.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 5.338,
+      "log": "checks/test_method_ledger.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_outcomes.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 0.618,
+      "log": "checks/test_outcomes.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_reference_links.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 0.316,
+      "log": "checks/test_reference_links.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_session_digest.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 0.35,
+      "log": "checks/test_session_digest.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_skill_evidence.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 0.044,
+      "log": "checks/test_skill_evidence.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_state_view.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 0.056,
+      "log": "checks/test_state_view.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_task_runtime.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 16.05,
+      "log": "checks/test_task_runtime.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_trigger_smoke.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 1.763,
+      "log": "checks/test_trigger_smoke.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_vendor_drift.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 0.114,
+      "log": "checks/test_vendor_drift.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_vendor_install.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 3.321,
+      "log": "checks/test_vendor_install.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_work_scope.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 10.943,
+      "log": "checks/test_work_scope.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test_workflow.py"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 0.546,
+      "log": "checks/test_workflow.log"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/test-check-sdlc.sh"
+      ],
+      "locale": "C.UTF-8",
+      "exit_code": 0,
+      "seconds": 98.041,
+      "log": "checks/test-check-sdlc.log"
+    },
+    {
+      "command": [
+        "/bin/bash",
+        "scripts/test-check-sdlc.sh"
+      ],
+      "locale": "zh_CN.UTF-8",
+      "exit_code": 0,
+      "seconds": 101.655,
+      "log": "checks/test-check-sdlc-zh.log"
+    }
+  ],
+  "additional_final_checks": [
+    {
+      "command": [
+        "python3",
+        "scripts/test_continuous_work.py"
+      ],
+      "exit_code": 0,
+      "seconds": 18.712,
+      "log": "checks/test_continuous_work-final.log"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/health-check.sh"
+      ],
+      "exit_code": 0,
+      "seconds": 0.357,
+      "log": "checks/health-check-verified.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/render-role-agents.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.078,
+      "log": "checks/role-render-check.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/workflow.py",
+        "render",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.056,
+      "log": "checks/host-render-check.log"
+    }
+  ],
+  "python_regression_scripts": 18,
+  "shell_gate_locales": [
+    "C.UTF-8",
+    "zh_CN.UTF-8"
+  ],
+  "scenario_cases": 5,
+  "scenario_verdict": "evaluated",
+  "initial_environment_failure_preserved": true,
+  "source_method_changes_after_scenarios": false,
+  "generic_validator": "baseline and candidate both reject existing when_to_use extension; native checks pass",
+  "limits": [
+    "not a new/old comparison",
+    "no production or native role execution",
+    "pre-existing METHODPENDING warnings untouched"
+  ],
+  "post_apply_native_checks": [
+    {
+      "command": [
+        "bash",
+        "scripts/health-check.sh"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/render-role-agents.py",
+        "--check"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/workflow.py",
+        "render",
+        "--check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "applied_byte_identity": "87 reviewed files matched actual repository before native checks"
+}

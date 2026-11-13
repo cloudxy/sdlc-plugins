@@ -59,6 +59,7 @@ A revalidation instance may inspect unchanged code and rerun affected checks aga
 
 | File | Use when |
 |---|---|
+| [references/local-media.md](references/local-media.md) | The accepted slice requires local/offline media or resource replication; source pins, byte integrity and real display/download consumers |
 | [references/backend-task.md](references/backend-task.md) | Backend protocol-1 ticket: pinned inputs, scope, consumer evidence and structured return |
 | [templates/impl-evidence.md](templates/impl-evidence.md) | Every implementer ticket |
 | [templates/integration.md](templates/integration.md) | Every slice: real consumer integration; UI uses the actual backend when applicable and runtime screenshots |
