@@ -1,0 +1,14 @@
+{
+ "id": "result-lifecycle-release-version",
+ "at": "2026-11-14T12:44:31+08:00",
+ "kind": "editorial",
+ "failure_form": "n/a",
+ "verdict": "n/a",
+ "reason": "Synchronize host metadata version for the evaluated result lifecycle method release; no host routing or permissions change",
+ "evidence": [],
+ "decided_by": "maintainer",
+ "files": {
+  "adapters/hosts.json": "1408869ba818d5d7a74e1a60a13bc84527f00a96b83faa59568a315d3a3bbb82"
+ },
+ "deleted": []
+}

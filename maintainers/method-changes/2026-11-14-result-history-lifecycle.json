@@ -1,0 +1,20 @@
+{
+ "id": "result-history-lifecycle",
+ "at": "2026-11-14T12:43:43+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "evaluated",
+ "reason": "Separate draft, submitted inputs, current output and history with task-specific refresh and partial-success recovery; five scoped scenarios evaluated without comparative claims",
+ "evidence": [
+  "maintainers/archive/result-lifecycle-2026-11-14/README.md",
+  "maintainers/archive/result-lifecycle-2026-11-14/evaluation/input.md",
+  "maintainers/archive/result-lifecycle-2026-11-14/evaluation/criteria.md",
+  "maintainers/archive/result-lifecycle-2026-11-14/evaluation/output.md"
+ ],
+ "decided_by": "maintainer",
+ "files": {
+  "skills/design-contract/SKILL.md": "792698c6a749636dcdceee77589d14803b6bda9b372107cfac59c21c5a4d3544",
+  "skills/design-contract/references/interaction-preserving-refinement.md": "4f33dbfa91d03fde60ba6796824cb91b6a8dc75a2aa67e0d7ceb7dfb5a2ec6eb"
+ },
+ "deleted": []
+}
