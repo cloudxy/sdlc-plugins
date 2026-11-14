@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-14",
+  "surface": "Safari native UI, private window; local character-studio page at port 8765",
+  "scope": "no image generation or provider login performed",
+  "before": "At the engine section, selecting a different style returned the workspace to the page heading.",
+  "after": [
+    "Style, aspect ratio and engine selections kept the engine section at the same visible position and retained the expanded parameters.",
+    "The replacement dropdown retained visible focus and showed the chosen value.",
+    "Refreshing authorization status retained the visible position and expanded parameters.",
+    "Random success feedback displayed a close button at its upper left; clicking it removed the notice, and editing could continue.",
+    "Timed screenshot samples showed a visible notice, its fading state, and automatic removal. Samples at 3010/3161/3464 milliseconds are relative to the click, not to the server response or notice mount. Exact 3000ms waiting and 300ms removal behavior are established by controlled-clock tests.",
+    "The private window was closed and the pre-existing normal window retained its original recipe and engine."
+  ],
+  "limits": "One desktop Safari surface; no claim about untested browsers, mobile layouts, provider output or general model capability."
+}

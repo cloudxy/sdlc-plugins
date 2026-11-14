@@ -3,8 +3,9 @@
   "method": "maintainer self-application plus executed product regressions; no blind evaluation or skill-level old/new comparison",
   "criteria_defined_in": "scenario-application.json",
   "code_regression_comparison": "old/new product code only, not a comparison of general model capability",
-  "remaining": "Real product browser continuity and rendered feedback remain pending the concurrent source handoff; unit and clock evidence do not verify browser animation.",
+  "remaining": "Other browsers and mobile layouts were not exercised. Exact timing is covered by controlled-clock tests; screenshot elapsed times are measured from click, not notice mount.",
   "full_suite": false,
   "reason_for_targeted_checks": "user preference: run relevant checks only; no whole-repository CI",
-  "conclusion": "Four bounded scenario applications completed against the recorded method text; two product continuity cases and five notice lifecycle cases passed. This is no claim of general capability improvement or a comparative skill result."
+  "conclusion": "Four bounded scenario applications completed against the recorded method text; two product continuity cases and five notice lifecycle cases passed. This is no claim of general capability improvement or a comparative skill result.",
+  "browser_observation": "browser-observation.json: Safari private-window reproduction, corrected continuous choices, status refresh, manual close, fade and automatic removal observed."
 }

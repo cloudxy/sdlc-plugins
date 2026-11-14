@@ -9,8 +9,8 @@
       "the replacement input owns focus",
       "expanded parameters stay open"
     ],
-    "actual_evidence": "isolated product regression: old code failed with scrollTop 0 rather than 512; scoped renderer fix passed, including the subsequent parameter and auth readback",
-    "result": "pass for simulated nested layout; actual browser observation pending"
+    "actual_evidence": "isolated product regression: old code failed with scrollTop 0 rather than 512; scoped renderer fix passed, including the subsequent parameter and auth readback; Safari reproduced the old jump and retained position, focus and expanded parameters after correction (browser-observation.json)",
+    "result": "pass for simulated nested layout and actual Safari private-window observation"
   },
   {
     "id": "transient-success",
@@ -23,8 +23,8 @@
       "manual close works",
       "old callbacks do not remove replacement"
     ],
-    "actual_evidence": "five executed notice-module scenarios pass; original random action now forwards duration in the isolated product test",
-    "result": "pass for clock/DOM behavior; rendered animation and close location pending"
+    "actual_evidence": "five executed notice-module scenarios pass; original random action now forwards duration in the isolated product test; actual Safari samples and manual close recorded in browser-observation.json",
+    "result": "pass for controlled clock/DOM and actual Safari fade, removal and upper-left close observations"
   },
   {
     "id": "persistent-error-negative",
