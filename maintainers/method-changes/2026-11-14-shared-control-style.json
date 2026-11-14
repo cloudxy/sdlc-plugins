@@ -1,0 +1,22 @@
+{
+ "id": "shared-control-style",
+ "at": "2026-11-14T13:04:54+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "evaluated",
+ "reason": "用户要求将跨页面共享控件反馈写入对应Skill；按宿主/原生标签条件声明不变量，收窄样式覆盖，并以相关实际路径验证。四案应用和范围澄清已记录，不宣称旧新收益。",
+ "evidence": [
+  "maintainers/archive/shared-control-style-2026-11-14"
+ ],
+ "decided_by": "codex",
+ "files": {
+  "adapters/hosts.json": "13e878300450e4c8fc79a60aa1fb6c1383392fbf8ac0d9f01ed3a83a6b83888a",
+  "skills/coverage-matrix/SKILL.md": "609e9bb1c1ec2b9f421471a470e2aaeb38efcf945f357f6995709d8df2311115",
+  "skills/coverage-matrix/references/e2e-and-exploratory.md": "01f51c4c12303b07b17f83a4832d49f9468e8d33c84dcaec930766c9ba94d8b1",
+  "skills/design-contract/SKILL.md": "4b47dcdaf3da6a91c6ea11fbc691554e73353e94491c4d7dd4be1f4b24c5ad4f",
+  "skills/design-contract/references/interaction-preserving-refinement.md": "be53baef28346b527247340f9bfa9f91f3b539b3b3391ef469e82acdbfb9a4e3",
+  "skills/impl-evidence/references/ui.md": "3ee28f790746f356a3c7d5e2464747ea18ac2a30cfdf8b2c8f1882796ac1423c",
+  "skills/impl-evidence/references/ui/interaction-and-result-integrity.md": "5465c47da4cedd34b642d5e7f2b6346f9ca7c9a6d4785e3da052bab849a80b5c"
+ },
+ "deleted": []
+}

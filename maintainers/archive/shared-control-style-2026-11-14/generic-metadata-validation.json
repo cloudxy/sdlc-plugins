@@ -1,0 +1,23 @@
+[
+  {
+    "skill": "design-contract",
+    "current_exit": 1,
+    "baseline_exit": 1,
+    "current_message": "Traceback (most recent call last):\n  File \"/Users/xuyun/.codex/skills/.system/skill-creator/scripts/quick_validate.py\", line 10, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'",
+    "baseline_message": "Traceback (most recent call last):\n  File \"/Users/xuyun/.codex/skills/.system/skill-creator/scripts/quick_validate.py\", line 10, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'"
+  },
+  {
+    "skill": "impl-evidence",
+    "current_exit": 1,
+    "baseline_exit": 1,
+    "current_message": "Traceback (most recent call last):\n  File \"/Users/xuyun/.codex/skills/.system/skill-creator/scripts/quick_validate.py\", line 10, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'",
+    "baseline_message": "Traceback (most recent call last):\n  File \"/Users/xuyun/.codex/skills/.system/skill-creator/scripts/quick_validate.py\", line 10, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'"
+  },
+  {
+    "skill": "coverage-matrix",
+    "current_exit": 1,
+    "baseline_exit": 1,
+    "current_message": "Traceback (most recent call last):\n  File \"/Users/xuyun/.codex/skills/.system/skill-creator/scripts/quick_validate.py\", line 10, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'",
+    "baseline_message": "Traceback (most recent call last):\n  File \"/Users/xuyun/.codex/skills/.system/skill-creator/scripts/quick_validate.py\", line 10, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'"
+  }
+]

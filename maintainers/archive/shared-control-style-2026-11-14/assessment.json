@@ -1,0 +1,21 @@
+{
+  "mode": "bounded scenario application; not a blind or old/new comparison",
+  "executor": "existing /root/sdlc_designer followup",
+  "checked_by": "parent source/output review",
+  "cases": {
+    "A": "Matches shared-tag baseline and ancestor cascade risks; distinguishes static explanation from measured geometry",
+    "B": "Preserves approved light/dark and primary/danger variants; no broad theme or business writes",
+    "C": "Keeps auto/manual loading and permission/submission contracts",
+    "D": "Leaves actual UI pending without fresh page; no browser contention or full-suite substitute"
+  },
+  "scope_refinement": "Applied the evaluator-proposed limitation and rechecked B/D text application",
+  "outcome": "evaluated; no claim of improvement over prior method",
+  "ui_execution_in_this_skill_evaluation": false,
+  "source_product_fix": "437dbba",
+  "validation": {
+    "native_health": "pass; known unrelated vendor/compatibility/legacy pending notices remain",
+    "method_ledger_tests": 15,
+    "full_suite": false,
+    "generic_skill_validator": "Both HEAD baseline and current skills reject the existing when_to_use extension identically; preserved original SDLC metadata and used native validation"
+  }
+}

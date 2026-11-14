@@ -79,7 +79,7 @@ Test environment must match the production properties relevant to the risk; reco
 
 | Reference | Read when... |
 |---|---|
-| [e2e-and-exploratory.md](references/e2e-and-exploratory.md) | Journey E2E scope and discipline, tracking validation rows, exploratory charters and heuristics |
+| [e2e-and-exploratory.md](references/e2e-and-exploratory.md) | Journey E2E, shared controls across page themes, tracking validation and exploratory heuristics |
 | [case-derivation.md](references/case-derivation.md) | Deriving cases from GWT (happy / empty / unauthorized / transitions) |
 | [test-layering.md](references/test-layering.md) | Affected regression scope, fixture fidelity, unit / integration / E2E split and dialect fidelity |
 | [templates/trace-matrix.md](templates/trace-matrix.md) | FR ↔ case matrix |

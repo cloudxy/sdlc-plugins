@@ -1,0 +1,31 @@
+{
+  "baseline": "58b168f",
+  "source_case_baseline": "2eed477",
+  "source_case_fix": "437dbba",
+  "comparison": "none; bounded scenario application only",
+  "method_hashes": {
+    "skills/design-contract/SKILL.md": "4b47dcdaf3da6a91c6ea11fbc691554e73353e94491c4d7dd4be1f4b24c5ad4f",
+    "skills/design-contract/references/interaction-preserving-refinement.md": "be53baef28346b527247340f9bfa9f91f3b539b3b3391ef469e82acdbfb9a4e3",
+    "skills/impl-evidence/references/ui.md": "3ee28f790746f356a3c7d5e2464747ea18ac2a30cfdf8b2c8f1882796ac1423c",
+    "skills/impl-evidence/references/ui/interaction-and-result-integrity.md": "5465c47da4cedd34b642d5e7f2b6346f9ca7c9a6d4785e3da052bab849a80b5c",
+    "skills/coverage-matrix/SKILL.md": "609e9bb1c1ec2b9f421471a470e2aaeb38efcf945f357f6995709d8df2311115",
+    "skills/coverage-matrix/references/e2e-and-exploratory.md": "01f51c4c12303b07b17f83a4832d49f9468e8d33c84dcaec930766c9ba94d8b1",
+    "adapters/hosts.json": "13e878300450e4c8fc79a60aa1fb6c1383392fbf8ac0d9f01ed3a83a6b83888a"
+  },
+  "criteria": {
+    "A": "Distinguishes tag baseline and ancestor CSS coverage; proposes scoped shared control fix and real cross-page checks",
+    "B": "Preserves accepted theme and primary/danger variants; does not restyle all content",
+    "C": "Does not conflate style consistency with paging/auth/write semantics",
+    "D": "Does not claim UI pass from DOM/screenshot or stale native window; coordinates before resuming; no full-suite demand"
+  },
+  "initial_method_hashes": {
+    "skills/design-contract/SKILL.md": "4b47dcdaf3da6a91c6ea11fbc691554e73353e94491c4d7dd4be1f4b24c5ad4f",
+    "skills/design-contract/references/interaction-preserving-refinement.md": "be53baef28346b527247340f9bfa9f91f3b539b3b3391ef469e82acdbfb9a4e3",
+    "skills/impl-evidence/references/ui.md": "3ee28f790746f356a3c7d5e2464747ea18ac2a30cfdf8b2c8f1882796ac1423c",
+    "skills/impl-evidence/references/ui/interaction-and-result-integrity.md": "5465c47da4cedd34b642d5e7f2b6346f9ca7c9a6d4785e3da052bab849a80b5c",
+    "skills/coverage-matrix/SKILL.md": "609e9bb1c1ec2b9f421471a470e2aaeb38efcf945f357f6995709d8df2311115",
+    "skills/coverage-matrix/references/e2e-and-exploratory.md": "babd4ddc44c913b9e8b5f52ad662b27f0b8cc4c491bffd40567da2331776e8ca",
+    "adapters/hosts.json": "13e878300450e4c8fc79a60aa1fb6c1383392fbf8ac0d9f01ed3a83a6b83888a"
+  },
+  "qa_refinement": "Scope limited to affected, authorized actions; unavailable page stays pending. Followup documented in scenario-refinement.md."
+}

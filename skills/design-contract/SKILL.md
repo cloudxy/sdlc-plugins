@@ -113,7 +113,7 @@ Follow [design-review.md](references/design-review.md): screenshot the build at 
 | [visual-direction.md](references/visual-direction.md) | Any surface with visual freedom — the AI-default clusters, the plan-then-critique method, where boldness belongs |
 | [design-review.md](references/design-review.md) | Task design-qa: comparing the build with the prototype, severity, verdict |
 | [ia-and-flow.md](references/ia-and-flow.md) | Navigation, collection semantics, compact cards, FR-to-screen mapping and flow notation |
-| [interaction-preserving-refinement.md](references/interaction-preserving-refinement.md) | Existing menus, media libraries, provider settings or asynchronous tools: retain actions, result/history lifetimes, source-specific loading, focus and narrow-screen controls |
+| [interaction-preserving-refinement.md](references/interaction-preserving-refinement.md) | Existing menus, libraries and settings; shared controls across page themes, retained actions, focus and narrow-screen states |
 | [ux-writing.md](references/ux-writing.md) | Any interface copy — naming, CTAs, error and empty copy |
 | [tokens-and-a11y.md](references/tokens-and-a11y.md) | Tokens, contrast pairs, focus order |
 | [generated-imagery.md](references/generated-imagery.md) | The packet lists `imagery` — when a generated image is worth it, where its style anchors come from, how it lands in an artifact (a reference image is never the direction) |
