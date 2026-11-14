@@ -103,7 +103,7 @@ Extract a shared component when behavior and visual consistency are stable enoug
 | [frontend-design](../../../vendor/anthropic-skills/skills/frontend-design/SKILL.md) | Deciding visual details the design did not specify (upstream original; install with `bash vendor/install.sh`) |
 | [edge-states-impl.md](ui/edge-states-impl.md) | Implementing a component with complex state (empty/loading/error/boundary) |
 | [state-and-data.md](ui/state-and-data.md) | Deciding state ownership, data fetching patterns, or debugging re-render issues |
-| [interaction-and-result-integrity.md](ui/interaction-and-result-integrity.md) | Menu event ordering, cross-container control styling, reference/result isolation, member selection, list retries or provider-status UI |
+| [interaction-and-result-integrity.md](ui/interaction-and-result-integrity.md) | Menu events, nested scroll/focus continuity, transient feedback lifetime, cross-container styles, reference/result isolation, list retries or provider-status UI |
 | [templates/impl-evidence.md](../templates/impl-evidence.md) | Implementation evidence (command + exit code) |
 
 > Gotchas based on: `anthropics/skills@41bbe19` (docx SKILL.md footgun pattern — 'the model knows the API; these are the footguns') · verified incidents from a user project's history

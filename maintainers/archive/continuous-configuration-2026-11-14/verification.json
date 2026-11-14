@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-11-14",
+  "product_checks": [
+    {
+      "command": "node --test tests/project/unit/notice.test.mjs",
+      "cwd": "/Users/xuyun/Documents/vsc-workflow",
+      "chunk_id": "9d1796",
+      "wall_time_seconds": 0.077165875,
+      "exit_code": 0,
+      "original_token_count": 191,
+      "output": "(node:25853) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n✔ transient feedback stays for three seconds then fades before removal (1.734208ms)\n✔ manual close hides the message immediately and cancels both lifetime timers (0.582083ms)\n✔ replacement cannot be hidden by a late timeout, fade, or detached close button (0.382834ms)\n✔ persistent errors remain dismissible and locale updates retain the close button (0.252708ms)\n✔ the actual panel forwards a caller lifetime without changing other notices (21.873833ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 128.329584\n"
+    },
+    {
+      "command": "node --test tests/project/unit/character_studio_continuity.test.mjs",
+      "cwd": "/private/tmp/vsc-character-continuity-20261114",
+      "chunk_id": "de424b",
+      "wall_time_seconds": 0.121114875,
+      "exit_code": 0,
+      "original_token_count": 132,
+      "output": "(node:25852) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\n✔ nested work area keeps its scroll, focus and expanded parameters through consecutive choices and auth updates (61.713916ms)\n✔ random recipe success opts into a three-second notice without timing unrelated errors (0.325125ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 172.029709\n"
+    }
+  ],
+  "method_checks": [
+    {
+      "command": "python3 scripts/test_method_ledger.py",
+      "exit_code": 0,
+      "tests": 15
+    },
+    {
+      "command": "python3 scripts/test_eval_protocol.py",
+      "exit_code": 0,
+      "tests": 11
+    }
+  ],
+  "before_fix_observation": {
+    "case": "nested-configuration",
+    "expected_scroll_top": 512,
+    "actual_scroll_top": 0,
+    "scope": "simulated DOM regression; observed before preparing renderer patch, not a browser measurement"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "method_hashes": {
+    "skills/design-contract/references/interaction-preserving-refinement.md": "d46dd7c062b77b9562477f7563810747c38a4e04df2f40844954615300623113",
+    "skills/impl-evidence/references/ui.md": "19065e83190d27b8f31da6c388336b71a3f4f1ba1e14d41102202efa156b9043",
+    "skills/impl-evidence/references/ui/interaction-and-result-integrity.md": "9e9c38fc22e194e29e219f675a3d74ac4a80c74458261e4c955501dcf174b5b7",
+    "skills/coverage-matrix/references/e2e-and-exploratory.md": "6c2019a7754e801868819c5364e4d8dd5308e0a43d47f76c24ab1e557c9174db"
+  },
+  "scope": "conditional additions to existing design, implementation and verification references",
+  "evaluation": "maintainer self-application of updated instructions to bounded cases; no independent or old/new skill comparison"
+}

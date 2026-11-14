@@ -1,0 +1,20 @@
+{
+ "id": "continuous-configuration-feedback",
+ "at": "2026-11-14T13:46:55+08:00",
+ "kind": "behavioral",
+ "failure_form": "conditional",
+ "verdict": "evaluated",
+ "reason": "将连续配置跳顶与短提示生命周期的产品修复经验加入现有设计、实现和验收指引；按场景触发并保留实际浏览器证据边界",
+ "evidence": [
+  "maintainers/archive/continuous-configuration-2026-11-14"
+ ],
+ "decided_by": "codex",
+ "files": {
+  "adapters/hosts.json": "0c23b1cc2f545bb130246ab03840d6142e20a68ff4bd0b37153ff00572e22dad",
+  "skills/coverage-matrix/references/e2e-and-exploratory.md": "6c2019a7754e801868819c5364e4d8dd5308e0a43d47f76c24ab1e557c9174db",
+  "skills/design-contract/references/interaction-preserving-refinement.md": "d46dd7c062b77b9562477f7563810747c38a4e04df2f40844954615300623113",
+  "skills/impl-evidence/references/ui.md": "19065e83190d27b8f31da6c388336b71a3f4f1ba1e14d41102202efa156b9043",
+  "skills/impl-evidence/references/ui/interaction-and-result-integrity.md": "9e9c38fc22e194e29e219f675a3d74ac4a80c74458261e4c955501dcf174b5b7"
+ },
+ "deleted": []
+}

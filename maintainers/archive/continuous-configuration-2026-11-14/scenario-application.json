@@ -1,0 +1,52 @@
+[
+  {
+    "id": "nested-configuration",
+    "input": "A long configuration page scrolls in an outer workspace. Changing a dropdown reconstructs its child; subsequent fields still need editing.",
+    "applied_decision": "Inspect the outer scroll owner and capture all relevant ancestor positions; restore expanded layout first, then stable control focus with scrolling prevented. Re-select a second parameter and wait for an auth-status response.",
+    "criteria": [
+      "selected values survive",
+      "outer position survives",
+      "the replacement input owns focus",
+      "expanded parameters stay open"
+    ],
+    "actual_evidence": "isolated product regression: old code failed with scrollTop 0 rather than 512; scoped renderer fix passed, including the subsequent parameter and auth readback",
+    "result": "pass for simulated nested layout; actual browser observation pending"
+  },
+  {
+    "id": "transient-success",
+    "input": "A random-recipe success message should stay for 3 seconds, fade for 300 ms and provide close at top left.",
+    "applied_decision": "Pass a lifetime only with this success message. Use the existing floating notice host, cancel both timers on close/replacement, guard already queued callbacks by message identity, and keep unrelated errors persistent.",
+    "criteria": [
+      "visible before 3000ms",
+      "fade begins at 3000ms",
+      "removed after fade",
+      "manual close works",
+      "old callbacks do not remove replacement"
+    ],
+    "actual_evidence": "five executed notice-module scenarios pass; original random action now forwards duration in the isolated product test",
+    "result": "pass for clock/DOM behavior; rendered animation and close location pending"
+  },
+  {
+    "id": "persistent-error-negative",
+    "input": "A failed save has no automatic-dismiss contract and must remain available for recovery.",
+    "applied_decision": "Do not infer an error timeout from the success-message requirement; retain dismissible persistent feedback and its independent recovery behavior.",
+    "criteria": [
+      "no auto-hide timer for default error",
+      "a stale success timeout cannot hide it"
+    ],
+    "actual_evidence": "replacement/persistent-error notice scenarios pass after advancing controlled time by 10 seconds",
+    "result": "pass"
+  },
+  {
+    "id": "non-ui-scope-negative",
+    "input": "A change affects a command-line parser only, with no parameter panel or floating feedback.",
+    "applied_decision": "Use parser and consumer checks appropriate to that change; these UI additions do not require a browser, screen prototypes, new timers, or a replacement state framework.",
+    "criteria": [
+      "no unrelated browser requirement",
+      "no new global success timeout",
+      "no full-suite expansion"
+    ],
+    "actual_evidence": "bounded manual application of the conditional scope paragraph",
+    "result": "pass as a scope application; no CLI software change claimed"
+  }
+]
