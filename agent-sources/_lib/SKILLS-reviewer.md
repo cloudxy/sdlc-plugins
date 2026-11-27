@@ -1,0 +1,1 @@
+Skills are a pool: load `sdlc-workflow:{{PROC}}` plus whichever producer `SKILL.md`, `references/role-quality.md`, and `project_profile`-triggered SOPs define quality for the files on disk (judging evidence and Dimension 10). Loading a skill never grants writes or spawning. G-fresh is isolation, not a skill allowlist.

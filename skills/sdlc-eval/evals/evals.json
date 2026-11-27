@@ -1,0 +1,105 @@
+{
+  "skill_name": "sdlc-eval",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run evals for all 16 SDLC roles.",
+      "expected_output": "Map requested roles to actual skills and registered tasks; propose bounded batches and a model-call budget, cover changed lanes, and report untested cases. Do not add this to scheduled health checks.",
+      "files": [],
+      "expectations": [
+        "Maps roles to actual skill/task contracts",
+        "Respects a bounded evaluation budget",
+        "Does not add the run to weekly health-check"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Add this eval harness to the Monday sdlc-maintenance cron.",
+      "expected_output": "Refuses. Eval burns real model calls and is non-deterministic. health-check stays structural only.",
+      "files": [],
+      "expectations": [
+        "Refuses cron/health-check integration",
+        "Keeps grade_eval.py as a post-hoc script, not a model runner"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "要求对全部26个skill做质量回归，只有40次模型调用预算。实现skill含四条lane。",
+      "expected_output": "枚举真实案例、按风险和预算分批，记录未覆盖项；四lane纳入选择，双方相同输入/工具预算，使用注册任务；meta skill不递归；结构通过不能宣称质量提升。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "枚举真实案例、按风险和预算分批，记录未覆盖项；四lane纳入选择，双方相同输入/工具预算，使用注册任务；meta skill不递归；结构通过不能宣称质量提升。",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "/sdlc-eval diagnose。问题陈述：会话是工作目录里的 session.jsonl（全部 12 行）；用户期望 /sdlc 继续 export 时只派一次 pm，闸门失败时不推进；实际 pm 派了两次，闸门报错后仍宣布定义完成；关心的可观察量是重复派单和无证据的完成声明。session_digest.py 已生成时间线 digest.md。请给出诊断报告。",
+      "expected_output": "A report in the diagnosis template: each finding cites session.jsonl:<line> (repeat dispatch at line 7 of line 3 after the compaction at lines 5-6; the gate failure at line 10 followed by the completion claim at line 11), separates observation from labelled inference, gives exactly one landing per finding (check, review standard, delete or out of scope) with a target file, and states that nothing was applied. It does not edit or claim to have edited any plugin file.",
+      "files": [
+        "evals/files/diagnose-1/session.jsonl",
+        "evals/files/diagnose-1/digest.md"
+      ],
+      "expectations": [
+        "Every finding cites session.jsonl:<line>",
+        "Identifies the repeated pm dispatch after compaction (lines 3 and 7)",
+        "Identifies the completion claim despite the failed gate (lines 10 and 11)",
+        "Each finding has one landing (check / review standard / delete / out of scope) and a target file",
+        "Reports only: no plugin file edited or claimed edited"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "/sdlc-eval diagnose。问题陈述：会话是工作目录里的 session.jsonl（全部 8 行）；用户期望修改插件前先尊重已有决定；实际助手在仓库里搜索没找到决定，就重新提议删除描述里的 Do NOT，而这在 9 月 29 日已被决定保留，记录在仓库之外的维护者归档里；关心的可观察量是重提已决定的事项。session_digest.py 已生成时间线 digest.md。请给出诊断报告。",
+      "expected_output": "Cites session.jsonl lines 5-7 (search found nothing, then the re-proposal) and 8 (the user's correction). Identifies that the decision existed but was unreachable from the repository, and lands the finding on a navigation pointer / information access (a file in the repository that points to where decisions are recorded), naming that target file. Separates observation from inference and states nothing was applied.",
+      "files": [
+        "evals/files/diagnose-2/session.jsonl",
+        "evals/files/diagnose-2/digest.md"
+      ],
+      "expectations": [
+        "Cites session.jsonl:<line> for the empty search and the re-proposal",
+        "Identifies that the decision existed outside the repository and could not be found from it",
+        "Lands the finding on a navigation pointer / information access with a named target file",
+        "Reports only: no plugin file edited or claimed edited"
+      ]
+    },
+    {
+      "id": "maintenance-without-client",
+      "prompt": "只做方法维护建议：我修改了一个 Skill 的共享账号暂停规则。Claude CLI 未登录；修改前后模型对照也没做。来源审查和脚本回归已通过，三个真实场景已有实际答复与逐项判定且均满足标准。是否还必须登录该 CLI 或重复固定次数才能完成？应如何记录评测结论和限制？不执行模型调用或文件修改。",
+      "expected_output": "Accepts already completed scenario evaluation without requiring a specific CLI/model/count or old-new comparison; Requires actual outputs, criteria and results; uses evaluated without claiming comparative improvement",
+      "files": [],
+      "expectations": [
+        "Accepts already completed scenario evaluation without requiring a specific CLI/model/count or old-new comparison",
+        "Requires actual outputs, criteria and results; uses evaluated without claiming comparative improvement"
+      ]
+    },
+    {
+      "id": "evaluation-required-control",
+      "prompt": "一个 Skill 的采集断点规则刚修改，健康检查和 Python 脚本全通过，但是没有执行任何使用该 Skill 的任务场景。维护者说不对模型使用做要求。能否直接宣布 Skill 评测通过？给出可行下一步，不指定模型或客户端，不实施。",
+      "expected_output": "Does not equate health/Python passes with skill scenario evaluation; Proposes actual scenarios and judgements without mandating a model/client/count or inventing execution",
+      "files": [],
+      "expectations": [
+        "Does not equate health/Python passes with skill scenario evaluation",
+        "Proposes actual scenarios and judgements without mandating a model/client/count or inventing execution"
+      ]
+    },
+    {
+      "id": "smoke-mode-product",
+      "prompt": "/sdlc-eval smoke。刚改了一个技能的一条规则，要做下一轮场景评测并核对产物。没有已登录的模型客户端。不要把它当成健康检查或 check-sdlc.sh 的替代，也不要指定模型、客户端或调用次数。说明应选哪种模式、behavior_smoke.py run 与 judge 要核对什么、以及和宿主端到端冒烟的差别。不执行调用。",
+      "expected_output": "Selects smoke mode for this next-turn method scenario. Names run inputs (--skill, --cases, --arm, --out, --budget-usd) and per-rep records, and judge only when the quote is in that run's reply. Dry-run, health-check and check-sdlc.sh are not the scenario result. A missing client does not waive evaluation and does not mandate a model. Distinguishes this mode from host end-to-end delegation smoke.",
+      "files": [],
+      "expectations": [
+        "Selects the smoke eval mode and checks run/judge artifacts against that run",
+        "Does not bind a model, client or call count; a missing client is not a waiver",
+        "Does not treat dry-run, health-check or check-sdlc.sh as the scenario result",
+        "Separates smoke mode from host end-to-end delegation smoke"
+      ]
+    }
+  ]
+}

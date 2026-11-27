@@ -1,0 +1,1289 @@
+#!/usr/bin/env bash
+set -u
+# ============================================================================
+# check-sdlc.sh — SDLC 工件合规门禁（G-脚本，确定性判决）
+# 用法：bash check-sdlc.sh [--require] [--hat <stage-id>] [--report] <feature 目录或 S 档文件>
+#       bash check-sdlc.sh --stats [root]
+#       bash check-sdlc.sh --work <work-id> <feature-dir>  # only the selected work, never feature delivery
+# 退出码 = 违规数，封顶 63（64 只表示用法错误；退出码按 256 取模，不封顶时 256 处违规会变成 0）。
+#   默认：无工件则跳过（exit 0），不阻塞非流程改动。
+# --require：跳过视为失败（编排器在帽子应交件之后用；skip ≠ pass）
+# --hat <stage-id>：隐含 --require；按 H.1 必交路径表检查本帽工件。
+# --report：/sdlc-review 报告模式。只验 findings.md + ## Snapshot；跳过 NOLANE/MATRIX/NOSEC 等泳道检查。
+#   stage-id 来自 workflow/registry.json（spawn 角色名如 pm 非法）。
+#   --hat product <product_root>：只验产品层文件（已填、无 sdlc:unfilled），不跑泳道检查。
+#   --hat cycle <cycle_dir>：只验产品周期的收尾（cycle.yaml、选定任务的输出、提议去向、信号 ID 唯一、决策未默认），不跑泳道检查。
+#   v4：state.yaml 含 sdlc_version: 4 时启用产品层 / 设计方向 / 联调 / E2E / 三方验收 / 回写闸门；旧档不受影响。
+#   未知/空 stage-id → 用法错误（exit 64）。skip 由 state.yaml roles_skipped
+#   单行 flow 列表精确 token 决定（block-style 无效，见 H.1）。
+#   `product-ops` ≡ `ops`（跳过别名，不是 spawn type）。
+# ============================================================================
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+MATRIX_PY="$SCRIPT_DIR/../skills/coverage-matrix/scripts/check-matrix.py"
+V=0
+REQUIRE=0
+HAT_GIVEN=0
+HATID=""
+REPORT=0
+WORK_GIVEN=0
+WORKID=""
+TMPF=$(mktemp 2>/dev/null || echo /tmp/_sdlc_$$.tmp)
+trap 'rm -f "$TMPF"' EXIT
+red() { printf "\033[0;31m✗ [SDLC-%s] %s\033[0m\n" "$1" "$2"; V=$((V+1)); }
+exit_v() { [ "$V" -gt 63 ] && exit 63; exit "$V"; }
+grn() { printf "\033[0;32m✓ %s\033[0m\n" "$1"; }
+to_farr() { # $1 = 换行分隔的路径 → 数组 FARR。路径可含空格，不能按空格切分；空数组用 ${FARR[@]+"${FARR[@]}"} 展开（bash 3.2 + set -u）
+  FARR=()
+  while IFS= read -r _p; do [ -n "$_p" ] && FARR+=("$_p"); done <<EOF
+$1
+EOF
+}
+
+VALID_HATS=$(python3 "$SCRIPT_DIR/workflow.py" stages) || exit 64
+is_valid_hat() { case " $VALID_HATS " in *" $1 "*) return 0 ;; esac; return 1; }
+
+FILTERED=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --require) REQUIRE=1 ;;
+    --hat)
+      HAT_GIVEN=1
+      if [ $# -ge 2 ]; then HATID="$2"; shift; else HATID=""; fi
+      ;;
+    --report) REPORT=1 ;;
+    --work)
+      WORK_GIVEN=1
+      if [ $# -ge 2 ]; then WORKID="$2"; shift; fi
+      ;;
+    *) FILTERED+=("$1") ;;
+  esac
+  shift
+done
+set -- "${FILTERED[@]+"${FILTERED[@]}"}"
+
+# Scoped completion never implies the aggregate lane/feature gates below passed.
+if [ "$WORK_GIVEN" = "1" ]; then
+  if [ -z "$WORKID" ] || [ "$HAT_GIVEN" = "1" ] || [ "$REPORT" = "1" ] || [ $# -ne 1 ]; then
+    echo 'usage: check-sdlc.sh --work <work-id> <feature-dir> (no --hat/--report)' >&2
+    exit 64
+  fi
+  exec python3 "$SCRIPT_DIR/workflow.py" check-work --root "$1" --work-id "$WORKID"
+fi
+
+# ---------- --stats：度量汇总（泳道 / 独立审查拦截 / 返工 / 逃逸 / 赌注读数），由 outcomes.py 计算 ----------
+if [ "${1:-}" = "--stats" ]; then
+  exec python3 "$SCRIPT_DIR/gates/outcomes.py" stats --root "${2:-.sdlc}"
+fi
+
+# ---------- --hat 校验（隐含 --require；spawn 角色名非法） ----------
+if [ "$HAT_GIVEN" = "1" ]; then
+  REQUIRE=1
+  if [ -z "$HATID" ] || ! is_valid_hat "$HATID"; then
+    echo "用法错误: --hat 必须是 stage-id (合法值: ${VALID_HATS})。--hat pm 这类 spawn 角色名非法。" >&2
+    exit 64
+  fi
+fi
+
+TARGET="${1:-}"
+if [ -z "$TARGET" ]; then echo "用法: check-sdlc.sh [--require] [--hat <stage-id>] [--report] <feature目录|S档文件> | --stats [root]"; exit 1; fi
+
+# ---------- v4 决策闸（DEFAULTED / DECISIONPENDING） ----------
+# 决策行 = 表格行里有 Q-* id、「类别」单元格（战略|运营）和「状态」单元格（待确认|已确认|默认）。
+# 无类别单元格的旧表不参与判定。战略决策只能由操作者明确回答：没回答 ≠ 同意。
+decision_rows() { # $@ = 文件 → file<TAB>id<TAB>类别<TAB>状态<TAB>有「原话」(1/0)
+  [ $# -gt 0 ] || return 0
+  awk -F'|' '
+    /^[[:space:]]*\|/ {
+      id=""; cls=""; stat=""; q=0
+      for (i=2; i<NF; i++) {
+        c=$i; gsub(/\*\*/, "", c); gsub(/^[[:space:]]+|[[:space:]]+$/, "", c)
+        if (id=="" && c ~ /^Q-[A-Z0-9][A-Z0-9-]*$/) id=c
+        else if (c=="战略" || c=="运营") cls=c
+        else if (c=="待确认" || c=="已确认" || c=="默认") stat=c
+        if (index($i, "「") && index($i, "」")) q=1
+      }
+      if (id!="" && cls!="" && stat!="") printf "%s\t%s\t%s\t%s\t%d\n", FILENAME, id, cls, stat, q
+    }' "$@" 2>/dev/null
+}
+check_defaulted() { # $1 = red|warn；其余 = 文件
+  local mode="$1"; shift
+  [ $# -gt 0 ] || return 0
+  local df did dcls dstat dq msg hit hits
+  while IFS="$(printf '\t')" read -r df did dcls dstat dq; do
+    [ -n "$did" ] || continue
+    msg=""
+    if [ "$dcls" = "战略" ] && [ "$dstat" = "默认" ]; then
+      msg="$df: $did 是战略决策却标「默认」（只能由操作者明确回答：写「待确认」+ 选项与推荐，问人并等待）"
+    elif [ "$dstat" = "已确认" ] && [ "$dq" != "1" ]; then
+      msg="$df: $did 标「已确认」但没有操作者原话「…」（写明谁、何时、怎么答的；没有回答就仍是待确认）"
+    fi
+    [ -n "$msg" ] || continue
+    if [ "$mode" = "red" ]; then red DEFAULTED "$msg"; else printf "\033[0;33m⚠ [SDLC-DEFAULTED] %s\033[0m\n" "$msg"; fi
+  done <<EOF
+$(decision_rows "$@")
+EOF
+  hits=$(grep -HnE '默认已定|未(应答|回复|答复)[^|]{0,24}(默认|采用|推荐)' "$@" 2>/dev/null \
+    | grep -vE '(不写|不要写|不得写|禁止写|别写|不能写|不要|不得|禁止)[[:space:]]*[「"“]?默认已定')  # 模板里禁止这样写的说明不是违规（C02）
+  [ -n "$hits" ] || return 0
+  local total
+  total=$(printf '%s\n' "$hits" | grep -c .)
+  while IFS= read -r hit; do
+    msg="${hit}（用户没回答不等于同意：战略问题保持待确认并停下等人，不得按推荐默认落地）"
+    if [ "$mode" = "red" ]; then red DEFAULTED "$msg"; else printf "\033[0;33m⚠ [SDLC-DEFAULTED] %s\033[0m\n" "$msg"; fi
+  done <<EOF
+$(printf '%s\n' "$hits" | head -3)
+EOF
+  [ "$total" -gt 3 ] && printf "  …默认落地的战略决策文本共 %s 处（只列前 3 处）\n" "$total"
+  return 0
+}
+check_pending() { # $1 = 说明；其余 = 文件：战略决策仍待确认
+  local why="$1"; shift
+  [ $# -gt 0 ] || return 0
+  local df did dcls dstat dq
+  while IFS="$(printf '\t')" read -r df did dcls dstat dq; do
+    [ -n "$did" ] || continue
+    if [ "$dcls" = "战略" ] && [ "$dstat" = "待确认" ]; then
+      red DECISIONPENDING "$df: 战略决策 $did 仍待确认 —— ${why}（把选项与推荐交给操作者，明确回答前整个阶段等待；不依赖它的工作拆成局部工作 --work 推进；这不是返工）"
+    fi
+  done <<EOF
+$(decision_rows "$@")
+EOF
+}
+
+is_unfilled() { # $1 = 文件：模板标记只认行首注释（<!-- / # / //），正文里提到这个词不算
+  grep -qE '^[[:space:]]*(<!--|#|//)[[:space:]]*sdlc:unfilled' "$1" 2>/dev/null
+}
+section_filled() { # $1 = briefing，$2 = 节名：打印该节里与模板原句不同的非空行（照抄模板不算填写）
+  awk -v sec="$2" -v tpl="$SCRIPT_DIR/../skills/discover/templates/briefing.md" '
+    BEGIN { while ((getline line < tpl) > 0) tl[line] = 1; close(tpl) }
+    /^##[[:space:]]+/ { insec = ($0 ~ ("^##[[:space:]]+" sec "([[:space:]]|$)")); next }
+    insec && NF && !($0 in tl) { print }
+  ' "$1"
+}
+kill_written() { # $1 = briefing：Falsify 节里「杀死条件」后要有内容（同一行冒号后，或紧随其后的非空列表项）
+  awk '
+    /^##[[:space:]]+/ { insec = ($0 ~ /^##[[:space:]]+Falsify([[:space:]]|$)/); k = 0; next }
+    !insec { next }
+    k && /^[[:space:]]*[-*][[:space:]]*$/ { next }
+    k && /^[[:space:]]*[-*][[:space:]]+[^[:space:]]/ { found = 1; exit }
+    k && NF { k = 0 }
+    index($0, "杀死条件") {
+      rest = substr($0, index($0, "杀死条件") + length("杀死条件"))
+      c = index(rest, "："); w = length("：")
+      if (c == 0) { c = index(rest, ":"); w = 1 }
+      after = c ? substr(rest, c + w) : rest
+      if (after ~ /[^[:space:]]/) { found = 1; exit }
+      k = 1
+    }
+    END { exit found ? 0 : 1 }
+  ' "$1"
+}
+verdict_state() { # $1 = briefing：Falsify 节的「本轮裁决」是否选定：missing / unchosen / bet-no-metric / ok
+  awk '
+    function lead(s) { # 去掉开头的空白、= : ： 与反引号（全角冒号按字节整体比较，避开 awk 的字节类）
+      while (s != "") {
+        if (substr(s, 1, 3) == "：") { s = substr(s, 4); continue }
+        c = substr(s, 1, 1)
+        if (c == " " || c == "\t" || c == "=" || c == ":" || c == "`") { s = substr(s, 2); continue }
+        break
+      }
+      return s
+    }
+    /^##[[:space:]]+/ { insec = ($0 ~ /^##[[:space:]]+Falsify([[:space:]]|$)/); next }
+    !insec { next }
+    index($0, "本轮裁决") && !seen {
+      seen = 1; v = substr($0, index($0, "本轮裁决") + length("本轮裁决"))
+      if (index(v, "复盘指标")) v = substr(v, 1, index(v, "复盘指标") - 1)
+    }
+    index($0, "复盘指标") {
+      r = lead(substr($0, index($0, "复盘指标") + length("复盘指标")))
+      if (r != "" && substr(r, 1, 1) != "<") m = 1
+    }
+    END {
+      if (!seen) { print "missing"; exit }
+      if (index(v, "|") || index(v, "<")) { print "unchosen"; exit }
+      n = split("杀死 缩小后存活 当作赌注 通过 待定", w, " "); k = 0
+      for (i = 1; i <= n; i++) if (index(v, w[i])) k++
+      if (k == 0) { print "unchosen"; exit }
+      if (index(v, "赌注") && !m) { print "bet-no-metric"; exit }
+      print "ok"
+    }
+  ' "$1"
+}
+research_offline() { # $1 = 起点目录：上溯找 sdlc.config.yaml；research.offline: true（只有用户能设）→ 0
+  local d="$1" nd j=0
+  while [ $j -lt 8 ]; do
+    if [ -f "$d/sdlc.config.yaml" ]; then
+      awk '/^research:/ { r=1; next } r && /^[^[:space:]#]/ { r=0 } r && /^[[:space:]]+offline:[[:space:]]*true([[:space:]]|#|$)/ { f=1 } END { exit f ? 0 : 1 }' "$d/sdlc.config.yaml"
+      return $?
+    fi
+    nd=$(dirname "$d"); [ "$nd" = "$d" ] && break; d="$nd"; j=$((j+1))
+  done
+  return 1
+}
+need_sources() { # $1 = file. Minimum traceability only: no source-count quota; evidence quality is reviewed by the owning skill
+  [ -f "$1" ] || return 0
+  research_offline "$(cd "$(dirname "$1")" && pwd)" && return 0
+  python3 "$SCRIPT_DIR/gates/check_research_sources.py" "$1" || red SOURCES "$1: 缺少带日期的来源引用（URL 或真实本地文件链接）；引用数量不代表研究质量"
+}
+has_existing_image() { # $1 = md 文件：引用的 PNG/JPG/WebP 至少一张真实存在（相对文件目录，上溯到项目根）
+  local f="$1" refs ref d nd j
+  refs=$(grep -oE '[A-Za-z0-9_./~-]+\.(png|jpe?g|webp)' "$f" 2>/dev/null | sort -u)
+  [ -n "$refs" ] || return 1
+  while IFS= read -r ref; do
+    case "$ref" in /*) [ -f "$ref" ] && return 0; continue ;; esac
+    d=$(cd "$(dirname "$f")" && pwd); j=0
+    while [ $j -lt 6 ]; do
+      [ -f "$d/$ref" ] && return 0
+      [ -f "$d/sdlc.config.yaml" ] && break
+      nd=$(dirname "$d"); [ "$nd" = "$d" ] && break; d="$nd"; j=$((j+1))
+    done
+  done <<EOF
+$refs
+EOF
+  return 1
+}
+
+missing_images() { # $1 = md 文件 → 打印引用了但不存在的图片；一张都没引用时打印 NONE
+  local f="$1" refs ref d nd j found miss=""
+  refs=$(grep -oE '[A-Za-z0-9_./~-]+\.(png|jpe?g|webp)' "$f" 2>/dev/null | sort -u)
+  [ -n "$refs" ] || { echo NONE; return; }
+  while IFS= read -r ref; do
+    found=0
+    case "$ref" in
+      /*) [ -f "$ref" ] && found=1 ;;
+      *) d=$(cd "$(dirname "$f")" && pwd); j=0
+         while [ $j -lt 6 ]; do
+           [ -f "$d/$ref" ] && { found=1; break; }
+           [ -f "$d/sdlc.config.yaml" ] && break
+           nd=$(dirname "$d"); [ "$nd" = "$d" ] && break; d="$nd"; j=$((j+1))
+         done ;;
+    esac
+    [ "$found" -eq 1 ] || miss="$miss $ref"
+  done <<EOF
+$refs
+EOF
+  echo "${miss# }"
+}
+is_generated_image() { # 生成图（Grok 出图）的两个落点：它们是素材与探针，不是渲染产物，也不是走查截图
+  case "$1" in
+    */assets/refs/*|assets/refs/*|*/assets/generated/*|assets/generated/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+real_shot_count() { # $1 = md 文件 → 打印其中「非生成图」的图片引用数
+  local f="$1" refs ref n=0
+  refs=$(grep -oE '[A-Za-z0-9_./~-]+\.(png|jpe?g|webp)' "$f" 2>/dev/null | sort -u)
+  for ref in $refs; do
+    is_generated_image "$ref" || n=$((n+1))
+  done
+  echo "$n"
+}
+need_images() { # $1 = md 文件；$2 = 标签；$3 = 语境。截图必须真实存在：一张不引用、或引用了不存在的文件都算违规
+  local m n
+  m=$(missing_images "$1")
+  if [ "$m" = "NONE" ]; then red "$2" "$1: ${3}未引用截图"; return; fi
+  if [ -n "$m" ]; then red "$2" "$1: 引用的截图不存在: ${m}（截图要真实拍下来，不能只写路径）"; return; fi
+  n=$(real_shot_count "$1")
+  [ "${n:-0}" -ge 1 ] || red "$2" "$1: ${3}只引用了生成图（assets/refs/ 与 assets/generated/ 是 AI 生成素材，不是渲染产物或走查截图）"
+}
+
+# ---------- --hat product：产品层独立检查（/sdlc-product 用；不跑泳道检查） ----------
+if [ "$HAT_GIVEN" = "1" ] && [ "$HATID" = "product" ]; then
+  PRD="$TARGET"
+  if [ ! -d "$PRD" ]; then
+    red PRODUCTCTX "--hat product: 产品层目录 $PRD 不存在"
+  else
+    for pf in strategy.md feature-map.md architecture.md domain-model.md erd.dbml; do
+      if [ ! -f "$PRD/$pf" ]; then red PRODUCTCTX "--hat product: 缺 $PRD/$pf"
+      elif ! grep -q '[^[:space:]]' "$PRD/$pf" 2>/dev/null; then red PRODUCTCTX "--hat product: $PRD/$pf 是空文件（P08）"
+      elif is_unfilled "$PRD/$pf"; then red PRODUCTCTX "--hat product: $PRD/$pf 仍是模板（含 sdlc:unfilled）"
+      fi
+    done
+    for pf in growth.md design-system.md data/tracking-plan.yaml data/metrics.yaml data/tags.yaml; do
+      if [ -f "$PRD/$pf" ] && is_unfilled "$PRD/$pf"; then
+        printf "\033[0;33m⚠ [SDLC-PRODUCTOPT] %s 仍是模板（可选文件：该产品无此面时删掉文件并在 README 写明理由）\033[0m\n" "$PRD/$pf"
+      fi
+    done
+    if [ -f "$PRD/growth.md" ] && ! is_unfilled "$PRD/growth.md"; then need_sources "$PRD/growth.md"; fi
+    if [ -f "$PRD/data-dictionary.md" ]; then
+      python3 "$SCRIPT_DIR/data/data_dictionary.py" --product-root "$PRD" --check >/dev/null 2>&1 \
+        || red PRODUCTCTX "$PRD/data-dictionary.md: 与 erd.dbml / domain-model.md / data/metrics.yaml 不一致（来源已变或被手改）——重新生成：python3 PLUGIN_ROOT/scripts/data/data_dictionary.py --product-root $PRD"
+    fi
+    DS="$PRD/design-system.md"
+    if [ -f "$DS" ] && ! is_unfilled "$DS"; then
+      has_existing_image "$DS" || red PRODUCTUI "$DS: 没有引用任何存在的截图——设计系统要从运行中的产品反推：按 app.start 启动，scripts/ui-evidence.sh 截图并引用 PNG（尚无界面的新产品引用原型截图；check_config.py --probe 查应用是否在跑）"
+    fi
+    PMD=$(find "$PRD" -name '*.md' -not -name 'CHANGELOG.md' 2>/dev/null)
+    if [ -n "$PMD" ]; then
+      to_farr "$PMD"
+      check_defaulted red "${FARR[@]}"
+      check_pending "产品层未完成（/sdlc-product 须拿到操作者回答后再收尾）" "${FARR[@]}"
+    fi
+    # PRODUCTSIZE：每次 spawn 都会整读产品层；超预算告警，超 2× 失败
+    for spec in strategy.md:120 feature-map.md:200 growth.md:200 design-system.md:250 architecture.md:250 domain-model.md:300 README.md:60; do
+      pf=${spec%%:*}; lim=${spec##*:}
+      [ -f "$PRD/$pf" ] || continue
+      nl=$(wc -l <"$PRD/$pf" | tr -d ' ')
+      if [ "$nl" -gt $((lim * 2)) ]; then
+        red PRODUCTSIZE "$PRD/$pf: ${nl} 行，超过 2× 预算 ${lim}（产品层只放长期成立的事实；功能细节回到功能工件）"
+      elif [ "$nl" -gt "$lim" ]; then
+        printf "\033[0;33m⚠ [SDLC-PRODUCTSIZE] %s: %s 行 > 预算 %s\033[0m\n" "$PRD/$pf" "$nl" "$lim"
+      fi
+    done
+    # REFS：metric:/tag:/event: 引用必须在数据文件里有定义（数据文件已填时才查）
+    for kind in metric:data/metrics.yaml:id tag:data/tags.yaml:id event:data/tracking-plan.yaml:event; do
+      pre=${kind%%:*}; rest=${kind#*:}; yf=${rest%%:*}; key=${rest##*:}
+      { [ -f "$PRD/$yf" ] && ! is_unfilled "$PRD/$yf"; } || continue
+      [ -n "$PMD" ] || continue
+      DEFS=$(grep -oE "^[[:space:]]*-?[[:space:]]*${key}:[[:space:]]*[\"']?[A-Za-z0-9_.-]+" "$PRD/$yf" 2>/dev/null | sed -E "s/.*${key}:[[:space:]]*[\"']?//" | sort -u)
+      to_farr "$PMD"
+      USED=$(grep -ohE "(^|[^A-Za-z0-9_])${pre}:[A-Za-z0-9_.-]+" "${FARR[@]}" 2>/dev/null | sed -E "s/^.*${pre}://; s/[.]+$//" | sort -u)
+      for u in $USED; do
+        printf '%s\n' "$DEFS" | grep -qxF "$u" || red REFS "$PRD: ${pre}:${u} 在 $yf 里没有定义（负责人补定义，或改成已有 id）"
+      done
+    done
+    # STALE（告警）：按 CHANGELOG 行序，上游文件在下游最后一次写入之后又变了
+    if [ -f "$PRD/CHANGELOG.md" ]; then
+      STALE_OUT=$(awk -F'|' '
+        BEGIN {
+          deps["growth.md"]="strategy.md feature-map.md data/metrics.yaml data/tags.yaml"
+          deps["design-system.md"]="strategy.md feature-map.md"
+          deps["architecture.md"]="strategy.md"
+          deps["domain-model.md"]="architecture.md feature-map.md"
+          deps["data/tracking-plan.yaml"]="domain-model.md feature-map.md"
+          deps["data/metrics.yaml"]="strategy.md data/tracking-plan.yaml"
+          deps["data/tags.yaml"]="data/metrics.yaml"
+          n = split("strategy.md feature-map.md growth.md design-system.md architecture.md domain-model.md data/tracking-plan.yaml data/metrics.yaml data/tags.yaml", files, " ")
+        }
+        /^[[:space:]]*\|/ && NF > 5 {
+          for (i = 1; i <= n; i++) {
+            f = files[i]; b = f; sub(/^data\//, "", b)
+            if (index($5, f) > 0 || (b != f && index($5, b) > 0)) last[f] = NR
+          }
+        }
+        END {
+          for (d in deps) {
+            if (!(d in last)) continue
+            m = split(deps[d], ups, " ")
+            for (k = 1; k <= m; k++) if ((ups[k] in last) && last[ups[k]] > last[d]) print d " ← " ups[k]
+          }
+        }' "$PRD/CHANGELOG.md" | sort)
+      if [ -n "$STALE_OUT" ]; then
+        while IFS= read -r sl; do
+          printf "\033[0;33m⚠ [SDLC-STALE] %s（上游在下游最后一次写入之后又改了：重跑下游负责人，或在 progress 记录为何不受影响）\033[0m\n" "$sl"
+        done <<EOF
+$STALE_OUT
+EOF
+      fi
+    fi
+  fi
+  echo "----------------------------------------"
+  if [ $V -eq 0 ]; then grn "产品层检查通过"
+  else printf "\033[0;31m✗ [SDLC-SUMMARY] 共 %s 处违规\033[0m\n" "$V"
+  fi
+  exit_v
+fi
+# ---------- --hat cycle：产品周期收尾检查（/sdlc-product cycle 用；不跑泳道检查） ----------
+if [ "$HAT_GIVEN" = "1" ] && [ "$HATID" = "cycle" ]; then
+  CY="$TARGET"
+  if [ ! -d "$CY" ]; then
+    red CYCLE "--hat cycle: 周期目录 $CY 不存在"
+  else
+    python3 "$SCRIPT_DIR/workflow.py" check-cycle --root "$CY" > "$TMPF" 2>&1
+    CRC=$?
+    if [ "$CRC" -ge 2 ]; then
+      red CYCLE "--hat cycle: 无法检查周期：$(cat "$TMPF")"
+    else
+      while IFS=$'\t' read -r LEVEL CODE MESSAGE; do
+        [ -z "$LEVEL" ] && continue
+        red "$CODE" "--hat cycle: $MESSAGE"
+      done < "$TMPF"
+    fi
+    CMD=$(find "$CY" -name '*.md' -not -path '*/memory/*' 2>/dev/null)
+    if [ -n "$CMD" ]; then
+      to_farr "$CMD"
+      check_defaulted red "${FARR[@]}"
+      if grep -qE '^status:[[:space:]]*closed' "$CY/cycle.yaml" 2>/dev/null; then
+        check_pending "周期关闭前，战略决策须有操作者的回答" "${FARR[@]}"
+      fi
+    fi
+  fi
+  echo "----------------------------------------"
+  if [ $V -eq 0 ]; then grn "产品周期检查通过"
+  else printf "\033[0;31m✗ [SDLC-SUMMARY] 共 %s 处违规\033[0m\n" "$V"
+  fi
+  exit_v
+fi
+if [ ! -e "$TARGET" ]; then
+  echo "check-sdlc: $TARGET 不存在，跳过"
+  if [ "$REQUIRE" = "1" ]; then red SKIP "$TARGET 不存在（--require：跳过不能当放行）"; exit_v; fi
+  exit 0
+fi
+
+# ---------- S 档单文件 / M+L 档目录统一收集工件 ----------
+# 非流程工件豁免（基础设施文件：账本/说明/模板——不要求泳道声明与证据）
+EXEMPT_RE='\.sdlc/(_lessons\.md|README\.md)$'
+
+FILES=""
+if [ -f "$TARGET" ]; then FILES="$TARGET"; ROOT="$(dirname "$TARGET")"
+else
+  ROOT="$TARGET"
+  FILES=$(find "$TARGET" -name "*.md" -o -name "state.yaml" 2>/dev/null | grep -vE "$EXEMPT_RE" || true)
+fi
+if [ -z "$FILES" ]; then
+  echo "check-sdlc: 无工件，跳过"
+  if [ "$REQUIRE" = "1" ]; then red SKIP "无工件（--require：跳过不能当放行）"; exit_v; fi
+  exit 0
+fi
+
+# Artifact locations are data; semantic checks below refer to generated shell variables.
+python3 "$SCRIPT_DIR/workflow.py" artifact-paths > "$TMPF" || exit 64
+while IFS=$'\t' read -r ART_ID ART_PATH; do
+  printf -v "ART_${ART_ID}" '%s' "$ART_PATH"
+done < "$TMPF"
+
+ST="$ROOT/state.yaml"
+[ -f "$ST" ] || ST="$TARGET"
+
+# Protocol task checks are read-only. A producer can finish before G-fresh;
+# only phase Closed invokes whole-feature closure here. Stage closure is an explicit manager step.
+if [ -f "$ROOT/state.yaml" ]; then
+  TASK_ARGS=(--root "$ROOT" --scope feature)
+  if grep -qE '^phase:[[:space:]]*Closed' "$ROOT/state.yaml"; then TASK_ARGS+=(--closure); fi
+  TASK_OUT=$(python3 "$SCRIPT_DIR/workflow.py" check-tasks "${TASK_ARGS[@]}" 2>&1)
+  TASK_CODE=$?
+  [ "$TASK_CODE" -eq 0 ] || red TASKPROTOCOL "$TASK_OUT"
+fi
+
+# ---------- roles_skipped 精确 token（单行 flow 列表；block-style 无效） ----------
+role_skipped() { # $1 = spawn_role token；读 state.yaml roles_skipped
+  [ -f "$ST" ] || return 1
+  LINE=$(grep -m1 -E '^roles_skipped:' "$ST" | sed -E 's/^roles_skipped:[[:space:]]*//; s/#.*$//; s/\[//g; s/\]//g')
+  [ -n "$LINE" ] || return 1
+  OLDIFS=$IFS; IFS=','
+  for t in $LINE; do
+    t=$(printf '%s' "$t" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')
+    [ "$t" = "$1" ] && { IFS=$OLDIFS; return 0; }
+    # product-ops is a skip alias for spawn role ops (not a --hat / spawn type)
+    if [ "$1" = "ops" ] && [ "$t" = "product-ops" ]; then
+      IFS=$OLDIFS
+      return 0
+    fi
+  done
+  IFS=$OLDIFS
+  return 1
+}
+
+stage_rank() { python3 "$SCRIPT_DIR/workflow.py" rank "$1" 2>/dev/null || echo 0; } # 未登记阶段由 STATE 单独报错
+checked_stage() { # 本次检查的阶段：--hat 指定的阶段，否则 state.yaml 的 current_hat（去掉行内注释，模板就带注释）
+  if [ "$HAT_GIVEN" = "1" ] && [ -n "$HATID" ]; then echo "$HATID"
+  else st_val current_hat
+  fi
+}
+sv() { python3 "$SCRIPT_DIR/gates/state_view.py" "$1" "$ST"; } # state.yaml 只读视图：容忍注释与 flow/block 两种写法
+
+q_security_yes() {
+  [ -f "$ST" ] || return 1
+  grep -qE '^q_security:[[:space:]]*yes' "$ST" && return 0
+  grep -qE '^[[:space:]]*Q[234]:[[:space:]]*yes' "$ST" && return 0
+  return 1
+}
+
+# ---------- v4 helpers（仅 sdlc_version>=4 生效） ----------
+st_val() { # $1 = 顶层标量键
+  [ -f "$ST" ] || return 0
+  grep -m1 -E "^$1:" "$ST" | sed -E "s/^$1:[[:space:]]*//; s/[[:space:]]+#.*$//; s/[\"']//g; s/[[:space:]]+$//"
+}
+is_v4() { SV=$(st_val sdlc_version); case "$SV" in ''|*[!0-9]*) return 1 ;; esac; [ "$SV" -ge 4 ]; }
+ui_yes() { [ "$(st_val ui)" = "yes" ]; }
+tracking_yes() { [ "$(st_val tracking)" = "yes" ]; }
+product_root_abs() {
+  PR=$(st_val product_root)
+  [ -n "$PR" ] || return 0
+  case "$PR" in
+    /*) printf '%s' "$PR"; return 0 ;;
+  esac
+  dd="$ROOT"; j=0
+  while [ $j -lt 6 ]; do
+    if [ -f "$dd/sdlc.config.yaml" ]; then printf '%s' "$dd/$PR"; return 0; fi
+    nd=$(dirname "$dd"); [ "$nd" = "$dd" ] && break; dd="$nd"; j=$((j+1))
+  done
+  printf '%s' "$(cd "$ROOT/../.." 2>/dev/null && pwd)/$PR"
+}
+need_product() { # $1 = 产品层相对路径；$2 = 标签
+  PRA=$(product_root_abs)
+  if [ -z "$PRA" ]; then red PRODUCTCTX "$2: sdlc_version>=4 但 state.yaml 缺 product_root"; return; fi
+  if [ ! -f "$PRA/$1" ]; then red PRODUCTCTX "$2: 缺产品层 $PRA/$1（负责人帽补齐，或先跑 /sdlc-product）"
+  elif is_unfilled "$PRA/$1"; then red PRODUCTCTX "$2: 产品层 $PRA/$1 仍是模板（含 sdlc:unfilled）"
+  fi
+}
+QID_RE='Q-[A-Z0-9][A-Z0-9-]*[A-Z0-9]|Q-[A-Z0-9]' # Q-PRICE、Q-1、Q-EXPORT-TIER；字母或数字开头都算决策编号
+pending_qids() { # $1 = 文件 → 「待确认」行里的 Q-* id（去重）
+  grep '待确认' "$1" 2>/dev/null | grep -oE "$QID_RE" | sort -u
+}
+q_status() { # $1 = Q id → open_questions 里该 id 的 status（精确匹配；未记账则空）
+  sv questions 2>/dev/null | awk -F'\t' -v id="$1" '$1 == id { print $2; exit }'
+}
+verdict_of() { # $1 = 验收文件 → 通过|有条件通过|不通过|歧义|空。出现多个不同结论时不取第一个（P12），判为歧义
+  local all
+  all=$(grep -oE '结论[:：][[:space:]]*(有条件通过|不通过|通过)' "$1" 2>/dev/null | sed -E 's/^结论[:：][[:space:]]*//' | sort -u)
+  case "$(printf '%s\n' "$all" | grep -c .)" in
+    0) echo "" ;;
+    1) echo "$all" ;;
+    *) echo "歧义" ;;
+  esac
+}
+opinion_verdict_of() { # $1 = 放行意见文件 → 放行|有条件放行|不放行|歧义|空（兼容「结论：放行」与表格勾选「☑ 放行 / [x] 不放行」，排除含 | 或 < 的模板占位行）
+  local by_colon by_box all
+  by_colon=$(grep -vE '[|<]' "$1" 2>/dev/null | grep -oE '结论[:：][[:space:]]*\**(有条件放行|不放行|放行)\**' | sed -E 's/^结论[:：][[:space:]]*\**//; s/\**$//')
+  by_box=$(grep -oE '(☑|\[[xX]\])[[:space:]]*\**(有条件放行|不放行|放行)\**' "$1" 2>/dev/null | sed -E 's/^(☑|\[[xX]\])[[:space:]]*\**//; s/\**$//')
+  all=$(printf '%s\n%s\n' "$by_colon" "$by_box" | sed '/^$/d' | sort -u)
+  case "$(printf '%s\n' "$all" | grep -c .)" in
+    0) echo "" ;;
+    1) echo "$all" ;;
+    *) echo "歧义" ;;
+  esac
+}
+check_accept_file() { # $1 = 文件；$2 = 谁；$3 = 是否要求截图(1/0)
+  [ -f "$1" ] || return 0 # presence is checked by the registry gate
+  VD=$(verdict_of "$1")
+  if [ -z "$VD" ]; then red ACCEPT "$1: 缺「结论：通过|有条件通过|不通过」"
+  elif [ "$VD" = "歧义" ]; then red ACCEPT "$1: 出现多个不同的「结论：」，只保留当前这一轮的结论（历史轮次移到「历史」小节并改写措辞）"
+  elif [ "$VD" = "不通过" ]; then red ACCEPT "$1: $2 验收不通过（按差距清单返工 implement 后重验）"
+  elif [ "$VD" = "有条件通过" ]; then
+    WHO=$(basename "$1" .md); WHO=${WHO#accept-}
+    COUT=$(python3 "$SCRIPT_DIR/gates/evidence.py" conditional --feature "$ROOT" --who "$WHO" 2>&1) || red ACCEPT "$1: ${COUT#✗ }"
+  fi
+  if [ "$3" = "1" ]; then need_images "$1" ACCEPT "$2 验收（有界面的变更须在运行中的产品上走查）"; fi
+}
+
+# ---------- 0. --hat 必交路径表（H.1，脚本合同） ----------
+if [ "$HAT_GIVEN" = "1" ]; then
+  CONTRACT_ARGS=(--stage "$HATID" --root "$ROOT")
+  for ROLE in $(python3 "$SCRIPT_DIR/workflow.py" roles); do
+    role_skipped "$ROLE" && CONTRACT_ARGS+=(--skip "$ROLE")
+  done
+  ui_yes && CONTRACT_ARGS+=(--ui)
+  python3 "$SCRIPT_DIR/workflow.py" check-stage "${CONTRACT_ARGS[@]}" > "$TMPF"
+  CONTRACT_RC=$?
+  [ "$CONTRACT_RC" -ge 2 ] && { red CONTRACT "cannot load stage contract"; exit 64; }
+  while IFS=$'\t' read -r LEVEL CODE MESSAGE; do
+    [ -z "$LEVEL" ] && continue
+    if [ "$LEVEL" = error ]; then red "$CODE" "--hat $HATID: $MESSAGE"
+    else printf '⚠ [SDLC-%s] %s\n' "$CODE" "$MESSAGE"; fi
+  done < "$TMPF"
+  case "$HATID" in
+    market)
+      is_v4 && ! role_skipped researcher && need_sources "$ROOT/${ART_market}"
+      ;;
+    compete)
+      is_v4 && ! role_skipped competitor && need_sources "$ROOT/${ART_compete}"
+      ;;
+    growth)
+      if ! role_skipped growth; then
+        is_v4 && need_product growth.md "--hat growth"
+        is_v4 && need_sources "$ROOT/${ART_growth}"
+      fi
+      ;;
+    launch)
+      if ! role_skipped growth; then
+        if [ -f "$ROOT/${ART_launch}" ]; then
+          grep -qE '人群|分群|segment' "$ROOT/${ART_launch}" || red LAUNCH "$ROOT/06-deliver/launch.md: 缺目标人群/分群"
+          grep -qE '渠道|channel' "$ROOT/${ART_launch}" || red LAUNCH "$ROOT/06-deliver/launch.md: 缺触达渠道"
+          grep -qE '对照|holdout|A/B|护栏' "$ROOT/${ART_launch}" || red LAUNCH "$ROOT/06-deliver/launch.md: 缺测量/护栏说明（因果实验才要求对照组）"
+        fi
+      fi
+      ;;
+    accept)
+      role_skipped pm || check_accept_file "$ROOT/${ART_accept_pm}" "pm" "$(ui_yes && echo 1 || echo 0)"
+      if ui_yes && ! role_skipped designer; then check_accept_file "$ROOT/${ART_accept_designer}" "designer" 1; fi
+      role_skipped growth || check_accept_file "$ROOT/${ART_accept_growth}" "growth" 0
+      ;;
+    define)
+      if is_v4; then
+        need_product strategy.md "--hat define"
+        need_product feature-map.md "--hat define"
+        PRA=$(product_root_abs)
+        if [ -n "$PRA" ] && [ -d "$PRA" ]; then
+          PMD=$(find "$PRA" -name '*.md' -not -name 'CHANGELOG.md' 2>/dev/null)
+          if [ -n "$PMD" ]; then to_farr "$PMD"; check_defaulted red "${FARR[@]}"; fi
+        fi
+        SPECF=""
+        for p in $(python3 "$SCRIPT_DIR/workflow.py" paths spec); do [ -f "$ROOT/$p" ] && SPECF="$ROOT/$p" && break; done
+        if [ -n "$SPECF" ]; then
+          grep -qE '核心价值|Aha' "$SPECF" || red CORE "$SPECF: 缺「核心价值与 Aha 时刻」（v4：先说清价值路径再写 FR）"
+          if ui_yes; then grep -qE '\bJ-[0-9]+' "$SPECF" || red JOURNEY "$SPECF: ui: yes 但无关键用户旅程 J-n"; fi
+          if tracking_yes; then
+            [ -f "$ROOT/${ART_tracking}" ] || red TRACKING "--hat define: tracking: yes 但缺 01-define/tracking.md"
+          else
+            grep -qE '埋点[:：][[:space:]]*N/A' "$SPECF" || [ -f "$ROOT/${ART_tracking}" ] || red TRACKING "$SPECF: tracking 非 yes 时须写「埋点：N/A（理由）」"
+          fi
+        fi
+      fi
+      ;;
+    signals)
+      ;;
+    shape)
+      if is_v4 && ! role_skipped architect; then
+        need_product architecture.md "--hat shape"
+        if [ -f "$ROOT/${ART_contract}" ]; then
+          grep -qE '质量属性|QAS' "$ROOT/${ART_contract}" || red ARCH "$ROOT/02-shape/contract.md: 缺质量属性场景（v4：方案由可量化场景驱动）"
+        fi
+        if ui_yes && ! role_skipped designer; then
+          [ -f "$ROOT/${ART_directions}" ] && grep -qE '选定[:：][[:space:]]*D[0-9]+' "$ROOT/${ART_directions}" \
+            || red DESIGNFIRST "--hat shape: ui: yes 但设计方向未选定（体验先于架构：designer explore → 人工选择 → specify）"
+        fi
+      fi
+      ;;
+    dba)
+      role_skipped dba || {
+        if is_v4; then
+          need_product domain-model.md "--hat dba"
+          need_product erd.dbml "--hat dba"
+          [ -f "$ROOT/${ART_db_spec}" ] && { grep -qE '路线压力测试' "$ROOT/${ART_db_spec}" || red STRESS "$ROOT/02-shape/db-spec.md: 缺「路线压力测试」（v4：用 feature-map 的 Next/Later 验证可扩展性）"; }
+        fi
+      }
+      ;;
+    designer)
+      if is_v4 && ! role_skipped designer; then
+        DD="$ROOT/${ART_directions}"
+        if [ ! -f "$DD" ]; then red HATMISS "--hat designer: 缺 02-shape/design-directions.md（适用方向 + 有效选定）"
+        else
+          ND=$(grep -oE '^#+[[:space:]]*D[0-9]+' "$DD" | grep -oE 'D[0-9]+' | sort -u | wc -l | tr -d ' ')
+          [ "${ND:-0}" -ge 1 ] || red DIRECTIONS "$DD: 设计方向 ${ND:-0} 个（至少保留实际采用/比较的方向，标题 ## D1 等；数量不代表质量）"
+          grep -qE '选定[:：][[:space:]]*D[0-9]+' "$DD" || red DIRECTIONS "$DD: 缺「选定：D<n>」（人工选择后由 designer specify 记录）"
+          need_images "$DD" DIRECTIONS "方向（没有渲染产物的方向不算方向）"
+          grep -qE '缺陷检查' "$DD" || red DIRECTIONS "$DD: 缺「缺陷检查」（推荐前逐张看截图：重叠 / 截断 / 溢出 / 对齐 / 对比度 / 占位内容）"
+        fi
+        need_product design-system.md "--hat designer"
+      fi
+      ;;
+    implement)
+      if is_v4 && ui_yes; then
+        if ls "$ROOT"/03-impl/*integration*.md >/dev/null 2>&1; then
+          for IF in "$ROOT"/03-impl/*integration*.md; do
+            need_images "$IF" INTEGRATION "联调记录（须在运行中的产品上走通切片并截图）"
+          done
+        else
+          red INTEGRATION "--hat implement: ui: yes 但缺 03-impl/T-n-integration.md（前后端联调 + 截图）"
+        fi
+      fi
+      ;;
+    verify)
+      if is_v4 && ui_yes; then
+        EOUT=$(python3 "$SCRIPT_DIR/gates/evidence.py" gate --feature "$ROOT" --name e2e 2>&1) \
+          || red E2E "$ST: ${EOUT#✗ }（ui: yes 的变更须有当前代码上的 E2E 运行证据；自报 pass 不算）"
+      fi
+      ;;
+    review)
+      if is_v4 && [ "$REPORT" != "1" ]; then
+        case "$(st_val lane)" in
+          L2|L3|L4)
+            DELTA="$ROOT/product-delta.md"
+            if [ ! -f "$DELTA" ]; then
+              red WRITEBACK "--hat review: 缺 product-delta.md（产品层回写记录；无变更写「无产品层变更：理由」）"
+            elif ! grep -qE '无产品层变更[:：]' "$DELTA"; then
+              PRA=$(product_root_abs)
+              for pf in $(grep -oE '(strategy|feature-map|growth|design-system|architecture|domain-model)\.md|erd\.dbml|data/(tracking-plan|metrics|tags)\.yaml' "$DELTA" | sort -u); do
+                [ -n "$PRA" ] && [ ! -f "$PRA/$pf" ] && red WRITEBACK "$DELTA: 记录了 $pf 的变更，但 $PRA/$pf 不存在"
+              done
+            fi
+            ;;
+        esac
+      fi
+      ;;
+    qc)
+      case "$(st_val delivery_goal)" in
+        release_ready|deployed)
+          [ -s "$ROOT/${ART_readiness}" ] && ! is_unfilled "$ROOT/${ART_readiness}" || red READINESS "发布目标在 QC 前需要 SRE readiness 证据（文件存在不代表专业验收通过）"
+          ;;
+      esac
+      if is_v4 && [ -f "$ROOT/${ART_opinion:-06-deliver/release-opinion.md}" ]; then
+        OPF="$ROOT/${ART_opinion:-06-deliver/release-opinion.md}"
+        OVD=$(opinion_verdict_of "$OPF")
+        if [ -z "$OVD" ]; then red RELEASEOPINION "$OPF: 缺明确放行结论（结论：放行|有条件放行|不放行）"
+        elif [ "$OVD" = "歧义" ]; then red RELEASEOPINION "$OPF: 放行结论有歧义（出现多个不同结论）"
+        elif [ "$OVD" = "不放行" ]; then red RELEASEOPINION "$OPF: QC 放行结论为不放行（修复最小阻塞集后重验）"
+        fi
+      fi
+      ;;
+    deliver)
+      : # presence handled by registry
+      ;;
+    enablement)
+      if role_skipped ops; then
+        :
+      elif [ -f "$ROOT/${ART_enablement}" ]; then
+        grep -qE '客服|第一次成功' "$ROOT/${ART_enablement}" || red ENABLE "$ROOT/06-deliver/enablement.md: 缺「客服」或「第一次成功」（教/开/告最低结构）"
+      fi
+      ;;
+    retro)
+      ;;
+    warehouse)
+      ;;
+    collect)
+      if is_v4 && ! role_skipped data-collector && [ -f "$ROOT/${ART_tracking_impl}" ]; then need_product data/tracking-plan.yaml "--hat collect"; fi
+      ;;
+  esac
+fi
+
+# ---------- --report：只验 findings + Snapshot，不跑泳道检查 ----------
+if [ "$REPORT" = "1" ]; then
+  FIND="$ROOT/${ART_findings}"
+  [ -f "$FIND" ] || FIND=$(find "$ROOT" -name findings.md 2>/dev/null | head -1)
+  if [ -z "$FIND" ] || [ ! -f "$FIND" ]; then
+    red HATMISS "--report: 缺 05-review/findings.md"
+  else
+    grep -qE '^##[[:space:]]*Snapshot' "$FIND" || red NOSNAP "$FIND: 缺 ## Snapshot（报告模式不验 NOLANE/MATRIX/NOSEC）"
+  fi
+  echo "----------------------------------------"
+  if [ $V -eq 0 ]; then grn "SDLC 报告模式通过（findings + Snapshot）"
+  else printf "\033[0;31m✗ [SDLC-SUMMARY] 共 %s 处违规\033[0m\n" "$V"
+  fi
+  exit_v
+fi
+
+# ---------- 1. 泳道声明 ----------
+LANE_DECLARED=0
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
+  grep -qE "(泳道|lane)[:：]\s*L[0-4]" "$f" 2>/dev/null && LANE_DECLARED=1 && break
+  [ -f "$ROOT/state.yaml" ] && grep -qE "^lane:\s*L[0-4]" "$ROOT/state.yaml" && LANE_DECLARED=1 && break
+done <<EOF
+$FILES
+EOF
+[ "$LANE_DECLARED" = "1" ] && grn "泳道声明" || red NOLANE "未声明泳道（工件头 '泳道：Ln' 或 state.yaml lane 字段）"
+
+# ---------- 2. GWT 验收标准（L2+ 工件含验收段时校验） ----------
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
+  case "$f" in */04-verify/*|*/05-review/*) continue ;; esac  # 验收/审查报告不是需求工件（P13）
+  if grep -qiE "^#+[[:space:]]*(验收标准|Acceptance([[:space:]]+criteria)?)[[:space:]]*$" "$f" 2>/dev/null; then
+    if ! grep -qE "Given|当.*时|假设" "$f" 2>/dev/null; then
+      red GWT "$f: 验收标准缺 Given/When/Then 结构"
+    fi
+    # 不可测词
+    UNTEST=$(grep -nE "(正确地|正确的|合理地|合理的|正常工作|应该没问题|友好的|快速的|适当的|尽可能|必要时|[Cc]orrectly|[Gg]racefully|[Ff]riendly)" "$f" 2>/dev/null | head -1)
+    [ -n "$UNTEST" ] && red VAGUE "$f:$UNTEST 不可测词"
+  fi
+done <<EOF
+$FILES
+EOF
+
+# ---------- 3. 自测证据：命令 + 退出码 + 证据-期望一致性（帽子感知） ----------
+IMPL_DONE=1
+ST_GLOBAL="$ROOT/state.yaml"
+[ -f "$ST_GLOBAL" ] || ST_GLOBAL="$TARGET"
+if [ -f "$ST_GLOBAL" ]; then
+  grep -qE "hats_done:.*(implement|实现)" "$ST_GLOBAL" 2>/dev/null || IMPL_DONE=0
+fi
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
+  if grep -qE "^#+\s*(自测证据|evidence)" "$f" 2>/dev/null && [ "$IMPL_DONE" = "1" ]; then
+    grep -qE "exit|退出码|Exit code|✅.*0$|\[0\]" "$f" || red EVID "$f: 自测证据缺退出码（'跑过了'不是证据）"
+    BT='`'
+    grep -qF "$BT$BT$BT" "$f" || red EVID "$f: 证据需原样输出块（三反引号围栏）"
+    # EVIDMISMATCH：want 按 FR 号存（QA-1），证据区标题 FR-n（重锚（QA-4）
+    if [ "$IMPL_DONE" = "1" ]; then
+      awk '/^FR-[0-9]+[[:space:]]*(Given|假设)/ { cur=substr($0,1,index($0," ")-1); pend=1 }
+           /Then/ && pend==1 { want[cur]=($0 ~ /退出码 0|exit code 0/) ? 0 : 1; pend=0 }
+           /^FR-[0-9]+[（(]/ { n=index($0,"（"); if(n==0) n=index($0,"("); cur=substr($0,1,n-1) }
+           /^exit code [0-9]+/ { if (want[cur]==0 && $0 !~ /exit code 0/) print FILENAME": " cur " 期望 0 但证据记录 " $0 }' "$f" > "$TMPF" 2>/dev/null || true
+      while IFS= read -r bad; do
+        red EVIDMISMATCH "${bad}（中间态证据禁入——重录终态输出）"
+      done < "$TMPF"
+    fi
+  fi
+done <<EOF
+$FILES
+EOF
+
+# ---------- 4. state.yaml 必填字段 + 闸门三类记录 + null 显式化 ----------
+if [ -f "$ST" ]; then
+  for k in feature lane current_hat; do
+    grep -qE "^${k}:.*\S" "$ST" || red STATE "$ST: 缺必填字段 $k"
+  done
+  grep -qE "^appetite:.*\S" "$ST" || grep -qE "^lane:\s*L[01]" "$ST" || red STATE "$ST: L2+ 必填 appetite"
+  # null 闸门必须各自带 reason：文件别处的 reason:（lane_changes、selection）不算
+  NGS=$(sv null-gates) || red STATE "$ST: state_view 无法读取 gates[]"
+  while IFS= read -r ng; do
+    [ -n "$ng" ] && red NULLGATE "$ST: 闸门 ${ng} 为 result: null 但这条记录缺 reason（静默跳过=漏洞）"
+  done <<EOF
+$NGS
+EOF
+fi
+
+# ---------- 5. 覆盖矩阵空洞（存在 coverage.md 时；优先 check-matrix.py 含 NFR 与 [SEC-n]） ----------
+COV=$(find "$ROOT" -name "coverage.md" 2>/dev/null | head -1)
+if [ -n "$COV" ]; then
+  SPECS=$(find "$ROOT" \( -name "spec.md" -o -name "spec-s.md" -o -path "*01-define/tracking.md" -o -path "*02-shape/contract.md" -o -path "*02-shape/security-review.md" \) 2>/dev/null)
+  if [ -n "$SPECS" ] && [ -f "$MATRIX_PY" ] && command -v python3 >/dev/null 2>&1; then
+    to_farr "$SPECS"
+    MOUT=$(python3 "$MATRIX_PY" "$COV" "${FARR[@]}" 2>&1) || true
+    while IFS= read -r line; do
+      case "$line" in
+        *'✗ [MATRIX]'*) red MATRIX "$COV: $line" ;;
+      esac
+    done <<EOF
+$MOUT
+EOF
+  else
+    to_farr "$SPECS"
+    for sf in ${FARR[@]+"${FARR[@]}"}; do
+      for fr in $(grep -oE "FR-[0-9]+" "$sf" 2>/dev/null | sort -u); do
+        grep -q "$fr" "$COV" 2>/dev/null || red MATRIX "$COV: $fr 未出现在覆盖矩阵（空洞须补用例或标豁免）"
+      done
+    done
+  fi
+fi
+
+# ---------- 5b. Q-security → contract.md 须有 [SEC-n] ----------
+if q_security_yes; then
+  CON=$(find "$ROOT" -name "contract.md" 2>/dev/null | head -1)
+  if role_skipped architect; then
+    red NOSEC "$ST: q_security: yes 时不能跳过 architect——信任边界与 [SEC-n] 控制是必需责任，不随角色裁剪消失（P10）"
+  elif [ -z "$CON" ] && [ "$(stage_rank "$(checked_stage)")" -ge "$(stage_rank shape)" ]; then
+    red NOSEC "$ST: q_security: yes 但没有 02-shape/contract.md（威胁建模须落在合同）"
+  fi
+  if [ -n "$CON" ]; then
+    grep -qE '\[SEC-[0-9]+\]' "$CON" || red NOSEC "$CON: Q-security=yes 但无 [SEC-n]（threat-model 须落在合同）"
+  fi
+fi
+
+# ---------- 5c. 跳过角色要写理由；UI 变更不能跳过 designer（v4） ----------
+if [ -f "$ST" ] && is_v4; then
+  SKS=$(sv skips) || red STATE "$ST: state_view 无法读取 roles_skipped"
+  while IFS=$'\t' read -r sk_role sk_why; do
+    [ -n "$sk_role" ] || continue
+    [ -n "$sk_why" ] || red SKIPWHY "$ST: roles_skipped 含 ${sk_role}，但 roles_skipped_why 没有写理由（铁律 3：不静默跳过）"
+  done <<EOF
+$SKS
+EOF
+  if ui_yes && role_skipped designer; then
+    red DESIGNSKIP "$ST: ui: yes 时不能跳过 designer——方向、规格与设计走查是用户可见变更的必需责任，不随角色裁剪消失"
+  fi
+fi
+
+# ---------- 6. metrics.yaml 重复 id（SVOT） ----------
+MET=$(find "$ROOT" -name "metrics.yaml" 2>/dev/null | head -1)
+if [ -n "$MET" ]; then
+  DUP=$(grep -oE "^[[:space:]]*-?[[:space:]]*id:[[:space:]]*[\"']?[A-Za-z0-9_.-]+" "$MET" 2>/dev/null | sed -E "s/.*id:[[:space:]]*[\"']?//" | sort | uniq -d)
+  [ -n "$DUP" ] && red METDUP "$MET: 重复指标 id（${DUP}）—— 口径唯一事实源被破坏"
+fi
+# ---------- 6b. 功能层 metric:/tag: 引用一致性（SVOT：产品层 YAML 已填且功能未自带新定义时核验） ----------
+if is_v4 && [ -f "$ST" ]; then
+  PRA_REF=$(product_root_abs)
+  FREF_DOCS=$(find "$ROOT" \( -name "spec.md" -o -name "spec-s.md" -o -path "*07-retro/*.md" \) 2>/dev/null)
+  if [ -n "$PRA_REF" ] && [ -d "$PRA_REF" ] && [ -n "$FREF_DOCS" ]; then
+    to_farr "$FREF_DOCS"
+    for kind in metric:data/metrics.yaml:02-shape/warehouse/metrics.yaml:id tag:data/tags.yaml:02-shape/warehouse/tags.yaml:id; do
+      pre=${kind%%:*}; rest=${kind#*:}; pyf=${rest%%:*}; rest2=${rest#*:}; fyf=${rest2%%:*}; key=${rest2##*:}
+      { [ -f "$PRA_REF/$pyf" ] && ! is_unfilled "$PRA_REF/$pyf"; } || continue
+      DEFS=$(grep -oE "^[[:space:]]*-?[[:space:]]*${key}:[[:space:]]*[\"']?[A-Za-z0-9_.-]+" "$PRA_REF/$pyf" "$ROOT/$fyf" 2>/dev/null | sed -E "s/.*${key}:[[:space:]]*[\"']?//" | sort -u)
+      USED=$(grep -ohE "(^|[^A-Za-z0-9_])${pre}:[A-Za-z0-9_.-]+" "${FARR[@]}" 2>/dev/null | sed -E "s/^.*${pre}://; s/@v[0-9]+$//; s/[.]+$//" | sort -u)
+      for u in $USED; do
+        printf '%s\n' "$DEFS" | grep -qxF "$u" || red REFS "$ROOT: ${pre}:${u} 在产品层 $pyf（或功能层 $fyf）没有定义（SVOT 口径漂移）"
+      done
+    done
+  fi
+fi
+
+# ---------- 7. 进度源 vs 工件（feat-four-pillars 2026-09-07 实锤） ----------
+if [ -f "$ST" ]; then
+  # current_hat 归一化到英文主词（中文 legacy 双边认；resume 时经理负责归一化写回）
+  norm_hat() {
+    case "$1" in
+      信号|signals) echo signals ;;
+      定义|define) echo define ;;
+      采集|collect) echo collect ;;
+      塑形|shape) echo shape ;;
+      实现|implement) echo implement ;;
+      验证|verify) echo verify ;;
+      验收|accept) echo accept ;;
+      审查|review) echo review ;;
+      放行|qc) echo qc ;;
+      交付|deliver) echo deliver ;;
+      回顾|retro) echo retro ;;
+      *) echo "$1" ;;
+    esac
+  }
+  rank_of() { python3 "$SCRIPT_DIR/workflow.py" rank "$1" 2>/dev/null || echo 0; }
+  HAT=$(st_val current_hat)
+  NHAT=$(norm_hat "$HAT")
+  if [ -n "$NHAT" ] && ! is_valid_hat "$NHAT"; then
+    red STATE "$ST: current_hat=${HAT} 不是登记的阶段（合法值：${VALID_HATS}）——按阶段排位的检查（发现带、待决问题、越级）都无法判断"
+  fi
+  # 最后一个 fresh-context 记录：result 与 stage（block 与 flow 写法都认；stage 缺省=legacy 旧档）
+  LFRESH=$(sv last-fresh) || red STATE "$ST: state_view 无法读取 gates[]"
+  LF_RESULT=$(printf '%s' "$LFRESH" | cut -f1); FAIL_STAGE=$(printf '%s' "$LFRESH" | cut -f2)
+  if [ "$LF_RESULT" = "fail" ]; then
+    NFAIL=$(norm_hat "$FAIL_STAGE")
+    RH=$(rank_of "$NHAT"); RF=0
+    [ -n "$NFAIL" ] && RF=$(rank_of "$NFAIL")
+    if [ "$RF" -eq 0 ]; then
+      # legacy 旧档无 stage 标记：只在 current_hat 已越过全部生产阶段时红
+      case "$NHAT" in
+        accept|review|qc|deliver|retro)
+          red HATADVANCE "$ST: 最近 G-fresh(fail) 禁止 current_hat=${HAT}（审查/放行/交付前不得推帽）"
+          ;;
+      esac
+    elif [ "$RH" -gt "$RF" ]; then
+      red HATADVANCE "$ST: 最近 G-fresh fail@${NFAIL} 但 current_hat=${HAT}（越级；应留在 ${NFAIL} 返工，HATADVANCE）"
+    fi
+  fi
+  # 脚本闸门：带合法 stage 的记录，最近一次是 fail 却已越过该阶段（2026-10-02）。
+  # v4（is_v4，即 sdlc_version>=4；脚本里没有单独的 VER 变量）下，失败的 script 记录若缺少合法 stage
+  # （空，或 workflow.py rank 不认识该 id）直接 HATADVANCE，不能靠漏写 stage 绕过。
+  # 无 sdlc_version 或 sdlc_version<4 仍是旧读法：没有合法 stage 不拦。
+  # rank 为 0 的合法阶段（market/compete/growth/product/cycle）不是漏写，不走缺 stage 这条。
+  FGS=$(sv failed-gates) || red STATE "$ST: state_view 无法读取 gates[]"
+  while IFS=$'\t' read -r fg_kind fg_name fg_stage; do
+    [ "$fg_kind" = "script" ] || continue
+    NFG=$(norm_hat "$fg_stage"); RFG=0
+    if [ -z "$NFG" ]; then
+      if is_v4; then
+        red HATADVANCE "$ST: v4 失败脚本闸门 ${fg_name} 缺少合法 stage:（sdlc_version>=4 必须记录 stage，不得借漏写绕过越级阻断）"
+      fi
+      continue
+    fi
+    if ! RFG=$(python3 "$SCRIPT_DIR/workflow.py" rank "$NFG" 2>/dev/null); then
+      if is_v4; then
+        red HATADVANCE "$ST: v4 失败脚本闸门 ${fg_name} 缺少合法 stage:（${NFG} 不是阶段 id，不得借漏写绕过越级阻断）"
+      fi
+      continue
+    fi
+    if [ "$RFG" -gt 0 ] && [ "$(rank_of "$NHAT")" -gt "$RFG" ]; then
+      red HATADVANCE "$ST: 脚本闸门 ${fg_name} 最近一次在 ${NFG} 失败，current_hat=${HAT} 却已越过（留在 ${NFG}，修复后重跑并记 pass）"
+    fi
+  done <<EOF
+$FGS
+EOF
+
+  SPEC=$(find "$ROOT" -name spec.md -o -name spec-s.md 2>/dev/null | head -1)
+  if [ -n "$SPEC" ]; then
+    if grep -qE '^appetite:[[:space:]]*["'"'"']?8h' "$ST" && grep -qE 'Wave[[:space:]]*0|[0-9]+[[:space:]]*人周' "$SPEC"; then
+      red APPETITE "$ST: appetite 仍是 8h，但 $SPEC 已按波/人周（进度源与 PRD 互相否定）"
+    fi
+    # OPENQOPEN: 待确认 Q 已记账但未 answered，且 current_hat 已过 define。id 精确匹配：Q-TIER 不等于 Q-TIER-B
+    if [ "$(rank_of "$NHAT")" -gt 2 ]; then
+      for q in $(pending_qids "$SPEC"); do
+        [ "$(q_status "$q")" = "answered" ] \
+          || red OPENQOPEN "$ST: spec 待确认 ${q} 未 answered，禁止进入 ${HAT}（整个阶段等决定人答复；不依赖它的工作拆成局部工作 --work 推进；这不是返工）"
+      done
+    fi
+  fi
+  # OPENQ: spec 与 briefing 里「待确认」的 Q-* 都要记进 open_questions（state 模板的约定）
+  BRQ=$(find "$ROOT" -path '*00-discover/briefing.md' 2>/dev/null | head -1)
+  for qf in "$SPEC" "$BRQ"; do
+    [ -n "$qf" ] && [ -f "$qf" ] || continue
+    for q in $(pending_qids "$qf"); do
+      [ -n "$(q_status "$q")" ] || red OPENQ "$ST: $(basename "$qf") 待确认 $q 未写入 open_questions"
+    done
+  done
+
+  # v4 决策：战略决策不得被默认；过 define（或 shape）仍待确认的战略决策禁止推帽
+  if is_v4; then
+    FMD=$(find "$ROOT" -name '*.md' -not -path '*/memory/*' 2>/dev/null)
+    if [ -n "$FMD" ]; then to_farr "$FMD"; check_defaulted red "${FARR[@]}"; fi
+    if [ "$HATID" != "define" ]; then
+      PRA=$(product_root_abs)
+      if [ -n "$PRA" ] && [ -d "$PRA" ]; then
+        PMD=$(find "$PRA" -name '*.md' -not -name 'CHANGELOG.md' 2>/dev/null)
+        if [ -n "$PMD" ]; then to_farr "$PMD"; check_defaulted warn "${FARR[@]}"; fi
+      fi
+    fi
+    RK=$(rank_of "$NHAT")
+    if [ "$RK" -gt 2 ]; then
+      DMD=$( { [ -d "$ROOT/01-define" ] && find "$ROOT/01-define" -name '*.md'; find "$ROOT" -path '*00-discover/briefing.md'; } 2>/dev/null)
+      if [ -n "$DMD" ]; then to_farr "$DMD"; check_pending "禁止进入 ${HAT}" "${FARR[@]}"; fi
+    fi
+    if [ "$RK" -gt 3 ] && [ -d "$ROOT/02-shape" ]; then
+      SMD=$(find "$ROOT/02-shape" -name '*.md' 2>/dev/null)
+      if [ -n "$SMD" ]; then to_farr "$SMD"; check_pending "禁止进入 ${HAT}" "${FARR[@]}"; fi
+    fi
+  fi
+
+  # 发现带：仅当 state 写了 discovery: 才判（无该键 = 旧档，不红）
+  if grep -qE '^discovery:' "$ST"; then
+    DVIEW=$(sv discovery) || red STATE "$ST: state_view 无法读取 discovery"
+    DSTAT=$(printf '%s' "$DVIEW" | cut -f1); DSKIPWHY=$(printf '%s' "$DVIEW" | cut -f2); REOPENED=$(printf '%s' "$DVIEW" | cut -f3)
+    LANE=$(st_val lane | grep -m1 -oE "^L[0-4]") # st_val 去掉行尾注释：模板写着「# L0-L4」，不去掉会得到三个泳道
+    case "$LANE" in
+      L2|L3|L4)
+        case "$DSTAT" in
+          pending|"")
+            if [ "$NHAT" = "define" ] || [ "$(rank_of "$NHAT")" -ge 2 ]; then
+              red NODISCOVER "$ST: L2+ discovery.status=${DSTAT:-empty} 禁止 define/其后（须 done|skipped）"
+            fi
+            ;;
+          skipped)
+            # 跳过发现带要写理由：引用已有授权/合同/缺陷证据，以及为什么不需要再探索（铁律 3：不静默跳过）
+            [ -n "$DSKIPWHY" ] || red NODISCOVER "$ST: L2+ discovery.status=skipped 但 skip_why 为空（写明复用的授权/合同/缺陷证据，及不需要再探索的原因）"
+            ;;
+          killed)
+            # 发现阶段结论是「不做」：必须显式重开（discovery.reopened: {by, at, reason}）才能继续（P07）
+            if [ -z "$REOPENED" ] && { [ "$NHAT" = "define" ] || [ "$(rank_of "$NHAT")" -ge 2 ]; }; then
+              red NODISCOVER "$ST: discovery.status=killed（发现阶段结论是不做），define 及之后不得继续；确需继续由用户决定并记录 discovery.reopened: {by, at, reason}"
+            fi
+            ;;
+          done)
+            BR=$(find "$ROOT" -path '*00-discover/briefing.md' 2>/dev/null | head -1)
+            [ -n "$BR" ] || BR="$ROOT/00-discover/briefing.md"
+            if [ ! -f "$BR" ]; then
+              red NODISCOVER "$ST: discovery.status=done 但无 00-discover/briefing.md"
+            elif is_unfilled "$BR"; then
+              red NODISCOVER "$BR: 仍是模板（含 sdlc:unfilled）——写入本次内容后删除标记行"
+            else
+              grep -qE '^##[[:space:]]+Compete' "$BR" || red NOCOMPETE "$BR: 缺 ## Compete"
+              grep -qE '^##[[:space:]]+Market' "$BR" || red NOMARKET "$BR: 缺 ## Market"
+              grep -qE '^##[[:space:]]+Falsify' "$BR" || red NOFALSIFY "$BR: 缺 ## Falsify"
+              section_filled "$BR" Compete | grep -qE '现状|status quo|Status quo' \
+                || red NOCOMPETE "$BR: Compete 未写现状（与模板逐字相同的句子不算）"
+              kill_written "$BR" || red NOFALSIFY "$BR: Falsify 未写杀死条件（「杀死条件」后要有实际内容）"
+              if is_v4 && ! role_skipped growth; then
+                grep -qE '^##[[:space:]]+Growth' "$BR" || red NOGROWTH "$BR: 缺 ## Growth（定位与亮点假设；roles_skipped 含 growth 可跳）"
+              fi
+              # 新版简报（有「本轮交接就绪」节）：裁决选定一个、赌注写复盘指标、交接就绪与 Discuss-P 不只是模板原句。
+              # 旧版简报只在写了「本轮裁决」时检查它，已过 define 的老功能不会因此突然变红。
+              NEWBR=0; grep -qE '^##[[:space:]]+本轮交接就绪' "$BR" && NEWBR=1
+              if [ "$NEWBR" -eq 1 ] || grep -q '本轮裁决' "$BR"; then
+                case "$(verdict_state "$BR")" in
+                  missing) red NOFALSIFY "$BR: Falsify 未写「本轮裁决」" ;;
+                  unchosen) red NOFALSIFY "$BR: 本轮裁决未选定（只写一个：杀死 / 缩小后存活 / 当作赌注 / 通过 / 待定并写明缺什么）" ;;
+                  bet-no-metric) red NOFALSIFY "$BR: 裁决是赌注，但没写复盘指标（复盘指标 = 指标名）" ;;
+                esac
+              fi
+              if [ "$NEWBR" -eq 1 ]; then
+                [ -n "$(section_filled "$BR" 本轮交接就绪)" ] \
+                  || red NODISCOVER "$BR: 本轮交接就绪仍是模板原句（写明当前切片、成功/失败例子、就绪范围与下一步）"
+                if grep -qE '^##[[:space:]]+Discuss-P' "$BR"; then
+                  [ -n "$(section_filled "$BR" Discuss-P)" ] \
+                    || red NODISCOVER "$BR: Discuss-P 仍是模板原句（至少写一条用户原话、事实或当前理解）"
+                fi
+              fi
+            fi
+            ;;
+        esac
+        ;;
+    esac
+  fi
+
+  if grep -qE 'hats_done:.*(verify|验证)' "$ST"; then
+    [ -n "$MET" ] || true
+    COV2=$(find "$ROOT" -name "coverage.md" 2>/dev/null | head -1)
+    [ -n "$COV2" ] || red MATRIXMISS "$ST: hats_done 含 verify/验证 但无 coverage.md（MATRIX 段不会跑；绿闸 ≠ FR 覆盖）"
+  fi
+
+  if grep -qE '^[^#]*kind:[[:space:]]*fresh-context' "$ST"; then
+    FIND=$(find "$ROOT" -name findings.md 2>/dev/null | head -1)
+    [ -n "$FIND" ] || red FINDINGS "$ST: 已记 fresh-context 但无 findings.md（审查结论必须落盘）"
+  fi
+
+  # DIAGRAM：功能目录里的每张图都要过绘图闸门（来源声明、安全、svg-lint 零警告、与来源的语义比对）
+  if is_v4; then
+    SVGS=$(find "$ROOT" -path '*/assets/*.svg' -not -path '*/shots/*' 2>/dev/null | sort)
+    if [ -n "$SVGS" ]; then
+      DOUT=$(printf '%s\n' "$SVGS" | tr '\n' '\0' | xargs -0 python3 "$SCRIPT_DIR/diagram/lint.py" --verify-only --root "$ROOT" 2>&1)
+      DCODE=$?
+      while IFS= read -r line; do
+        case "$line" in *'✗ [DIAGRAM-'*) red DIAGRAM "${line#*] }" ;; esac
+      done <<EOF
+$DOUT
+EOF
+      [ "$DCODE" -eq 2 ] && ! printf '%s' "$DOUT" | grep -q '✗ \[DIAGRAM-' && red DIAGRAM "diagram check could not run: ${DOUT}"
+    fi
+  fi
+
+  # IMAGE：功能目录里的每张生成图都要绑得住（提示词 / 模型 / 声明源 digest）；没有生成图就跳过
+  if is_v4; then
+    GIMGS=$(find "$ROOT" \( -path '*/assets/refs/*' -o -path '*/assets/generated/*' \) \
+              \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) 2>/dev/null | sort)
+    if [ -n "$GIMGS" ]; then
+      IOUT=$(python3 "$SCRIPT_DIR/image/check.py" --root "$ROOT" 2>&1)
+      ICODE=$?
+      while IFS= read -r line; do
+        case "$line" in *'✗ [IMAGE-'*) red IMAGE "${line#*] }" ;; esac
+      done <<EOF
+$IOUT
+EOF
+      [ "$ICODE" -eq 2 ] && ! printf '%s' "$IOUT" | grep -q '✗ \[IMAGE-' && red IMAGE "imagery check could not run: ${IOUT}"
+    fi
+  fi
+
+  # CLOSED：关闭一个功能要看实际终点，而不是手写一行 phase: Closed（P06）
+  if is_v4 && grep -qE '^phase:[[:space:]]*Closed' "$ST"; then
+    CLANE=$(st_val lane | grep -m1 -oE '^L[0-4]')
+    CSHORT=""; grep -qE '^path:[[:space:]]*short' "$ST" && CSHORT="--short"
+    CDONE=$(grep -m1 -E '^hats_done:' "$ST")
+    for CS in $(python3 "$SCRIPT_DIR/workflow.py" lane "${CLANE:-L2}" $CSHORT 2>/dev/null); do
+      printf '%s' "$CDONE" | grep -qE "(\[|[ ,])${CS}([],]|$)" || red CLOSED "$ST: phase: Closed 但 hats_done 没有 ${CS}（泳道 ${CLANE:-L2} 的阶段没走完不能关闭）"
+    done
+    CFIND=$(find "$ROOT" -path '*05-review/findings.md' 2>/dev/null | head -1)
+    { [ -n "$CFIND" ] && grep -q '[^[:space:]]' "$CFIND"; } || red CLOSED "$ST: phase: Closed 但 05-review/findings.md 缺失或为空"
+    { [ -f "$ROOT/product-delta.md" ] && grep -q '[^[:space:]]' "$ROOT/product-delta.md"; } \
+      || red CLOSED "$ST: phase: Closed 但 product-delta.md 缺失或为空（无产品层变更也要写「无产品层变更：理由」）"
+    # ESCAPEQA：v4 逃逸缺陷修复关闭前，必须同时交出过程监督 QA 接缝补漏证据（不能只修当次代码 QC 而让同一接缝继续漏检）
+    ESCVIEW=$(sv escape 2>/dev/null || true)
+    if [ -n "$ESCVIEW" ]; then
+      ESC_STAGE=$(printf '%s' "$ESCVIEW" | cut -f2)
+      ESC_CLASS=$(printf '%s' "$ESCVIEW" | cut -f3)
+      ESC_FIX=$(printf '%s' "$ESCVIEW" | cut -f4)
+      ESC_VER=$(printf '%s' "$ESCVIEW" | cut -f5)
+      if [ -z "$ESC_STAGE" ] || [ -z "$ESC_CLASS" ] || [ -z "$ESC_FIX" ] || [ -z "$ESC_VER" ]; then
+        red ESCAPEQA "$ST: phase: Closed 的逃逸缺陷缺过程 QA 闭环字段（should_have_caught_at / defect_class / seam_fix / verified_by）——不能只修当次产物（QC），必须补上漏检接缝门禁并验证生效（QA）"
+      fi
+    fi
+  fi
+
+  # v4 ACCEPT：任何验收结论「不通过」都挡住整棵树，直到重新验收
+  if is_v4; then
+    for af in "$ROOT"/04-verify/accept-*.md; do
+      [ -f "$af" ] || continue
+      case "$(verdict_of "$af")" in
+        不通过)
+          # 返工路径（implement → verify → accept）必须能走通（P05）：只挡验收之后的阶段与关闭
+          if [ "$HAT_GIVEN" != "1" ] || [ "$(stage_rank "$(checked_stage)")" -gt "$(stage_rank accept)" ] || grep -qE '^phase:[[:space:]]*Closed' "$ST"; then
+            red ACCEPT "$af: 验收不通过未关闭（返工 implement → 重跑 verify → 重新验收）"
+          fi ;;
+        歧义) red ACCEPT "$af: 验收结论有歧义（多个不同的「结论：」）" ;;
+      esac
+    done
+    if grep -qE 'hats_done:.*accept' "$ST"; then
+      [ -f "$ROOT/${ART_accept_pm}" ] || red ACCEPTMISS "$ST: hats_done 含 accept 但无 04-verify/accept-pm.md"
+    fi
+    OP_GLOBAL="$ROOT/${ART_opinion:-06-deliver/release-opinion.md}"
+    if [ -f "$OP_GLOBAL" ] && [ "${HATID:-}" != "qc" ]; then
+      case "$(opinion_verdict_of "$OP_GLOBAL")" in
+        "")
+          if [ "$HAT_GIVEN" != "1" ] || [ "$(stage_rank "$(checked_stage)")" -gt "$(stage_rank qc)" ] || grep -qE '^phase:[[:space:]]*Closed' "$ST"; then
+            red RELEASEOPINION "$OP_GLOBAL: 缺明确放行结论（结论：放行|有条件放行|不放行）"
+          fi ;;
+        不放行)
+          if [ "$HAT_GIVEN" != "1" ] || [ "$(stage_rank "$(checked_stage)")" -gt "$(stage_rank qc)" ] || grep -qE '^phase:[[:space:]]*Closed' "$ST"; then
+            red RELEASEOPINION "$OP_GLOBAL: QC 放行结论为不放行，阻断后续交付与关闭（修复后重新放行）"
+          fi ;;
+        歧义) red RELEASEOPINION "$OP_GLOBAL: 放行结论有歧义（多个不同的放行结论）" ;;
+      esac
+    fi
+  fi
+
+  # HOSTSPAWN：禁止同一文件写两次 host_spawn（后者覆盖前者，常见于模板 host_spawn: {}）
+  HSCOUNT=$(grep -cE '^host_spawn:' "$ST" 2>/dev/null) || HSCOUNT=0
+  [ "${HSCOUNT:-0}" -gt 1 ] && red HOSTSPAWN "$ST: host_spawn 出现 ${HSCOUNT} 次（YAML 后者覆盖前者；禁止再写 host_spawn: {}）"
+
+  # ROOTCAUSE：同帽第二轮返工须在证据或 gates 里有 root_cause: 一行（不判对错）
+  RW=$(grep -m1 -E '^rework_rounds:' "$ST" | grep -oE '[0-9]+' | head -1)
+  RW=${RW:-0}
+  if [ "$RW" -ge 2 ]; then
+    HAS_EV=0
+    ls "$ROOT"/03-impl/*evidence*.md >/dev/null 2>&1 && HAS_EV=1
+    if [ "$HAS_EV" = "1" ]; then
+      grep -qE '^[[:space:]]*root_cause:' "$ST" "$ROOT"/03-impl/*evidence*.md 2>/dev/null \
+        || red ROOTCAUSE "$ST: rework_rounds>=2 但证据/gates 无 root_cause: 一行"
+    fi
+  fi
+fi
+
+# ---------- extra_gates：仅当项目 sdlc.config.yaml 显式点名（默认不跑，避免无后端票假红） ----------
+CFG=""
+d="$ROOT"
+i=0
+while [ $i -lt 6 ]; do
+  if [ -f "$d/sdlc.config.yaml" ]; then CFG="$d/sdlc.config.yaml"; break; fi
+  nd=$(dirname "$d")
+  [ "$nd" = "$d" ] && break
+  d="$nd"
+  i=$((i+1))
+done
+if [ -n "$CFG" ] && command -v python3 >/dev/null 2>&1; then
+  EG_INFO=$(python3 "$SCRIPT_DIR/runtime/_sdlc_core.py" extra-gates "$CFG" 2>/dev/null || true)
+  EG_LIST=$(printf '%s' "$EG_INFO" | cut -f1)
+  EG_LR=$(printf '%s' "$EG_INFO" | cut -f2)
+  EG_FR=$(printf '%s' "$EG_INFO" | cut -f3)
+  EG_CS=$(printf '%s' "$EG_INFO" | cut -f4)
+  case ",$EG_LIST," in
+    *,layering,*)
+      LAYER_PY="$SCRIPT_DIR/../skills/impl-evidence/scripts/check-layering.py"
+      LR=${EG_LR:-backend}
+      LPATH="$d/$LR"
+      if [ ! -e "$LPATH" ]; then
+        red LAYERING "$CFG: extra_gates 含 layering，但 layering_root ${LPATH} 不存在（配置了的闸门不能静默跳过）"
+      elif [ -f "$LAYER_PY" ]; then
+        LOUT=$(python3 "$LAYER_PY" "$LPATH" 2>&1) || true
+        while IFS= read -r line; do
+          case "$line" in
+            *'✗ [LAYER]'*) red LAYERING "$line" ;;
+          esac
+        done <<EOF
+$LOUT
+EOF
+      fi
+      ;;
+  esac
+  case ",$EG_LIST," in
+    *,frontend,*)
+      FE_PY="$SCRIPT_DIR/../skills/impl-evidence/scripts/check-frontend.py"
+      FR=${EG_FR:-frontend}
+      FPATH="$d/$FR"
+      if [ ! -e "$FPATH" ]; then
+        red FRONTEND "$CFG: extra_gates 含 frontend，但 frontend_root ${FPATH} 不存在（配置了的闸门不能静默跳过）"
+      elif [ -f "$FE_PY" ]; then
+        FOUT=$(python3 "$FE_PY" "$FPATH" 2>&1) || true
+        while IFS= read -r line; do
+          case "$line" in
+            *'✗ [FRONTEND]'*) red FRONTEND "$line" ;;
+          esac
+        done <<EOF
+$FOUT
+EOF
+      fi
+      ;;
+  esac
+  case ",$EG_LIST," in
+    *,explain,*)
+      EXPLAIN_PY="$SCRIPT_DIR/../skills/schema/scripts/check-explain.py"
+      EXFILES=$(find "$ROOT" -name '*explain*' 2>/dev/null | sort)
+      if [ -z "$EXFILES" ]; then
+        red EXPLAIN "$CFG: extra_gates 含 explain，但 $ROOT 下没有 *explain* 文件（配置了的闸门不能静默跳过）"
+      elif [ -f "$EXPLAIN_PY" ]; then
+        to_farr "$EXFILES"
+        for exf in "${FARR[@]}"; do
+          XOUT=$(python3 "$EXPLAIN_PY" "$exf" 2>&1)
+          XCODE=$?  # 不能写成 $(...) || true 再读 $?：那样永远是 0（P09b）
+          [ "$XCODE" -ne 0 ] && red EXPLAIN "$exf: check-explain.py exit $XCODE"
+        done
+      fi
+      ;;
+  esac
+  case ",$EG_LIST," in
+    *,contract,*)
+      CON_PY="$SCRIPT_DIR/../skills/architecture/scripts/check-contract.py"
+      CSPEC=${EG_CS:-openapi.yaml}
+      CPATH="$d/$CSPEC"
+      if [ ! -e "$CPATH" ]; then
+        red CONTRACTLOCK "$CFG: extra_gates 含 contract，但 contract_spec ${CPATH} 不存在（配置了的契约闸门不能静默跳过）"
+      elif [ -f "$CON_PY" ]; then
+        COUT=$(python3 "$CON_PY" "$CPATH" 2>&1)
+        CCODE=$?
+        if [ "$CCODE" -ne 0 ]; then
+          FOUND_C=0
+          while IFS= read -r line; do
+            case "$line" in
+              *'✗ [CONTRACT]'*) red CONTRACTLOCK "$line"; FOUND_C=1 ;;
+            esac
+          done <<EOF
+$COUT
+EOF
+          [ "$FOUND_C" -eq 0 ] && red CONTRACTLOCK "$CPATH: check-contract.py exit $CCODE"
+        fi
+      fi
+      ;;
+  esac
+fi
+
+echo "----------------------------------------"
+if [ $V -eq 0 ]; then grn "SDLC 工件合规通过"
+else printf "\033[0;31m✗ [SDLC-SUMMARY] 共 %s 处违规\033[0m\n" "$V"
+fi
+exit_v

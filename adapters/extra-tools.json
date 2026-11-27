@@ -1,0 +1,4 @@
+{
+  "_comment": "Compile-time MCP allowlist (PR8b). Map role -> extra tool names, e.g. \"frontend\": [\"mcp__playwright__browser_navigate\", \"mcp__playwright__browser_take_screenshot\"]. Names must match a connected MCP server exactly. Reviewer/qc may not gain Write/Edit/Bash. Re-run python3 scripts/render-role-agents.py after editing.",
+  "roles": {}
+}

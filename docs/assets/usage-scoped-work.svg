@@ -1,0 +1,77 @@
+<svg viewBox="-147 -64 529 851" width="529" xmlns="http://www.w3.org/2000/svg">
+  <metadata id="sdlc">{"type": "state", "owner": "maintainer", "sources": ["../skills/sdlc/references/work-scope.md", "../skills/sdlc/references/task-protocol.md"]}</metadata>
+  <style>
+    text { font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', system-ui, sans-serif; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect x="-147" y="-64" width="529" height="851" fill="#ffffff"/>
+  <text x="117.5" y="-30" font-size="16" fill="#1e293b" text-anchor="middle">局部打磨与修复：一次工作怎么走完</text>
+  <path d="M0,59 L 0,68" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,138 L 0,147" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,217 L 0,226" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,296 L 0,305" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,375 L 0,384" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,454 L 0,463" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,533 L 0,542" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,612 L 0,621" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,691 L 0,700" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M130,264 L 139,264" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M130,501 L 139,501" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M130,580 L 139,580" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- box x=-125..125, y=0..54 -->
+  <rect x="-125" y="0" width="250" height="54" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="0" y="22.2" font-size="12" fill="#1e40af" text-anchor="middle">你说出对象和停止点</text>
+  <text x="0" y="40.2" font-size="12" fill="#1e40af" text-anchor="middle">例：补齐退款规则，停在需求确认</text>
+  <!-- box x=-125..125, y=79..133 -->
+  <rect x="-125" y="79" width="250" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="work_items"/>
+  <text x="0" y="101.2" font-size="12" fill="#b45309" text-anchor="middle">经理写入 work_items</text>
+  <text x="0" y="119.2" font-size="12" fill="#b45309" text-anchor="middle">范围 · 目标 · 完成等级</text>
+  <!-- box x=-125..125, y=158..212 -->
+  <rect x="-125" y="158" width="250" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="0" y="180.2" font-size="12" fill="#b45309" text-anchor="middle">按依赖只选需要的任务</text>
+  <text x="0" y="198.2" font-size="12" fill="#b45309" text-anchor="middle">不起完整泳道</text>
+  <!-- box x=-125..125, y=237..291 -->
+  <rect x="-125" y="237" width="250" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="prepare"/>
+  <text x="0" y="259.2" font-size="12" fill="#b45309" text-anchor="middle">prepare（每个任务）</text>
+  <text x="0" y="277.2" font-size="12" fill="#b45309" text-anchor="middle">核对输入、权限与依赖</text>
+  <!-- box x=-125..125, y=316..370 -->
+  <rect x="-125" y="316" width="250" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="seal"/>
+  <text x="0" y="338.2" font-size="12" fill="#b45309" text-anchor="middle">seal</text>
+  <text x="0" y="356.2" font-size="12" fill="#b45309" text-anchor="middle">封存派单包</text>
+  <!-- box x=-125..125, y=395..449 -->
+  <rect x="-125" y="395" width="250" height="54" rx="6" fill="#f3e8ff" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="0" y="417.2" font-size="12" fill="#6b21a8" text-anchor="middle">角色子代理执行</text>
+  <text x="0" y="435.2" font-size="12" fill="#6b21a8" text-anchor="middle">独立上下文，只写授权路径</text>
+  <!-- box x=-125..125, y=474..528 -->
+  <rect x="-125" y="474" width="250" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="record"/>
+  <text x="0" y="496.2" font-size="12" fill="#b45309" text-anchor="middle">record</text>
+  <text x="0" y="514.2" font-size="12" fill="#b45309" text-anchor="middle">核对产出、写入与运行记录</text>
+  <!-- box x=-125..125, y=553..607 -->
+  <rect x="-125" y="553" width="250" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="check-work"/>
+  <text x="0" y="575.2" font-size="12" fill="#b45309" text-anchor="middle">check-work</text>
+  <text x="0" y="593.2" font-size="12" fill="#b45309" text-anchor="middle">本次目标是否达成</text>
+  <!-- box x=-125..125, y=632..686 -->
+  <rect x="-125" y="632" width="250" height="54" rx="6" fill="#d1fae5" stroke="#22c55e" stroke-width="1.5" data-sdlc-id="complete-work"/>
+  <text x="0" y="654.2" font-size="12" fill="#166534" text-anchor="middle">complete-work</text>
+  <text x="0" y="672.2" font-size="12" fill="#166534" text-anchor="middle">写入不可覆盖的完成记录</text>
+  <!-- box x=-125..125, y=711..765 -->
+  <rect x="-125" y="711" width="250" height="54" rx="6" fill="#d1fae5" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="0" y="733.2" font-size="12" fill="#166534" text-anchor="middle">停在约定目标</text>
+  <text x="0" y="751.2" font-size="12" fill="#166534" text-anchor="middle">不会自动继续开发或发布</text>
+  <!-- box x=150..360, y=237..291 -->
+  <rect x="150" y="237" width="210" height="54" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/>
+  <text x="255" y="259.2" font-size="12" fill="#9d174d" text-anchor="middle">缺输入或未获批准</text>
+  <text x="255" y="277.2" font-size="12" fill="#9d174d" text-anchor="middle">不能封存，先补齐</text>
+  <!-- box x=150..360, y=474..528 -->
+  <rect x="150" y="474" width="210" height="54" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/>
+  <text x="255" y="496.2" font-size="12" fill="#9d174d" text-anchor="middle">越权写入或检查失败</text>
+  <text x="255" y="514.2" font-size="12" fill="#9d174d" text-anchor="middle">这次结果不算完成</text>
+  <!-- box x=150..360, y=553..607 -->
+  <rect x="150" y="553" width="210" height="54" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/>
+  <text x="255" y="575.2" font-size="12" fill="#9d174d" text-anchor="middle">上游有变化</text>
+  <text x="255" y="593.2" font-size="12" fill="#9d174d" text-anchor="middle">相关结果标为需复验</text>
+</svg>

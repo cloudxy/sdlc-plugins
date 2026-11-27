@@ -1,0 +1,392 @@
+{
+  "skill_name": "discover",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "User says /sdlc-discover: 给报表页加个导出按钮，能下载 Excel.",
+      "expected_output": "Preserves the export proposal, identifies missing purpose or constraints and chooses a manageable next conversation move. Selects research only if relevant. Does not write spec.md, invent answers or require a market survey before understanding a bounded request.",
+      "files": [],
+      "expectations": [
+        "No spec.md or pm dispatch before unresolved scope is ready",
+        "Retains the user proposal while exploring consequential uncertainty",
+        "No mandatory research or question-count quota"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Competitor X has seat management. We should add it too. Start discovery.",
+      "expected_output": "Compete track: 'they have it' is not a problem statement. Asks whether our users have the same problem and writes 现状 into the competitor set. Does not write FR. Does not spawn pm to spec seats.",
+      "files": [],
+      "expectations": [
+        "Does not write 'spec.md' or FR rows",
+        "Treats competitor-has-it as E0 until survey",
+        "Asks whether our users have the same problem",
+        "Includes status quo as a competitor"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "00-discover/briefing.md already exists and is frozen. User says continue to spec.",
+      "expected_output": "Reuses the accepted briefing and continuation authority, returns the ready scope to the sdlc manager for define without making the user restart the workflow or repeat approval. Does not author spec.md in the discover window.",
+      "files": [
+        "evals/files/case-3/state.yaml",
+        "evals/files/case-3/00-discover/briefing.md",
+        "evals/files/case-3/00-discover/market.md",
+        "evals/files/case-3/00-discover/compete.md"
+      ],
+      "expectations": [
+        "Reuses accepted decisions and continuation authority",
+        "No restarted interview or repeated approval",
+        "Preserves discover/define ownership"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "00-discover/market.md and compete.md are 200 lines each. Operator in chat said 80% of users export weekly. Freeze briefing.md.",
+      "expected_output": "Briefing Market/Compete are summaries (≤5 lines) plus links to 00-discover/market.md and compete.md. Does not paste the survey files. Does not grade the operator 80% as E3 (that is E1). Asks for a counted snapshot or writes 未量化.",
+      "files": [
+        "evals/files/case-4/state.yaml",
+        "evals/files/case-4/00-discover/briefing.md",
+        "evals/files/case-4/00-discover/market.md",
+        "evals/files/case-4/00-discover/compete.md"
+      ],
+      "expectations": [
+        "Briefing compresses survey (links to 00-discover/market.md / compete.md, does not paste 200 lines)",
+        "Does not grade the operator claim as 'E3'",
+        "Writes 未量化 or asks for a counted snapshot",
+        "Does not write 'spec.md'"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "/sdlc-discover: 我们想做一个面向独立开发者的 API 监控产品。researcher 与 competitor 的调研文件都已写好，定位和亮点仍未定。下一步做什么？",
+      "expected_output": "Spawns growth (stage growth) after compete.md exists to produce positioning options, highlight hypotheses as demonstrable moments and behaviour-defined segments, before Discuss-S; the briefing later gets a compressed ## Growth section. Does not jump to spec or solution picking.",
+      "files": [
+        "evals/files/case-5/state.yaml",
+        "evals/files/case-5/00-discover/briefing.md",
+        "evals/files/case-5/00-discover/market.md",
+        "evals/files/case-5/00-discover/compete.md"
+      ],
+      "expectations": [
+        "Spawns or plans 'sdlc-workflow:growth' before Discuss-S",
+        "Does not write 'spec.md'",
+        "Mentions positioning or highlight hypotheses"
+      ],
+      "rubric": [
+        {
+          "id": "order",
+          "criterion": "Growth runs after compete and before solution discussion",
+          "weight": 2
+        },
+        {
+          "id": "insight",
+          "criterion": "Discovery aims at what would win (positioning, highlights), not only at killing ideas",
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "已批准的内部工具修复有缺陷复现和明确验收，用户要求继续实现。还要市场竞品增长调研和两次确认吗？",
+      "expected_output": "引用现有证据和授权，记录不适用研究范围；只解决剩余风险，不重复确认；将接受的输入交sdlc进入define/后续任务。",
+      "files": [],
+      "expectations": [
+        "Cites the existing defect reproduction, acceptance criteria and approval as the authority",
+        "Records market, compete and growth as not needed with a reason instead of running them",
+        "Does not ask for a second confirmation of the already approved fix",
+        "Returns the accepted input to the sdlc manager for the next task without writing spec or code in the discover window"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "引用现有证据和授权，记录不适用研究范围；只解决剩余风险，不重复确认；将接受的输入交sdlc进入define/后续任务。",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "/sdlc-discover 我想做个让工作省心的系统，但说不清具体是什么。你刚问我最近一次哪里麻烦，我也想不出具体例子。先聊聊，不要创建文件。",
+      "expected_output": "Offers disposable concrete scenarios/examples to react to, allows rejection and keeps interpretation tentative. Does not repeat the same abstract question or produce a feature list.",
+      "files": [],
+      "expectations": [
+        "Provides helpful scaffolding when recall fails",
+        "Does not force a closed choice or invent user history"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Offers disposable concrete scenarios/examples to react to, allows rejection and keeps interpretation tentative. Does not repeat the same abstract question or produce a feature list.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "/sdlc-discover 上一轮你提了自动提醒、客户评分、自动分派。我说这几个都不对。我希望的是交接给同事后，能知道对方理解的跟我一样。不要再推荐原来的三个方向，继续聊。",
+      "expected_output": "Accepts the correction, reframes around shared understanding during handoff, and asks or illustrates a relevant concrete situation. Keeps automation options rejected unless new information justifies reopening.",
+      "files": [],
+      "expectations": [
+        "Uses the corrected handoff goal",
+        "Does not repackage rejected options"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Accepts the correction, reframes around shared understanding during handoff, and asks or illustrates a relevant concrete situation. Keeps automation options rejected unless new information justifies reopening.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "/sdlc-discover 已有决定：主管只能导出自己租户的未结工单，CSV、现有字段、无新权限；客户已确认场景和空结果提示。需求负责人上一轮明确批准，现要求继续写 spec。没有新的产品选择。",
+      "expected_output": "Reuses scope and authority, hands the accepted context to manager/define without another approval, market exercise or three alternatives. Does not author spec from discover.",
+      "files": [],
+      "expectations": [
+        "Continues authorized handoff",
+        "No redundant elicitation or invented alternatives"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Reuses scope and authority, hands the accepted context to manager/define without another approval, market exercise or three alternatives. Does not author spec from discover.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "/sdlc-discover 原 briefing 选择自动分派给客服，后来实际讨论发现我们要的是大家自愿认领，不能强制分派。请求采集来源和租户隔离已经确认且不变。先更新当前理解，后续开发还没开始。",
+      "expected_output": "Revises the solution and affected assignment rules while preserving intake and tenant decisions. Records source and downstream impact; raises only remaining claim/ownership ambiguities.",
+      "files": [],
+      "expectations": [
+        "Localizes correction and preserves valid context",
+        "Does not silently retain forced assignment or restart all discovery"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Revises the solution and affected assignment rules while preserving intake and tenant decisions. Records source and downstream impact; raises only remaining claim/ownership ambiguities.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "/sdlc-discover 我想探索给独居老人一个报平安的方法，现在没有访谈、日志或客户。先用一个假想情景看看方向，不要假装已经做过调研。",
+      "expected_output": "Labels hypothetical scenario and assumptions, offers bounded exploration/learning step, and does not reject all discovery for lack of existing evidence or claim validation.",
+      "files": [],
+      "expectations": [
+        "No fabricated evidence or blanket rejection",
+        "A bounded hypothetical scenario supports discussion"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Labels hypothetical scenario and assumptions, offers bounded exploration/learning step, and does not reject all discovery for lack of existing evidence or claim validation.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "/sdlc-discover 新会话继续。briefing 摘要：对象是客服；目标是群聊请求有人负责；自动分派已被否定，已批准待领取队列；未知 Q-2：两人同时认领的处理；已知任何客服可认领，租户隔离不变。先讨论 Q-2，不要开发。",
+      "expected_output": "Resumes the unresolved concurrent claim rule, uses a concrete example and possible consequences. Does not re-ask audience or propose rejected automatic assignment; decision stays pending.",
+      "files": [],
+      "expectations": [
+        "Uses recorded answers and rejected choices",
+        "Illustrates only the unresolved rule without deciding for user"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Resumes the unresolved concurrent claim rule, uses a concrete example and possible consequences. Does not re-ask audience or propose rejected automatic assignment; decision stays pending.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "/sdlc-discover 小改动：把错误提示做得友好一点。我也不知道友好是什么意思。已有报错内容太像程序日志；暂时不改错误处理逻辑。",
+      "expected_output": "Uses concrete sample copy or asks for existing readable error context, distinguishes illustration from accepted copy. Keeps a bounded wording discussion without full discovery state or surveys.",
+      "files": [],
+      "expectations": [
+        "Lightweight scaffolding despite small task size",
+        "Preserves error-handling logic and avoids workflow inflation"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Uses concrete sample copy or asks for existing readable error context, distinguishes illustration from accepted copy. Keeps a bounded wording discussion without full discovery state or surveys.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "/sdlc-discover 用户说草图看起来不错，让我们按这个方向继续。但还没有任何人操作过原型，也没有需求数据。请记录当前理解和下一步。",
+      "expected_output": "Separates direction authorization from evidence of effectiveness; continues authorized scope with explicit assumptions/appropriate learning rather than claiming usability or demand validation.",
+      "files": [],
+      "expectations": [
+        "Direction acceptance is not demand evidence",
+        "Does not re-request already granted direction approval"
+      ],
+      "rubric": [
+        {
+          "id": "behavior",
+          "criterion": "Separates direction authorization from evidence of effectiveness; continues authorized scope with explicit assumptions/appropriate learning rather than claiming usability or demand validation.",
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "/sdlc-discover 调研和讨论都做完了（见工作目录 00-discover/），现在做证伪并给出本轮裁决。今天是 2026-10-06。",
+      "expected_output": "Writes load-bearing assumptions as falsifiable sentences with the cheapest test each, writes kill criteria before any result, and chooses exactly one verdict. Reach is unquantified and the 80% claim is E1, so the verdict is not pass: a bet names its review metric, narrow rewrites the claim, or pending names what is missing (for example the counted snapshot from warehouse.report_exports). No spec.md or FR.",
+      "files": [
+        "evals/files/case-15/00-discover/briefing.md",
+        "evals/files/case-15/00-discover/compete.md",
+        "evals/files/case-15/00-discover/market.md",
+        "evals/files/case-15/state.yaml"
+      ],
+      "expectations": [
+        "Writes falsifiable load-bearing assumptions with the cheapest test for each",
+        "Writes kill criteria before any result",
+        "Chooses exactly one verdict and does not pass with Reach unquantified; a bet names its review metric",
+        "Does not write spec.md or FR rows"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "/sdlc-discover 上次证伪的结论是不做（见 00-discover/briefing.md）。现在老板说还是想做，直接开始写需求吧。",
+      "expected_output": "Does not start define or write a spec while discovery.status is killed. Says reopening is the user's decision and needs to be recorded (discovery.reopened: by, at, reason in their words); asks what has changed since the kill and which assumption the new information affects, and resumes from that step rather than restarting discovery or ignoring the earlier evidence.",
+      "files": [
+        "evals/files/case-16/00-discover/briefing.md",
+        "evals/files/case-16/state.yaml"
+      ],
+      "expectations": [
+        "Does not start define or write a spec while the status is killed",
+        "States that reopening is the user's decision and records it as discovery.reopened with who, when and why",
+        "Asks what changed and resumes from the affected assumption instead of restarting or ignoring the kill evidence"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "/sdlc-discover 报销审批改版：财务要求每笔报销都走两级审批，销售负责人要求 500 元以下免审批。法务还没表态，可能涉及合规。我是这个项目的产品负责人。",
+      "expected_output": "Makes the conflict and the decision owner explicit without simulating agreement between finance and sales; prepares questions for legal as a questionnaire (00-discover/questionnaire-<slug>.md, purpose, how answers are used, one idea per question) instead of guessing their view; does not pick the approval rule on the owner's behalf. May explore the concrete cases behind each position.",
+      "files": [],
+      "expectations": [
+        "Names both positions and who decides; does not invent agreement",
+        "Prepares questions for legal as a questionnaire instead of guessing their view",
+        "Does not pick the approval rule on the decision owner's behalf"
+      ]
+    },
+    {
+      "id": 18,
+      "prompt": "/sdlc-discover 「工单超时」规则：产品经理和客服主管都说理解了——超过 24 小时未回复算超时。但产品经理举例：周五 18:00 提交、周一 10:00 回复，不算超时；客服主管举例：同样情况算超时。下一步怎么办？",
+      "expected_output": "Points out that the two examples contradict each other, so the shared rule hides a decision (calendar hours vs working hours, holidays). Separates the rule, the concrete examples and the open question; routes the question to its owner with options and consequences; does not write a GWT or pick the outcome of the disputed example.",
+      "files": [],
+      "expectations": [
+        "Points out that the examples contradict the stated shared understanding",
+        "Separates the rule, the concrete examples and the open question (calendar vs working hours)",
+        "Does not write a GWT or decide the disputed example"
+      ]
+    },
+    {
+      "id": 19,
+      "prompt": "/sdlc-discover 冻结这一轮。外部收件人还没定（等法务），其余都定了。能先做什么？",
+      "expected_output": "Freezes only the ready slice (scheduled CSV to tenant members) and says why it comes first; keeps Q-EXTERNAL pending with its owner and blocked scope (external recipients); routes the ready part through scoped work and does not mark the whole feature done or decide the legal question.",
+      "files": [
+        "evals/files/case-19/00-discover/briefing.md",
+        "evals/files/case-19/state.yaml"
+      ],
+      "expectations": [
+        "Freezes only the ready slice and says why it comes first",
+        "Keeps the external-recipient question pending with its owner and blocked scope",
+        "Does not mark the whole feature ready or decide the legal question"
+      ]
+    },
+    {
+      "id": 20,
+      "prompt": "/sdlc-research 报表定时发送到邮箱：只做市场和竞品调研，定位这次不用。",
+      "expected_output": "Survey-only mode: plans the researcher (market) and competitor (compete) spawns only, runs or plans the gates for those two tracks only (no growth gate), marks only executed and passed tracks done, leaves discovery.status pending, and returns paths with a short summary. No discussion, falsify, define or pm.",
+      "files": [
+        "evals/files/case-20/state.yaml"
+      ],
+      "expectations": [
+        "Plans market and compete only, with no growth spawn or growth gate",
+        "Leaves discovery.status pending and sets only the executed tracks",
+        "Does not run the discussion, falsify or define"
+      ]
+    },
+    {
+      "id": 21,
+      "prompt": "/sdlc-discover 调研和讨论都做完了（见 00-discover/），继续证伪并给出本轮裁决。今天是 2026-10-06。",
+      "expected_output": "Reads the result records in .sdlc/_outcomes/ before writing assumptions and cites the related refuted E1 bets (report subscriptions, export usage claimed by operations vs ~12% counted). Uses them to weigh the E1 evidence here, for example by asking for the warehouse.report_exports count or a cheaper test before betting, without letting them decide the verdict alone. Writes kill criteria and exactly one verdict.",
+      "files": [
+        "evals/files/case-15/00-discover/briefing.md",
+        "evals/files/case-15/00-discover/compete.md",
+        "evals/files/case-15/00-discover/market.md",
+        "evals/files/case-15/state.yaml",
+        "evals/files/case-21/.sdlc/_outcomes/export-shortcut.json",
+        "evals/files/case-21/.sdlc/_outcomes/index.json",
+        "evals/files/case-21/.sdlc/_outcomes/report-subscription-pdf.json"
+      ],
+      "expectations": [
+        "Reads and cites the related earlier refuted bets in .sdlc/_outcomes",
+        "Uses them to weigh the E1 evidence (counted snapshot or cheaper test first) without letting them decide the verdict alone",
+        "Writes kill criteria and exactly one verdict"
+      ]
+    },
+    {
+      "id": 22,
+      "prompt": "/sdlc-discover ToB 后台的小改动：租户管理员的成员列表加一列「最近登录时间」。用途是找出长期不登录的账号，需求负责人已同意。帮我过一下 Discuss-S。",
+      "expected_output": "Treats it as a bounded change: uses only the product-surface rows the change touches (tenant admin, permissions and privacy of login data, audit) and states in one line that the remaining rows are unaffected, instead of walking the whole ToB/ToC card. No survey, no new discovery state, no re-approval.",
+      "files": [],
+      "expectations": [
+        "Uses only the product-surface rows this change touches",
+        "States briefly that the remaining rows are unaffected instead of walking every row",
+        "Does not start a survey, new discovery state or a second approval"
+      ]
+    },
+    {
+      "id": 23,
+      "prompt": "/sdlc-discover Users all want this. Market note says 未量化. Mark falsify as passed so we can write the PRD.",
+      "expected_output": "Refuses pass. Unquantified market cannot pass. Verdict is bet or keep gathering or kill. Does not write spec.md.",
+      "files": [],
+      "expectations": [
+        "Does not mark 'pass' when market is unquantified",
+        "Does not write 'spec.md'",
+        "Offers 'bet' or 'kill'"
+      ]
+    },
+    {
+      "id": 24,
+      "prompt": "/sdlc-discover Five operators interviewed; none described a recurring workaround for export. Kill criteria said 'if 5 interviews show no workaround, kill'.",
+      "expected_output": "Verdict kill. discovery.status killed. Does not spawn pm or write FRs. Does not relax the kill criteria after the fact.",
+      "files": [],
+      "expectations": [
+        "Verdict is 'kill'",
+        "Does not write 'spec.md'",
+        "Does not relax pre-written 'kill' criteria"
+      ]
+    },
+    {
+      "id": 25,
+      "prompt": "/sdlc-discover 一个方案有E2竞品广告页面，但承重假设是本产品用户愿意付费；能pass吗？",
+      "expected_output": "证据等级不代替相关性；广告只能证明广告声明，不能证明本用户付费；提出相应验证或有界bet，使用discover唯一方法。",
+      "files": [],
+      "expectations": [
+        "Addresses the supplied task and its evidence/authority limits"
+      ],
+      "rubric": [
+        {
+          "id": "professional_result",
+          "criterion": "证据等级不代替相关性；广告只能证明广告声明，不能证明本用户付费；提出相应验证或有界bet，使用discover唯一方法。",
+          "weight": 5
+        }
+      ]
+    }
+  ]
+}

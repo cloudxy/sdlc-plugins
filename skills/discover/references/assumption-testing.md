@@ -1,0 +1,60 @@
+# Falsify — try to kill the change before spec
+
+Job: **write load-bearing assumptions that can be false**, the cheapest test, and a verdict. Confirmation is not the goal. Launch A/B belongs to `retro` / analyst — not here.
+
+Invoke when the current discussion exposes load-bearing uncertainty. Use relevant research, existing artifacts or interview returns; a survey is not required for every bounded question. No existing evidence means an explicit hypothesis and learning step, not fabricated findings or automatic rejection.
+
+**Read earlier outcomes first.** When `.sdlc/_outcomes/index.json` exists, read it: one row per bet with feature, hypothesis, metric, evidence grade and readout status. Open `.sdlc/_outcomes/<feature>.json` only for related features; its readout note is usually enough, so open the evidence it points to only when the note leaves the question open. With a shell, `python3 <PLUGIN_ROOT>/scripts/gates/outcomes.py stats --root <project>/.sdlc --json` adds the hit rate by evidence grade (`bets_by_grade`); do not read the script to learn the format. Cite what bears on the current assumptions, for example "the two earlier E1 bets on export usage were refuted"; no index, or nothing related, takes one line. Earlier outcomes tell you how much a grade has been worth here; they do not decide the verdict.
+
+| Task | Approach |
+|---|---|
+| **Problem-layer** | Walk `prd-gwt` triage (no source / one customer / copy / future) against survey |
+| **Solution-layer** | load-bearing assumptions on the chosen A/B/C |
+| **No cheap test left** | Bet (explicit uncertainty + named metric) or stop |
+
+## Gotchas
+
+- **"Users said they want it" is not a pass.** That is E1. **Pass** requires evidence relevant and strong enough for each load-bearing assumption, with predefined failure criteria not triggered. Merely attaching an E2 citation is insufficient. Unquantified cannot pass — only kill / narrow / bet.
+- **Do not upgrade E1 to E3.** E3 is counted behaviour (number + source + window). Operator chat stays E1.
+- **Kill criteria are written before results.** Do not relax them after a disappointing interview.
+- **Safety, permissions, consistency cannot be killed for appetite.** Narrow the surface; do not drop audit.
+- **A/B in discovery is fake science.** Sample size and peeking rules live in [experiment-design](../../retro/references/experiment-design.md). Discovery uses cheaper rungs (probe, counts, targeted past-behaviour interviews, competitor reviews, fake door, logic prototype).
+
+## Evidence grades
+
+See [evidence.md](evidence.md), the sole definition of evidence labels. Grades do not by themselves establish validity.
+
+## Cheapest-test ladder (stop when killed)
+
+1. Three-question probe / demand a ticket id  
+2. Behaviour counts  
+3. Targeted past-behaviour interviews / questionnaire return  
+4. Competitor reviews + trial  
+5. Fake door / waitlist (`prototype` FAKE branch)  
+6. Logic prototype / wizard-of-oz  
+7. Launch experiment — **forbidden here**; bets only reserve the metric
+
+## Verdict
+
+Do not choose a verdict from missing evidence alone. When the scenario, load-bearing assumptions, investment boundary or bet metric is still unknown, leave the verdict pending and resolve the relevant gap. Direction approval can authorize continued exploration without authorizing a larger implementation bet. Define tests from the actual claim; do not prescribe generic interview counts or numerical kill thresholds before that context exists. Proposed criteria are not executed results or accepted decisions.
+
+- **Kill** → `discovery.status: killed`. No pm.  
+- **Narrow** → rewrite Claim (YAGNI: cut peripheral scope around the Aha path), allow define on the smaller claim.  
+- **Bet** → name the canonical metric (`metric:<id>` or net-new proposal) that define must use as north-star or driver, **plus its paired counter-guardrail** so a gamed driver (e.g., clicks with high refunds/unsubscribes/COGS) cannot pass readout.  
+- **Pass** → scoped assumptions supported by relevant evidence and failure criteria not triggered; disclose what remains unknown.
+
+Write the table into `00-discover/briefing.md` § Falsify (the single source of truth when a briefing exists). Use the standalone [assumptions template](../templates/assumptions.md) only when running a scoped assumption check without a full briefing or linking externally — never maintain two drifting copies.
+
+## Self-check
+
+- [ ] Related earlier outcomes checked (or none, said in one line)?
+- [ ] Load-bearing rows, each one falsifiable sentence?
+- [ ] Kill criteria written before results?
+- [ ] Unquantified did not pass?
+- [ ] Verdict filled? Bet has a metric name?
+
+## Deep references — when to read them
+
+| Reference | Read when... |
+|---|---|
+| [assumptions template](../templates/assumptions.md) | Standalone assumption table |

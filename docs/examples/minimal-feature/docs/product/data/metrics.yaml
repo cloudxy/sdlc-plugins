@@ -1,0 +1,7 @@
+# 复盘指标。id 被产品层里的 metric: 引用。
+metrics:
+  - id: weekly_export_tenants
+    name: 每周有成功导出的租户数
+    grain: 自然周 · 去重 tenant_id
+    definition: 该周内至少一次成功返回审计 CSV 的租户数
+    source: 导出调用的成功计数。本样例没有新埋点。

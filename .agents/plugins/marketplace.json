@@ -1,0 +1,20 @@
+{
+  "name": "sdlc-workflow",
+  "interface": {
+    "displayName": "SDLC Workflow"
+  },
+  "plugins": [
+    {
+      "name": "sdlc-workflow",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

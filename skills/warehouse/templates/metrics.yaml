@@ -1,0 +1,49 @@
+# sdlc:unfilled — 用作产品层 data/metrics.yaml 时，写入真实指标后删除本行（功能级 02-shape/warehouse/metrics.yaml 可忽略）
+# metrics.yaml — 指标定义（SVOT 单一真相版本）
+# 产品层：整棵指标树（北极星 → 驱动 → 护栏）只在这里定义并版本化；分析、看板与实验引用 metric:<id>@v<n>，禁止另起 SQL 口径。
+# 破坏性口径变更必须递增 version 并记录 effective_from；owner = 业务语义负责人，计算实现由 data-warehouse-engineer 维护。
+version: 1
+tree:
+  north_star: report_weekly_active_viewers        # 唯一；由 pm 在 strategy.md 命名
+  drivers: [first_report_view_rate, report_share_rate]
+  guardrails: [report_p95_load_ms, unsubscribe_rate]
+metrics:
+  - id: report_weekly_active_viewers
+    layer: north_star
+    name: 周活跃报表查看人数
+    formula: "COUNT(DISTINCT user_id) FROM dwd_events WHERE event = 'report_viewed' AND event_date >= week_start"
+    source_events: [report_viewed]
+    granularity: weekly
+    time_semantics: event_time                     # event_time | business_time | ingestion_time（注明迟到回溯窗，如 24h）
+    effective_from: "2026-09-01"
+    dimensions: [tenant_id, platform]
+    exclusions: "internal accounts (tag: internal_user)"
+    fr_anchor: ""                                  # 产品级指标可为空；功能新增指标写 FR-n
+    owner: pm
+
+  - id: first_report_view_rate
+    layer: driver
+    name: 导入后 24 小时内首次查看报表比例
+    formula: "COUNT(DISTINCT u WHERE report_viewed within 24h of dataset_imported) / COUNT(DISTINCT u WHERE dataset_imported)"
+    source_events: [dataset_imported, report_viewed]
+    granularity: daily
+    time_semantics: event_time
+    effective_from: "2026-09-01"
+    dimensions: [tenant_id, source_type]
+    exclusions: "users with consent=false"
+    fr_anchor: FR-03
+    owner: pm
+
+  - id: report_p95_load_ms
+    layer: guardrail
+    name: 报表首屏 P95 加载时长
+    formula: "P95(load_ms) FROM dwd_events WHERE event = 'report_viewed'"
+    source_events: [report_viewed]
+    granularity: daily
+    time_semantics: event_time
+    effective_from: "2026-09-01"
+    dimensions: [platform]
+    red_line: 2000                                 # 护栏必须有红线
+    exclusions: ""
+    fr_anchor: NFR-01
+    owner: architect

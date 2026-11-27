@@ -1,0 +1,160 @@
+# 插件自身的轻量自检。
+# 结构与生成一致性每次都跑。Python 单测只按本次 diff 映射到对应的单个测试文件。
+# 不遍历全部单测，也不把模型评测放进本工作流。
+# 干净 checkout 不包含 gitignore 的 vendor 树。anthropic-skills 与 svg-diagram
+# 有 runtime 文件，未安装时 health_check.py 报 VENDOR 错误，所以先跑
+# bash vendor/install.sh（只装锁文件里的公开原件，不接受受限许可证）。
+
+name: self-check
+
+"on":
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  self-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install public vendor originals
+        run: bash vendor/install.sh
+
+      - name: Structure and generation gates
+        run: |
+          set -euo pipefail
+          bash scripts/health-check.sh
+          python3 scripts/workflow.py render --check
+          python3 scripts/render-role-agents.py --check
+          python3 scripts/gates/gate_catalog.py check --strict
+
+      - name: Targeted tests for the diff
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          tests_out="$(mktemp)"
+          sdlc_flag="$(mktemp)"
+          files_list="$(mktemp)"
+          : > "$tests_out"
+          : > "$sdlc_flag"
+          trap 'rm -f "$tests_out" "$sdlc_flag" "$files_list"' EXIT
+
+          add_test() {
+            local t="$1"
+            if [[ -f "$t" ]]; then
+              if ! grep -Fxq "$t" "$tests_out"; then
+                printf '%s\n' "$t" >> "$tests_out"
+              fi
+            else
+              echo "映射目标 $t 不存在，跳过"
+            fi
+          }
+
+          map_one() {
+            local f="$1" base
+            if [[ "$f" =~ ^tests/test_[^/]+\.py$ ]]; then
+              add_test "$f"
+              return
+            fi
+            if [[ "$f" == "scripts/check-sdlc.sh" || "$f" == "tests/test-check-sdlc.sh" ]]; then
+              echo 1 > "$sdlc_flag"
+              return
+            fi
+            if [[ "$f" == "scripts/gates/state_view.py" || "$f" == "scripts/gates/evidence.py" ]]; then
+              echo 1 > "$sdlc_flag"
+              base="${f##*/}"
+              base="${base%.py}"
+              add_test "tests/test_${base}.py"
+              return
+            fi
+            if [[ "$f" == "scripts/runtime/dispatch_cli.py" || "$f" =~ ^scripts/tools/[^/]+\.py$ ]]; then
+              add_test "tests/test_tools_dispatch.py"
+              return
+            fi
+            if [[ "$f" == "scripts/packaging/vendorlib.py" ]]; then
+              add_test "tests/test_vendor_drift.py"
+              return
+            fi
+            if [[ "$f" =~ ^scripts/([^/]+/)?[^/]+\.py$ ]]; then
+              base="${f##*/}"
+              base="${base%.py}"
+              add_test "tests/test_${base}.py"
+              return
+            fi
+            if [[ "$f" == "maintainers/gate-provenance.json" ]]; then
+              add_test "tests/test_gate_catalog.py"
+              return
+            fi
+            if [[ "$f" == "maintainers/method-baseline.json" || "$f" =~ ^maintainers/method-changes/ ]]; then
+              add_test "tests/test_method_ledger.py"
+              return
+            fi
+            if [[ "$f" =~ ^skills/[^/]+/evals(/|$) ]]; then
+              add_test "tests/test_eval_protocol.py"
+              return
+            fi
+          }
+
+          event_name="${EVENT_NAME:-}"
+          if [[ "$event_name" == "workflow_dispatch" ]]; then
+            echo "workflow_dispatch 没有 PR/push 的 base，定向单测跳过；结构门禁已在上一步运行。"
+            exit 0
+          fi
+          if [[ "$event_name" == "pull_request" ]]; then
+            if [[ -z "${BASE_SHA:-}" ]]; then
+              echo "pull_request 没有 base SHA，定向单测跳过。"
+              exit 0
+            fi
+            git diff --name-only --diff-filter=ACDMRTUXB "$BASE_SHA" "$HEAD_SHA" > "$files_list"
+          elif [[ "$event_name" == "push" ]]; then
+            if [[ -z "${BEFORE_SHA:-}" || "${BEFORE_SHA}" =~ ^0+$ ]]; then
+              echo "push 没有可比较的 before SHA，定向单测跳过。"
+              exit 0
+            fi
+            git diff --name-only --diff-filter=ACDMRTUXB "$BEFORE_SHA" "$HEAD_SHA" > "$files_list"
+          else
+            echo "事件 ${event_name} 不计算 diff，定向单测跳过。"
+            exit 0
+          fi
+
+          echo "按 diff 映射定向测试"
+          while IFS= read -r f || [[ -n "${f:-}" ]]; do
+            [[ -z "$f" ]] && continue
+            echo "变更: $f"
+            map_one "$f"
+          done < "$files_list"
+
+          if [[ ! -s "$tests_out" && ! -s "$sdlc_flag" ]]; then
+            echo "无受影响脚本单测，跳过"
+            exit 0
+          fi
+
+          while IFS= read -r t || [[ -n "${t:-}" ]]; do
+            [[ -z "$t" ]] && continue
+            echo "运行 python3 $t"
+            python3 "$t"
+          done < "$tests_out"
+
+          if [[ -s "$sdlc_flag" ]]; then
+            echo "运行 bash tests/test-check-sdlc.sh"
+            bash tests/test-check-sdlc.sh
+            if locale -a 2>/dev/null | grep -Eiq '^zh_CN\.(utf-?8|UTF-8)$'; then
+              echo "运行 LC_ALL=zh_CN.UTF-8 /bin/bash tests/test-check-sdlc.sh"
+              LC_ALL=zh_CN.UTF-8 /bin/bash tests/test-check-sdlc.sh
+            else
+              echo "runner 未安装 zh_CN.UTF-8，跳过 locale 校验"
+            fi
+          fi

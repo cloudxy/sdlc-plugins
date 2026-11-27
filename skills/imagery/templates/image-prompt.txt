@@ -1,0 +1,15 @@
+# sdlc:unfilled — 写入本次真实提示词后删除本行
+# Prompt file for scripts/image/generate.py (--prompt-file <this-file>)
+# Traceability: stored verbatim in <feature>/evidence/images/<name>.json. Keep concrete values from <product_root>/design-system.md; delete comment lines if desired after filling.
+
+Subject & communicative purpose:
+<One specific object/scene that communicates the exact state or message — e.g., an open empty ledger folder resting on a clean desk inviting the first import; state what the viewer understands in 1 second.>
+
+Composition, safe zones & light/dark surface fit:
+<Framing, focal point, aspect ratio intent, and negative-space safe zone if UI copy sits nearby. Specify background treatment so it works cleanly on both light and dark UI surfaces (neutral isolated ground or theme-matched surface hex, never an accidental harsh white/black box that breaks contrast).>
+
+Style anchors (from design-system.md & picked direction D<n>):
+<Exact accent hex (e.g. #2563EB), neutral temperature (cool slate #F8FAFC / dark #0F172A), flat/painterly rendering choice, stroke/line weight, lighting restraint — zero generic buzzwords like "modern, clean, futuristic".>
+
+Exclusions:
+no text, no letters, no numbers, no UI chrome, no buttons, no logos, no trademarks, no watermarks, no real person likeness, no competitor interface elements.

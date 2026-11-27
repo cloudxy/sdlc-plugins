@@ -1,0 +1,91 @@
+# 样例功能账本。legacy 聚合闸门（无 task_protocol）。角色只读；此处是关闭后的记录。
+feature: export-audit-csv
+sdlc_version: 4
+product_root: docs/product
+delivery_goal: local_verified
+project_profile: "surface=api stack=python maturity=sample；无界面，无迁移"
+lane: L2
+appetite: 4h
+ui: no
+tracking: no
+q_security: yes
+path: default
+current_hat: review
+hats_done: [define, shape, implement, verify, accept, review]
+phase: Closed
+rework_rounds: 0
+intent:
+  class: new-feature
+  quote: "租户管理员要导出本租户的审计日志 CSV"
+  skip_shape: false
+  skip_discover: false
+  at: "2026-11-21T09:00:00+08:00"
+discovery:
+  status: done
+  briefing: 00-discover/briefing.md
+  at: "2026-11-21T09:30:00+08:00"
+roles_skipped: [designer, frontend, growth, dba, ops, data-collector]
+roles_skipped_why:
+  designer: "无用户可见界面"
+  frontend: "无界面，不改前端"
+  growth: "内部租户管理能力，无对外增长宣称"
+  dba: "只读既有 audit_event，本轮不改表"
+  ops: "无客服话术，也无开闸公告"
+  data-collector: "不新增埋点"
+tickets:
+  - id: T-1
+    title: 导出租户审计 CSV
+    journey: J-1
+    roles: [backend]
+    status: done
+    evidence: 03-impl/T-1-backend-evidence.md
+gates:
+  - name: test
+    kind: script
+    stage: implement
+    result: pass
+    cmd: "python3 tests/test_audit_export.py"
+    exit_code: 0
+    duration_min: 5
+    at: "2026-11-21T12:00:00+08:00"
+  - name: py_compile
+    kind: script
+    stage: implement
+    result: pass
+    cmd: "python3 -m py_compile src/audit_export.py tests/test_audit_export.py"
+    exit_code: 0
+    duration_min: 1
+    at: "2026-11-21T12:01:00+08:00"
+  - name: fresh-context
+    kind: fresh-context
+    stage: review
+    result: pass
+    findings_total: 0
+    blocker: 0
+    major: 0
+    at: "2026-11-21T12:40:00+08:00"
+acceptance:
+  - by: pm
+    verdict: 通过
+    file: 04-verify/accept-pm.md
+    at: "2026-11-21T12:20:00+08:00"
+review_findings: []
+stale_artifacts: []
+open_questions: []
+lane_changes: []
+bet:
+  hypothesis: H-1
+  metric: weekly_export_tenants
+  evidence_grade: E1
+  readout_due: "2026-12-15"
+host_spawn:
+  backend:
+    requested: sdlc-workflow:backend
+    available: sdlc-workflow:backend
+    fallback: general-purpose
+    reason: "示例宿主能解析插件角色，本轮没有回退"
+  qa:
+    requested: sdlc-workflow:qa
+    available: sdlc-workflow:qa
+    fallback: general-purpose
+    reason: "示例宿主能解析插件角色，本轮没有回退"

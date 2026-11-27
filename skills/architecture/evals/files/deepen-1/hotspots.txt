@@ -1,0 +1,9 @@
+# git log --since=2026-07-01 --format= --name-only | sort | uniq -c | sort -rn
+  14 src/orders/order_service.py
+  11 src/orders/order_pricing.py
+   9 src/orders/order_validator.py
+   3 src/orders/order_repository.py
+   1 src/notifications/email_sender.py
+# defect fixes in the window (from .sdlc/_outcomes escapes)
+fix-discount-rounding: escaped at verify; order_pricing.py + order_service.py
+fix-empty-order-accepted: escaped at implement; order_validator.py + order_service.py

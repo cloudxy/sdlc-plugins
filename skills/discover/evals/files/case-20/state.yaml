@@ -1,0 +1,7 @@
+feature: scheduled-report-email
+sdlc_version: 4
+product_root: docs/product
+current_hat: define
+hats_done: []
+phase: Intent
+host_spawn: {}

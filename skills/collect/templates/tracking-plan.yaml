@@ -1,0 +1,33 @@
+# sdlc:unfilled — data-collector 写入本产品真实规范后删除本行
+# 产品埋点规范与事件字典（产品层 data/tracking-plan.yaml；负责人 data-collector，pm 经 01-define/tracking.md 提事件）
+version: 1
+conventions:
+  event_name: object_action, past tense, snake_case   # report_viewed / invite_sent
+  object_vocabulary: domain-model.md 统一语言          # 事件对象词与领域模型一致
+  one_behaviour_one_event: true                        # 差异用属性表达，不拆事件
+identity:
+  anonymous_id: 设备或浏览器首次访问生成并持久化
+  user_id: 注册/登录成功由服务端事件建立与 anonymous_id 的映射
+  logout: 生成新的 anonymous_id
+  tenant_id: ToB 产品作为公共属性（ToC 删除本行）
+consent:
+  analytics_before_consent: <不发送 | 仅必要事件 | 发送并标记 consent=false>
+  pii_in_properties: forbidden
+common_properties:
+  event_time_client: {type: timestamp, required: true}
+  event_time_server: {type: timestamp, required: true}
+  anonymous_id: {type: string, required: true}
+  user_id: {type: string, required: false}
+  session_id: {type: string, required: true}
+  platform: {type: enum, values: [web, ios, android, miniprogram, server], required: true}
+  app_version: {type: string, required: true}
+events:
+  - event: <object_action>
+    description: <从用户视角的触发时刻>
+    placement: <client | server>
+    properties:
+      <name>: {type: <type>, required: <true|false>}
+    metrics: [<metrics.yaml id>]
+    owner: <角色>
+    since: <功能 / 版本>
+    status: <active | deprecated>

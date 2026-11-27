@@ -1,0 +1,10 @@
+{"type": "user", "timestamp": "2026-10-01T01:00:00.000Z", "isSidechain": false, "message": {"role": "user", "content": "深度检查 sdlc 插件"}}
+{"type": "assistant", "timestamp": "2026-10-01T01:00:05.000Z", "isSidechain": false, "message": {"content": [{"type": "thinking", "thinking": "plan", "signature": "x"}, {"type": "tool_use", "id": "t1", "name": "Read", "input": {"file_path": "/repo/skills/sdlc/SKILL.md"}}]}}
+{"type": "user", "timestamp": "2026-10-01T01:00:06.000Z", "isSidechain": false, "message": {"content": [{"type": "tool_result", "tool_use_id": "t1", "is_error": false, "content": "# SDLC orchestrator"}]}}
+{"type": "assistant", "timestamp": "2026-10-01T01:00:10.000Z", "isSidechain": false, "message": {"content": [{"type": "tool_use", "id": "t2", "name": "Bash", "input": {"command": "curl -H 'Authorization: Bearer abcdefghijklmnopqrstuvwxyz0123' https://x"}}]}}
+{"type": "user", "timestamp": "2026-10-01T01:00:12.000Z", "isSidechain": false, "message": {"content": [{"type": "tool_result", "tool_use_id": "t2", "is_error": true, "content": "curl: (6) Could not resolve host"}]}}
+{"type": "assistant", "timestamp": "2026-10-01T01:00:20.000Z", "isSidechain": false, "message": {"content": [{"type": "tool_use", "id": "t3", "name": "Read", "input": {"file_path": "/repo/skills/sdlc/SKILL.md"}}]}}
+{"type": "user", "timestamp": "2026-10-01T01:00:21.000Z", "isSidechain": false, "message": {"content": [{"type": "tool_result", "tool_use_id": "t3", "is_error": false, "content": [{"type": "text", "text": "# SDLC orchestrator"}]}]}}
+{"type": "system", "subtype": "compact_boundary", "timestamp": "2026-10-01T01:05:00.000Z"}
+{"type": "assistant", "timestamp": "2026-10-01T01:05:30.000Z", "isSidechain": true, "message": {"content": [{"type": "tool_use", "id": "t4", "name": "Skill", "input": {"skill": "sdlc-workflow:discover"}}]}}
+{"type": "assistant", "timestamp": "2026-10-01T01:06:00.000Z", "isSidechain": false, "message": {"content": [{"type": "text", "text": "检查完成，发现 16 个问题。"}]}}

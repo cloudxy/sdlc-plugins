@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "status": "fixtures-not-model-results",
+  "cases": [
+    {
+      "id": "pm-export",
+      "role": "pm",
+      "stage": "define",
+      "task": "spec",
+      "skill": "prd-gwt",
+      "prompt": "Define the authorized export behavior as a compact business specification. Reuse settled scope, identify observable success/failure/permission outcomes and distinguish proposed metrics from facts.",
+      "fixture_root": "fixtures/round2",
+      "inputs": [
+        "briefing.md",
+        "strategy.md"
+      ],
+      "deliverables": [
+        "spec.md"
+      ],
+      "rubric": [
+        {
+          "id": "correctness",
+          "criterion": "Correct and complete against the supplied business/tenant behavior, with concrete supported claims",
+          "weight": 2
+        },
+        {
+          "id": "evidence",
+          "criterion": "Verification supports each claimed result; missing coverage and source/build limits are explicit",
+          "weight": 2
+        },
+        {
+          "id": "handoff",
+          "criterion": "Downstream can act without reopening authorized scope; unresolved obligations have owners and affected work",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "backend-export",
+      "role": "backend",
+      "stage": "implement",
+      "task": "T-3",
+      "skill": "impl-evidence",
+      "prompt": "Implement T-3. Edit only service.py and tests in your project copy. Verify tenant boundaries and CSV consumer behavior. Copy changed source, tests and evidence to outputs.",
+      "fixture_root": "fixtures/round2",
+      "inputs": [
+        "briefing.md",
+        "contract.md",
+        "T-3.md",
+        "service.py",
+        "checks.py"
+      ],
+      "deliverables": [
+        "service.py",
+        "checks.py",
+        "evidence.md"
+      ],
+      "rubric": [
+        {
+          "id": "correctness",
+          "criterion": "Correct and complete against the supplied business/tenant behavior, with concrete supported claims",
+          "weight": 2
+        },
+        {
+          "id": "evidence",
+          "criterion": "Verification supports each claimed result; missing coverage and source/build limits are explicit",
+          "weight": 2
+        },
+        {
+          "id": "handoff",
+          "criterion": "Downstream can act without reopening authorized scope; unresolved obligations have owners and affected work",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "architecture-conformance",
+      "role": "architect",
+      "stage": "verify",
+      "task": "conformance",
+      "skill": "architecture",
+      "prompt": "Review the supplied accepted contract against the current implementation and checks. Execute available checks where useful; write per-obligation met/deviation/unverified findings. Do not change implementation or claim a running deployment.",
+      "fixture_root": "fixtures/round2",
+      "inputs": [
+        "contract.md",
+        "service.py",
+        "checks.py",
+        "check-context.md"
+      ],
+      "deliverables": [
+        "conformance.md"
+      ],
+      "rubric": [
+        {
+          "id": "correctness",
+          "criterion": "Correct and complete against the supplied business/tenant behavior, with concrete supported claims",
+          "weight": 2
+        },
+        {
+          "id": "evidence",
+          "criterion": "Verification supports each claimed result; missing coverage and source/build limits are explicit",
+          "weight": 2
+        },
+        {
+          "id": "handoff",
+          "criterion": "Downstream can act without reopening authorized scope; unresolved obligations have owners and affected work",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+ "feature": "export-audit-csv",
+ "lane": "L2",
+ "delivery_goal": "local_verified",
+ "phase": "Closed",
+ "hats_done": [
+  "define",
+  "shape",
+  "implement",
+  "verify",
+  "accept",
+  "review"
+ ],
+ "rework_rounds": 0,
+ "intercepts": 0,
+ "bet": {
+  "hypothesis": "H-1",
+  "metric": "weekly_export_tenants",
+  "evidence_grade": "E1",
+  "readout_due": "2026-12-15"
+ },
+ "escape": null,
+ "readout": {
+  "status": "inconclusive",
+  "evidence": ".sdlc/export-audit-csv/04-verify/accept-pm.md",
+  "note": "本地验收只证明导出行为。每周有没有租户导出，要等生产计数；这笔赌注记为不确定。",
+  "at": "2026-11-21"
+ },
+ "recorded_at": "2026-11-21T01:11:29+08:00"
+}

@@ -1,0 +1,1 @@
+Primary: packet `primary_skill` (else `sdlc-workflow:{{PROC}}`). Extra methods: only `allowed_companion_skills` (v3; apply all `required_companion_skills`) or `companion_skills` (v2; `debug_protocol` adds `debug` on rework). Report used methods with `provenance: "reported"`. Load `references/role-quality.md` and `project_profile`-triggered SOPs on demand.

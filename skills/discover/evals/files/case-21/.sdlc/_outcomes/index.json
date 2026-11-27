@@ -1,0 +1,28 @@
+{
+ "bets": [
+  {
+   "feature": "report-subscription-pdf",
+   "hypothesis": "H-3",
+   "metric": "weekly_report_subscriptions",
+   "evidence_grade": "E1",
+   "readout_due": "2026-08-15",
+   "readout": "refuted"
+  },
+  {
+   "feature": "export-shortcut",
+   "hypothesis": "H-5",
+   "metric": "weekly_export_tenants",
+   "evidence_grade": "E1",
+   "readout_due": "2026-09-01",
+   "readout": "refuted"
+  },
+  {
+   "feature": "supervisor-export",
+   "hypothesis": "H-2",
+   "metric": "weekly_export_tenants",
+   "evidence_grade": "E2",
+   "readout_due": "2026-09-25",
+   "readout": "supported"
+  }
+ ]
+}

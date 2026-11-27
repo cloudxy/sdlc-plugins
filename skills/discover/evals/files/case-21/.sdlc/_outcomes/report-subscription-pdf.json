@@ -1,0 +1,17 @@
+{
+ "feature": "report-subscription-pdf",
+ "lane": "L2",
+ "phase": "Closed",
+ "bet": {
+  "hypothesis": "H-3",
+  "metric": "weekly_report_subscriptions",
+  "evidence_grade": "E1",
+  "readout_due": "2026-08-15"
+ },
+ "readout": {
+  "status": "refuted",
+  "evidence": "07-retro/retro.md",
+  "note": "访谈里人人说要订阅，上线 30 天只有 3 个租户建了订阅，其中 2 个一周后删除",
+  "at": "2026-08-16"
+ }
+}

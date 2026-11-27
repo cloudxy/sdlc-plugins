@@ -1,0 +1,18 @@
+{
+  "name": "sdlc-workflow",
+  "version": "4.10.0",
+  "description": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
+  "author": {
+    "name": "xuyun"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/cloudxy/sdlc-plugins",
+  "keywords": [
+    "workflow",
+    "sdlc",
+    "agents",
+    "process",
+    "quality-gates"
+  ],
+  "agents": "./agents"
+}

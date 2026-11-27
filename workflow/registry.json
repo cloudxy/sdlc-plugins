@@ -1,0 +1,4358 @@
+{
+  "schema_version": 3,
+  "commands": {
+    "sdlc": {
+      "skill": "sdlc",
+      "mode": "auto",
+      "description": "Goal-scoped SDLC: full delivery, local refinement or defect repair through shared role tasks, versioned dependencies and evidence. Completion of scoped work does not imply feature delivery.",
+      "argument_hint": "[需求 | 只细化需求 | 打磨原型 | 修复 BUG | continue]"
+    },
+    "sdlc-discover": {
+      "skill": "discover",
+      "mode": "full",
+      "description": "Co-create unclear needs through conversation, examples and scoped research; check assumptions and accept the current slice. Reuse settled decisions. No spec.md; this window stays the manager.",
+      "argument_hint": "[idea or 'continue']"
+    },
+    "sdlc-eval": {
+      "skill": "sdlc-eval",
+      "mode": "eval",
+      "description": "Run explicitly budgeted SDLC comparisons, blind rubric judging or mechanical checks; human-triggered, never a scheduled gate.",
+      "argument_hint": "[skill: prd-gwt|design-contract|architecture|schema|growth|collect|warehouse|coverage-matrix|findings|release-gate|impl-evidence|algorithm|debug|tdd|refactor|cicd|deliver|discover|market|compete|enablement|signals|retro|prototype|imagery|sdlc|sdlc-eval] [mechanical|rubric|regression <case-id|all>|smoke <cases>|diagnose <session>] [comparison: plugin|skill|chain] [treatment: with_without|old_new] [scope: role_task|workflow]"
+    },
+    "sdlc-grok": {
+      "skill": "imagery",
+      "mode": "auth",
+      "description": "Authorize this plugin with your Grok subscription (OAuth device login) and check whether image generation is actually available: login / status / logout / probe. Never prints a token. Not a way to generate images outside a packet.",
+      "argument_hint": "[login|status|logout|probe]"
+    },
+    "sdlc-product": {
+      "skill": "sdlc",
+      "mode": "product",
+      "description": "Build or refresh the product layer (strategy, feature map, growth, design system, architecture, domain model, data) before or between features, or run a product cycle (signals, readout, experiments, decisions). Spawns the owning hats; this window stays the manager.",
+      "argument_hint": "[product name / what to refresh, e.g. '全部' | 'strategy feature-map' | 'domain-model' | 'cycle <id>']"
+    },
+    "sdlc-research": {
+      "skill": "discover",
+      "mode": "research",
+      "description": "AFK survey only — spawn researcher (market) ∥ competitor (compete), then growth (positioning). No HITL grilling, no spec.md. This window stays the manager.",
+      "argument_hint": "[change to survey]"
+    },
+    "sdlc-review": {
+      "skill": "sdlc",
+      "mode": "review-only",
+      "description": "Independent G-fresh review of artifacts already on disk. Spawns sdlc-workflow:reviewer only — not a full swimlane. This window stays the manager.",
+      "argument_hint": "[feature dir or artifact paths]"
+    },
+    "sdlc-refine": {
+      "skill": "sdlc",
+      "mode": "refine",
+      "description": "Refine a named requirement, design, architecture, schema or data contract; stop at the agreed task outcome.",
+      "argument_hint": "[feature / object / feedback / desired stopping point]"
+    },
+    "sdlc-fix": {
+      "skill": "sdlc",
+      "mode": "fix",
+      "description": "Diagnose, repair and verify a defect against accepted behavior; preserve its original feature and release references.",
+      "argument_hint": "[feature / object / feedback / desired stopping point]"
+    }
+  },
+  "roles": {
+    "pm": {
+      "skill": "prd-gwt",
+      "description": "Use this agent for product value, core features, journeys, spec.md (FR/GWT), tracking and acceptance. While /sdlc runs, only its manager dispatches this role, with a spawn packet. Use proactively when the user states a problem before technical design, including walking acceptance on the build. Do not delegate to it on your own. Do NOT use for architecture, schema, or implementation.",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [
+        "feature-map.md",
+        "strategy.md"
+      ],
+      "function": "product-mgmt"
+    },
+    "growth": {
+      "skill": "growth",
+      "description": "Use this agent ONLY when the spawn packet or the user names growth. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. 增长运营: positioning, highlights, claims check, segments, precision-marketing launch plans. Do NOT use proactively. Do NOT use for feature specs (pm), support scripts or signals (ops), or deploy/rollback (sre).",
+      "color": "orange",
+      "fresh": false,
+      "product_writes": [
+        "growth.md"
+      ],
+      "function": "operations"
+    },
+    "ops": {
+      "skill": "signals",
+      "description": "Use this agent ONLY when the spawn packet or the user names ops. Product operations (产品运营/用户运营). While /sdlc runs, only its manager dispatches this role, with a spawn packet. User signals, enablement (teach/open/announce), release notes. Do NOT use proactively. Do not delegate to it on your own. Do NOT use for deploy, rollback, incidents, CI, or SRE (sre). Do NOT use for RICE, feature design (pm), or campaigns (growth).",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [],
+      "function": "operations"
+    },
+    "designer": {
+      "skill": "design-contract",
+      "description": "Use this agent ONLY when the spawn packet or the user names designer. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Reuses or explores design directions, delivers runnable final prototypes and applicable states, coordinates scoped discovery prototypes, and performs design QA. Do NOT use for frontend implementation.",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [
+        "design-system.md"
+      ],
+      "function": "design"
+    },
+    "architect": {
+      "skill": "architecture",
+      "description": "Use this agent for feasibility before scope/design freeze, architecture contracts, change impact and implementation conformance. Do NOT use as the /sdlc manager, for production implementation or physical schemas. Follow the assigned task and existing decision authority.",
+      "color": "purple",
+      "fresh": false,
+      "product_writes": [
+        "architecture.md"
+      ],
+      "function": "engineering"
+    },
+    "dba": {
+      "skill": "schema",
+      "description": "Use this agent ONLY when the spawn packet or the user names dba. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Domain models, engine-specific constraints, query optimization and scoped migration design/implementation with explicit recovery limits. Do NOT use for Service/Repository code or API shapes.",
+      "color": "green",
+      "fresh": false,
+      "product_writes": [
+        "domain-model.md",
+        "erd.dbml"
+      ],
+      "function": "engineering"
+    },
+    "frontend": {
+      "skill": "impl-evidence",
+      "description": "Use this agent when implementing UI slices from accepted prototype code, tokens and state contracts. While /sdlc runs, only its manager dispatches this role, with a spawn packet. Use proactively for UI tickets, including integration runs with screenshots. Do not delegate to it on your own. Do NOT use for API implementation or token definition.",
+      "color": "cyan",
+      "fresh": false,
+      "product_writes": [],
+      "function": "engineering"
+    },
+    "backend": {
+      "skill": "impl-evidence",
+      "description": "Use this agent when implementing APIs, services, repositories, transactions, or server-side events. While /sdlc runs, only its manager dispatches this role, with a spawn packet. Use proactively for API tickets, including idempotency. Do not delegate to it on your own. Do NOT use for schema design or changing GWT.",
+      "color": "cyan",
+      "fresh": false,
+      "product_writes": [],
+      "function": "engineering"
+    },
+    "sre": {
+      "skill": "deliver",
+      "description": "Use this agent ONLY when the spawn packet or the user names sre. SRE / 运维. While /sdlc runs, only its manager dispatches this role, with a spawn packet. Pre-QC readiness, scoped CI wiring, authorized deployment, recovery, monitoring and incidents. Do NOT use proactively. Do not delegate to it on your own. Do NOT use for user-facing copy, support scripts, or signal aggregation (ops / 产品运营). Do NOT use for business code or schema changes.",
+      "color": "green",
+      "fresh": false,
+      "product_writes": [],
+      "function": "engineering"
+    },
+    "qa": {
+      "skill": "coverage-matrix",
+      "description": "Use this agent when designing risk-based tests, E2E journeys, coverage matrices, or defect reports. While /sdlc runs, only its manager dispatches this role, with a spawn packet. Use for early test planning, tracking validation and post-implementation verification. Do not delegate to it on your own. Do NOT use for fixing defects or release decisions.",
+      "color": "orange",
+      "fresh": false,
+      "product_writes": [],
+      "function": "quality"
+    },
+    "algo": {
+      "skill": "algorithm",
+      "description": "Use this agent ONLY when the spawn packet or the user names algo. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Designs eval sets, model choice, RAG, agent tool loops, AI fallback chains, benchmarks and AI defect repair. Do NOT use for business CRUD or UI.",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [],
+      "function": "engineering"
+    },
+    "miner": {
+      "skill": "impl-evidence",
+      "description": "Use this agent ONLY when the spawn packet or the user names miner. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Builds predictive models, segmentation, feature as-of design. Do NOT use for online LLM/RAG (algo) or dashboards (analyst).",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [],
+      "function": "engineering"
+    },
+    "analyst": {
+      "skill": "retro",
+      "description": "Use this agent ONLY when the spawn packet or the user names analyst. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Early measurement plans, experiments, funnels, cohorts, readouts and metric interpretation; PM applies strategy decisions. Do NOT use for writing FRs or implementation.",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [],
+      "function": "operations"
+    },
+    "data-warehouse-engineer": {
+      "skill": "warehouse",
+      "description": "Use this agent ONLY when the spawn packet or the user names data-warehouse-engineer. While /sdlc runs, only its manager dispatches this role, with a spawn packet. Do NOT use proactively. Do not delegate to it on your own. Metric/tag definitions, appropriate analytical models, pipeline implementation, reconciliation and replay validation. Do NOT use for OLTP schema (dba) or experiments (analyst).",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [
+        "data/metrics.yaml",
+        "data/tags.yaml"
+      ],
+      "function": "engineering"
+    },
+    "data-collector": {
+      "skill": "collect",
+      "description": "Use this agent ONLY when the spawn packet or the user names data-collector. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Tracking/source design, scoped collection implementation and destination validation for events, identities, logs and external sources. Do NOT use for warehouse ETL or backend APIs.",
+      "color": "cyan",
+      "fresh": false,
+      "product_writes": [
+        "data/tracking-plan.yaml"
+      ],
+      "function": "engineering"
+    },
+    "reviewer": {
+      "skill": "findings",
+      "description": "Use this agent ONLY when the spawn packet or the user names reviewer. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Memory-free review of artifacts (G-fresh), including product value and experience evidence. Do NOT use for writing code, fixing issues, or release approval (qc).",
+      "color": "red",
+      "fresh": true,
+      "product_writes": [],
+      "function": "quality"
+    },
+    "qc": {
+      "skill": "release-gate",
+      "description": "Use this agent ONLY when the spawn packet or the user names qc. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Scoped verification/release-readiness opinion from acceptance, SRE preparation and residual risk; no deployment authorization. Do NOT use for finding defects (reviewer) or writing tests (qa).",
+      "color": "red",
+      "fresh": true,
+      "product_writes": [],
+      "function": "quality"
+    },
+    "researcher": {
+      "skill": "market",
+      "description": "Use this agent ONLY when the spawn packet or the user names researcher. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. Bounds who has the problem, how often, and today's alternatives, with cited sources. Do NOT use for RICE, spec.md, competitor borrow/avoid (competitor), or positioning (growth).",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [],
+      "function": "product-mgmt"
+    },
+    "competitor": {
+      "skill": "compete",
+      "description": "Use this agent ONLY when the spawn packet or the user names competitor. Do NOT use proactively. While /sdlc runs, only its manager dispatches this role, with a spawn packet; do not delegate to it on your own. How rivals and the status quo serve this job, where users complain, where we can win. Do NOT use for RICE, spec.md, market sizing (researcher), or positioning (growth).",
+      "color": "blue",
+      "fresh": false,
+      "product_writes": [],
+      "function": "product-mgmt"
+    }
+  },
+  "functions": {
+    "product-mgmt": {
+      "name": "产品"
+    },
+    "operations": {
+      "name": "运营"
+    },
+    "design": {
+      "name": "设计"
+    },
+    "engineering": {
+      "name": "研发"
+    },
+    "quality": {
+      "name": "质量"
+    }
+  },
+  "skills": {
+    "sdlc": {
+      "kind": "manager",
+      "trigger": "command"
+    },
+    "discover": {
+      "kind": "manager",
+      "trigger": "command"
+    },
+    "sdlc-eval": {
+      "kind": "manager",
+      "trigger": "command"
+    },
+    "prd-gwt": {
+      "kind": "role",
+      "trigger": "domain"
+    },
+    "market": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "compete": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "growth": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "signals": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "enablement": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "retro": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "design-contract": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "architecture": {
+      "kind": "role",
+      "trigger": "domain"
+    },
+    "schema": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "impl-evidence": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "collect": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "warehouse": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "deliver": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "coverage-matrix": {
+      "kind": "role",
+      "trigger": "domain"
+    },
+    "findings": {
+      "kind": "role",
+      "trigger": "domain"
+    },
+    "release-gate": {
+      "kind": "role",
+      "trigger": "packet"
+    },
+    "debug": {
+      "kind": "practice",
+      "trigger": "packet"
+    },
+    "tdd": {
+      "kind": "practice",
+      "trigger": "packet"
+    },
+    "refactor": {
+      "kind": "practice",
+      "trigger": "packet"
+    },
+    "prototype": {
+      "kind": "practice",
+      "trigger": "packet"
+    },
+    "cicd": {
+      "kind": "practice",
+      "trigger": "packet"
+    },
+    "imagery": {
+      "kind": "practice",
+      "trigger": "command"
+    },
+    "algorithm": {
+      "kind": "role",
+      "trigger": "packet"
+    }
+  },
+  "scopes": [
+    "feature",
+    "product",
+    "cycle"
+  ],
+  "lifecycle": [
+    "discover",
+    "define",
+    "shape",
+    "implement",
+    "verify",
+    "accept",
+    "review",
+    "release",
+    "learn"
+  ],
+  "stores": {
+    "signals": {
+      "config": "signals_path",
+      "owner": "ops",
+      "template": "skills/signals/templates/signal-store.md"
+    }
+  },
+  "artifacts": {
+    "market": {
+      "paths": [
+        "00-discover/market.md"
+      ],
+      "legacy": []
+    },
+    "compete": {
+      "paths": [
+        "00-discover/compete.md"
+      ],
+      "legacy": []
+    },
+    "growth": {
+      "paths": [
+        "00-discover/growth.md"
+      ],
+      "legacy": []
+    },
+    "spec": {
+      "paths": [
+        "01-define/spec.md",
+        "01-define/spec-s.md",
+        "spec-s.md"
+      ],
+      "legacy": [
+        "01-define/prd.md",
+        "prd.md"
+      ]
+    },
+    "tracking": {
+      "paths": [
+        "01-define/tracking.md"
+      ],
+      "legacy": []
+    },
+    "signals": {
+      "paths": [
+        "01-define/requirement-pool.md"
+      ],
+      "legacy": []
+    },
+    "design-brief": {
+      "paths": [
+        "02-shape/design-brief.md"
+      ],
+      "legacy": []
+    },
+    "directions": {
+      "paths": [
+        "02-shape/design-directions.md"
+      ],
+      "legacy": []
+    },
+    "prototypes": {
+      "paths": [
+        "02-shape/prototypes/*",
+        "02-shape/prototypes/**/*"
+      ],
+      "legacy": []
+    },
+    "flows": {
+      "paths": [
+        "02-shape/flows.md"
+      ],
+      "legacy": []
+    },
+    "states": {
+      "paths": [
+        "02-shape/edge-states.md"
+      ],
+      "legacy": []
+    },
+    "contract": {
+      "paths": [
+        "02-shape/contract.md"
+      ],
+      "legacy": []
+    },
+    "db-spec": {
+      "paths": [
+        "02-shape/db-spec.md"
+      ],
+      "legacy": []
+    },
+    "schema": {
+      "paths": [
+        "02-shape/schema.dbml"
+      ],
+      "legacy": []
+    },
+    "tracking-impl": {
+      "paths": [
+        "02-shape/collect/tracking-impl.md"
+      ],
+      "legacy": []
+    },
+    "data-source": {
+      "paths": [
+        "02-shape/collect/data-source-analysis.md"
+      ],
+      "legacy": []
+    },
+    "metrics": {
+      "paths": [
+        "02-shape/warehouse/metrics.yaml"
+      ],
+      "legacy": []
+    },
+    "evidence": {
+      "paths": [
+        "03-impl/*evidence*.md"
+      ],
+      "legacy": []
+    },
+    "integration": {
+      "paths": [
+        "03-impl/*integration*.md"
+      ],
+      "legacy": []
+    },
+    "coverage": {
+      "paths": [
+        "04-verify/coverage.md"
+      ],
+      "legacy": [
+        "04-verify/trace-matrix.md"
+      ]
+    },
+    "accept-pm": {
+      "paths": [
+        "04-verify/accept-pm.md"
+      ],
+      "legacy": []
+    },
+    "accept-designer": {
+      "paths": [
+        "04-verify/accept-design.md"
+      ],
+      "legacy": []
+    },
+    "accept-growth": {
+      "paths": [
+        "04-verify/accept-growth.md"
+      ],
+      "legacy": []
+    },
+    "findings": {
+      "paths": [
+        "05-review/findings.md"
+      ],
+      "legacy": []
+    },
+    "opinion": {
+      "paths": [
+        "06-deliver/release-opinion.md"
+      ],
+      "legacy": []
+    },
+    "checklist": {
+      "paths": [
+        "06-deliver/checklist.md"
+      ],
+      "legacy": [
+        "06-deliver/release-checklist.md"
+      ]
+    },
+    "enablement": {
+      "paths": [
+        "06-deliver/enablement.md"
+      ],
+      "legacy": []
+    },
+    "launch": {
+      "paths": [
+        "06-deliver/launch.md"
+      ],
+      "legacy": []
+    },
+    "retro": {
+      "paths": [
+        "07-retro/retro.md"
+      ],
+      "legacy": []
+    },
+    "final-prototype": {
+      "paths": [
+        "02-shape/prototypes/final/*",
+        "02-shape/prototypes/final/**/*"
+      ],
+      "legacy": []
+    },
+    "diagram": {
+      "paths": [
+        "*/assets/*.svg",
+        "assets/*.svg"
+      ],
+      "legacy": []
+    },
+    "architecture-feasibility": {
+      "paths": [
+        "01-define/architecture-feasibility.md"
+      ],
+      "legacy": []
+    },
+    "architecture-change-impact": {
+      "paths": [
+        "02-shape/architecture-change-impact.md"
+      ],
+      "legacy": []
+    },
+    "architecture-conformance": {
+      "paths": [
+        "04-verify/architecture-conformance.md"
+      ],
+      "legacy": []
+    },
+    "security-review": {
+      "paths": [
+        "02-shape/security-review.md"
+      ],
+      "legacy": []
+    },
+    "db-optimization": {
+      "paths": [
+        "02-shape/db-optimization.md"
+      ],
+      "legacy": []
+    },
+    "migration-review": {
+      "paths": [
+        "02-shape/migration-review.md"
+      ],
+      "legacy": []
+    },
+    "collect-evidence": {
+      "paths": [
+        "03-impl/collect-evidence.md"
+      ],
+      "legacy": []
+    },
+    "collect-validation": {
+      "paths": [
+        "04-verify/collect-validation.md"
+      ],
+      "legacy": []
+    },
+    "tags": {
+      "paths": [
+        "02-shape/warehouse/tags.yaml"
+      ],
+      "legacy": []
+    },
+    "warehouse-design": {
+      "paths": [
+        "02-shape/warehouse/design.md"
+      ],
+      "legacy": []
+    },
+    "warehouse-evidence": {
+      "paths": [
+        "03-impl/warehouse-evidence.md"
+      ],
+      "legacy": []
+    },
+    "warehouse-validation": {
+      "paths": [
+        "04-verify/warehouse-validation.md"
+      ],
+      "legacy": []
+    },
+    "test-plan": {
+      "paths": [
+        "01-define/test-plan.md"
+      ],
+      "legacy": []
+    },
+    "ci": {
+      "paths": [
+        "06-deliver/ci.md"
+      ],
+      "legacy": []
+    },
+    "readiness": {
+      "paths": [
+        "06-deliver/readiness.md"
+      ],
+      "legacy": []
+    },
+    "measurement-plan": {
+      "paths": [
+        "01-define/measurement-plan.md"
+      ],
+      "legacy": []
+    },
+    "prototype-experiment": {
+      "paths": [
+        "00-discover/prototypes/report.md"
+      ],
+      "legacy": []
+    },
+    "generated-image": {
+      "paths": [
+        "*/assets/refs/*.png",
+        "*/assets/refs/*.jpg",
+        "*/assets/refs/*.webp",
+        "*/assets/generated/*.png",
+        "*/assets/generated/*.jpg",
+        "*/assets/generated/*.webp"
+      ],
+      "legacy": []
+    },
+    "cycle-signals": {
+      "paths": [
+        "outputs/signals-digest.md"
+      ],
+      "legacy": []
+    },
+    "cycle-readout": {
+      "paths": [
+        "outputs/readout.md"
+      ],
+      "legacy": []
+    },
+    "cycle-experiments": {
+      "paths": [
+        "outputs/experiments.md"
+      ],
+      "legacy": []
+    },
+    "cycle-decisions": {
+      "paths": [
+        "outputs/decisions.md"
+      ],
+      "legacy": []
+    },
+    "cycle-tags": {
+      "paths": [
+        "outputs/tags-refresh.md"
+      ],
+      "legacy": []
+    },
+    "fix-frontend": {
+      "paths": [
+        "03-impl/fix-frontend-evidence.md"
+      ],
+      "legacy": []
+    },
+    "fix-backend": {
+      "paths": [
+        "03-impl/fix-backend-evidence.md"
+      ],
+      "legacy": []
+    },
+    "diagnosis-backend": {
+      "paths": [
+        "04-verify/diagnosis-backend.md"
+      ],
+      "legacy": []
+    },
+    "diagnosis-frontend": {
+      "paths": [
+        "04-verify/diagnosis-frontend.md"
+      ],
+      "legacy": []
+    },
+    "diagnosis-data-collector": {
+      "paths": [
+        "04-verify/diagnosis-data-collector.md"
+      ],
+      "legacy": []
+    },
+    "analysis": {
+      "paths": [
+        "07-retro/analysis.md"
+      ],
+      "legacy": []
+    },
+    "data-audit": {
+      "paths": [
+        "04-verify/data-audit.md"
+      ],
+      "legacy": []
+    },
+    "backfill": {
+      "paths": [
+        "03-impl/backfill-evidence.md"
+      ],
+      "legacy": []
+    },
+    "mining-explore": {
+      "paths": [
+        "03-impl/mining-explore-evidence.md"
+      ],
+      "legacy": []
+    },
+    "mining-experiment": {
+      "paths": [
+        "03-impl/mining-experiment-evidence.md"
+      ],
+      "legacy": []
+    },
+    "mining-evaluate": {
+      "paths": [
+        "03-impl/mining-evaluate-evidence.md"
+      ],
+      "legacy": []
+    },
+    "algo-explore": {
+      "paths": [
+        "03-impl/algo-explore-evidence.md"
+      ],
+      "legacy": []
+    },
+    "algo-evaluate": {
+      "paths": [
+        "03-impl/algo-evaluate-evidence.md"
+      ],
+      "legacy": []
+    },
+    "fix-algo": {
+      "paths": [
+        "03-impl/fix-algo-evidence.md"
+      ],
+      "legacy": []
+    },
+    "diagnosis-algo": {
+      "paths": [
+        "04-verify/diagnosis-algo.md"
+      ],
+      "legacy": []
+    },
+    "cycle-deepening": {
+      "paths": [
+        "outputs/deepening.md"
+      ],
+      "legacy": []
+    },
+    "log-analysis": {
+      "paths": [
+        "04-verify/log-analysis.md"
+      ],
+      "legacy": []
+    },
+    "ops-diagnosis": {
+      "paths": [
+        "04-verify/ops-diagnosis.md"
+      ],
+      "legacy": []
+    },
+    "security-audit": {
+      "paths": [
+        "04-verify/security-audit.md"
+      ],
+      "legacy": []
+    },
+    "ops-design": {
+      "paths": [
+        "01-define/ops-design.md"
+      ],
+      "legacy": []
+    }
+  },
+  "stages": {
+    "market": {
+      "rank": 0,
+      "progress": null,
+      "required": [
+        {
+          "any": [
+            "market"
+          ],
+          "role": "researcher"
+        }
+      ]
+    },
+    "compete": {
+      "rank": 0,
+      "progress": null,
+      "required": [
+        {
+          "any": [
+            "compete"
+          ],
+          "role": "competitor"
+        }
+      ]
+    },
+    "growth": {
+      "rank": 0,
+      "progress": null,
+      "required": [
+        {
+          "any": [
+            "growth"
+          ],
+          "role": "growth"
+        }
+      ]
+    },
+    "signals": {
+      "rank": 1,
+      "progress": "signals",
+      "required": [
+        {
+          "any": [
+            "signals"
+          ],
+          "role": "ops"
+        }
+      ]
+    },
+    "define": {
+      "rank": 2,
+      "progress": "define",
+      "required": [
+        {
+          "any": [
+            "spec"
+          ],
+          "role": null
+        }
+      ]
+    },
+    "shape": {
+      "rank": 3,
+      "progress": "shape",
+      "required": [
+        {
+          "any": [
+            "contract"
+          ],
+          "role": "architect"
+        }
+      ]
+    },
+    "designer": {
+      "rank": 3,
+      "progress": "shape",
+      "required": [
+        {
+          "any": [
+            "states"
+          ],
+          "role": "designer"
+        }
+      ]
+    },
+    "dba": {
+      "rank": 3,
+      "progress": "shape",
+      "required": [
+        {
+          "any": [
+            "db-spec"
+          ],
+          "role": "dba"
+        },
+        {
+          "any": [
+            "schema"
+          ],
+          "role": "dba"
+        }
+      ]
+    },
+    "collect": {
+      "rank": 2,
+      "progress": "collect",
+      "required": [
+        {
+          "any": [
+            "tracking-impl",
+            "data-source"
+          ],
+          "role": "data-collector"
+        }
+      ]
+    },
+    "warehouse": {
+      "rank": 3,
+      "progress": "shape",
+      "required": [
+        {
+          "any": [
+            "metrics",
+            "tags"
+          ],
+          "role": "data-warehouse-engineer"
+        }
+      ]
+    },
+    "implement": {
+      "rank": 4,
+      "progress": "implement",
+      "required": [
+        {
+          "any": [
+            "evidence"
+          ],
+          "role": null
+        }
+      ]
+    },
+    "verify": {
+      "rank": 5,
+      "progress": "verify",
+      "required": [
+        {
+          "any": [
+            "coverage"
+          ],
+          "role": null
+        }
+      ]
+    },
+    "accept": {
+      "rank": 6,
+      "progress": "accept",
+      "required": [
+        {
+          "any": [
+            "accept-pm"
+          ],
+          "role": "pm"
+        },
+        {
+          "any": [
+            "accept-designer"
+          ],
+          "role": "designer",
+          "when": "ui"
+        },
+        {
+          "any": [
+            "accept-growth"
+          ],
+          "role": "growth"
+        }
+      ]
+    },
+    "review": {
+      "rank": 7,
+      "progress": "review",
+      "required": [
+        {
+          "any": [
+            "findings"
+          ],
+          "role": null
+        }
+      ]
+    },
+    "qc": {
+      "rank": 8,
+      "progress": "qc",
+      "required": [
+        {
+          "any": [
+            "opinion"
+          ],
+          "role": null
+        }
+      ]
+    },
+    "deliver": {
+      "rank": 9,
+      "progress": "deliver",
+      "required": [
+        {
+          "any": [
+            "checklist"
+          ],
+          "role": null
+        }
+      ]
+    },
+    "enablement": {
+      "rank": 9,
+      "progress": "deliver",
+      "required": [
+        {
+          "any": [
+            "enablement"
+          ],
+          "role": "ops"
+        }
+      ]
+    },
+    "launch": {
+      "rank": 9,
+      "progress": "deliver",
+      "required": [
+        {
+          "any": [
+            "launch"
+          ],
+          "role": "growth"
+        }
+      ]
+    },
+    "retro": {
+      "rank": 10,
+      "progress": "retro",
+      "required": [
+        {
+          "any": [
+            "retro"
+          ],
+          "role": "analyst"
+        }
+      ]
+    },
+    "product": {
+      "rank": 0,
+      "progress": null,
+      "required": []
+    },
+    "cycle": {
+      "rank": 0,
+      "progress": null,
+      "required": []
+    }
+  },
+  "tasks": [
+    {
+      "role": "researcher",
+      "stage": "market",
+      "task": "survey",
+      "skill": "market",
+      "required": [
+        "market"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "discover"
+      ],
+      "gate_stages": [
+        "market"
+      ]
+    },
+    {
+      "role": "competitor",
+      "stage": "compete",
+      "task": "survey",
+      "skill": "compete",
+      "required": [
+        "compete"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "discover"
+      ],
+      "gate_stages": [
+        "compete"
+      ]
+    },
+    {
+      "role": "growth",
+      "stage": "growth",
+      "task": "positioning",
+      "skill": "growth",
+      "required": [
+        "growth"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "discover"
+      ],
+      "gate_stages": [
+        "growth"
+      ]
+    },
+    {
+      "role": "pm",
+      "stage": "define",
+      "task": "spec",
+      "skill": "prd-gwt",
+      "required": [
+        "spec"
+      ],
+      "visuals": [
+        {
+          "type": "flow",
+          "when": "branches"
+        },
+        {
+          "type": "state",
+          "when": "state_machine"
+        }
+      ],
+      "diagram_reference": "skills/prd-gwt/references/flow-diagram.md",
+      "diagram_dir": "01-define/assets",
+      "companions": [
+        "collect"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define"
+      ],
+      "gate_stages": [
+        "define"
+      ],
+      "protocol_required": 1,
+      "inputs": [
+        {
+          "id": "briefing",
+          "source": "binding",
+          "when": "lane_l2plus",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "strategy",
+          "source": "product",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one",
+          "allow_unfilled": true,
+          "ref": "strategy.md"
+        },
+        {
+          "id": "feature_map",
+          "source": "product",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one",
+          "allow_unfilled": true,
+          "ref": "feature-map.md"
+        },
+        {
+          "id": "decisions",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "metrics",
+          "source": "binding",
+          "when": "tracking",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "reads": [
+        "skills/prd-gwt/references/spec-task.md"
+      ]
+    },
+    {
+      "role": "ops",
+      "stage": "signals",
+      "task": "listen",
+      "skill": "signals",
+      "required": [
+        "signals"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define"
+      ],
+      "gate_stages": [
+        "signals"
+      ]
+    },
+    {
+      "role": "designer",
+      "stage": "designer",
+      "task": "explore",
+      "skill": "design-contract",
+      "required": [
+        "design-brief",
+        "directions",
+        "prototypes"
+      ],
+      "evidence": [
+        "screenshots"
+      ],
+      "reads": [
+        "vendor/anthropic-skills/skills/frontend-design/SKILL.md"
+      ],
+      "partial_stage": true,
+      "imagery": [
+        {
+          "kind": "ref",
+          "when": "visual_direction"
+        }
+      ],
+      "imagery_reference": "skills/design-contract/references/generated-imagery.md",
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "shape"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "behavior",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "spec",
+          "requires_acceptance": true
+        },
+        {
+          "id": "design_context",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "designer",
+      "stage": "designer",
+      "task": "specify",
+      "skill": "design-contract",
+      "required": [
+        "directions",
+        "flows",
+        "states",
+        "final-prototype"
+      ],
+      "evidence": [
+        "screenshots"
+      ],
+      "reads": [
+        "vendor/anthropic-skills/skills/frontend-design/SKILL.md"
+      ],
+      "imagery": [
+        {
+          "kind": "illustration",
+          "when": "empty_or_error_state"
+        },
+        {
+          "kind": "empty-state",
+          "when": "empty_or_error_state"
+        },
+        {
+          "kind": "hero",
+          "when": "marketing_surface"
+        },
+        {
+          "kind": "icon",
+          "when": "icon_set"
+        }
+      ],
+      "imagery_reference": "skills/design-contract/references/generated-imagery.md",
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "shape"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "behavior",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "spec",
+          "requires_acceptance": true
+        },
+        {
+          "id": "directions",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "directions",
+          "requires_acceptance": true
+        },
+        {
+          "id": "design_context",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "architect",
+      "stage": "define",
+      "task": "feasibility",
+      "skill": "architecture",
+      "required": [
+        "architecture-feasibility"
+      ],
+      "partial_stage": true,
+      "reads": [
+        "skills/architecture/references/lifecycle.md"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define"
+      ],
+      "gate_stages": [
+        "define"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "question",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "baseline",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "architect",
+      "stage": "shape",
+      "task": "change-impact",
+      "skill": "architecture",
+      "required": [
+        "architecture-change-impact"
+      ],
+      "partial_stage": true,
+      "reads": [
+        "skills/architecture/references/lifecycle.md"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape",
+        "implement",
+        "verify"
+      ],
+      "gate_stages": [
+        "define",
+        "shape",
+        "implement",
+        "verify",
+        "accept",
+        "review"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "accepted_baseline",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "mismatch",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "consumers",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "architect",
+      "stage": "verify",
+      "task": "conformance",
+      "skill": "architecture",
+      "required": [
+        "architecture-conformance"
+      ],
+      "partial_stage": true,
+      "reads": [
+        "skills/architecture/references/lifecycle.md",
+        "skills/architecture/references/conformance-task.md"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "verify"
+      ],
+      "gate_stages": [
+        "verify"
+      ],
+      "protocol_required": 1,
+      "inputs": [
+        {
+          "id": "accepted_contract",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true,
+          "ref": "contract"
+        },
+        {
+          "id": "architecture_baseline",
+          "source": "product",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "architecture.md"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "verification_records",
+          "source": "verification_records",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never"
+    },
+    {
+      "role": "architect",
+      "stage": "shape",
+      "task": "contract",
+      "skill": "architecture",
+      "required": [
+        "contract"
+      ],
+      "visuals": [
+        {
+          "type": "architecture",
+          "when": "services"
+        },
+        {
+          "type": "sequence",
+          "when": "services"
+        },
+        {
+          "type": "trust-boundary",
+          "when": "security"
+        }
+      ],
+      "diagram_reference": "skills/architecture/references/diagrams.md",
+      "diagram_dir": "02-shape/assets",
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "shape"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "behavior",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "spec",
+          "requires_acceptance": true
+        },
+        {
+          "id": "baseline",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "approved_design",
+          "source": "binding",
+          "when": "ui",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        }
+      ]
+    },
+    {
+      "role": "architect",
+      "stage": "shape",
+      "task": "security-review",
+      "skill": "architecture",
+      "required": [
+        "security-review"
+      ],
+      "partial_stage": true,
+      "reads": [
+        "skills/architecture/references/lifecycle.md",
+        "skills/architecture/references/threat-model.md"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "shape"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "security_surface",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "authoritative_model",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "dba",
+      "stage": "dba",
+      "task": "model",
+      "skill": "schema",
+      "required": [
+        "db-spec",
+        "schema"
+      ],
+      "visuals": [
+        {
+          "type": "er",
+          "when": "schema"
+        },
+        {
+          "type": "state",
+          "when": "state_machine"
+        }
+      ],
+      "diagram_reference": "skills/schema/references/er-diagram.md",
+      "diagram_dir": "02-shape/assets",
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "shape"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "behavior",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "spec",
+          "requires_acceptance": true
+        },
+        {
+          "id": "accepted_contract",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "contract",
+          "requires_acceptance": true
+        },
+        {
+          "id": "baseline",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "data-collector",
+      "stage": "collect",
+      "task": "tracking",
+      "skill": "collect",
+      "required": [
+        "tracking-impl"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "collect"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "event_requirements",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "collection_contract",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        }
+      ]
+    },
+    {
+      "role": "data-collector",
+      "stage": "collect",
+      "task": "source",
+      "skill": "collect",
+      "required": [
+        "data-source"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "collect"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "data_need",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_constraints",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "warehouse",
+      "task": "metrics",
+      "skill": "warehouse",
+      "required": [
+        "metrics"
+      ],
+      "visuals": [
+        {
+          "type": "lineage",
+          "when": "new_metrics"
+        }
+      ],
+      "diagram_reference": "skills/warehouse/references/lineage-diagram.md",
+      "diagram_dir": "02-shape/assets",
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "warehouse"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "business_definitions",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "source_contracts",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "warehouse",
+      "task": "tags",
+      "skill": "warehouse",
+      "required": [
+        "tags"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "warehouse"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "business_definitions",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "source_contracts",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "frontend",
+      "stage": "implement",
+      "task": "T-<n>",
+      "skill": "impl-evidence",
+      "required": [
+        "evidence"
+      ],
+      "task_pattern": "T-[1-9][0-9]*",
+      "lane_file": "ui",
+      "companions": [
+        "tdd",
+        "refactor",
+        "debug"
+      ],
+      "evidence": [
+        "running_app",
+        "screenshots"
+      ],
+      "reads": [
+        "vendor/anthropic-skills/skills/frontend-design/SKILL.md"
+      ],
+      "writes_source": true,
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "ticket",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "behavior",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "spec",
+          "requires_acceptance": true
+        },
+        {
+          "id": "accepted_contract",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "contract",
+          "requires_acceptance": true
+        },
+        {
+          "id": "approved_design",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "implementation_context",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "backend",
+      "stage": "implement",
+      "task": "T-<n>",
+      "skill": "impl-evidence",
+      "required": [
+        "evidence"
+      ],
+      "task_pattern": "T-[1-9][0-9]*",
+      "lane_file": "api",
+      "companions": [
+        "tdd",
+        "refactor",
+        "debug"
+      ],
+      "writes_source": true,
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_required": 1,
+      "inputs": [
+        {
+          "id": "ticket",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "behavior",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "spec"
+        },
+        {
+          "id": "accepted_contract",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true,
+          "ref": "contract",
+          "alternatives": [
+            {
+              "source": "artifact",
+              "ref": "spec",
+              "rule": "l2-short-spec"
+            }
+          ]
+        },
+        {
+          "id": "data_definitions",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "reads": [
+        "skills/impl-evidence/references/backend-task.md",
+        "skills/impl-evidence/references/api.md"
+      ]
+    },
+    {
+      "role": "algo",
+      "stage": "implement",
+      "task": "T-<n>",
+      "skill": "algorithm",
+      "required": [
+        "evidence"
+      ],
+      "task_pattern": "T-[1-9][0-9]*",
+      "lane_file": "ai",
+      "companions": [
+        "tdd",
+        "refactor",
+        "debug"
+      ],
+      "writes_source": true,
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "ticket",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "behavior",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "spec",
+          "requires_acceptance": true
+        },
+        {
+          "id": "accepted_contract",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "contract",
+          "requires_acceptance": true
+        },
+        {
+          "id": "implementation_context",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "miner",
+      "stage": "implement",
+      "task": "T-<n>",
+      "skill": "impl-evidence",
+      "required": [
+        "evidence"
+      ],
+      "task_pattern": "T-[1-9][0-9]*",
+      "lane_file": "model",
+      "companions": [
+        "tdd",
+        "refactor",
+        "debug"
+      ],
+      "writes_source": true,
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "ticket",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "behavior",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "spec",
+          "requires_acceptance": true
+        },
+        {
+          "id": "accepted_contract",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "contract",
+          "requires_acceptance": true
+        },
+        {
+          "id": "implementation_context",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "pm",
+      "stage": "accept",
+      "task": "walkthrough",
+      "skill": "prd-gwt",
+      "required": [
+        "accept-pm"
+      ],
+      "evidence": [
+        "running_app",
+        {
+          "kind": "screenshots",
+          "when": "ui"
+        }
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "accept"
+      ],
+      "gate_stages": [
+        "accept"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "accepted_behavior",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "verification_evidence",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "designer",
+      "stage": "accept",
+      "task": "design-qa",
+      "skill": "design-contract",
+      "required": [
+        "accept-designer"
+      ],
+      "evidence": [
+        "running_app",
+        "screenshots"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "accept"
+      ],
+      "gate_stages": [
+        "accept"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "approved_design",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "verification_evidence",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "growth",
+      "stage": "accept",
+      "task": "claims-check",
+      "skill": "growth",
+      "required": [
+        "accept-growth"
+      ],
+      "evidence": [
+        "running_app",
+        {
+          "kind": "screenshots",
+          "when": "ui"
+        }
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "accept"
+      ],
+      "gate_stages": [
+        "accept"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "accepted_claims",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "verification_evidence",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "qa",
+      "stage": "verify",
+      "task": "risk-based-tests",
+      "skill": "coverage-matrix",
+      "required": [
+        "coverage"
+      ],
+      "aliases": [
+        "risk-based tests"
+      ],
+      "evidence": [
+        {
+          "kind": "e2e",
+          "when": "ui"
+        }
+      ],
+      "companions": [
+        "collect"
+      ],
+      "writes_source": true,
+      "requires_source": false,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "verify"
+      ],
+      "gate_stages": [
+        "verify"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "accepted_behavior",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "implementation_evidence",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "test_scope",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "reviewer",
+      "stage": "review",
+      "task": "G-fresh",
+      "skill": "findings",
+      "required": [
+        "findings"
+      ],
+      "aliases": [],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define",
+        "shape",
+        "implement",
+        "review"
+      ],
+      "gate_stages": [
+        "review"
+      ]
+    },
+    {
+      "role": "qc",
+      "stage": "qc",
+      "task": "release-opinion",
+      "skill": "release-gate",
+      "required": [
+        "opinion"
+      ],
+      "aliases": [
+        "release opinion"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "release"
+      ],
+      "gate_stages": [
+        "qc"
+      ]
+    },
+    {
+      "role": "sre",
+      "stage": "deliver",
+      "task": "checklist",
+      "skill": "deliver",
+      "required": [
+        "checklist"
+      ],
+      "aliases": [],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "release"
+      ],
+      "gate_stages": [
+        "deliver"
+      ]
+    },
+    {
+      "role": "ops",
+      "stage": "enablement",
+      "task": "teach-open-announce",
+      "skill": "enablement",
+      "required": [
+        "enablement"
+      ],
+      "aliases": [
+        "teach/open/announce"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "release"
+      ],
+      "gate_stages": [
+        "enablement"
+      ]
+    },
+    {
+      "role": "growth",
+      "stage": "launch",
+      "task": "precision-marketing",
+      "skill": "growth",
+      "required": [
+        "launch"
+      ],
+      "aliases": [
+        "precision marketing",
+        "launch"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "release"
+      ],
+      "gate_stages": [
+        "launch"
+      ]
+    },
+    {
+      "role": "analyst",
+      "stage": "retro",
+      "task": "readout",
+      "skill": "retro",
+      "required": [
+        "retro"
+      ],
+      "aliases": [],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ],
+      "gate_stages": [
+        "retro"
+      ]
+    },
+    {
+      "role": "pm",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "prd-gwt",
+      "required": [],
+      "product_outputs": [
+        "feature-map.md",
+        "strategy.md"
+      ],
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": [],
+      "gate_stages": [
+        "product"
+      ]
+    },
+    {
+      "role": "growth",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "growth",
+      "required": [],
+      "product_outputs": [
+        "growth.md"
+      ],
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": [],
+      "gate_stages": [
+        "product"
+      ]
+    },
+    {
+      "role": "designer",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "design-contract",
+      "required": [],
+      "product_outputs": [
+        "design-system.md"
+      ],
+      "evidence": [
+        "running_app",
+        "screenshots"
+      ],
+      "evidence_paths": [
+        "assets/screens/*"
+      ],
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": [],
+      "gate_stages": [
+        "product"
+      ]
+    },
+    {
+      "role": "architect",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "architecture",
+      "required": [],
+      "product_outputs": [
+        "architecture.md"
+      ],
+      "visuals": [
+        {
+          "type": "architecture",
+          "when": "services"
+        }
+      ],
+      "diagram_reference": "skills/architecture/references/diagrams.md",
+      "diagram_dir": "assets",
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": [],
+      "gate_stages": [
+        "product"
+      ]
+    },
+    {
+      "role": "dba",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "schema",
+      "required": [],
+      "product_outputs": [
+        "domain-model.md",
+        "erd.dbml"
+      ],
+      "visuals": [
+        {
+          "type": "er",
+          "when": "schema"
+        }
+      ],
+      "diagram_reference": "skills/schema/references/er-diagram.md",
+      "diagram_dir": "assets",
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": [],
+      "gate_stages": [
+        "product"
+      ]
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "warehouse",
+      "required": [],
+      "product_outputs": [
+        "data/metrics.yaml",
+        "data/tags.yaml"
+      ],
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": [],
+      "gate_stages": [
+        "product"
+      ]
+    },
+    {
+      "role": "data-collector",
+      "stage": "product",
+      "task": "bootstrap",
+      "skill": "collect",
+      "required": [],
+      "product_outputs": [
+        "data/tracking-plan.yaml"
+      ],
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": [],
+      "gate_stages": [
+        "product"
+      ]
+    },
+    {
+      "role": "pm",
+      "stage": "product",
+      "task": "apply-decisions",
+      "skill": "prd-gwt",
+      "required": [],
+      "product_outputs": [
+        "feature-map.md",
+        "strategy.md"
+      ],
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": [],
+      "gate_stages": [
+        "product"
+      ]
+    },
+    {
+      "role": "reviewer",
+      "stage": "product",
+      "task": "G-fresh",
+      "skill": "findings",
+      "required": [],
+      "manager_output": ".sdlc/_product/findings.md",
+      "scopes": [
+        "product"
+      ],
+      "lifecycle_phases": [],
+      "gate_stages": [
+        "product"
+      ]
+    },
+    {
+      "role": "dba",
+      "stage": "dba",
+      "task": "optimize",
+      "skill": "schema",
+      "required": [
+        "db-optimization"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape",
+        "implement"
+      ],
+      "gate_stages": [
+        "shape"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "baseline",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "workload",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "dba",
+      "stage": "dba",
+      "task": "migration",
+      "skill": "schema",
+      "required": [
+        "migration-review"
+      ],
+      "partial_stage": true,
+      "writes_source": true,
+      "requires_source": false,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape",
+        "implement"
+      ],
+      "gate_stages": [
+        "shape"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "approved_schema",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "migration_scope",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "data-collector",
+      "stage": "collect",
+      "task": "implement",
+      "skill": "collect",
+      "required": [
+        "collect-evidence"
+      ],
+      "partial_stage": true,
+      "writes_source": true,
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "collect"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "accepted_design",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "destination_contract",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "data-collector",
+      "stage": "collect",
+      "task": "validate",
+      "skill": "collect",
+      "required": [
+        "collect-validation"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "verify"
+      ],
+      "gate_stages": [
+        "collect"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "accepted_design",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "implementation",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "collect-evidence"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "warehouse",
+      "task": "design",
+      "skill": "warehouse",
+      "required": [
+        "warehouse-design"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "warehouse"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "data_need",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "source_contracts",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        }
+      ]
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "warehouse",
+      "task": "implement",
+      "skill": "warehouse",
+      "required": [
+        "warehouse-evidence"
+      ],
+      "partial_stage": true,
+      "writes_source": true,
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "warehouse"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "accepted_design",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "warehouse-design",
+          "requires_acceptance": true
+        },
+        {
+          "id": "source_contracts",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "warehouse",
+      "task": "validate",
+      "skill": "warehouse",
+      "required": [
+        "warehouse-validation"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "verify"
+      ],
+      "gate_stages": [
+        "warehouse"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "accepted_design",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "warehouse-design",
+          "requires_acceptance": true
+        },
+        {
+          "id": "implementation",
+          "source": "artifact",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "ref": "warehouse-evidence"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "qa",
+      "stage": "define",
+      "task": "test-plan",
+      "skill": "coverage-matrix",
+      "required": [
+        "test-plan"
+      ],
+      "partial_stage": true,
+      "companions": [
+        "collect"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define"
+      ],
+      "gate_stages": [
+        "define"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "behavior",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "risk_context",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "sre",
+      "stage": "deliver",
+      "task": "ci",
+      "skill": "cicd",
+      "required": [
+        "ci"
+      ],
+      "partial_stage": true,
+      "writes_source": true,
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement",
+        "release"
+      ],
+      "gate_stages": [
+        "deliver"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "pipeline_requirements",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "baseline",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "sre",
+      "stage": "deliver",
+      "task": "prepare",
+      "skill": "deliver",
+      "required": [
+        "readiness"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "release"
+      ],
+      "gate_stages": [
+        "deliver"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "release_scope",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "verification_evidence",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "operational_baseline",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "analyst",
+      "stage": "define",
+      "task": "measurement-plan",
+      "skill": "retro",
+      "required": [
+        "measurement-plan"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define"
+      ],
+      "gate_stages": [
+        "define"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "outcome",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "available_data",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "designer",
+      "stage": "market",
+      "task": "prototype",
+      "skill": "prototype",
+      "required": [
+        "prototype-experiment"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "discover"
+      ],
+      "gate_stages": [
+        "market"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "question",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "constraints",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "ops",
+      "stage": "cycle",
+      "task": "signals-digest",
+      "skill": "signals",
+      "required": [
+        "cycle-signals"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "cycle"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ],
+      "store_writes": "signals",
+      "gate_stages": [
+        "cycle"
+      ]
+    },
+    {
+      "role": "analyst",
+      "stage": "cycle",
+      "task": "readout",
+      "skill": "retro",
+      "required": [
+        "cycle-readout"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "cycle"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ],
+      "gate_stages": [
+        "cycle"
+      ]
+    },
+    {
+      "role": "growth",
+      "stage": "cycle",
+      "task": "experiments",
+      "skill": "growth",
+      "required": [
+        "cycle-experiments"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "cycle"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ],
+      "gate_stages": [
+        "cycle"
+      ]
+    },
+    {
+      "role": "pm",
+      "stage": "cycle",
+      "task": "apply-decisions",
+      "skill": "prd-gwt",
+      "required": [
+        "cycle-decisions"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "cycle"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ],
+      "gate_stages": [
+        "cycle"
+      ]
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "cycle",
+      "task": "tags-refresh",
+      "skill": "warehouse",
+      "required": [
+        "cycle-tags"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "cycle"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ],
+      "gate_stages": [
+        "cycle"
+      ]
+    },
+    {
+      "role": "architect",
+      "stage": "cycle",
+      "task": "deepen-survey",
+      "skill": "architecture",
+      "required": [
+        "cycle-deepening"
+      ],
+      "partial_stage": true,
+      "reads": [
+        "skills/architecture/references/deepening.md"
+      ],
+      "scopes": [
+        "cycle"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ],
+      "gate_stages": [
+        "cycle"
+      ]
+    },
+    {
+      "role": "frontend",
+      "stage": "implement",
+      "task": "fix",
+      "skill": "impl-evidence",
+      "required": [
+        "fix-frontend"
+      ],
+      "lane_file": "ui",
+      "companions": [
+        "tdd",
+        "refactor",
+        "debug"
+      ],
+      "evidence": [
+        "running_app",
+        "screenshots"
+      ],
+      "reads": [
+        "skills/impl-evidence/references/ui.md"
+      ],
+      "writes_source": true,
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "defect",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "accepted_behavior",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "accepted_contract",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "implementation_context",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "backend",
+      "stage": "implement",
+      "task": "fix",
+      "skill": "impl-evidence",
+      "required": [
+        "fix-backend"
+      ],
+      "lane_file": "api",
+      "companions": [
+        "tdd",
+        "refactor",
+        "debug"
+      ],
+      "writes_source": true,
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "inputs": [
+        {
+          "id": "defect",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "accepted_behavior",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "accepted_contract",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "implementation_context",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "reads": [
+        "skills/impl-evidence/references/api.md"
+      ],
+      "protocol_supported": 1,
+      "execution_required": true
+    },
+    {
+      "role": "backend",
+      "stage": "implement",
+      "task": "diagnose",
+      "skill": "debug",
+      "required": [
+        "diagnosis-backend"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "symptom",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "behavior_baseline",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "execution_required": true,
+      "integration_required": false
+    },
+    {
+      "role": "frontend",
+      "stage": "implement",
+      "task": "diagnose",
+      "skill": "debug",
+      "required": [
+        "diagnosis-frontend"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "symptom",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "behavior_baseline",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "execution_required": true,
+      "integration_required": false
+    },
+    {
+      "role": "data-collector",
+      "stage": "collect",
+      "task": "diagnose",
+      "skill": "debug",
+      "required": [
+        "diagnosis-data-collector"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "collect"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "symptom",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "behavior_baseline",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "execution_required": true
+    },
+    {
+      "role": "analyst",
+      "stage": "retro",
+      "task": "analyze",
+      "skill": "retro",
+      "required": [
+        "analysis"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "learn"
+      ],
+      "gate_stages": [
+        "retro"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "question",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "dataset",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "definitions",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "execution_required": true,
+      "dataset_required": true
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "warehouse",
+      "task": "audit",
+      "skill": "warehouse",
+      "required": [
+        "data-audit"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "warehouse"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "question",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "dataset",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "quality_rules",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "execution_required": true,
+      "dataset_required": true
+    },
+    {
+      "role": "data-warehouse-engineer",
+      "stage": "warehouse",
+      "task": "backfill",
+      "skill": "warehouse",
+      "required": [
+        "backfill"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "shape"
+      ],
+      "gate_stages": [
+        "warehouse"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "recovery_plan",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "dataset",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "target_contract",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "execution_required": true,
+      "writes_source": true,
+      "dataset_required": true
+    },
+    {
+      "role": "miner",
+      "stage": "implement",
+      "task": "explore",
+      "skill": "impl-evidence",
+      "required": [
+        "mining-explore"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "question",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "dataset",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "evaluation_plan",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "execution_required": true,
+      "reads": [
+        "skills/impl-evidence/references/model.md"
+      ],
+      "lane_file": "model",
+      "dataset_required": true,
+      "integration_required": false
+    },
+    {
+      "role": "miner",
+      "stage": "implement",
+      "task": "experiment",
+      "skill": "impl-evidence",
+      "required": [
+        "mining-experiment"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "question",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "dataset",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "evaluation_plan",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        }
+      ],
+      "skip_policy": "never",
+      "execution_required": true,
+      "reads": [
+        "skills/impl-evidence/references/model.md"
+      ],
+      "lane_file": "model",
+      "dataset_required": true,
+      "integration_required": false
+    },
+    {
+      "role": "miner",
+      "stage": "implement",
+      "task": "evaluate",
+      "skill": "impl-evidence",
+      "required": [
+        "mining-evaluate"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "question",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "dataset",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "evaluation_plan",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        }
+      ],
+      "skip_policy": "never",
+      "execution_required": true,
+      "reads": [
+        "skills/impl-evidence/references/model.md"
+      ],
+      "lane_file": "model",
+      "dataset_required": true,
+      "integration_required": false
+    },
+    {
+      "role": "algo",
+      "stage": "implement",
+      "task": "explore",
+      "skill": "algorithm",
+      "required": [
+        "algo-explore"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "question",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "eval_samples",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "evaluation_plan",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "execution_required": true,
+      "reads": [
+        "skills/impl-evidence/references/ai.md"
+      ],
+      "lane_file": "ai",
+      "integration_required": false
+    },
+    {
+      "role": "algo",
+      "stage": "implement",
+      "task": "evaluate",
+      "skill": "algorithm",
+      "required": [
+        "algo-evaluate"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "question",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "eval_samples",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "evaluation_plan",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        }
+      ],
+      "skip_policy": "never",
+      "execution_required": true,
+      "reads": [
+        "skills/impl-evidence/references/ai.md"
+      ],
+      "lane_file": "ai",
+      "integration_required": false
+    },
+    {
+      "role": "algo",
+      "stage": "implement",
+      "task": "diagnose",
+      "skill": "debug",
+      "required": [
+        "diagnosis-algo"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "symptom",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "behavior_baseline",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "execution_required": true,
+      "integration_required": false
+    },
+    {
+      "role": "algo",
+      "stage": "implement",
+      "task": "fix",
+      "skill": "algorithm",
+      "required": [
+        "fix-algo"
+      ],
+      "lane_file": "ai",
+      "companions": [
+        "tdd",
+        "refactor",
+        "debug"
+      ],
+      "writes_source": true,
+      "requires_source": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "implement"
+      ],
+      "gate_stages": [
+        "implement"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "defect",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "accepted_behavior",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "accepted_contract",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one",
+          "requires_acceptance": true
+        },
+        {
+          "id": "implementation_context",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read-write",
+          "cardinality": "one"
+        }
+      ],
+      "skip_policy": "never",
+      "reads": [
+        "skills/impl-evidence/references/ai.md"
+      ],
+      "execution_required": true
+    },
+    {
+      "role": "sre",
+      "stage": "deliver",
+      "task": "log-analysis",
+      "skill": "deliver",
+      "required": [
+        "log-analysis"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "verify"
+      ],
+      "gate_stages": [
+        "deliver"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "log_source",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "sre",
+      "stage": "deliver",
+      "task": "ops-diagnose",
+      "skill": "deliver",
+      "required": [
+        "ops-diagnosis"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "verify"
+      ],
+      "gate_stages": [
+        "deliver"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "incident_symptom",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "architect",
+      "stage": "verify",
+      "task": "security-audit",
+      "skill": "architecture",
+      "required": [
+        "security-audit"
+      ],
+      "partial_stage": true,
+      "reads": [
+        "skills/architecture/references/threat-model.md"
+      ],
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "verify"
+      ],
+      "gate_stages": [
+        "verify"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "audit_scope",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        },
+        {
+          "id": "source_snapshot",
+          "source": "source_snapshot",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    },
+    {
+      "role": "ops",
+      "stage": "define",
+      "task": "ops-design",
+      "skill": "enablement",
+      "required": [
+        "ops-design"
+      ],
+      "partial_stage": true,
+      "scopes": [
+        "feature"
+      ],
+      "lifecycle_phases": [
+        "define"
+      ],
+      "gate_stages": [
+        "define"
+      ],
+      "protocol_supported": 1,
+      "inputs": [
+        {
+          "id": "ops_goal",
+          "source": "binding",
+          "when": "always",
+          "access": "read",
+          "cardinality": "one"
+        }
+      ]
+    }
+  ],
+  "manager_only": [
+    "CHANGELOG.md",
+    "product-delta.md",
+    "README.md",
+    "state.yaml"
+  ],
+  "lanes": {
+    "L0": [],
+    "L1": [
+      "implement",
+      "review"
+    ],
+    "L2-default": [
+      "define",
+      "shape",
+      "implement",
+      "verify",
+      "accept",
+      "review"
+    ],
+    "L2-short": [
+      "define",
+      "implement",
+      "verify",
+      "accept",
+      "review"
+    ],
+    "L3": [
+      "define",
+      "shape",
+      "implement",
+      "verify",
+      "accept",
+      "review",
+      "qc",
+      "deliver"
+    ],
+    "L4": [
+      "define",
+      "shape",
+      "implement",
+      "verify",
+      "accept",
+      "review",
+      "qc",
+      "deliver"
+    ]
+  },
+  "diagram": {
+    "guide": "vendor/svg-diagram/SKILL.md",
+    "tool": "vendor/svg-diagram/tools/svg-lint/bin/svg-lint.mjs",
+    "lint": "scripts/diagram/lint.py",
+    "render": "scripts/diagram/render.sh",
+    "types": [
+      "flow",
+      "state",
+      "architecture",
+      "sequence",
+      "trust-boundary",
+      "er",
+      "lineage",
+      "other"
+    ],
+    "when": {
+      "security": "state q_security: yes (enforced)",
+      "schema": "tables or relationships added or changed",
+      "state_machine": "a new or changed status field with legal transitions",
+      "services": "calls between services or modules change",
+      "branches": "a journey with three or more branches",
+      "new_metrics": "new metrics or datasets"
+    },
+    "enforced_when": [
+      "security"
+    ]
+  },
+  "imagery": {
+    "guide": "skills/imagery/SKILL.md",
+    "auth": "scripts/grok/auth.py",
+    "generate": "scripts/image/generate.py",
+    "check": "scripts/image/check.py",
+    "provider": "grok",
+    "model_default": "grok-imagine-image-2.0",
+    "kinds": [
+      "ref",
+      "illustration",
+      "empty-state",
+      "hero",
+      "icon"
+    ],
+    "dirs": {
+      "ref": "02-shape/assets/refs",
+      "illustration": "02-shape/assets/generated",
+      "empty-state": "02-shape/assets/generated",
+      "hero": "02-shape/assets/generated",
+      "icon": "02-shape/assets/generated"
+    },
+    "when": {
+      "visual_direction": "exploring a visual language needs one probe image; the direction itself is still prototype code",
+      "empty_or_error_state": "an empty or error state carries its meaning better with an illustration than with text alone",
+      "marketing_surface": "a brand-front surface (site, landing page) needs a hero or cover image",
+      "icon_set": "a set of icons or icon grounds has to look like one family"
+    },
+    "enforced_when": [],
+    "not_evidence": [
+      "rendered prototype",
+      "walkthrough screenshot",
+      "integration screenshot"
+    ]
+  },
+  "required_capabilities": [
+    "input-contract-v1",
+    "result-v1",
+    "task-closure-v1",
+    "work-scope-v1"
+  ],
+  "method_rules": {
+    "debug_protocol": {
+      "when": "rework_rounds_gte_2",
+      "skill": "debug"
+    }
+  }
+}

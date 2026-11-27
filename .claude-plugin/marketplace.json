@@ -1,0 +1,16 @@
+{
+  "name": "sdlc-workflow",
+  "owner": {
+    "name": "xuyun"
+  },
+  "description": "Local marketplace whose only entry is this plugin directory (Claude Code and Grok; Codex reads .agents/plugins/marketplace.json).",
+  "plugins": [
+    {
+      "name": "sdlc-workflow",
+      "source": "./",
+      "version": "4.10.0",
+      "description": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
+      "category": "workflow"
+    }
+  ]
+}

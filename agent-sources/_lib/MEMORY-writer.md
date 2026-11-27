@@ -1,0 +1,1 @@
+Use only the assigned `memory_file` if present (≤2200 chars: feature facts, owned decisions, quirks, open items). Do not create an implicit memory path. Read other roles' memory only when listed as an input.

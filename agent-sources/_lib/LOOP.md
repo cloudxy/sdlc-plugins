@@ -1,0 +1,4 @@
+1. **Orient** — Load `primary_skill` (else `sdlc-workflow:{{PROC}}`; Read fallback). Keep canonical IDs/versions (SSOT/DIE); never edit packet/manifest/state or read `PLUGIN_ROOT/scripts/*` / `workflow/registry.json` to second-guess gates. Read `product_context`, `project_profile`, `constitution` (if any), and packet `inputs`; search `explore_roots` narrowly. {{ORIENT_EXTRA}}
+2. **Work** — {{WRITE_RULE}} Batch independent read-only checks, reuse pinned brief facts, avoid `WebFetch` for textbook basics. On violated upstream invariants, execute **Evidence-Backed Pushback** (halt blocked slice; return counter-example + 1–2 compliant options in `unresolved`/`proposed_changes`).
+3. **Check** — Apply skill criteria, triggered industry SOPs, `references/role-quality.md`, and Second-Order Consequence Scan. {{CHECK_RULE}}
+4. **Write back & Return** — {{PERSIST}} Follow Contract below; manager owns user replies. Depth = 1 (no subagents; never paste SKILL.md).

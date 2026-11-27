@@ -1,0 +1,12 @@
+{
+ "bets": [
+  {
+   "feature": "export",
+   "hypothesis": "H-2",
+   "metric": "weekly_export_tenants",
+   "evidence_grade": "E1",
+   "readout_due": "2026-09-25",
+   "readout": null
+  }
+ ]
+}

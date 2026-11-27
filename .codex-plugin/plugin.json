@@ -1,0 +1,38 @@
+{
+  "name": "sdlc-workflow",
+  "version": "4.10.0",
+  "description": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
+  "author": {
+    "name": "xuyun"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/cloudxy/sdlc-plugins",
+  "keywords": [
+    "workflow",
+    "sdlc",
+    "agents",
+    "process",
+    "quality-gates"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SDLC Workflow",
+    "shortDescription": "Product delivery, scoped refinement and verified defect repair",
+    "longDescription": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
+    "developerName": "xuyun",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use SDLC Workflow to take this feature through the gated swimlane.",
+      "Use SDLC Workflow in product mode to refresh the product layer.",
+      "Use SDLC Workflow in refine mode to improve this requirement and stop at an accepted handoff.",
+      "Use SDLC Workflow in fix mode to repair and verify this defect."
+    ],
+    "composerIcon": "./commands/sdlc.icon.png",
+    "logo": "./commands/sdlc.icon.png"
+  }
+}

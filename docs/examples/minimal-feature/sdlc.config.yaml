@@ -1,0 +1,27 @@
+# 样例项目根的配置。check-sdlc.sh 从功能目录向上找到本文件，再拼接 product_root。
+# 本样例没有用户界面，也没有监听端口。
+gates:
+  test: "python3 tests/test_audit_export.py"
+  lint: "python3 -m py_compile src/audit_export.py tests/test_audit_export.py"
+  build: "python3 -m py_compile src/audit_export.py"
+  migration: null
+  e2e: null
+  e2e_reason: "没有用户界面。审计导出的端到端检查是 tests/test_audit_export.py 里的 API 级用例。"
+app:
+  start: "python3 tests/test_audit_export.py"
+  base_url: "http://127.0.0.1:9/"
+  widths: []
+product_root: docs/product
+artifact_root: .
+imagery:
+  enabled: false
+research:
+  offline: false
+lane_rules:
+  file_count_threshold: 20
+  subproject_dirs: []
+  schema_paths: []
+  auth_paths: []
+  ui_paths: []
+  tracking_paths: []
+mcp_adapters: []

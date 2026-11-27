@@ -1,0 +1,48 @@
+{
+  "source": "agentskills",
+  "url": "https://github.com/agentskills/agentskills.git",
+  "branch": "main",
+  "kind": "docs",
+  "commit": "69ef37e9424c0a7ea9dd2293b559e43ec8176379",
+  "commit_time": "2026-08-09T13:36:04-07:00",
+  "included_paths": [
+    "LICENSE",
+    "docs/specification.mdx",
+    "docs/skill-creation/best-practices.mdx",
+    "docs/skill-creation/evaluating-skills.mdx",
+    "docs/skill-creation/optimizing-descriptions.mdx"
+  ],
+  "tree_digest": "ec8b6f9723afe67effb0161f69208265daab7fd0f585e996d83c9bd42977c08d",
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "993da3f8d330d69108e521636555f7783ef81d46b904394c59ec5ff651331fe5",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "docs/skill-creation/best-practices.mdx",
+      "sha256": "a729bc1d746366ecb8c5056b100439fbf760007a0f836e089c0f3aff9ce5c2f8",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "docs/skill-creation/evaluating-skills.mdx",
+      "sha256": "20e53ee9085966bb25345fc4c431bcf24f1f1b410b687605dc870c76f8579a49",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "docs/skill-creation/optimizing-descriptions.mdx",
+      "sha256": "5d6f72364f819399d07887843519d3ac037131778a5776584e5e6118d479a492",
+      "purpose": "maintainer"
+    },
+    {
+      "path": "docs/specification.mdx",
+      "sha256": "b9079c0c10b7930e8c6a20ff2bc10cda2a3343c55185120e3f1116a1a529b220",
+      "purpose": "maintainer"
+    }
+  ],
+  "license": "Apache-2.0",
+  "adopted_at": "2026-09-18T16:24:51+0800",
+  "previous_commit": null,
+  "reviewed_by": "plugin-updater inspect/gate.sh (content)",
+  "note": "由 plugin-updater 写入，不要手改。vendor/ 内容不进 git；使用者运行 vendor/install.sh 按本锁文件的 commit 下载并校验 tree_digest。"
+}

@@ -1,0 +1,12 @@
+{
+ "bets": [
+  {
+   "feature": "export-audit-csv",
+   "hypothesis": "H-1",
+   "metric": "weekly_export_tenants",
+   "evidence_grade": "E1",
+   "readout_due": "2026-12-15",
+   "readout": "inconclusive"
+  }
+ ]
+}

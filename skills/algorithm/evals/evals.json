@@ -1,0 +1,33 @@
+{
+  "skill_name": "algorithm",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Evaluate two RAG prompt variants for customer ticket routing against the pinned eval-set-v2 snapshot without editing production code.",
+      "expected_output": "Runs an implement/evaluate comparison on identical frozen eval-set-v2 with 5 reproducibility anchors, compares against cheapest baseline, reports accuracy + P95 latency + cost ledger, and makes zero production code edits.",
+      "rubric": [
+        {"id": "frozen_eval", "criterion": "Pins eval-set-v2 snapshot and compares both candidates against baseline on identical split", "weight": 3},
+        {"id": "repro_anchors", "criterion": "Records 5 reproducibility anchors and latency/cost ledger", "weight": 2},
+        {"id": "read_only_scope", "criterion": "Makes zero production source edits during evaluate task", "weight": 2}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Implement a production LLM extraction step for invoice parsing with timeout fallback and tenant isolation.",
+      "expected_output": "Implements bounded runtime (max_steps, timeouts, spend cap), enforces tenant/ACL checks outside the prompt, validates 3-tier fallback under simulated timeout/429, and separates mock contract tests from eval-set quality proof.",
+      "rubric": [
+        {"id": "bounds_and_fallback", "criterion": "Enforces hard runtime bounds and 3-tier fallback chain", "weight": 3},
+        {"id": "tenant_outside_prompt", "criterion": "Enforces tenant/ACL isolation outside prompt text", "weight": 3},
+        {"id": "mock_vs_eval", "criterion": "Separates mocked contract tests from real eval-set quality evidence", "weight": 2}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Build a standard CRUD REST endpoint and React settings form for user profile editing.",
+      "expected_output": "Refuses out-of-role business CRUD and UI work and routes to backend and frontend roles instead of loading algorithm workflow.",
+      "rubric": [
+        {"id": "role_refusal", "criterion": "Explicitly refuses non-algorithm CRUD/UI task and points to backend/frontend", "weight": 3}
+      ]
+    }
+  ]
+}

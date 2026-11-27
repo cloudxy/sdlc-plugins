@@ -1,0 +1,154 @@
+# Orchestrator gates — host facts, spawn fallback, G-fresh, acceptance, rework
+
+Read this when a spawn fails, when resuming a feature, after a G-fresh or acceptance failure, or when rework reaches 3. Do not paste this file into spawn prompts.
+
+The `/sdlc` window is the **manager** (agents-as-tools). Spawns are nested specialist calls. Do not handoff the conversation to a hat. Persist findings and run `check-sdlc.sh` yourself.
+
+## 0. Host facts (read on demand)
+
+Full list for maintainers: `PLUGIN_ROOT/adapters/HOST-NOTES.md`. What the manager must know:
+
+- **ZCode, Claude Code and Grok execute plugin agents as `pluginName:bareName`** — spawn `sdlc-workflow:<role>`. Codex and Kimi run linked agents `sdlc-workflow-<role>`; packets keep the qualified name ([hosts.md](hosts.md)).
+- **Agent body is who; skills are how.** Hats load `sdlc-workflow:<proc>` with the Skill tool; pass PLUGIN_ROOT so a hat can Read `skills/<proc>/SKILL.md` if Skill fails. Agent frontmatter never carries `skills:` (a non-empty list is an allowlist that blocks companion skills and the reviewer pool).
+- **Research, product, design and architecture hats have `WebSearch` / `WebFetch`**; UI evidence is Bash + `scripts/ui-evidence.sh` (Playwright). Optional MCP tools come only from `adapters/extra-tools.json`, rendered at compile time.
+- **Default `check-sdlc.sh` skip is exit 0.** After a producing hat, run with `--require` / `--hat`. Confirm files exist first — agent said so ≠ file exists.
+- **If role work happens in the manager window, G-fresh is fake.** Iron rule 4.
+- **Agent definitions are a session-start snapshot.** After re-rendering agents, smoke-test in a new window.
+- **bash 3.2:** `$HAT（` is one identifier — use `${HAT}` before full-width punctuation.
+
+## 1. Spawn recipe
+
+First inspect the host dispatcher schema ([hosts.md](hosts.md), including Codex variants). When it supports a type selector, the first spawn is the host's role type (`subagent_type: "sdlc-workflow:<role>"`; Codex `agent_type: "sdlc-workflow-<role>"`; Kimi `sdlc-workflow-<role>`, [hosts.md](hosts.md)) with the registry-selected packet version (sealed v3 for required contracts and supported scoped tasks, v2 for legacy tasks; see [task-protocol.md](../protocol/task-protocol.md)). Never paste SKILL.md.
+
+If the host returns **unknown / unregistered type**, spawn **once** as the host's generic type (`general-purpose`; Codex `default`; Kimi `coder`) with the same packet. Its first action is to Read:
+
+- `PLUGIN_ROOT/agents/<role>.md`
+- `PLUGIN_ROOT/skills/<proc>/SKILL.md` (resolve the task’s primary skill from [stage-map.md](../modes/stage-map.md))
+
+**Reviewer/qc exception:** verify that the fresh review context has effective read-only tools/sandbox before dispatch. A writable generic fallback is not acceptable for G-fresh, even with a prompt prohibition. If native roles are unavailable, repair project links and restart, use a verified read-only host type, or keep the review blocked. Record actual isolation/permissions separately from the requested type; Codex runtime overrides can change declared sandbox settings. On Kimi, call project-linked skills by bare name (`Skill: <proc>` or `/skill:<proc>`); packets retain logical qualified names.
+
+Record in `state.yaml` (merge under the role key; never write an empty `host_spawn: {}`):
+
+```yaml
+host_spawn:
+  <role>:
+    requested: "sdlc-workflow:<role>"
+    available: [<types the host listed>]
+    fallback: general-purpose
+    reason: "host has no pluginName:bareName table"
+```
+
+**Dual dispatch** = native and general-purpose both succeed for the same hat. One unknown-type retry is not dual dispatch. Do not start with general-purpose when native types exist.
+
+## 2. G-fresh fail does not advance the hat
+
+After define / shape / implement (L1+), and at the final review:
+
+1. Write `05-review/findings.md` from the reviewer's **final message** before any other spawn. If an earlier `findings.md` has a different `## Snapshot`, copy it to `findings-<stage>.md` first.
+2. blocker > 0 or major > 0 (unwaived): `current_hat` stays on the producing stage; `hats_done` does not gain it.
+3. Spawn the producer to fix, then a **new** reviewer on the new files (a new snapshot is not reviewer shopping).
+4. `review_findings[].status: fixed` is bookkeeping written only after a later G-fresh verified that id independently.
+
+`check-sdlc.sh --require` fails **HATADVANCE** when `current_hat` ranks past the stage of the last failed fresh-context gate, or past the stage of a script gate whose latest record for that name and stage is a fail. Ranks are in [stage-map.md](../modes/stage-map.md).
+
+On `sdlc_version >= 4`, a fresh-context gate and a script gate must both record `stage:` as a real stage id. A failed script gate that omits a legal `stage:` (empty, or not a stage id) is **HATADVANCE** on its own — leaving `stage:` off does not bypass the advance check. A later `pass` clears it only when the kind, name and stage match; a missing stage matches only another missing stage. A file with no `sdlc_version`, or with `sdlc_version` below 4, keeps the legacy reading: a script failure without `stage:` is not this violation. A fresh-context failure that itself omits `stage:` is still reported only when `current_hat` is already accept, review, qc, deliver or retro.
+
+## 2b. Acceptance fail (v4)
+
+Acceptance is not a fresh-context gate — it is a verdict by pm, designer and growth on the running build.
+
+1. Any `accept-*.md` with `结论：不通过` fails `check-sdlc.sh` (ACCEPT) for the whole tree until a new acceptance run replaces it.
+2. Classify the gaps and route each to its owner: UI implementation to frontend, API implementation to backend, and schema/collection/warehouse defects to the corresponding task. For a repeated quality failure, increment that task's `rework_rounds` in scoped work (the global counter only in legacy lanes); from round 2 attach `debug_protocol`. Scope or preference changes are iterations.
+3. After the fix: re-run the implement G-fresh only if contracts or schemas changed; re-run the affected verification (including relevant E2E) and every affected acceptance, including earlier `通过` verdicts whose input/build/design versions changed. Reuse only demonstrably unaffected, current evidence.
+4. A gap that is really a spec or design problem (the build matches the spec, the spec is wrong) goes back to define or designer — record it in `lane_changes` or `stale_artifacts`, do not bend the implementation.
+5. `有条件通过` → present the conditions to the user; accepted conditions go into `open_questions` with an owner; otherwise treat as `不通过`.
+
+## 3. Rework ≥ 3 on the same hat
+
+Three consecutive quality failures against the same agreed criterion (task-local in scoped work; global only in legacy lanes) → **stop**, report "systemic", wait for the operator. From round 2 on, respawns attach `debug_protocol` ([debug-loop.md](../modes/debug-loop.md)) and the gate records a one-line `root_cause`.
+
+## 3b. Resume derivation (write back when `phase` is missing)
+
+Normalize legacy Chinese `current_hat` / `hats_done` to English first (once). Then derive `phase`:
+
+| `current_hat` on disk | last fresh-context / acceptance | derived `phase` |
+|---|---|---|
+| missing and lane = L0 | — | L0done |
+| empty/`define` and `discovery.status: pending` | — | Discovering |
+| `define` and no fresh gate | — | HatReady |
+| any, last fresh = `fail` or any accept `不通过` | fail | Rework |
+| any, last fresh = `pass`, lane unfinished | pass | HatReady |
+| `hats_done` covers `required_hats_done(lane)` | pass | Closed |
+| unparseable | — | HatReady (conservative) + note in open_questions |
+
+`required_hats_done(lane)` is in [stage-map.md](../modes/stage-map.md); v4 features include `accept`, legacy features do not. `check-sdlc.sh` uses `phase: Closed` for full feature closure; a completed work item is checked separately and must not set Closed.
+
+## 4. Expected paths
+
+After each spawn, `ls` the deliverable paths from the packet. Missing path = hat not done. An empty `tickets/` with the table only in `contract.md` is allowed only if the packet said Wave 1 stays in the table.
+
+## 5. Lessons learned: project ledger, not plugin files
+
+A trap verified in this project (**code + test, an escape id, or a gate command + exit code**) belongs to the project. Hats return it as a lesson row — evidence, the condition under which it holds, and when to recheck it; you check the evidence and append it to the project's `.sdlc/_lessons.md` (or the knowledge file the project already uses). When a later task touches the same area, list the relevant entries in the packet `inputs`. Speculation stays in diagnosis notes.
+
+Never write lessons into `PLUGIN_ROOT` during project work: plugin skills hold only cross-project principles, and promoting a project lesson into one is a plugin-maintainer change that strips project names, stacks and paths. Earlier project-specific pitfalls files were moved out of the skills to local ignored maintainer archives and are not loaded.
+
+## 6. User-named all-roles diagnosis
+
+If the operator lists many roles, that is a **diagnostic fan-out**, not "L4 by default". Skip roles with no surface via `roles_skipped` + why. qc during define is a coverage-gap diagnosis, not a release opinion.
+
+## 7. Shape split
+
+Split architecture work into waves when dependency structure or context size warrants it, following [architecture lifecycle](../../../architecture/references/lifecycle.md). A contract/ticket table can precede detailed tickets, but each implementation packet needs its complete slice ticket and required accepted contracts. Do not use a fixed FR-count threshold or mark shape complete while applicable outputs are missing.
+
+## 8. Design direction pick (v4, `ui: yes`)
+
+1. After designer `explore`, check `02-shape/design-directions.md` lists the applicable rendered directions (D1…Dn), with the design skill's scope mode and existing authorization when reusing, each with screenshots under `02-shape/prototypes/`.
+2. Present one line per direction (signature moment · main trade-off · screenshot paths) and the designer's recommendation. Wait for the human.
+3. Record `design.picked`, `design.picked_by` (`user` or `delegated`), `design.at`. Spawn designer `specify` with the pick in the packet `task` line; the designer writes `选定：D<n>` into `design-directions.md`.
+Reuse a valid existing pick without asking again; only unresolved consequential choices require a new decision.
+4. The user rejects all directions → respawn `explore` with their feedback as an input file (`02-shape/direction-feedback.md`); this is normal iteration unless the producer failed an already agreed criterion. Preserve the feedback/version; do not increment the technical rework counter for preference changes.
+
+## 9. Discovery survey scale
+
+If `00-discover/market.md` already has an E3 counted snapshot (number + source + window), do **not** spawn a second researcher round. competitor still writes 现状; growth still writes positioning hypotheses. Survey hats become 1–2, not 3.
+
+## 10. Product layer failures
+
+| Gate tag | Meaning | Manager action |
+|---|---|---|
+| PRODUCTCTX | a product file the stage needs is missing or still carries `sdlc:unfilled` | respawn the owner hat with that file in `product_writes`, or run `/sdlc-product` |
+| WRITEBACK | `product-delta.md` missing at the final review, or it names a product file that does not exist | write the delta rows the hats returned (you own `product-delta.md` and `CHANGELOG.md`); a row naming a missing file → respawn that owner; nothing changed → `无产品层变更：<理由>` |
+| unowned edit | a hat changed a product file it does not own (seen in the delta) | reviewer raises a major; route the change to the owner |
+| DECISIONPENDING | a strategic `Q-*` row is still 待确认 while the feature tries to leave define/shape, or at the product gate | **not rework.** Use the [discussion protocol](../../../discover/references/discuss-protocol.md) for manageable, dependency-ready decisions. Explicit answer → owner records 已确认 and its source. Until then the lane waits: the gate holds the whole next stage, whatever the row's 阻塞什么 says. Work that does not depend on the pending rows proceeds only as separate scoped work items ([work-scope](../protocol/work-scope.md), e.g. `/sdlc-refine`), never by advancing `current_hat`. Set `phase: Stopped`, reason `waiting-for-operator`, only when no authorized scoped work can proceed |
+| OPENQ / OPENQOPEN | a spec `Q-*` row of any 类别 is 待确认 but missing from `open_questions` (OPENQ), or still not answered once `current_hat` is past define (OPENQOPEN) | **not rework.** Record the row in `open_questions`; get the answer from its named decider through the discussion protocol, then the owner writes 已确认 with the source. Same waiting rule as DECISIONPENDING: the whole next stage waits; independent work goes through scoped work items |
+| DEFAULTED | a strategic row marked 默认, 已确认 without the operator's words, or 默认已定 / "未应答…按推荐" text | rework on the producer: turn it back into 待确认 with options, remove the settled wording from dependent sections, then ask the operator. The gate reads strategic rows only: a consequential business rule (duplicate/overwrite, partial failure, permission, ownership) marked 默认 without authority is a reviewer major, reworked the same way |
+| PRODUCTUI | `design-system.md` cites no screenshot that exists | the designer described screens nobody looked at: start the app (§12), respawn the designer to capture the existing UI with `scripts/ui-evidence.sh` and cite the PNGs |
+
+## 11. `host_spawn` merge
+
+Record fallbacks under `host_spawn.<role>`. Never replace a non-empty mapping with `host_spawn: {}` (YAML keeps the last duplicate key). `check-sdlc.sh` flags two `^host_spawn:` keys as HOSTSPAWN.
+
+## 12. The app must run (v4)
+
+Implementation screenshots, integration runs, E2E, design QA and acceptance walkthroughs need the corresponding running product. Early design needs its runnable prototype; a nonexistent future application cannot be required before design. Nonvisual products use actual CLI/API/SDK/data execution rather than a browser. Reading source code is not a substitute (2026-09-17: a whole run finished without once starting a project that has two frontends).
+
+1. **Step 0 / `/sdlc-product` step 1:** `python3 <PLUGIN_ROOT>/scripts/gates/check_config.py --project-root <root>`. Evaluate APP-START, APP-URL, E2E and NO-CONFIG findings against the selected tasks. Establish known root settings as described in Step 0; delegate authorized runtime/configuration changes to SRE ci, and ask only for missing facts or authority. Missing runtime configuration blocks only the selected tasks needing that runtime.
+2. **Before a stage that needs the web app** — designer explore/design QA on an existing product, `/sdlc-product` designer, implement integration, verify E2E, accept: `check_config.py --project-root <root> --probe`. It probes `app.base_url` and every `app.urls` entry (products with several UIs or an API health URL); put the URLs the stage needs into the packet.
+3. **APP-DOWN** → run `app.start` in the background (keep its output in `.sdlc/<feature>/app-start.log`), wait, probe again — at most three probes over about a minute.
+4. **Still down** → stop (`phase: Stopped`, reason `app-not-running`) and tell the user the command, the URL and the last log lines. For web UI verification do not substitute prototype screenshots or source reading for the real UI. For an API task, actual API requests/responses can be valid product evidence. Scope the prerequisite to the task and record what remains unverified.
+
+## 13. Execution efficiency & protocol hygiene
+
+Distilled from real multi-agent runs where ceremony, protocol friction, over-analysis, and uncontained rework consumed >95% of wall-clock time:
+
+1. **Zero-config bootstrap & local-ignore at Step 0**: run `python3 <PLUGIN_ROOT>/scripts/workflow.py bootstrap --project-root <root> --json` (which invokes `ensure-ignore` to idempotently write `.git/info/exclude` without touching `.gitignore`, keeps existing `sdlc.config.yaml` untouched, and lets non-UI / read-only tasks start immediately while preserving UI `check_config.py` blockers). Never kill an active subagent mid-run over git-ignore placement when a local ignore rule solves it immediately.
+2. **Deterministic track routing & risk-gated review (`workflow.py route`)**: run `workflow.py route --text "<request>" --project-root <root> --json` before spawning. For `fast_track` single-hat tasks where upstream code/fixtures already fix the contract and there is no product uncertainty or high-risk trigger (no destructive DDL, shared-table/financial/multi-tenant auth, or cross-service contract change), dispatch directly via `workflow.py dispatch --mode light` (concise v2 packet + sealed light manifest binding `source_writes` and baseline content snapshot; note full-repo hashing is O(files) and capped at 20,000 files — oversized repos fail closed as `unknown` rather than claiming speedup, and should use `--mode strict` or an isolated worktree) rather than running `pm/define/spec` or bootstrapping `docs/product/`; close via `workflow.py finish --mode light --run <light-manifest.json>` (content-level write audit preserving pre-existing dirty files and catching out-of-scope/concurrent/unprovable writes), dispatching `reviewer` only when the user asks or higher risk applies.
+3. **Keep the write-audit window clean**: between `workflow.py seal` (or `dispatch --mode strict`) and `workflow.py record` (or `finish --mode strict`), the manager must **not** edit `state.yaml`, `.gitignore`, or any other file under `project_root`. IDE/editor/OS noise (`.idea/`, `.vscode/`, `.ruff_cache/`, `.mypy_cache/`, `.DS_Store`) is excluded automatically by `SKIP_DIRS`/`SKIP_FILES`; manager edits are not.
+4. **Dispatch by file reference, never hand-copied JSON**: `workflow.py seal` and `workflow.py dispatch` print `packet_sha256` and a ready-to-paste `dispatch_snippet`; pass that snippet and instruct the role to `Read` the file. Never retype or transcribe sealed JSON/SHA256 digests into an Agent prompt.
+5. **Prevent context & reasoning bloat (host-independent boundaries)**: do not cram multiple heavyweight sequential phases (e.g., multi-table `dba/model` design + `dba/migration` implementation + round-trip verification) into one subagent session when each phase produces substantial deliverables or distinct write scopes; split into separate focused runs. Keep `spec-s.md` and `db-spec.md` to concise rationale deltas — never duplicate full column catalogs already frozen in upstream code or `schema.dbml`.
+6. **No self-reverse-engineering tax**: neither the manager nor dispatched roles should read `PLUGIN_ROOT/scripts/*` or `workflow/registry.json` source code to second-guess gate internals. Use `workflow.py route` / `contract` once per needed task, pin factual check outputs in the brief so downstream roles do not re-run identical discovery probes, and batch independent read-only checks per turn.
+7. **Wait cleanly after dispatch (no side-quest churn)**: once a subagent is dispatched, wait for its return instead of running unrelated skill/doc reads, memory rewrites, or overlapping probes in the manager window (which bloats manager context and triggers concurrent rate-limit contention).
+8. **Fresh context for rework — never resume heavy producer sessions**: when review findings require edits after a completed multi-deliverable or source-writing producer run, spawn a **fresh** focused subagent carrying only `findings.md` and the target file paths rather than resuming/messaging the prior producer's full delivery history.
+9. **Soft budget, compact verification & single-pass convergence**: keep ad-hoc additive verification scripts compact (≤120 lines) and evidence docs concise (commands, exit codes, and key assertion counts — never pasting multi-ten-KB raw transcripts); prefer built-in deterministic tools (`scripts/tools/log_profiler.py`, `schema_parity.py`, `sec_quickscan.py`) over hand-writing large throwaway scripts. Once deliverables pass declared checks, allow at most one factual fix pass and prohibit repetitive prose-polish loops. If a single subagent spins through many read/probe turns without landing core target artifacts, inspect progress and narrow scope.
+10. **Fast convergence on external concurrent workspace changes**: if the target repository's files or git branch are modified/committed externally mid-run (e.g., another session took over and pushed), run at most one `git status` + `git log -n 3` check to confirm the facts, halt local rework immediately, and deliver a concise closing report — do not spend further turns auditing per-file hashes or rewriting `.sdlc/` narrative.

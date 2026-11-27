@@ -1,0 +1,87 @@
+<svg viewBox="-117 -64 644 517" width="644" xmlns="http://www.w3.org/2000/svg">
+  <metadata id="sdlc">{"type": "sequence", "owner": "maintainer", "sources": ["../skills/sdlc/references/continuous-work.md", "../workflow/registry.json"]}</metadata>
+  <style>
+    text { font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', system-ui, sans-serif; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect x="-117" y="-64" width="644" height="517" fill="#ffffff"/>
+  <text x="205" y="-30" font-size="16" fill="#1e293b" text-anchor="middle">边修 Bug 边打磨需求：两件事同时推进</text>
+  <path d="M0,120 L 0,129" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,199 L 0,208" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,278 L 0,287" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,357 L 0,366" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M410,120 L 410,129" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M410,199 L 410,208" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M410,278 L 410,287" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M0,41 L 0,50" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M205,41 L 205,50" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M410,41 L 410,50" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M115,167 L 106,167" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M310,246 L 301,246" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M205,278 L 205,287" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- box x=-95..95, y=0..36 -->
+  <rect x="-95" y="0" width="190" height="36" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="0" y="22.2" font-size="12" fill="#1e40af" text-anchor="middle">修 Bug（主工作区）</text>
+  <!-- box x=120..290, y=0..36 -->
+  <rect x="120" y="0" width="170" height="36" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="205" y="22.2" font-size="12" fill="#1e40af" text-anchor="middle">需求的两个版本</text>
+  <!-- box x=315..505, y=0..36 -->
+  <rect x="315" y="0" width="190" height="36" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="410" y="22.2" font-size="12" fill="#1e40af" text-anchor="middle">打磨 v2（隔离 worktree）</text>
+  <!-- box x=-95..95, y=61..115 -->
+  <rect x="-95" y="61" width="190" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="diagnose"/>
+  <text x="0" y="83.2" font-size="12" fill="#b45309" text-anchor="middle">diagnose</text>
+  <text x="0" y="101.2" font-size="12" fill="#b45309" text-anchor="middle">定位原因，不改代码</text>
+  <!-- box x=-95..95, y=140..194 -->
+  <rect x="-95" y="140" width="190" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="implement"/>
+  <text x="0" y="162.2" font-size="12" fill="#b45309" text-anchor="middle">implement</text>
+  <text x="0" y="180.2" font-size="12" fill="#b45309" text-anchor="middle">按冻结的 v1 修复</text>
+  <!-- box x=-95..95, y=219..273 -->
+  <rect x="-95" y="219" width="190" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="validate"/>
+  <text x="0" y="241.2" font-size="12" fill="#b45309" text-anchor="middle">validate</text>
+  <text x="0" y="259.2" font-size="12" fill="#b45309" text-anchor="middle">独立验证与回归测试</text>
+  <!-- box x=-95..95, y=298..352 -->
+  <rect x="-95" y="298" width="190" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" data-sdlc-id="candidate-create"/>
+  <text x="0" y="320.2" font-size="12" fill="#b45309" text-anchor="middle">集成候选</text>
+  <text x="0" y="338.2" font-size="12" fill="#b45309" text-anchor="middle">钉住精确源码再测一次</text>
+  <!-- box x=-95..95, y=377..431 -->
+  <rect x="-95" y="377" width="190" height="54" rx="6" fill="#d1fae5" stroke="#22c55e" stroke-width="1.5" data-sdlc-id="candidate-verify"/>
+  <text x="0" y="399.2" font-size="12" fill="#166534" text-anchor="middle">integration-verified</text>
+  <text x="0" y="417.2" font-size="12" fill="#166534" text-anchor="middle">集成通过 ≠ 已发布</text>
+  <!-- box x=315..505, y=61..115 -->
+  <rect x="315" y="61" width="190" height="54" rx="6" fill="#f3e8ff" stroke="#a855f7" stroke-width="1.5" data-sdlc-id="claim"/>
+  <text x="410" y="83.2" font-size="12" fill="#6b21a8" text-anchor="middle">claim</text>
+  <text x="410" y="101.2" font-size="12" fill="#6b21a8" text-anchor="middle">认领任务与资源，拿到令牌</text>
+  <!-- box x=315..505, y=140..194 -->
+  <rect x="315" y="140" width="190" height="54" rx="6" fill="#f3e8ff" stroke="#a855f7" stroke-width="1.5" data-sdlc-id="workspace-register"/>
+  <text x="410" y="162.2" font-size="12" fill="#6b21a8" text-anchor="middle">在 worktree 中执行</text>
+  <text x="410" y="180.2" font-size="12" fill="#6b21a8" text-anchor="middle">写 v2 提案，互不干扰</text>
+  <!-- box x=315..505, y=219..273 -->
+  <rect x="315" y="219" width="190" height="54" rx="6" fill="#f3e8ff" stroke="#a855f7" stroke-width="1.5" data-sdlc-id="import-result"/>
+  <text x="410" y="241.2" font-size="12" fill="#6b21a8" text-anchor="middle">import-result</text>
+  <text x="410" y="259.2" font-size="12" fill="#6b21a8" text-anchor="middle">带令牌导回结果</text>
+  <!-- box x=315..505, y=298..352 -->
+  <rect x="315" y="298" width="190" height="54" rx="6" fill="#f3e8ff" stroke="#a855f7" stroke-width="1.5" data-sdlc-id="release-claim"/>
+  <text x="410" y="320.2" font-size="12" fill="#6b21a8" text-anchor="middle">release-claim</text>
+  <text x="410" y="338.2" font-size="12" fill="#6b21a8" text-anchor="middle">释放认领，旧令牌作废</text>
+  <!-- box x=120..290, y=61..115 -->
+  <rect x="120" y="61" width="170" height="54" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="205" y="83.2" font-size="12" fill="#1e40af" text-anchor="middle">两个版本并存</text>
+  <text x="205" y="101.2" font-size="12" fill="#1e40af" text-anchor="middle">都不可变，互不覆盖</text>
+  <!-- box x=120..290, y=140..194 -->
+  <rect x="120" y="140" width="170" height="54" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" data-sdlc-id="artifact-promote"/>
+  <text x="205" y="162.2" font-size="12" fill="#1e40af" text-anchor="middle">需求 v1</text>
+  <text x="205" y="180.2" font-size="12" fill="#1e40af" text-anchor="middle">已接受并冻结</text>
+  <!-- box x=120..290, y=219..273 -->
+  <rect x="120" y="219" width="170" height="54" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" data-sdlc-id="artifact-capture"/>
+  <text x="205" y="241.2" font-size="12" fill="#1e40af" text-anchor="middle">需求 v2 提案</text>
+  <text x="205" y="259.2" font-size="12" fill="#1e40af" text-anchor="middle">已记录，尚未推广</text>
+  <!-- box x=120..290, y=298..352 -->
+  <rect x="120" y="298" width="170" height="54" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="205" y="320.2" font-size="12" fill="#1e40af" text-anchor="middle">推广 v2</text>
+  <text x="205" y="338.2" font-size="12" fill="#1e40af" text-anchor="middle">需要你单独决定</text>
+</svg>

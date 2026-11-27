@@ -1,0 +1,522 @@
+{
+ "ACCEPT": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "验收文件用 grep -oE 抽出「结论：通过|有条件通过|不通过」，sort -u 后 0 条、多于 1 条或「不通过」都失败；「有条件通过」再执行 evidence.py conditional，核对 state.yaml 里 Q-ACCEPT-<角色大写> 是否 status answered、by user 且带 quote。ui 验收另走 need_images（图片后缀、上溯到 sdlc.config.yaml、排除 assets/refs 与 assets/generated）。phase Closed 或阶段序超过 accept 时再扫 04-verify/accept-*.md。耦合结论句式、evidence.py 的问题编号和 workflow.py rank。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "ACCEPTMISS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "只在 hats_done 含 accept 时 test -f 注册表给出的 ART_accept_pm，不读验收正文、不判结论。路径来自本次启动时 workflow.py artifact-paths 注入的工件表。耦合 registry 工件 id 与 04-verify/accept-pm.md 这一条路径。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "APPETITE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "同时成立才失败：state.yaml 行首 appetite 是 8h，且第一份 spec.md 或 spec-s.md 出现 Wave 0 或「数字+人周」。两处只中一处不报。耦合 state 模板里 8h 这个默认进度和 PRD 的波次/人周写法。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "ARCH": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat shape、未跳过 architect、且 contract.md 已存在时，只 grep「质量属性|QAS」。不解析场景表，文件缺失也不归本标签。耦合 02-shape/contract.md 的质量属性用词和 architect 的 roles_skipped。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "CLOSED": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "45298b5 kernel: run evidence bound to the current code; closing, acceptance and security follow real end states",
+  "review_by": "2027-03-19",
+  "cost": "phase 为 Closed 时，用 workflow.py lane 按 state 的 L0–L4 和可选 path: short 列出必经阶段，再在 hats_done 里逐个匹配；另外 05-review/findings.md 与 product-delta.md 必须存在且含非空白。耦合 registry 泳道表、短路径开关和这两份收尾文件名。",
+  "note": ""
+ },
+ "CONTRACT": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat 时执行 workflow.py check-stage --stage --root，按 roles_skipped 加 --skip、ui: yes 加 --ui。只有退出码 ≥2（阶段合同加载失败）记 CONTRACT 并 exit 64；子进程打出的其它 error 标签原样转发。耦合 registry 的阶段/角色合同和 check-stage 的用法退出码。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "CONTRACTLOCK": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-11-22",
+  "origin": "not in git history",
+  "review_by": "2027-05-23",
+  "cost": "向上 6 层找到的 sdlc.config.yaml 经 _sdlc_core.py extra-gates 解析出 contract 时读 contract_spec（缺省当 openapi.yaml）。该路径不存在直接失败；存在则执行 skills/architecture/scripts/check-contract.py，收含 ✗ [CONTRACT] 的行或非 0 退出码。脚本核验 OpenAPI/Swagger JSON 与块式 YAML：非空且含 paths、每个 HTTP 方法同时声明 2xx 成功响应与 4xx/5xx/default 错误语义，并在存在同名 .baseline 契约时拦截删端点、删 2xx 响应字段与新增必填请求入参等未升版本的破坏性变更。耦合 extra_gates 的 contract/contract_spec 键和 OpenAPI 字段树。",
+  "note": "v4.9.1 executable OpenAPI/Swagger contract lock & breaking-change gate."
+ },
+ "CORE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat define 用 workflow.py paths spec 找到第一份现存 spec 后，grep「核心价值|Aha」。不点名 FR 表，spec 不存在则本项不跑。耦合 spec 价值段的这两个词，不耦合旅程编号。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "CYCLE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-27",
+  "origin": "3921a98 round 1 (2026-09-24 plan): consistent contracts, a clarified task model, product cycles and trace",
+  "review_by": "2027-03-28",
+  "cost": "周期目录缺失由 shell 直接失败。目录在时执行 workflow.py check-cycle：缺 cycle.yaml、正文含 sdlc:unfilled、id 不等于目录名、status 不是 open/closed、window 或 data_cutoff 不是 YYYY-MM-DD、selected_tasks 为空或不是映射、任务不在 registry 的 cycle 阶段、status 不在 CYCLE_TASK_STATES、done 缺 required 工件、carried 缺 carried_to、提案状态非法或 decided_in 未指向已填文件，都记 CYCLE。退出码 ≥2 时 shell 把整段输出收成一条 CYCLE。耦合 templates/cycle.yaml 和 registry 里 cycle 任务的 required。",
+  "note": ""
+ },
+ "CYCLE-CLOSE": {
+  "source": "scripts/workflow.py",
+  "added": "2026-09-27",
+  "origin": "3921a98 round 1 (2026-09-24 plan): consistent contracts, a clarified task model, product cycles and trace",
+  "review_by": "2027-03-28",
+  "cost": "只在 workflow.py check-cycle 里、status 已是 closed 时触发：所选任务仍为 todo 或 doing，提案仍 pending 却没有 reason，或 cycle.yaml 的 closure 为空。不判断读数对不对。耦合允许收尾的任务状态集和 closure 字段。",
+  "note": ""
+ },
+ "CYCLE-INTERIM": {
+  "source": "scripts/workflow.py",
+  "added": "2026-09-27",
+  "origin": "3921a98 round 1 (2026-09-24 plan): consistent contracts, a clarified task model, product cycles and trace",
+  "review_by": "2027-03-28",
+  "cost": "只盯 selected_tasks 里名为 readout、status 为 done、且 interim 不是 true 的一条：window.to 仍 ≥ 今天，或 data_cutoff 早于 window.to。日期用 datetime.date.fromisoformat。耦合 readout 这个任务名和 interim、window、data_cutoff 三个字段。",
+  "note": ""
+ },
+ "DECISIONPENDING": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "awk 按竖线拆 Markdown 表，同一行要同时有 Q-*、类别单元格「战略」和状态「待确认」才失败；没有类别列的旧表跳过。产品层收尾、current_hat 越过 define 的 01-define 与 briefing、越过 shape 的 02-shape，以及 status closed 的周期目录都会调用。耦合决策表三列用词，不读 prose 里的待确认。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "DEFAULTED": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "同一张决策表：类别是战略且状态是「默认」，或状态是「已确认」但该行没有「」原话。另 grep「默认已定」和「未应答/未回复/未答复」后 24 字内的默认、采用、推荐，并排除模板里「不写/禁止写默认已定」这类禁句，最多点名 3 处。功能检查里产品层文件走警告通道，不进红标签。耦合状态词和这句禁句白名单。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "DESIGNFIRST": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat shape、ui: yes、designer 未被跳过时，design-directions.md 不存在，或存在但没有「选定：」后接 D 加数字。方向个数、截图和缺陷检查不在这里。耦合 ART_directions 和选定行，顺序约定是 explore 之后人工选定。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "DESIGNSKIP": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-10-02",
+  "origin": "c3572d5 fix: make check-sdlc read state robustly and close silent passes in 4.3.4",
+  "review_by": "2027-04-02",
+  "cost": "v4 且 ui: yes，并且 role_skipped 在 roles_skipped 的单行 flow 列表里看到 designer（product-ops 只是 ops 的别名，与本标签无关）。不打开设计文件。耦合 ui 标志和 designer 这个角色 token。",
+  "note": ""
+ },
+ "DIAGRAM": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "bba1227 diagrams: vendored svg-diagram conventions + a checked diagram gate (packages C and E)",
+  "review_by": "2027-03-19",
+  "cost": "v4 且 find 到 assets 下、shots 以外的 svg 时，把路径交给 scripts/diagram/lint.py --verify-only（只读核验不写盘）。该进程查 <metadata id=sdlc> 的 JSON、来源文件是否存在、禁止 script/事件/foreignObject/外链，再调 vendor/svg-diagram 的 svg-lint，并核 evidence/diagrams/ 下对应证据的 sha256 与来源摘要是否过期。输出中的 DIAGRAM- 或退出码 2 且没有该前缀，折成 DIAGRAM。耦合 metadata 模式、vendor 锁和 node。",
+  "note": ""
+ },
+ "DIRECTIONS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat designer 且 design-directions.md 已存在：统计 ^#+ 标题里的 D<n>，少于 1 个、没有「选定：D<n>」、need_images 找不到一张真实非生成截图、或没有「缺陷检查」，各失败一次。文件本身缺失走 HATMISS。耦合 D 编号、选定行、缺陷检查标题和截图目录排除规则。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "E2E": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat verify 且 ui: yes 时执行 evidence.py gate --name e2e。它读 gates[] 里名称为 e2e 的最后一条，要求 result 为 pass、evidence 指向功能目录内的 JSON、exit_code 为 0、changed_during_run 不为真，且 fingerprint 等于当前 git HEAD 加 diff 加未跟踪文件的 sha256（无 git 则用路径、大小和 mtime）。耦合 evidence.py run 的记录字段，自报 pass 不够。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "ENABLE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat enablement、ops 未被跳过、且 enablement.md 已存在时，grep「客服|第一次成功」。文件缺失不归本标签。耦合 06-deliver/enablement.md 的教/开/告用词，不查发布清单。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "ESCAPEQA": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-11-22",
+  "origin": "not in git history",
+  "review_by": "2027-05-23",
+  "cost": "v4 且 phase 为 Closed 时调 state_view.py escape 读取 state.yaml 的 escape 映射。未声明 escape 则跳过；一旦声明逃逸缺陷，should_have_caught_at、defect_class、seam_fix（本次补了哪条契约/测试/脚本门禁焊死漏检接缝）和 verified_by（门禁生效验证依据）四项任一为空即失败。不核验新门禁脚本的实现细节。耦合 state.yaml 的 escape 四键与 state_view.py escape 视图。",
+  "note": "v4.9.1 Process-QA seam-hardening exit gate separating systemic QA seam fixes from single-artifact QC patches."
+ },
+ "EVID": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "标题是「自测证据」或 evidence、且 hats_done 含 implement/实现 的 markdown，必须出现 exit、退出码、Exit code、行尾 ✅…0 或 [0] 之一，并且含三反引号围栏。不执行命令。耦合证据节标题和这五种退出码写法。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "EVIDMISMATCH": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "在同一份自测证据里用 awk：FR-n 开头的 Given/假设 一直到 Then，若 Then 期望退出码 0，而后面以「FR-n（」重锚的证据区出现不是 exit code 0 的行，就失败。耦合 FR 编号、Then 期望句和 exit code 行，不重跑测试。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "EXPLAIN": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "向上 6 层找到的 sdlc.config.yaml 经 _sdlc_core.py extra-gates 解析出 explain 时，find 功能目录下所有文件名带 explain 的文件；为空直接失败，存在则逐个执行 skills/schema/scripts/check-explain.py。该脚本识别竖线/制表符 MySQL EXPLAIN、PostgreSQL 文本与 JSON 计划、以及 SQLite EXPLAIN QUERY PLAN，空文件、未识别计划、无索引全表扫描或超过扫描行数预算即非 0；shell 直接读退出码，不用 || true 吞掉。耦合 extra_gates 的 explain 项和四类计划格式。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "FINDINGS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "state.yaml 出现未被注释掉的 kind: fresh-context 时 find findings.md，找不到才失败。不读 Snapshot 或发现正文。耦合 gates 记录的 kind 值和 findings.md 文件名。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "FRONTEND": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-11-22",
+  "origin": "not in git history",
+  "review_by": "2027-05-23",
+  "cost": "向上 6 层找到的 sdlc.config.yaml 经 _sdlc_core.py extra-gates 解析出 frontend 时读 frontend_root（缺省当 frontend）。该路径不存在直接失败；存在则执行 skills/impl-evidence/scripts/check-frontend.py，只收含 ✗ [FRONTEND] 的行。脚本扫描 .tsx/.jsx/.vue/.svelte/.html/.css/.scss（跳过 test/stories/tokens 定义及含 sdlc-frontend-ignore 的行），拦截样式与属性里的裸色值（Token SSOT）、onClick={() => {}} 类静默空回调和 style={{...}}/style=\"...\" 内联样式（CSP）。耦合 extra_gates 的 frontend/frontend_root 键和这三类正则。",
+  "note": "v4.9.0 frontend static verifier opt-in gate."
+ },
+ "GWT": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "04-verify 与 05-review 以外的文件，若有标题「验收标准」或 Acceptance criteria，正文还必须出现 Given、「当…时」或「假设」之一。Then 不在本标签。耦合这三种验收标题和三种起句。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "HATADVANCE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "state_view.py last-fresh 给出最后一条 fresh-context 的 result 和 stage；result 为 fail 时用 workflow.py rank 与 current_hat 比较。fresh-context 没有 stage 时，只在 current_hat 已是 accept、review、qc、deliver 或 retro 才失败。failed-gates 再列出 kind 为 script 的最近一次失败：有合法 stage 且 current_hat 的 rank 更大则 HATADVANCE。sdlc_version>=4（is_v4）时，script 失败若 stage 为空，或 rank 不认识该 id，直接 HATADVANCE，不能靠漏写 stage 绕过。无 sdlc_version 或 sdlc_version<4 的脚本失败缺 stage 仍不报这条。rank 为 0 的合法阶段（market、compete、growth、product、cycle）不算缺 stage。同一 kind、name、stage 的后续 pass 清掉该条；没写 stage 的失败只被同样没写 stage 的 pass 清掉。中文阶段名先按 case 表收成英文。耦合 registry 阶段序和 state_view 的这两道 TSV。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "HATMISS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "三处来源。shell：--hat designer 缺 design-directions.md，或 --report 缺 findings.md。workflow.py check_groups 与 check_task：registry 的 required/any 在功能目录没有可交付文件，或文件空、或行首仍是 sdlc:unfilled；product_outputs 在 --product-root 下同样缺失。check-stage 返回的 HATMISS 由 shell 按 TSV 转发。耦合工件 glob、T-<n>-<role>-evidence 命名和产品层相对路径。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "HOSTSPAWN": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "grep -c 行首 host_spawn:，次数大于 1 即失败。不解析下面的角色键，因此模板里再写一块 host_spawn: {} 会盖掉前面的记录。耦合这一行键在 state.yaml 里只能出现一次。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "IMAGE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-27",
+  "origin": "66deac7 imagery: Grok-subscription image generation behind a registered, checked gate",
+  "review_by": "2027-03-28",
+  "cost": "v4 且 assets/refs 或 assets/generated 下有 png/jpg/webp 时执行 scripts/image/check.py --root。它核对 generate.py 写下的证据、文件 sha256、真实图片魔数、kind 与目录是否一致、声明该图的工件摘要，以及提示词未被改写。IMAGE- 输出或退出码 2 折成 IMAGE；没有生成图则整段跳过。耦合 image 证据 JSON 和这两个目录。",
+  "note": ""
+ },
+ "INTEGRATION": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat implement 且 ui: yes：03-impl 下没有 *integration*.md 就失败；有则对每一个文件做 need_images，引用缺失、路径不存在或只剩生成图都失败。不启动应用。耦合联调文件名通配和截图引用规则。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "JOURNEY": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat define、ui: yes、且已定位到 spec 时，grep 词边界上的 J- 加数字。不要求该旅程出现在覆盖矩阵。耦合 spec 里的旅程编号和 ui 标志。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "LAUNCH": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat launch、growth 未被跳过、launch.md 存在时做三次独立 grep：人群/分群/segment、渠道/channel、对照/holdout/A/B/护栏。缺哪条报哪条。耦合 06-deliver/launch.md 的三组词，不核实实验是否执行。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "LAYERING": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "经 _sdlc_core.py extra-gates 解析出 layering 时读 layering_root，缺省当 backend。该路径不存在直接失败；存在则执行 skills/impl-evidence/scripts/check-layering.py，只收含 ✗ [LAYER] 的行。脚本支持 Python 与 TS/JS，按目录或文件名识别 api、service、domain、repository、infra、model，检查单向依赖（禁止 api 直跨 repository/infra、禁止下层反向引用上层、禁止 domain 依赖 infra/orm/api/repo 破坏 DIP），并跳过 test。耦合 sdlc.config.yaml 的这两个键和分层目录名。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "MATRIX": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "找到 coverage.md 且旁边有 spec.md、spec-s.md、01-define/tracking.md、02-shape/contract.md 或 02-shape/security-review.md 时，优先执行 skills/coverage-matrix/scripts/check-matrix.py：FR、NFR、J、EV、[SEC-n] 都要出现，J 所在行必须有非否定的 E2E，失败/跳过/未执行/缺口/待补/需真实环境或无理由裸 N/A 不算覆盖（带理由的「➖ N/A（原因）」允许），行内点名的测试文件必须存在。python 或矩阵脚本不可用时，退回把 spec 里的 FR-n 用 grep 对进 coverage.md。耦合矩阵表、五类编号和测试路径。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "MATRIXMISS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "hats_done 含 verify 或「验证」时 find coverage.md，没有文件才失败。不打开矩阵、不数 FR。耦合 hats_done 的用词和 coverage.md 这个文件名，避免绿的 verify 绕过 MATRIX。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "METDUP": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "find 第一份 metrics.yaml，抽出列表项或键行的 id: 值（兼容列表前缀 - 与引号）后 sort | uniq -d，有重复才失败。不读口径说明，也不查产品层那份同名文件以外的第二份。耦合 YAML 的 id 键必须全文件唯一。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOCOMPETE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "discovery.status 为 done 且 briefing 已不是未填模板时，缺行首 ## Compete，或 Compete 节去掉与 skills/discover/templates/briefing.md 逐字相同的行之后没有「现状」、status quo 或 Status quo。耦合这份模板的 Compete 节原文，照抄模板不算填写。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NODISCOVER": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "仅当 state.yaml 有 discovery:。L2–L4 上 status 为 pending 或空，且 current_hat 是 define 或 rank ≥ 2（collect 也是 2，所以会碰上）；skipped 但 state_view discovery 给出的 skip_why 为空；killed 且没有 reopened，却同样进入 define 或 rank ≥ 2；done 但没有 00-discover/briefing.md、文件行首仍是 sdlc:unfilled，或「本轮交接就绪」「Discuss-P」节与 briefing 模板逐字相同。耦合 discovery 的 status、skip_why、reopened 和模板里这两节。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOFALSIFY": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "同一条 done 的 briefing：缺 ## Falsify；或 awk kill_written 看到「杀死条件」后没有内容；或 verdict_state 把「本轮裁决」判成 missing、unchosen（五个词一个都没选中或仍带竖线占位）、bet-no-metric（含「赌注」但复盘指标为空或仍以 < 开头）。含「本轮交接就绪」的新简报必查，旧简报只在写了「本轮裁决」时查。耦合五个裁决词和复盘指标行。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOGROWTH": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "v4、growth 未被 roles_skipped 跳过、briefing 已填完时，缺行首 ## Growth。不检查定位段落写了什么。耦合 Growth 标题和 growth 这个跳过 token。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOLANE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "本次 find 到的每个 md 和 state.yaml 都没有「泳道」或 lane 后接 L0–L4，并且 state.yaml 也没有行首 lane: L0–L4，才失败。豁免 _lessons.md 与 .sdlc/README.md。耦合工件头的泳道行和 state 的 lane 字段。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOMARKET": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "discovery 已 done 的 briefing 只检查有没有行首 ## Market，不比较该节是否照抄模板。现状句的逐字比较属于 NOCOMPETE。耦合 ## Market 这一个标题。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOSEC": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "q_security 为 yes 时三条分开报：roles_skipped 含 architect；workflow.py rank 已到 shape 或更后却 find 不到 contract.md；contract.md 里没有 [SEC-数字]。耦合 q_security、architect 角色和合同里的 SEC 编号。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NOSNAP": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--report 已经找到 findings.md 之后，grep 行首 ## Snapshot，没有这一节才失败。文件缺失走 HATMISS。报告模式在此之后退出，不跑 NOLANE、MATRIX、NOSEC。耦合 Snapshot 标题。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "NULLGATE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "state_view.py null-gates 列出 gates[] 里 result 为 null 且这一条记录自己没有 reason 的闸门名；lane_changes 或 selection 上的 reason 不算。子进程失败改记 STATE。耦合 gates[] 的 result 与 reason，以及 state_view 对行内注释的剥离。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "OPENQ": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "从 spec 和 00-discover/briefing.md 里含「待确认」的行抽出 Q-*（Q-TIER 与 Q-TIER-B 不是同一 id），再到 state_view.py questions 的 TSV 里按 id 精确找 status；找不到就失败。耦合 Q-* 正则和 open_questions 的 id、status。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "OPENQOPEN": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "current_hat 经 workflow.py rank 大于 2 时才查（define 与 collect 都是 2，shape 从 3 起）。spec 里每个待确认 Q 的 status 必须是 answered。没写入 open_questions 归 OPENQ，这里只挡已经记账但仍开着的问题。耦合这个数值门槛和 answered。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "PRODUCTCTX": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat product 检查目录本身，以及 strategy.md、feature-map.md、architecture.md、domain-model.md、erd.dbml 是否缺失、空文件或行首 sdlc:unfilled。若有 data-dictionary.md，再跑 data_dictionary.py --check，对照 erd.dbml、domain-model.md 和 data/metrics.yaml。功能侧 need_product 在 sdlc_version≥4 时还要求 state 的 product_root 和指定产品文件已填。耦合这 5 个必填名、字典生成器和 product_root。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "PRODUCTSIZE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "对七个文件做 wc -l，预算写死在 shell：strategy 120、feature-map 200、growth 200、design-system 250、architecture 250、domain-model 300、README 60。超过 2 倍记 PRODUCTSIZE，只超过 1 倍是警告，不进本标签。耦合这七个行数常数，不看内容对错。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "PRODUCTUI": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "design-system.md 存在且不是未填模板时，has_existing_image 用 grep 抽 png/jpg/webp，再从文件目录向上找到 sdlc.config.yaml 为止核磁盘上的文件。一张真实文件都没有才失败；生成图过滤不在这条路径上。耦合设计系统里的图片引用，脚本本身不调用 ui-evidence.sh。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "READINESS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-19",
+  "origin": "df72aa7 roles work by task scope: early feasibility, scoped source writes, evidence-based research, verification separate from release",
+  "review_by": "2027-03-20",
+  "cost": "--hat qc 且 state 的 delivery_goal 是 release_ready 或 deployed 时，ART_readiness 必须非空且行首不是 sdlc:unfilled。其它交付目标不查。耦合 delivery_goal 的这两个值和 readiness 工件路径。",
+  "note": ""
+ },
+ "REFS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "两处检查：产品层核 metrics.yaml 的 id 对正文 metric:、tags.yaml 的 id 对 tag:、tracking-plan.yaml 的 event 对 event:；v4 功能层在对应产品层 YAML 已填时，核 spec 与 07-retro/*.md 里的 metric:/tag:（剥离 @v<n> 版本后缀）是否在产品层或 02-shape/warehouse/*.yaml 有定义。耦合这三个键名和前缀写法。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "RELEASEOPINION": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-11-22",
+  "origin": "not in git history",
+  "review_by": "2027-05-23",
+  "cost": "v4 下核 06-deliver/release-opinion.md 的放行结论（opinion_verdict_of 同时识别不含竖线/尖括号占位的「结论：放行|有条件放行|不放行」与勾选框「☑/[x] 放行|有条件放行|不放行」）：--hat qc 时文件已存在却缺结论、有多个不同结论（歧义）或结论为「不放行」即失败；非 --hat qc 时，歧义直接失败，缺结论或「不放行」在未指定阶段、阶段秩超过 qc 或 phase: Closed 时阻断后续交付与关闭。耦合 release-opinion.md 路径和三态放行词。",
+  "note": "v4.9.0 QC release verdict gate closing the non-blocking opinion gap."
+ },
+ "ROOTCAUSE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "rework_rounds 的第一个整数 ≥2，并且 03-impl 下存在 *evidence*.md 时，这些证据或 state.yaml 里要有一行 root_cause:。不判断原因写得对不对，也没有证据文件时不报。耦合 rework_rounds 和 root_cause 键。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "SIGDUP": {
+  "source": "scripts/workflow.py",
+  "added": "2026-09-27",
+  "origin": "3921a98 round 1 (2026-09-24 plan): consistent contracts, a clarified task model, product cycles and trace",
+  "review_by": "2027-03-28",
+  "cost": "check-cycle 顺着 sdlc.config.yaml 的 signals_path 收集 markdown，用表格行正则抓 SIG-六位日期-数字。同一 ID 在一个文件或跨文件出现两次即失败；仍含 sdlc:unfilled 的文件跳过。耦合信号表第一列和 signals_path，不在 check-sdlc.sh 里另写一遍。",
+  "note": ""
+ },
+ "SKIP": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "仅 --require：目标路径不存在，或目录里 find 不到 md 与 state.yaml（已排除 .sdlc/_lessons.md 和 .sdlc/README.md）。这不是 roles_skipped。耦合 --require 开关和这两条豁免路径。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "SKIPWHY": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-10-02",
+  "origin": "c3572d5 fix: make check-sdlc read state robustly and close silent passes in 4.3.4",
+  "review_by": "2027-04-02",
+  "cost": "v4 调用 state_view.py skips，按 TSV 的角色和理由逐行看，理由为空才失败。roles_skipped 有 token 但 roles_skipped_why 对不上即中。子进程失败改记 STATE。耦合这两个字段的成对关系。",
+  "note": ""
+ },
+ "SOURCES": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "research.offline 不是 true 时，market、compete、growth 工件和已填的产品 growth.md 交给 check_research_sources.py。同一行既要有 20YY-MM-DD，又要有 http(s) 或能在磁盘上打开的链接、反引号路径。不数条数，也不评研究质量。耦合日期格式、URL 和配置里的 offline 开关。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "STATE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "一个标签罩住八个读 state 失败：缺行首 feature、lane 或 current_hat；L2 及以上缺 appetite；current_hat 经中文别名归一后仍不在 workflow.py 登记的阶段；state_view.py 的 null-gates、skips、last-fresh、failed-gates、discovery 任一非 0。各子命令自己的业务违规用别的标签。耦合 state 模板必填键和这五道 TSV。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "STRESS": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat dba、dba 未被跳过、db-spec.md 存在时，grep「路线压力测试」。不打开 feature-map，也不核 Next/Later 是否真写了。耦合 02-shape/db-spec.md 这一节标题。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "TASKPROTOCOL": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-27",
+  "origin": "1ed6158 task protocol 1 (round 2, 2026-09-25 plan): prepare, seal, record and check-tasks for three pilots",
+  "review_by": "2027-03-28",
+  "cost": "存在 state.yaml 就执行 workflow.py check-tasks --root --scope feature；只有 phase 为 Closed 才追加 --closure。非 0 时整段输出记一条 TASKPROTOCOL。task_state.check_tasks 在没有 task_protocol 且没有 runs/*-manifest.json 时按 legacy 放行；有协议时核对 registry 任务图、done 结果清单、依赖祖先，并调用 evidence.py 核绑定的检查记录。耦合 task_protocol、运行清单和 registry 图。",
+  "note": ""
+ },
+ "TRACKING": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat define 两条互斥：tracking 为 yes 时必须有 ART_tracking；否则 spec 要写「埋点：N/A」，或者跟踪文件仍然存在。耦合 tracking 标志、这句 N/A 和 tracking.md 路径。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "VAGUE": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "和 GWT 扫同一批带验收标准标题的文件，用固定词表抓第一处：正确地、正确的、合理地、合理的、正常工作、应该没问题、友好的、快速的、适当的、尽可能、必要时、correctly、gracefully、friendly。耦合这份词表本身，改词就会改闸门。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ },
+ "WRITEBACK": {
+  "source": "scripts/check-sdlc.sh",
+  "added": "2026-09-18",
+  "origin": "9677b35 sdlc-workflow v4.1.0: single-commit restart",
+  "review_by": "2027-03-19",
+  "cost": "--hat review、不是 report、lane 为 L2/L3/L4 时，缺 product-delta.md 即失败。文件在，且没有「无产品层变更：」时，从正文抽出 strategy、feature-map、growth、design-system、architecture、domain-model、erd.dbml 和 data 下 tracking-plan、metrics、tags 三个 yaml，再到 product_root 下逐个 test -f。耦合免责句和这 9 个产品文件名。",
+  "note": "History before the 4.1.0 single-commit restart is not in git; the earlier origin is unknown."
+ }
+}

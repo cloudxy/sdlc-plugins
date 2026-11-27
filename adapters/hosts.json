@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "_comment": "Single source for plugin identity and host adapters. Edit here, then run python3 scripts/workflow.py render (writes every host manifest and skills/sdlc/references/platform/hosts.md). Every host uses the plugin by reference (hosts[].install); host facts behind these choices: adapters/HOST-NOTES.md.",
+  "plugin": {
+    "name": "sdlc-workflow",
+    "version": "4.10.0",
+    "description": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
+    "description_i18n": {
+      "en": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
+      "zh-CN": "按目标组织完整交付、局部打磨和缺陷修复：共享角色任务、版本依赖、独立审查与运行证据。"
+    },
+    "author": {
+      "name": "xuyun"
+    },
+    "license": "MIT",
+    "repository": "https://github.com/cloudxy/sdlc-plugins",
+    "keywords": [
+      "workflow",
+      "sdlc",
+      "agents",
+      "process",
+      "quality-gates"
+    ]
+  },
+  "marketplace": {
+    "name": "sdlc-workflow",
+    "owner": {
+      "name": "xuyun"
+    },
+    "description": "Local marketplace whose only entry is this plugin directory (Claude Code and Grok; Codex reads .agents/plugins/marketplace.json).",
+    "category": "workflow"
+  },
+  "codex": {
+    "category": "Developer Tools",
+    "policy": {
+      "installation": "AVAILABLE",
+      "authentication": "ON_INSTALL"
+    },
+    "agent_prefix": "sdlc-workflow-",
+    "interface": {
+      "displayName": "SDLC Workflow",
+      "shortDescription": "Product delivery, scoped refinement and verified defect repair",
+      "longDescription": "Goal-scoped product delivery, refinement and defect repair with shared role tasks, versioned dependencies, independent review and execution evidence.",
+      "developerName": "xuyun",
+      "category": "Developer Tools",
+      "capabilities": [
+        "Interactive",
+        "Read",
+        "Write"
+      ],
+      "defaultPrompt": [
+        "Use SDLC Workflow to take this feature through the gated swimlane.",
+        "Use SDLC Workflow in product mode to refresh the product layer.",
+        "Use SDLC Workflow in refine mode to improve this requirement and stop at an accepted handoff.",
+        "Use SDLC Workflow in fix mode to repair and verify this defect."
+      ],
+      "composerIcon": "./commands/sdlc.icon.png",
+      "logo": "./commands/sdlc.icon.png"
+    }
+  },
+  "hosts": [
+    {
+      "id": "zcode",
+      "label": "ZCode",
+      "manifest": ".zcode-plugin/plugin.json",
+      "install": "the plugin directory itself: ~/.zcode/local-plugins/sdlc-workflow (a clone, or a symlink to one)",
+      "commands": "`/sdlc`, `/sdlc-product`, … from commands/",
+      "role_type": "sdlc-workflow:<role>",
+      "generic_type": "general-purpose",
+      "skill_call": "Skill tool `sdlc-workflow:<name>`; users type `$<name>`",
+      "read_only": "reviewer/qc tool allowlist + disallowedTools"
+    },
+    {
+      "id": "claude",
+      "label": "Claude Code",
+      "manifest": ".claude-plugin/plugin.json",
+      "install": "settings only: a `directory` source under `extraKnownMarketplaces` (project-relative or absolute) plus `enabledPlugins`; loads in place. Never `claude plugin install` (it writes a cache copy)",
+      "commands": "`/sdlc`, `/sdlc-product`, … (qualified `/sdlc-workflow:sdlc` when names collide)",
+      "role_type": "sdlc-workflow:<role>",
+      "generic_type": "general-purpose",
+      "skill_call": "Skill tool `sdlc-workflow:<name>`; users type `/sdlc-workflow:<name>`",
+      "read_only": "reviewer/qc tool allowlist + disallowedTools"
+    },
+    {
+      "id": "grok",
+      "label": "Grok",
+      "manifest": ".grok-plugin/plugin.json",
+      "install": "a symlink in a trusted project's `.grok/plugins/` (listed in `[plugins].enabled`) or in `~/.grok/plugins/`, or a `[plugins].paths` entry. Never `grok plugin install` (it keeps a hashed copy)",
+      "commands": "`/sdlc`, `/sdlc-product`, … (qualified `/sdlc-workflow:sdlc` when ambiguous)",
+      "role_type": "sdlc-workflow:<role>",
+      "generic_type": "general-purpose",
+      "skill_call": "Skill tool `sdlc-workflow:<name>`; users type `/<name>`",
+      "read_only": "reviewer/qc tool allowlist + disallowedTools"
+    },
+    {
+      "id": "codex",
+      "label": "Codex",
+      "manifest": ".codex-plugin/plugin.json",
+      "install": "`python3 PLUGIN_ROOT/scripts/link-codex.py --project <root>`: `<root>/.codex/skills/sdlc-workflow` → `skills/` and role agents in `<root>/.codex/agents/`, this project only (without `--project`: `$CODEX_HOME`, every project). Never `codex plugin add` (it installs a copy and drops symlinks)",
+      "commands": "none — Codex plugins carry no commands; see the command table below",
+      "role_type": "sdlc-workflow-<role>",
+      "generic_type": "default",
+      "skill_call": "read the listed SKILL.md (Codex lists `sdlc-workflow:<name>`); users pick it with `$` or `/skills`",
+      "read_only": "typed agents: sandbox_mode = \"read-only\" (verify effective settings); untyped collaboration fallback needs a verified read-only parent/session"
+    },
+    {
+      "id": "kimi",
+      "label": "Kimi Code",
+      "manifest": ".kimi-plugin/plugin.json",
+      "install": "`python3 PLUGIN_ROOT/scripts/link-kimi.py --project <git root>`: individual skill and role symlinks in `.kimi-code/skills/` and `.kimi-code/agents/`, project only. Never `/plugins install` (user-level managed copy)",
+      "commands": "project links: `/skill:<name>` + `mode:`; distribution manifest also declares `/sdlc-workflow:<command>`",
+      "role_type": "sdlc-workflow-<role>",
+      "generic_type": "coder",
+      "skill_call": "Skill tool `<name>` (drop the logical `sdlc-workflow:` prefix); users type `/skill:<name>`",
+      "read_only": "reviewer/qc tool allowlist + disallowedTools; all roles set subagents: []"
+    }
+  ],
+  "kimi": {
+    "agent_prefix": "sdlc-workflow-",
+    "tools": {
+      "BASE_TOOLS": [
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Bash",
+        "Skill"
+      ],
+      "WEB_TOOLS": [
+        "WebSearch",
+        "WebFetch"
+      ],
+      "REVIEW_TOOLS": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Skill"
+      ],
+      "DISALLOW": [
+        "Agent",
+        "AgentSwarm"
+      ],
+      "REVIEW_DISALLOW": [
+        "Write",
+        "Edit",
+        "Bash",
+        "Agent",
+        "AgentSwarm"
+      ]
+    }
+  }
+}

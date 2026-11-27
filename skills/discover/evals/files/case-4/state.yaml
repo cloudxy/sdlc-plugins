@@ -1,0 +1,25 @@
+feature: scheduled-report-email
+sdlc_version: 4
+product_root: docs/product
+lane: L2
+current_hat: define
+hats_done: []
+phase: Discovering
+intent:
+  class: discovery
+  quote: "报表能不能定时发到邮箱"
+  at: "2026-09-29T10:00:00+08:00"
+discovery:
+  status: pending
+  skip_why: ""
+  briefing: 00-discover/briefing.md
+  tracks:
+    discuss: done
+    compete: done
+    market: done
+    growth: skipped
+    falsify: pending
+  at: ""
+roles_skipped: [growth]
+roles_skipped_why: {growth: "存量功能的效率改进，不涉及定位"}
+open_questions: []

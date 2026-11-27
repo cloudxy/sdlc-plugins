@@ -1,0 +1,16 @@
+// 样例产品层。只记录本切片读取的既有表。导出不建新表。
+
+Table tenant {
+  id text [pk]
+  name text [not null]
+}
+
+Table audit_event {
+  id text [pk]
+  tenant_id text [not null, ref: > tenant.id]
+  occurred_at timestamptz [not null, note: '必须带时区；导出时换成 UTC 文本']
+  actor_id text [not null]
+  action text [not null]
+  object_type text [not null]
+  object_id text [not null]
+}

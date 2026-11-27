@@ -1,0 +1,22 @@
+{
+ "feature": "fix-csv-tz-escape",
+ "lane": "L1",
+ "delivery_goal": "local_verified",
+ "phase": "Closed",
+ "hats_done": [
+  "implement",
+  "review"
+ ],
+ "rework_rounds": 0,
+ "intercepts": 0,
+ "bet": null,
+ "escape": {
+  "origin_feature": "export-audit-csv",
+  "origin_release": "2026-11-18",
+  "should_have_caught_at": "implement",
+  "gate": "EVID",
+  "defect_class": "code"
+ },
+ "readout": null,
+ "recorded_at": "2026-11-21T01:12:00+08:00"
+}

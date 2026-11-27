@@ -1,0 +1,17 @@
+{
+ "feature": "export-shortcut",
+ "lane": "L1",
+ "phase": "Closed",
+ "bet": {
+  "hypothesis": "H-5",
+  "metric": "weekly_export_tenants",
+  "evidence_grade": "E1",
+  "readout_due": "2026-09-01"
+ },
+ "readout": {
+  "status": "refuted",
+  "evidence": "07-retro/retro.md",
+  "note": "运营口述的「大部分用户每周导出」与仓库计数不符：实际每周导出的租户约 12%",
+  "at": "2026-09-02"
+ }
+}
